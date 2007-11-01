@@ -1,4 +1,5 @@
 #summary Details of the WARC Tools mailing list
+#labels Featured
 
 = WARC Tools Mailing List =
 
