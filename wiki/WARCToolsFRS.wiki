@@ -1,0 +1,6 @@
+#summary Functional Requirements Specification
+#labels Featured,Phase-Requirements
+
+= Introduction =
+
+A draft of the WARC Tools Functional Requirements Specification is under review. The drafts are available in the MailingList. Once approved, the final version will be posted here.
