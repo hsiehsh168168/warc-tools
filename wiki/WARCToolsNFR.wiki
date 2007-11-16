@@ -3,4 +3,4 @@
 
 = Introduction =
 
-A draft of the WARC Tools Non-Functional Requirements is under review. The drafts are available in the MailingList. Once approved, the final version will be posted here.
+[http://warc-tools.googlecode.com/files/warc_tools_nfr.pdf Open Source WARC Tools Non-Functional Requirements v1.0]. 
