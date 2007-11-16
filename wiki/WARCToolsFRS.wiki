@@ -3,4 +3,4 @@
 
 = Introduction =
 
-A draft of the WARC Tools Functional Requirements Specification is under review. The drafts are available in the MailingList. Once approved, the final version will be posted here.
+[http://warc-tools.googlecode.com/files/warc_tools_frs.pdf Open Source WARC Tools Functional Requirements Specification v1.0]. 
