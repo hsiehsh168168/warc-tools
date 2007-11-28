@@ -13,6 +13,9 @@ So if you contribute command-lines to this list, please add usage notes on how i
 
 = Command-Line Specifications =
 
+== warcdump ==
+SRS 11-14, 27-28
+
 `warcdump -i <warc_input> [-s <offset>] [-p <compression>]`
 
 where:
@@ -20,7 +23,8 @@ where:
  * -s: start dumping from offset (default 0)
  * -p: compressor to load at runtime (default no compression)
 
-SRS 11-14, 27-28
+== wfilter ==
+SRS 16-20
 
 `wfilter -i <warc_input>  -t <wtype> [-m <regexp>] [-o <warc_output>]`
 
@@ -30,7 +34,8 @@ where :
  * -t: warcinfo, response, request, metadata, revisit, conversion and/or continuation
  * -o: write filtered records to this WARC (default STDOUT)
 
-SRS 16-20
+== warcappend ==
+SRS 8-10
 
 `warcappend -i <warc_input> [-o <warc_output>]`
 
@@ -38,14 +43,16 @@ where:
  * -i: WARC input file name
  * -o: append the record to this WARC (default STDOUT)
 
-SRS 8-10
+== w-validator ==
+SRS 31-32
 
 `w-validator -i <warc_input>`
 
 where:
  * -i: WARC input file name
 
-SRS 31-32
+== arc2warc ==
+SRS 11-14, 15, 44
 
 `arc2warc -a <arc_input> [-o <warc_output>] [-c <config_file.cfg>]`
 
@@ -54,10 +61,10 @@ where:
  * -o: write converted records to this WARC (default STDOUT)
  * -c: use this configuration for conversion
 
-SRS 11-14, 15, 44
-
+== warc-server ==
+SRS 33-36, 37-38
 `warc-server -d [-r <warcs_dir>]`
+
+where:
  * -d: run the wserver ad a daemon
  * -r: WARCs repository base path
-
-SRS 33-36, 37-38
