@@ -1,0 +1,69 @@
+#summary One-WARC Tools Command-line Specifications.
+#labels Phase-Design,Phase-QA
+
+= Introduction =
+
+The following command-line specs are intended as a proof of concept to illustrate how you can build on the WARC standard enabled by libwarc. Feel free to add your own command-lines, as a wish list or otherwise.
+
+N.N. Two important functions of these command-lines are:
+ # a specification of use-cases
+ # a test case specification
+
+So if you contribute command-lines to this list, please add usage notes on how it may be used and how it may help test libwarc.
+
+= Command-Line Specifications =
+
+`warcdump -i <warc_input> [-s <offset>] [-p <compression>]`
+
+where:
+-i: WARC input file name
+-s: start dumping from offset (default 0)
+-p: compressor to load at runtime (default no compression)
+
+SRS 11-14, 27-28
+DELIVERED ON MARCH
+
+`wfilter -i <warc_input>  -t <wtype> [-m <regexp>] [-o <warc_output>]`
+
+where :
+-i: WARC input file name
+-m: MIME type regular expression
+-t: warcinfo, response, request, metadata, revisit, conversion and/or continuation
+-o: write filtered records to this WARC (default STDOUT)
+
+SRS 16-20
+DELIVERED ON MARCH
+
+`warcappend -i <warc_input> [-o <warc_output>]`
+
+where:
+-i: WARC input file name
+-o: append the record to this WARC (default STDOUT)
+
+SRS 8-10
+DELIVERED ON MARCH
+
+`w-validator -i <warc_input>`
+
+where:
+-i: WARC input file name
+
+SRS 31-32
+DELIVERED ON MARCH
+
+`arc2warc -a <arc_input> [-o <warc_output>] [-c <config_file.cfg>]`
+
+where:
+-a: ARC input file name
+-o: write converted records to this WARC (default STDOUT)
+-c: use this configuration for conversion
+
+SRS 11-14, 15, 44
+DELIVERED AFTER MARCH
+
+`warc-server -d [-r <warcs_dir>]`
+-d: run the wserver ad a daemon
+-r: WARCs repository base path
+
+SRS 33-36, 37-38
+DELIVERED AFTER MARCH
