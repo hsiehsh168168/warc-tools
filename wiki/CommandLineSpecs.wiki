@@ -66,5 +66,5 @@ SRS 33-36, 37-38
 `warc-server -d [-r <warcs_dir>]`
 
 where:
- * -d: run the wserver ad a daemon
+ * -d: run the wserver as a daemon
  * -r: WARCs repository base path
