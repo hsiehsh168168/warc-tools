@@ -5,7 +5,7 @@
 
 The following command-line specs are intended as a proof of concept to illustrate how you can build on the WARC standard enabled by libwarc. Feel free to add your own command-lines, as a wish list or otherwise.
 
-N.N. Two important functions of these command-lines are:
+Two important functions of these command-lines are:
  # a specification of use-cases
  # a test case specification
 
