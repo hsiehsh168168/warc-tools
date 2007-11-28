@@ -1,4 +1,4 @@
-#summary One-WARC Tools Command-line Specifications.
+#summary WARC Tools Command-line Specifications.
 #labels Phase-Design,Phase-QA
 
 = Introduction =
