@@ -23,6 +23,14 @@ where:
  * -s: start dumping from offset (default 0)
  * -p: compressor to load at runtime (default no compression)
 
+and:
+
+`warcdump -i <warc_input> [-d]`
+
+where:
+ * -d: dump headers in summary mode, a brief, line-at-a-time (ARC-like?) format (useful suggestion from John Kunze)
+
+
 == wfilter ==
 SRS 16-20
 
