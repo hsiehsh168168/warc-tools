@@ -111,10 +111,24 @@ WIPUBLIC const char * WUUID_text (const void * const _self)
              (warc_u32_t) (TIGER [2]>>32),
              (warc_u32_t) (TIGER [2]));
 
+   return (BUF);
+}
+
+
+/**
+ * @param _self WUUID object
+ * Zero fill the Tiger buffer (re-init)
+ */
+
+WIPUBLIC void WUUID_reinit (const void * const _self)
+{
+  const struct WUUID * const self = _self;
+  
+  /* preconditions */
+  CASSERT (self);
+
   /* zero fill the hash */
   w_memset_z (TIGER, 3 * sizeof (warc_u64_t));
-
-  return (BUF);
 }
 
 
@@ -150,6 +164,9 @@ WPRIVATE void * WUUID_constructor (void * _self, va_list * app)
       destroy (self);
       return (NIL);
     }
+
+  /* zero fill the tiger buffer */
+  WUUID_reinit (self);
 
   return (self);
 }
