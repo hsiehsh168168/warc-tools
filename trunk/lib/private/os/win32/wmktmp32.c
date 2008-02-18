@@ -115,7 +115,7 @@ WPRIVATE void * WTempFile_constructor (void * _self, va_list * app)
       return (NIL);
     }
   
-  HANDLE = w_fopen_wb (template, "");
+  HANDLE = w_fopen_wb (template);
   unless (HANDLE)
     {
       destroy (self);
@@ -142,7 +142,7 @@ WPRIVATE void * WTempFile_destructor (void * _self)
   CASSERT (self);
   
   if (HANDLE)
-    w_fclose (HANDLE), HANDLE = NIL;
+    w_fclose (HANDLE);
 
   unlink (WString_getText (TEMPLATE));
     

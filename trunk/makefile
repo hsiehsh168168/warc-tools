@@ -247,7 +247,8 @@ $(APP)/warcvalidator: $(warcvalidator);  $(CC) $(CFLAGS) -o $@ $(warcvalidator)
 clean:		;   rm -f $t $(libwarc) *.o *~ *.a *.so *.log \
 	            $(PUBLIC)/*~ $(PRIVATE)/*~ $(PLUGIN)/*~ $(GZIP)/*~ \
 		    $(APP)/*~ $(APP)/*.exe $(TST)/*~ $(TST)/*.exe $(DOC)/*~ \
-			semantic.cache depend *.gz compress* uncompress*
+			$(WIN32DEP)/*~ semantic.cache depend *.gz compress* \
+			uncompress*
 			rm -rf $(DOC)/html
 
 doc:        ;   doxygen ./doc/warcdoc
