@@ -48,6 +48,7 @@ int test1 (void)
   fprintf (stdout, "%s\n", s);
 
 
+  WUUID_reinit(u); /* re-initialize the Tiger buffer */
   WUUID_hash (u, makeU("Hello World"));
   s = WUUID_text(u);
   fprintf (stdout, "%s\n", s);
@@ -69,10 +70,11 @@ int test2 (void)
   u = bless (WUUID);
   assert (u);
 
-  WUUID_hash (u, makeU(""));
+  WUUID_hash (u, makeU("Tiger Hashing"));
   s = WUUID_text(u);
   fprintf (stdout, "%s\n", s);
 
+  WUUID_reinit(u); /* re-initialize the Tiger buffer */
   s = WUUID_text(u);
   fprintf (stdout, "%s\n", s);
 
@@ -98,6 +100,7 @@ int test3 (void)
   s = WUUID_text(u);
   fprintf (stdout, "%s\n", s);
 
+  WUUID_reinit(u); /* re-initialize the Tiger buffer */
   WUUID_hash (u, makeU("Hello World"));
   s = WUUID_text(u);
   fprintf (stdout, "%s\n", s);

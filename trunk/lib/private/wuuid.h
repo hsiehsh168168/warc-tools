@@ -36,8 +36,9 @@
 
 extern const void * WUUID;
 
-extern void         WUUID_hash (const void * const, const unsigned char *,
-                                const warc_u64_t);
-extern const char * WUUID_text (const void * const);
+extern void         WUUID_reinit (const void * const);
+extern void         WUUID_hash   (const void * const, const unsigned char *,
+                                  const warc_u64_t);
+extern const char * WUUID_text   (const void * const);
 
 #endif /* __WARC_UUID_H__ */
