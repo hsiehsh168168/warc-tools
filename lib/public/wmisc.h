@@ -58,10 +58,7 @@
 #endif
 
 /* To disable warnings about unused variable */
-#define UNUSED(obj) \
-do{ \
- if(0 && obj) 0; \
-}while(0)
+#define UNUSED(obj) ((void) obj)
 
 /* Get array size */
 #define ARRAY_LEN(array) (sizeof(array)/sizeof(array[0]))
