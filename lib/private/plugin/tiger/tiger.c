@@ -683,9 +683,9 @@ tiger(word64 *str, word64 length, word64 res[3])
   register word64 i, j;
   unsigned char temp[64];
 
-  res[0]=0x0123456789ABCDEFLL;
-  res[1]=0xFEDCBA9876543210LL;
-  res[2]=0xF096A5B4C3B2E187LL;
+/*   res[0]=0x0123456789ABCDEFLL; */
+/*   res[1]=0xFEDCBA9876543210LL; */
+/*   res[2]=0xF096A5B4C3B2E187LL; */
 
   for(i=length; i>=64; i-=64)
     {

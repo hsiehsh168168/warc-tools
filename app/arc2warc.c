@@ -195,10 +195,10 @@ int main (int argc, const char ** argv)
        free_err (10);
     
      /* Create a UUID (Universal Unique IDentifier) based on URL + Timestamp */
+     WUUID_reinit(u);
      WUUID_hash (u, makeU (ARecord_getUrl (ar)));
      WUUID_hash (u, makeU (ARecord_getCreationDate (ar)));
      b = WRecord_setRecordId (wr, makeS (WUUID_text (u)));
-     WUUID_reinit(u);
      if (b)
        free_err (11);
      

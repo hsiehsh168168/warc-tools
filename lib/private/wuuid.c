@@ -127,8 +127,10 @@ WIPUBLIC void WUUID_reinit (const void * const _self)
   /* preconditions */
   CASSERT (self);
 
-  /* zero fill the hash */
-  w_memset_z (TIGER, 3 * sizeof (warc_u64_t));
+  /* reinialize Tiger seeds for avalanche */
+  TIGER [0] = 0x0123456789ABCDEFLL;
+  TIGER [1] = 0xFEDCBA9876543210LL;
+  TIGER [2] = 0xF096A5B4C3B2E187LL;
 }
 
 
