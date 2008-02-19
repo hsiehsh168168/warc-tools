@@ -14,15 +14,15 @@ Doxygen is optional and only needed to generate technical documentation.
    
     Install the following items in this order:
     {{{
-    wget http://kent.dl.sourceforge.net/sourceforge/mingw/MinGW-5.1.3.exe
-    wget http://kent.dl.sourceforge.net/sourceforge/mingw/MSYS-1.0.11-2004.04.30-1.exe
+    http://kent.dl.sourceforge.net/sourceforge/mingw/MinGW-5.1.3.exe
+    http://kent.dl.sourceforge.net/sourceforge/mingw/MSYS-1.0.11-2004.04.30-1.exe
     }}}
  
   * *Windows Cygwin*:
     
     Install the following application:
     {{{
-    wget http://cygwin.com/setup.exe
+    http://cygwin.com/setup.exe
     }}}
 
   * *MacOS X (Intel)*:
