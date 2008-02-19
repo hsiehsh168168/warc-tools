@@ -43,7 +43,7 @@ This command can easily be built with only few instructions using the WARC libra
 == warcvalidator ==
 SRS 31-32
 
-`w-validator <warc_input>`
+`warcvalidator <warc_input>`
 
 where:
  * <warc_input>: WARC input file name
