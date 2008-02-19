@@ -25,6 +25,10 @@ Doxygen is optional and only needed to generate technical documentation.
     wget http://cygwin.com/setup.exe
     }}}
 
+  * *MacOS X (Intel)*:
+
+    Install XCode
+
   * *FreeBSD/NetBSD/OpenBSD*:
 
     Use "gmake" instead of "make" when compiling.
