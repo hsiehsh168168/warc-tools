@@ -27,6 +27,11 @@
 #ifndef	__WARC_WPORT_H__
 #define	__WARC_WPORT_H__
 
+/* to mix C and C++ */
+#ifdef __cplusplus
+ extern "C" {
+#endif
+
 /*
  * Portability insurance.
  */
@@ -694,5 +699,9 @@ WARC_COMPILE_TIME_ASSERT(warc_i32_t, sizeof(warc_i32_t) == 4);
 #  define SET_BINARY_MODE(file)
 #endif
 
+
+#ifdef __cplusplus
+ }
+#endif
 
 #endif /* __WARC_WPORT_H__ */

@@ -27,6 +27,12 @@
 #ifndef	__WARC_MISC_H__
 #define	__WARC_MISC_H__
 
+
+/* to mix C and C++ */
+#ifdef __cplusplus
+ extern "C" {
+#endif
+
 /*
  * C default headers
  */
@@ -74,5 +80,11 @@
 #else
 #define WarcDebugMsg(m) (m)
 #endif
+
+
+#ifdef __cplusplus
+ }
+#endif
+
 
 #endif /* __WARC_MISC_H__ */

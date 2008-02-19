@@ -24,15 +24,19 @@
 /*     http://code.google.com/p/warc-tools/                            */
 /* ------------------------------------------------------------------- */
 
-#ifndef	__FSM_H__
-#define	__FSM_H__
+#ifndef	__FSM_X__
+#define	__FSM_X__
+
+/* to mix C and C++ */
+#ifdef __cplusplus
+ extern "C" {
+#endif
 
 /**
  * Portability header file
  */
 
 #include <wport.h>
-
 #include <wmisc.h>
 
 typedef const struct eventAct 
@@ -44,4 +48,9 @@ typedef const struct eventAct
 
 typedef Transition State[];
 
-#endif /* __FSM_H__ */
+
+#ifdef __cplusplus
+ }
+#endif
+
+#endif /* __FSM_X__ */

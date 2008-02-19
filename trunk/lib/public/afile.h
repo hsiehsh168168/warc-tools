@@ -27,6 +27,11 @@
 #ifndef	__ARC_FILE_H__
 #define	__ARC_FILE_H__
 
+/* to mix C and C++ */
+#ifdef __cplusplus
+ extern "C" {
+#endif
+
 
 /**
  * Portability header file
@@ -49,5 +54,11 @@ extern warc_bool_t     AFile_register       (void *, void *,
                                              (void*, const char *, 
                                               const warc_u32_t),
                                              void *);
+
+
+#ifdef __cplusplus
+ }
+#endif
+
 
 #endif /* __ARC_FILE_H__ */

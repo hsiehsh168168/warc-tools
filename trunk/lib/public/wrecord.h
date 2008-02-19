@@ -28,6 +28,12 @@
 #define	__WARC_WRECORD_H__
 
 
+/* to mix C and C++ */
+#ifdef __cplusplus
+ extern "C" {
+#endif
+
+
 
 /**
  * Portability header file
@@ -67,6 +73,11 @@ extern warc_bool_t   WRecord_setContentFromFileName (void *, const char *);
 extern warc_i64_t WRecord_getOffset           (const void * const );
 extern warc_u64_t WRecord_getUncompressedSize (const void * const );
 extern warc_u64_t WRecord_getCompressedSize   (const void * const);
+
+
+#ifdef __cplusplus
+ }
+#endif
 
 
 #endif /* __WARC_WRecord_H__ */

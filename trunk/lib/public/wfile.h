@@ -28,6 +28,12 @@
 #define	__WFILE_H__
 
 
+/* to mix C and C++ */
+#ifdef __cplusplus
+ extern "C" {
+#endif
+
+
 /**
  * Portability header file
  */
@@ -59,5 +65,11 @@ extern warc_bool_t     WFile_register       (void *, void *,
                                               const warc_u32_t), 
                                              void *);
                                               
+
+
+#ifdef __cplusplus
+ }
+#endif
+
 
 #endif /* __WFILE_H__ */

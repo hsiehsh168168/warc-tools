@@ -27,6 +27,13 @@
 #ifndef	__WARC_RECORD_TYPE_H__
 #define	__WARC_RECORD_TYPE_H__
 
+
+/* to mix C and C++ */
+#ifdef __cplusplus
+ extern "C" {
+#endif
+
+
 /**
  * Portability header file
  */
@@ -46,5 +53,10 @@ typedef enum
     CONTINUATION_RECORD,
     RESOURCE_RECORD
   } warc_rec_t;
+
+
+#ifdef __cplusplus
+ }
+#endif
 
 #endif /* __WARC_RECORD_TYPE_H__ */
