@@ -27,7 +27,7 @@ Doxygen is optional and only needed to generate technical documentation.
 
   * *MacOS X (Intel)*:
 
-    Install XCode
+    Install [http://developer.apple.com/tools/xcode/ XCode]
 
   * *FreeBSD/NetBSD/OpenBSD*:
 
