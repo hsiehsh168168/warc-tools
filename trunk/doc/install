@@ -1,69 +1,66 @@
+Requirements
+-------------
 
-/* ------------------------------------------------------------------- */
-/* Copyright (c) 2007-2008 Hanzo Archives Limited.                     */
-/*                                                                     */
-/* Licensed under the Apache License, Version 2.0 (the "License");     */
-/* you may not use this file except in compliance with the License.    */
-/* You may obtain a copy of the License at                             */
-/*                                                                     */
-/*     http://www.apache.org/licenses/LICENSE-2.0                      */
-/*                                                                     */
-/* Unless required by applicable law or agreed to in writing, software */
-/* distributed under the License is distributed on an "AS IS" BASIS,   */
-/* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or     */
-/* implied.                                                            */
-/* See the License for the specific language governing permissions and */
-/* limitations under the License.                                      */
-/*                                                                     */
-/* You may find more information about Hanzo Archives at               */
-/*                                                                     */
-/*     http://www.hanzoarchives.com/                                   */
-/*                                                                     */
-/* You may find more information about the WARC Tools project at       */
-/*                                                                     */
-/*     http://code.google.com/p/warc-tools/                            */
-/* ------------------------------------------------------------------- */
+WARC is a standalone library with no requirements but GCC. Doxygen is optional and only needed to generate technical documentation. (http://www.stack.nl/~dimitri/doxygen).
 
-WARC is a standalone library with no requirements but GCC.
-Doxygen is optional and only needed to generate technical documentation.
-(http://www.stack.nl/~dimitri/doxygen).
+    o Linux: 
 
-o Linux:
+    GCC >= 3.x.y 
 
-  GCC >= 3.x.y
+    o Windows MinGW: 
 
-o Windows MinGW:
- Install the following items in this order:
+    Install the following items in this order:
 
- # wget http://kent.dl.sourceforge.net/sourceforge/mingw/MinGW-5.1.3.exe
- # wget http://kent.dl.sourceforge.net/sourceforge/mingw/MSYS-1.0.11-2004.04.30-1.exe
- 
-o Windows Cygwin:
+    wget http://kent.dl.sourceforge.net/sourceforge/mingw/MinGW-5.1.3.exe
+    wget http://kent.dl.sourceforge.net/sourceforge/mingw/MSYS-1.0.11-2004.04.30-1.exe
 
- # wget http://cygwin.com/setup.exe
+    o Windows Cygwin: 
 
-o FreeBSD/NetBSD/OpenBSD:
+    Install the following application:
 
-  Use "gmake" instead of "make" when compiling.
+    wget http://cygwin.com/setup.exe
 
-o Solaris: 
+    o MacOS X (Intel): 
 
-  First, go to "sunfreeware.com" and downloaded "gcc", "libiconv" and the 
-  "make" packages for your Solaris achitecture (i.e. SPARC/X86) on 
-  the right panel.
-  
-  I assume here that you're using a Solaris 10 on a SPARC architecture:
+    Install XCode (http://developer.apple.com/tools/xcode/)
 
-  # wget ftp://ftp.sunfreeware.com/pub/freeware/sparc/10/libiconv-1.11-sol10-sparc-local.gz
-  # wget ftp://ftp.sunfreeware.com/pub/freeware/sparc/10/gcc-3.4.6-sol10-sparc-local.gz
-  # wget ftp://ftp.sunfreeware.com/pub/freeware/sparc/10/make-3.81-sol10-sparc-local.gz
+    o FreeBSD/NetBSD/OpenBSD: 
 
-  # gunzip libiconv-1.11-sol10-sparc-local.gz
-  # gunzip gcc-3.4.6-sol10-sparc-local.gz
-  # gunzip make-3.81-sol10-sparc-local.gz
+    Use "gmake" instead of "make" when compiling. 
 
-  # pkgadd -d libiconv-1.11-sol10-sparc-local.gz
-  # pkgadd -d gcc-3.4.6-sol10-sparc-local.gz
-  # pkgadd -d make-3.81-sol10-sparc-local.gz
+    o Solaris: 
 
-  # export PATH=$PATH:/usr/local/bin
+    First, go to "sunfreeware.com" and downloaded "gcc", "libiconv" and the "make" packages for your Solaris achitecture (i.e. SPARC/X86) on the right panel. 
+
+    We assume here that you're using a Solaris 10 on a SPARC architecture. As root type:
+
+    # wget ftp://ftp.sunfreeware.com/pub/freeware/sparc/10/libiconv-1.11-sol10-sparc-local.gz
+    # wget ftp://ftp.sunfreeware.com/pub/freeware/sparc/10/gcc-3.4.6-sol10-sparc-local.gz
+    # wget ftp://ftp.sunfreeware.com/pub/freeware/sparc/10/make-3.81-sol10-sparc-local.gz
+
+    # gunzip libiconv-1.11-sol10-sparc-local.gz
+    # gunzip gcc-3.4.6-sol10-sparc-local.gz
+    # gunzip make-3.81-sol10-sparc-local.gz
+
+    # pkgadd -d libiconv-1.11-sol10-sparc-local.gz
+    # pkgadd -d gcc-3.4.6-sol10-sparc-local.gz
+    # pkgadd -d make-3.81-sol10-sparc-local.gz
+
+    # export PATH=$PATH:/usr/local/bin
+
+
+Install
+--------
+
+Get a fresh copy of the library from subversion:
+
+   svn checkout http://warc-tools.googlecode.com/svn/trunk/ warc-tools-read-only
+   cd warc-tools-read-only
+
+Compile the library with:
+
+   make
+
+or use gmake on FreeBSD, NetBSD or OpenBSD:
+
+   gmake
