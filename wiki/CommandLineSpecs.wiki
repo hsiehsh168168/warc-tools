@@ -16,19 +16,11 @@ So if you contribute command-lines to this list, please add usage notes on how i
 == warcdump ==
 SRS 11-14, 27-28
 
-`warcdump -i <warc_input> [-s <offset>] [-p <compression>]`
+`warcdump <warc_input> [flag]`
 
 where:
- * -i: WARC input file name
- * -s: start dumping from offset (default 0)
- * -p: compressor to load at runtime (default no compression)
-
-and:
-
-`warcdump -i <warc_input> [-d]`
-
-where:
- * -d: dump headers in summary mode, a brief, line-at-a-time (ARC-like?) format (useful suggestion from John Kunze)
+ * <warc_input>: WARC input file name
+ * <flag>: 1 means compressed with GZIP (default 0)
 
 
 == wfilter ==
