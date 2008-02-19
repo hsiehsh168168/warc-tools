@@ -27,6 +27,13 @@
 #ifndef	__WARC_SIGN_H__
 #define	__WARC_SIGN_H__
 
+
+/* to mix C and C++ */
+#ifdef __cplusplus
+ extern "C" {
+#endif
+
+
 /*
  * Portability header file
  */
@@ -35,6 +42,11 @@
 
 #ifndef CASSERT
 #define CASSERT(x) (cassert (((void * const) x), SIGN))
+#endif
+
+
+#ifdef __cplusplus
+ }
 #endif
 
 #endif /* __WARC_SIGN_H__ */

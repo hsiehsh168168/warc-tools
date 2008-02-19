@@ -27,6 +27,13 @@
 #ifndef	__WARC_CLASS_X__
 #define	__WARC_CLASS_X__
 
+
+/* to mix C and C++ */
+#ifdef __cplusplus
+ extern "C" {
+#endif
+
+
 /*
  * Portability header file
  */
@@ -48,5 +55,10 @@ struct Class
   void * (* constructor) (void * self, va_list * app);
   void * (* destructor)  (void * self);
 };
+
+
+#ifdef __cplusplus
+ }
+#endif
 
 #endif /* __WARC_CLASS_X__ */

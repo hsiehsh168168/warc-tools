@@ -27,6 +27,12 @@
 #ifndef	__WFSM_HDL_H__
 #define	__WFSM_HDL_H__
 
+
+/* to mix C and C++ */
+#ifdef __cplusplus
+ extern "C" {
+#endif
+
 /**
  * Portability header file
  */
@@ -44,5 +50,9 @@ extern warc_bool_t  WFsmHDL_run       (void * const);
 extern void *       WFsmHDL_transform (const void * const);
 extern const void * WFsmHDL_state     (const void * const);
 
+
+#ifdef __cplusplus
+ }
+#endif
 
 #endif /* __WFSM_HDL_H__ */

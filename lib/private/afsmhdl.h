@@ -27,7 +27,10 @@
 #ifndef	__AFSM_HDL_H__
 #define	__AFSM_HDL_H__
 
-
+/* to mix C and C++ */
+#ifdef __cplusplus
+ extern "C" {
+#endif
 
 /*
  * Portability header file
@@ -44,5 +47,8 @@ extern warc_bool_t  AFsmHDL_run       (void * const);
 extern void *       AFsmHDL_transform (const void * const);
 extern const void * AFsmHDL_state     (const void * const);
 
+#ifdef __cplusplus
+ }
+#endif
 
 #endif /* __AFSM_HDL_H__ */

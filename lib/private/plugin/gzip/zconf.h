@@ -8,6 +8,14 @@
 #ifndef ZCONF_H
 #define ZCONF_H
 
+
+/* to mix C and C++ */
+#ifdef __cplusplus
+ extern "C" {
+#endif
+
+
+
 /*
  * If you *really* need a unique prefix for all types and library functions,
  * compile with -DZ_PREFIX. The "standard" zlib should be compiled without it.
@@ -309,6 +317,12 @@ typedef uLong FAR uLongf;
 #   pragma map(inflate_table,"INTABL")
 #   pragma map(inflate_fast,"INFA")
 #   pragma map(inflate_copyright,"INCOPY")
+#endif
+
+
+
+#ifdef __cplusplus
+ }
 #endif
 
 #endif /* ZCONF_H */

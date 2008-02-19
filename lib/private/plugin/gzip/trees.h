@@ -1,3 +1,13 @@
+#ifndef	__GZIP_TREES_H__
+#define	__GZIP_TREES_H__
+
+
+/* to mix C and C++ */
+#ifdef __cplusplus
+ extern "C" {
+#endif
+
+
 /* header created automatically with -DGEN_TREES_H */
 
 local const ct_data static_ltree[L_CODES+2] = {
@@ -126,3 +136,10 @@ local const int base_dist[D_CODES] = {
  1024,  1536,  2048,  3072,  4096,  6144,  8192, 12288, 16384, 24576
 };
 
+
+#ifdef __cplusplus
+ }
+#endif
+
+
+#endif /*__GZIP_TREES_H__ */

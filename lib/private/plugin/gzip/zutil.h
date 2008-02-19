@@ -13,6 +13,13 @@
 #ifndef ZUTIL_H
 #define ZUTIL_H
 
+
+/* to mix C and C++ */
+#ifdef __cplusplus
+ extern "C" {
+#endif
+
+
 #define ZLIB_INTERNAL
 #include "zlib.h"
 
@@ -265,5 +272,12 @@ void   zcfree  OF((voidpf opaque, voidpf ptr));
            (*((strm)->zalloc))((strm)->opaque, (items), (size))
 #define ZFREE(strm, addr)  (*((strm)->zfree))((strm)->opaque, (voidpf)(addr))
 #define TRY_FREE(s, p) {if (p) ZFREE(s, p);}
+
+
+#ifdef __cplusplus
+ }
+#endif
+
+
 
 #endif /* ZUTIL_H */

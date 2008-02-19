@@ -1,6 +1,12 @@
 #ifndef	__TIGER_H__
 #define	__TIGER_H__
 
+/* to mix C and C++ */
+#ifdef __cplusplus
+ extern "C" {
+#endif
+
+
 /* sboxes.c: Tiger S boxes */
 
 /* 
@@ -20,5 +26,13 @@ typedef warc_u32_t    word32;
 typedef unsigned char byte;
 
 extern void tiger(word64 *, word64, word64 res[3]);
+
+
+/* to mix C and C++ */
+#ifdef __cplusplus
+ extern "C" {
+#endif
+
+
 
 #endif /* __TIGER_H__ */

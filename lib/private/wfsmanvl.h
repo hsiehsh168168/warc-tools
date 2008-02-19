@@ -27,6 +27,11 @@
 #ifndef	__WFSM_ANVL_H__
 #define	__WFSM_ANVL_H__
 
+/* to mix C and C++ */
+#ifdef __cplusplus
+ extern "C" {
+#endif
+
 /**
  * Portability header file
  */
@@ -43,6 +48,11 @@ extern const void * WFsmANVL;
 extern warc_bool_t      WFsmANVL_run       (void * const);
 extern void *       WFsmANVL_transform (const void * const);
 extern const void * WFsmANVL_state      (const void * const);
+
+
+#ifdef __cplusplus
+ }
+#endif
 
 
 #endif /* __WFSM_HDL_H__ */

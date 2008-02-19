@@ -41,7 +41,7 @@
 #include <wmem.h>     /* wmalloc, wfree ... */
 #include <wstring.h>  /* WString */
 #include <arecord.h>  /* AHDLine */
-#include <wfsm.h>     /* Transition */
+#include <wfsm.x>     /* Transition */
 #include <afsmhdl.h>  /* headers */
 #include <wcsafe.h>
 

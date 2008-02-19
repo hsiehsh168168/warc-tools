@@ -27,6 +27,11 @@
 #ifndef __WARC_RECORD_X_H__
 #  define __WARC_RECORD_X_H__
 
+/* to mix C and C++ */
+#ifdef __cplusplus
+ extern "C" {
+#endif
+
 
 #include <stdlib.h> /* FILE */
 
@@ -57,5 +62,11 @@ extern warc_bool_t WRecord_setContentFromArc  (void * , void *);
 extern warc_bool_t WRecord_setWFileOffset (void * , warc_i64_t);
 extern warc_bool_t WRecord_setUncompressedSize (void * , warc_u64_t);
 extern warc_bool_t WRecord_setCompressedSize (void * , warc_u64_t);
+
+
+#ifdef __cplusplus
+ }
+#endif
+
 
 #endif /* __WARC_RECORD_X_H__ */

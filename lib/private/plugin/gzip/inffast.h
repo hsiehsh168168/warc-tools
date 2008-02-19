@@ -1,3 +1,13 @@
+#ifndef	__GZIP_INFFAST_H__
+#define	__GZIP_INFFAST_H__
+
+
+/* to mix C and C++ */
+#ifdef __cplusplus
+ extern "C" {
+#endif
+
+
 /* inffast.h -- header to use inffast.c
  * Copyright (C) 1995-2003 Mark Adler
  * For conditions of distribution and use, see copyright notice in zlib.h
@@ -25,3 +35,11 @@ void inflate_fast OF((z_streamp strm, unsigned start));
 /* #define F_  808 */
 /* #define F_  809 */
 #endif
+
+
+#ifdef __cplusplus
+ }
+#endif
+
+
+#endif /* __GZIP_INFFAST_H__ */

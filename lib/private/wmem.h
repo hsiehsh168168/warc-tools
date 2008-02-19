@@ -27,6 +27,11 @@
 #ifndef	__WARC_MEM_H__
 #define	__WARC_MEM_H__
 
+/* to mix C and C++ */
+#ifdef __cplusplus
+ extern "C" {
+#endif
+
 #ifndef WARC_MALLOC
 #  define WARC_MALLOC
 
@@ -38,5 +43,9 @@
 
 #endif /* WARC_MALLOC */
 
+
+#ifdef __cplusplus
+ }
+#endif
 
 #endif /* __WARC_MEM_H__ */

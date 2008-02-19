@@ -41,7 +41,7 @@
 #include <wstring.h>  /* WString */
 #include <whdline.h>  /* WHDLine */
 #include <wanvl.h>    /* WAnvl */
-#include <wfsm.h>     /* Transition */
+#include <wfsm.x>     /* Transition */
 #include <wfsmanvl.h>  /* headers */
 #include <wcsafe.h>
 

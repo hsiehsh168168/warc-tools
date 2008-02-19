@@ -27,6 +27,13 @@
 #ifndef __WARC_MKTMP_H__
 #define __WARC_MKTMP_H__
 
+
+/* to mix C and C++ */
+#ifdef __cplusplus
+ extern "C" {
+#endif
+
+
 /**
  * Portability header file
  */
@@ -45,6 +52,11 @@
 extern const void * WTempFile;
 
 extern FILE  * WTempFile_handle  (const void * const);
+
+
+#ifdef __cplusplus
+ }
+#endif
 
 #endif /* __WARC_MKTMP_H__ */
 

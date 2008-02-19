@@ -80,24 +80,25 @@ CFLAGS += $(GCC_EXTRA)
 # sources
 ###############
 
-c	= $(PRIVATE)/wstring.c $(PRIVATE)/wclass.c $(PRIVATE)/wlist.c \
+b	= $(PRIVATE)/wstring.c $(PRIVATE)/wclass.c $(PRIVATE)/wlist.c \
 	  $(PRIVATE)/whdline.c $(PRIVATE)/wfile.c $(PRIVATE)/wrecord.c \
 	  $(PRIVATE)/wanvl.c $(PRIVATE)/wfsmhdl.c $(PRIVATE)/afsmhdl.c \
       $(PRIVATE)/wfsmanvl.c $(PRIVATE)/wcsafe.c \
       $(PRIVATE)/arecord.c  $(PRIVATE)/afile.c ${MKTEMP}.c \
       $(PRIVATE)/wendian.c $(PRIVATE)/wuuid.c
-c      += $(GZIP)/adler32.c $(GZIP)/crc32.c $(GZIP)/deflate.c \
+b     += $(GZIP)/adler32.c $(GZIP)/crc32.c $(GZIP)/deflate.c \
 	  $(GZIP)/infback.c $(GZIP)/inffast.c $(GZIP)/inflate.c \
 	  $(GZIP)/inftrees.c $(GZIP)/uncompr.c $(GZIP)/wgzipbit.c \
 	  $(GZIP)/zutil.c $(GZIP)/compress.c $(GZIP)/trees.c \
 	  $(PRIVATE)/wgzip.c
-c	   += $(TIGER)/tiger.c
-c      += $(TST)/string.c $(TST)/list.c $(TST)/hdline.c $(TST)/object.c \
+b	  += $(TIGER)/tiger.c
+
+c     = $(b) \
+	  $(TST)/string.c $(TST)/list.c $(TST)/hdline.c $(TST)/object.c \
 	  $(TST)/anvl.c $(TST)/record.c $(TST)/file.c $(TST)/arcrecord.c \
 	  $(TST)/gzip.c $(TST)/gunzip.c  $(TST)/arcfile.c  $(TST)/a2w.c \
 	  $(TST)/uuid.c
-
-c      += $(APP)/arc2warc.c $(APP)/warcdump.c $(APP)/warcfilter.c \
+c     += $(APP)/arc2warc.c $(APP)/warcdump.c $(APP)/warcfilter.c \
 		$(APP)/warcvalidator.c
 
 h	= $(PUBLIC)/wclass.h $(PUBLIC)/warc.h $(PRIVATE)/wstring.h \
@@ -124,7 +125,7 @@ t  += $(APP)/arc2warc $(APP)/warcdump $(APP)/warcfilter $(APP)/warcvalidator
 # library
 ###############
 
-libwarc = $(c:.c=.o)
+libwarc = $(b:.c=.o)
 gzlib = $(GZIP)/adler32.o $(GZIP)/crc32.o $(GZIP)/deflate.o \
 		$(GZIP)/infback.o $(GZIP)/inffast.o $(GZIP)/inflate.o \
 	  	$(GZIP)/inftrees.o $(GZIP)/uncompr.o $(GZIP)/wgzipbit.o \
@@ -247,8 +248,8 @@ $(APP)/warcvalidator: $(warcvalidator);  $(CC) $(CFLAGS) -o $@ $(warcvalidator)
 clean:		;   rm -f $t $(libwarc) *.o *~ *.a *.so *.log \
 	            $(PUBLIC)/*~ $(PRIVATE)/*~ $(PLUGIN)/*~ $(GZIP)/*~ \
 		    $(APP)/*~ $(APP)/*.exe $(TST)/*~ $(TST)/*.exe $(DOC)/*~ \
-			$(WIN32DEP)/*~ semantic.cache depend *.gz compress* \
-			uncompress*
+			$(WIN32DEP)/*~ $(TIGER)/*~ semantic.cache depend \
+			*.gz compress* uncompress*
 			rm -rf $(DOC)/html
 
 doc:        ;   doxygen ./doc/warcdoc
