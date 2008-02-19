@@ -13,7 +13,7 @@ So if you contribute command-lines to this list, please add usage notes on how i
 
 = Command-Line Specifications =
 
-== warcdump ==
+== warcdump (done) ==
 SRS 11-14, 27-28
 
 `warcdump <warc_input> <flag>`
@@ -23,7 +23,7 @@ where:
  * <flag>: 1 means compressed with GZIP (default 0)
 
 
-== warcfilter ==
+== warcfilter (done) ==
 SRS 16-20
 
 `warcfilter <warc_input>  <flag> <match_string> <mime_uri>`
@@ -40,7 +40,7 @@ SRS 8-10
 This command can easily be built with only few instructions using the WARC library.
 
 
-== warcvalidator ==
+== warcvalidator (done) ==
 SRS 31-32
 
 `warcvalidator <warc_input>`
@@ -49,7 +49,7 @@ where:
  * <warc_input>: WARC input file name
 
 
-== arc2warc ==
+== arc2warc (done) ==
 SRS 11-14, 15, 44
 
 `arc2warc <arcfile> <aflag> <warcfile> <wflag>`
@@ -61,9 +61,10 @@ where:
  * wflag   : WARC compression (1, means compressed with GZIP)
 
 
-== warc-server ==
+== warcserver ==
 SRS 33-36, 37-38
-`warc-server -d [-r <warcs_dir>]`
+
+`warcserver -d [-r <warcs_dir>]`
 
 where:
  * -d: run the wserver as a daemon
