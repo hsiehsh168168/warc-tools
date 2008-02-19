@@ -27,6 +27,14 @@
 #ifndef	__ARC_RECORD_H__
 #define	__ARC_RECORD_H__
 
+
+/* to mix C and C++ */
+#ifdef __cplusplus
+ extern "C" {
+#endif
+
+
+
 /**
  * Portability header file
  */
@@ -70,5 +78,11 @@ extern warc_bool_t ARecord_setEnv (void * , void *);
 extern void * ARecord_fromWho (const void * const );
 extern warc_bool_t ARecord_setAfile (void * , void *);
 extern warc_bool_t ARecord_transferContent (void * , void *, void *);
+
+
+#ifdef __cplusplus
+ }
+#endif
+
 
 #endif /* __ARC_RECORD_H__ */

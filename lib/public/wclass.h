@@ -27,6 +27,13 @@
 #ifndef	__WARC_OBJECT_H__
 #define	__WARC_OBJECT_H__
 
+
+/* to mix C and C++ */
+#ifdef __cplusplus
+ extern "C" {
+#endif
+
+
 /*
  * Portability header file
  */
@@ -49,5 +56,11 @@
 void * bless   (const void *, ...);
 void   destroy (void *);
 void   cassert (void * const, const warc_u32_t);
+
+
+#ifdef __cplusplus
+ }
+#endif
+
 
 #endif /* __WARC_OBJECT_H__ */

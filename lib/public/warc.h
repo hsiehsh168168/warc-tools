@@ -27,6 +27,13 @@
 #ifndef	__WARC_H__
 #define	__WARC_H__
 
+/* to mix C and C++ */
+#ifdef __cplusplus
+ extern "C" {
+#endif
+
+
+
 #include <wport.h>       /* portability issues */
 #include <wmisc.h>       /* NIL, ARRAY_LEN ... */
 #include <wclass.h>      /* bless, destroy */
@@ -38,5 +45,10 @@
 #include <wuuid.h>       /* WUUID */
 #include <wrectype.h>    /* WRecord types (i.e. resource, revisit ...) */
 
+
+
+#ifdef __cplusplus
+ }
+#endif
 
 #endif /* __WARC_H__ */
