@@ -27,6 +27,12 @@
 #ifndef	__WARC_WGZIP_H__
 #define	__WARC_WGZIP_H__
 
+/* to mix C and C++ */
+#ifdef __cplusplus
+ extern "C" {
+#endif
+
+
 /**
  * Portability header file
  */
@@ -67,5 +73,11 @@ extern warc_u32_t WGzip_uncompress (const void * const,
 extern warc_bool_t WGzip_analyzeHeader (const void *,  FILE *, 
                                         warc_u32_t, warc_u32_t *,
                                         warc_u32_t *);
+
+
+#ifdef __cplusplus
+ }
+#endif
+
 
 #endif /* __WARC_WGZIP_H__ */

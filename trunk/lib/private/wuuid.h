@@ -27,6 +27,13 @@
 #ifndef	__WARC_UUID_H__
 #define	__WARC_UUID_H__
 
+
+/* to mix C and C++ */
+#ifdef __cplusplus
+ extern "C" {
+#endif
+
+
 /**
  * Portability header file
  */
@@ -40,5 +47,11 @@ extern void         WUUID_reinit (const void * const);
 extern void         WUUID_hash   (const void * const, const unsigned char *,
                                   const warc_u64_t);
 extern const char * WUUID_text   (const void * const);
+
+
+#ifdef __cplusplus
+ }
+#endif
+
 
 #endif /* __WARC_UUID_H__ */

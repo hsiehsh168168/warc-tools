@@ -27,6 +27,13 @@
 #ifndef __WARC_OS_H__
 #define	__WARC_OS_H__
 
+
+/* to mix C and C++ */
+#ifdef __cplusplus
+ extern "C" {
+#endif
+
+
 #if defined(__MSDOS__) && !defined(MSDOS)
 #  define MSDOS
 #endif
@@ -60,6 +67,11 @@
 # if defined(macosx)
 #    define MACOSX
 #  define POWERPC
+#endif
+
+
+#ifdef __cplusplus
+ }
 #endif
 
 

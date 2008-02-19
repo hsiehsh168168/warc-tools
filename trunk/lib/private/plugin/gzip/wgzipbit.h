@@ -27,6 +27,13 @@
 #ifndef	__WARC_METHOD_BITS_H__
 #define	__WARC_METHOD_BITS_H__
 
+/* to mix C and C++ */
+#ifdef __cplusplus
+ extern "C" {
+#endif
+
+
+
 #define DEFLATE_METHOD      0
 #define GZIP_METHOD         1
 
@@ -125,6 +132,11 @@ int methodBits (int);
 /* #define  OUTPUT_BUFFSIZE      16 * 64 * 1024 */
 
 #endif /* __RFC1952_H__ */
+
+
+#ifdef __cplusplus
+ }
+#endif
 
 
 #endif /* __WARC_METHOD_BITS_H__ */

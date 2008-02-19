@@ -27,7 +27,10 @@
 #ifndef	__WARC_WANVL_H__
 #define	__WARC_WANVL_H__
 
-
+/* to mix C and C++ */
+#ifdef __cplusplus
+ extern "C" {
+#endif
 
 /**
  * Portability header file
@@ -49,5 +52,9 @@ extern warc_bool_t    WAnvl_setValue     (void * const, const char *,
                                           const warc_u32_t);
 extern warc_bool_t    WAnvl_isValid      (const void * const);
 
+
+#ifdef __cplusplus
+ }
+#endif
 
 #endif /* __WARC_WANVL_H__ */

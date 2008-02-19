@@ -1,3 +1,13 @@
+#ifndef	__GZIP_INFLATE_H__
+#define	__GZIP_INFLATE_H__
+
+
+/* to mix C and C++ */
+#ifdef __cplusplus
+ extern "C" {
+#endif
+
+
 /* inflate.h -- internal inflate state definition
  * Copyright (C) 1995-2004 Mark Adler
  * For conditions of distribution and use, see copyright notice in zlib.h
@@ -137,5 +147,13 @@ struct inflate_state {
 #define Z_INCORRECT_DATA_CHECK                 716
 #define Z_INCORRECT_LENGTH_CHECK               717
 
-
 #endif
+
+
+
+#ifdef __cplusplus
+ }
+#endif
+
+
+#endif /* __GZIP_INFLATE_H__ */

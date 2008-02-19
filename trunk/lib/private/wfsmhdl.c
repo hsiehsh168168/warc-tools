@@ -41,7 +41,7 @@
 #include <wmem.h>     /* wmalloc, wfree ... */
 #include <wstring.h>  /* WString */
 #include <whdline.h>  /* WHDLine */
-#include <wfsm.h>     /* Transition */
+#include <wfsm.x>     /* Transition */
 #include <wfsmhdl.h>  /* headers */
 #include <wrectype.h> /* revist, resource ... */
 #include <wcsafe.h>

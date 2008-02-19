@@ -27,6 +27,12 @@
 #ifndef	__WARC_WLIST_H__
 #define	__WARC_WLIST_H__
 
+/* to mix C and C++ */
+#ifdef __cplusplus
+ extern "C" {
+#endif
+
+
 /**
  * Portability header file
  */
@@ -45,5 +51,10 @@ extern const void * WList_get     (const void * const, const warc_u32_t);
 extern void       * WList_remove  (void * const, const warc_u32_t);
 extern void       * WList_set     (void * const, const warc_u32_t,
                                    void * const);
+
+#ifdef __cplusplus
+ }
+#endif
+
 
 #endif /* __WARC_WLIST_H__ */

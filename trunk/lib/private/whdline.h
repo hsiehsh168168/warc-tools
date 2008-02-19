@@ -27,6 +27,11 @@
 #ifndef	__WARC_HEADER_LINE_H__
 #define	__WARC_HEADER_LINE_H__
 
+/* to mix C and C++ */
+#ifdef __cplusplus
+ extern "C" {
+#endif
+
 /**
  * Portability header file
  */
@@ -68,5 +73,9 @@ extern warc_bool_t WHDLine_setContentType  (void * const, const char *,
 extern warc_bool_t WHDLine_setRecordId     (void * const, const char *,
                                         const warc_u32_t);
 
+
+#ifdef __cplusplus
+ }
+#endif
 
 #endif /* __WARC_STRING_H__ */

@@ -27,6 +27,13 @@
 #ifndef	__WARC_STRING_H__
 #define	__WARC_STRING_H__
 
+
+/* to mix C and C++ */
+#ifdef __cplusplus
+ extern "C" {
+#endif
+
+
 /**
  * Portability header file
  */
@@ -44,5 +51,11 @@ extern       warc_bool_t    WString_concat    (void * const, const void * const)
 extern       warc_bool_t    WString_append    (void * const, const char * const,
                                            warc_u32_t);
 extern       warc_i32_t WString_strstr    (const void * const, const char *);
+
+
+#ifdef __cplusplus
+ }
+#endif
+
 
 #endif /* __WARC_STRING_H__ */

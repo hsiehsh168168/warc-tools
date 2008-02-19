@@ -27,6 +27,12 @@
 #ifndef	__WARC_C_SAFE_H__
 #define	__WARC_C_SAFE_H__
 
+
+/* to mix C and C++ */
+#ifdef __cplusplus
+ extern "C" {
+#endif
+
 /**
  * Portability header file
  */
@@ -254,6 +260,11 @@
 
 extern ptrdiff_t w_strncpy    (char *, const char *, size_t);
 extern char *    w_strcasestr (const char *, const char *);
+
+
+#ifdef __cplusplus
+ }
+#endif
 
 #endif /* __WARC_C_SAFE_H__ */
 

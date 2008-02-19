@@ -1,3 +1,12 @@
+#ifndef	__GZIP_CRC32_H__
+#define	__GZIP_CRC32_H__
+
+/* to mix C and C++ */
+#ifdef __cplusplus
+ extern "C" {
+#endif
+
+
 /* crc32.h -- tables for rapid CRC calculation
  * Generated automatically by crc32.c
  */
@@ -439,3 +448,11 @@ local const unsigned long FAR crc_table[TBLS][256] =
 #endif
   }
 };
+
+
+#ifdef __cplusplus
+ }
+#endif
+
+
+#endif /* __GZIP_CRC32_H__ */
