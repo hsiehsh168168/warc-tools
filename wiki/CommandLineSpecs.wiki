@@ -16,50 +16,50 @@ So if you contribute command-lines to this list, please add usage notes on how i
 == warcdump ==
 SRS 11-14, 27-28
 
-`warcdump <warc_input> [flag]`
+`warcdump <warc_input> <flag>`
 
 where:
  * <warc_input>: WARC input file name
  * <flag>: 1 means compressed with GZIP (default 0)
 
 
-== wfilter ==
+== warcfilter ==
 SRS 16-20
 
-`wfilter -i <warc_input>  -t <wtype> [-m <regexp>] [-o <warc_output>]`
+`warcfilter <warc_input>  <flag> <match_string> <mime_uri>`
 
 where :
- * -i: WARC input file name
- * -m: MIME type regular expression
- * -t: warcinfo, response, request, metadata, revisit, conversion and/or continuation
- * -o: write filtered records to this WARC (default STDOUT)
+ * <warc_input>: WARC input file name
+ * <flag>    : 0 for uncompressed WARC
+ * <match_string>: a string
+ * <mime_uri>: 0 for MIME, 1 for URI
 
 == warcappend ==
 SRS 8-10
 
-`warcappend -i <warc_input> [-o <warc_output>]`
+This command can easily be built with only few instructions using the WARC library.
 
-where:
- * -i: WARC input file name
- * -o: append the record to this WARC (default STDOUT)
 
-== w-validator ==
+== warcvalidator ==
 SRS 31-32
 
-`w-validator -i <warc_input>`
+`w-validator <warc_input>`
 
 where:
- * -i: WARC input file name
+ * <warc_input>: WARC input file name
+
 
 == arc2warc ==
 SRS 11-14, 15, 44
 
-`arc2warc -a <arc_input> [-o <warc_output>] [-c <config_file.cfg>]`
+`arc2warc <arcfile> <aflag> <warcfile> <wflag>`
 
 where:
- * -a: ARC input file name
- * -o: write converted records to this WARC (default STDOUT)
- * -c: use this configuration for conversion
+ * arcfile : ARC input file name
+ * aflag   : ARC compression  (0, means uncompressed)
+ * warcfile: a WARC file
+ * wflag   : WARC compression (1, means compressed with GZIP)
+
 
 == warc-server ==
 SRS 33-36, 37-38
