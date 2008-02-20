@@ -16,23 +16,23 @@ So if you contribute command-lines to this list, please add usage notes on how i
 == warcdump (done) ==
 SRS 11-14, 27-28
 
-`warcdump <warc_input> <flag>`
+Dump a WARC file
 
-where:
- * <warc_input>: WARC input file name
- * <flag>: 1 means compressed with GZIP (default 0)
+Usage: ./app/warcdump -f <file.warc> [-c]
+  * -f    : valid WARC file name
+  * [-c]  : GZIP compressed WARC (default true)
 
 
 == warcfilter (done) ==
 SRS 16-20
 
-`warcfilter <warc_input>  <flag> <match_string> <mime_uri>`
+Filter WARC records based on MIME or URI
 
-where :
- * <warc_input>: WARC input file name
- * <flag>    : 0 for uncompressed WARC
- * <match_string>: a string
- * <mime_uri>: 0 for MIME, 1 for URI
+Usage: ./app/warcfilter -f <file.warc> [-c] -s <match> [-t]
+  * -f    : valid WARC file name
+  * [-c]  : GZIP compressed WARC (default true)
+  * -s    : pattern string
+  * [-t]  : compare with MIME (default true)
 
 == warcappend ==
 SRS 8-10
@@ -43,22 +43,24 @@ This command can easily be built with only few instructions using the WARC libra
 == warcvalidator (done) ==
 SRS 31-32
 
-`warcvalidator <warc_input>`
+Check WARC file consistency
 
-where:
- * <warc_input>: WARC input file name
+Usage: ./app/warcvalidator -f <file.warc> [-c] [-v]
+  * -f    : valid WARC file name
+  * [-c]  : GZIP compressed WARC (default true)
+  * [-v]  : verbose mode (default true)
 
 
 == arc2warc (done) ==
 SRS 11-14, 15, 44
 
-`arc2warc <arcfile> <aflag> <warcfile> <wflag>`
+ARC to WARC convertor
 
-where:
- * arcfile : ARC input file name
- * aflag   : ARC compression  (0, means uncompressed)
- * warcfile: a WARC file
- * wflag   : WARC compression (1, means compressed with GZIP)
+Usage: ./app/arc2warc -a <file.arc> [-b] -f <file.warc> [-c]
+  * -a    : valid ARC file name
+  * [-b]  : GZIP compressed ARC (default true)
+  * -f    : valid WARC file name
+  * [-c]  : GZIP compressed WARC (default true)
 
 
 == warcserver ==
