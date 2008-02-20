@@ -85,7 +85,7 @@ b	= $(PRIVATE)/wstring.c $(PRIVATE)/wclass.c $(PRIVATE)/wlist.c \
 	  $(PRIVATE)/wanvl.c $(PRIVATE)/wfsmhdl.c $(PRIVATE)/afsmhdl.c \
       $(PRIVATE)/wfsmanvl.c $(PRIVATE)/wcsafe.c \
       $(PRIVATE)/arecord.c  $(PRIVATE)/afile.c ${MKTEMP}.c \
-      $(PRIVATE)/wendian.c $(PRIVATE)/wuuid.c
+      $(PRIVATE)/wendian.c $(PRIVATE)/wuuid.c $(PRIVATE)/wgetopt.c
 b     += $(GZIP)/adler32.c $(GZIP)/crc32.c $(GZIP)/deflate.c \
 	  $(GZIP)/infback.c $(GZIP)/inffast.c $(GZIP)/inflate.c \
 	  $(GZIP)/inftrees.c $(GZIP)/uncompr.c $(GZIP)/wgzipbit.c \
@@ -97,7 +97,7 @@ c     = $(b) \
 	  $(TST)/string.c $(TST)/list.c $(TST)/hdline.c $(TST)/object.c \
 	  $(TST)/anvl.c $(TST)/record.c $(TST)/file.c $(TST)/arcrecord.c \
 	  $(TST)/gzip.c $(TST)/gunzip.c  $(TST)/arcfile.c  $(TST)/a2w.c \
-	  $(TST)/uuid.c
+	  $(TST)/uuid.c $(TST)/getopt.c
 c     += $(APP)/arc2warc.c $(APP)/warcdump.c $(APP)/warcfilter.c \
 		$(APP)/warcvalidator.c
 
@@ -108,7 +108,7 @@ h	= $(PUBLIC)/wclass.h $(PUBLIC)/warc.h $(PRIVATE)/wstring.h \
 	  $(PRIVATE)/fsm.h $(PRIVATE)/wfsmhdl.h $(PRIVATE)/fsmanvl.h \
 	  $(PRIVATE)/wcsafe.h $(PRIVATE)/afsmhdl.h $(PRIVATE)/arecord.h \
 	  $(PRIVATE)/afile.h $(PRIVATE)/wmktmp.h $(PRIVATE)/arecord.h \
-	  $(PRIVATE)/wendian.h $(PRIVATE)/wuuid.h
+	  $(PRIVATE)/wendian.h $(PRIVATE)/wuuid.h $(PRIVATE)/wgetopt.h
 h   += $(GZIP)/crc32.h $(GZIP)/deflate.h $(GZIP)/inffast.h \
 	  $(GZIP)/inffixed.h $(GZIP)/inflate.h $(GZIP)/inftrees.h \
 	  $(GZIP)/wgzipbit.h $(GZIP)/wos.h $(GZIP)/zconf.h $(GZIP)/zlib.h \
@@ -117,7 +117,7 @@ h	   += $(TIGER)/tiger.h
 t	= $(TST)/string $(TST)/list   $(TST)/anvl \
 	  $(TST)/record $(TST)/object $(TST)/hdline \
 	  $(TST)/gzip   $(TST)/gunzip $(TST)/file \
-	  $(TST)/arcrecord $(TST)/arcfile $(TST)/a2w $(TST)/uuid
+	  $(TST)/arcrecord $(TST)/arcfile $(TST)/a2w $(TST)/uuid $(TST)/getopt
 t  += $(APP)/arc2warc $(APP)/warcdump $(APP)/warcfilter $(APP)/warcvalidator
 
 
@@ -126,6 +126,7 @@ t  += $(APP)/arc2warc $(APP)/warcdump $(APP)/warcfilter $(APP)/warcvalidator
 ###############
 
 libwarc = $(b:.c=.o)
+obj     = $(libwarc) $(c:.c=.o)
 gzlib = $(GZIP)/adler32.o $(GZIP)/crc32.o $(GZIP)/deflate.o \
 		$(GZIP)/infback.o $(GZIP)/inffast.o $(GZIP)/inflate.o \
 	  	$(GZIP)/inftrees.o $(GZIP)/uncompr.o $(GZIP)/wgzipbit.o \
@@ -183,6 +184,9 @@ arcfile = $(PRIVATE)/wclass.o $(PRIVATE)/wstring.o $(PRIVATE)/wlist.o \
 uuid	= $(PRIVATE)/wclass.o $(PRIVATE)/wuuid.o $(PRIVATE)/wcsafe.o \
 		$(PRIVATE)/wstring.o $(TIGER)/tiger.o $(TST)/uuid.o
 
+getopt	= $(PRIVATE)/wclass.o $(PRIVATE)/wgetopt.o $(PRIVATE)/wcsafe.o \
+		$(PRIVATE)/wstring.o $(TST)/getopt.o
+
 ##################
 # unit tests deps
 ##################
@@ -200,7 +204,7 @@ $(TST)/arcrecord: $(arcrecord);  $(CC) $(CFLAGS)   -o $@ $(arcrecord)
 $(TST)/a2w:       $(a2w);        $(CC) $(CFLAGS)   -o $@ $(a2w)
 $(TST)/arcfile:   $(arcfile);    $(CC) $(CFLAGS)   -o $@ $(arcfile)
 $(TST)/uuid:	  $(uuid);       $(CC) $(CFLAGS)   -o $@ $(uuid)
-
+$(TST)/getopt:	  $(getopt);     $(CC) $(CFLAGS)   -o $@ $(getopt)
 
 ####################
 # applications deps
@@ -230,7 +234,7 @@ warcvalidator = $(PRIVATE)/wclass.o $(PRIVATE)/wstring.o $(PRIVATE)/wlist.o \
 		   $(PRIVATE)/whdline.o $(PRIVATE)/wanvl.o $(PRIVATE)/wrecord.o \
 		   $(PRIVATE)/wfile.o  $(PRIVATE)/wfsmhdl.o \
            $(PRIVATE)/wfsmanvl.o $(PRIVATE)/wcsafe.o \
-           $(APP)/warcvalidator.o ${MKTEMP}.o $(gzlib)
+           $(APP)/warcvalidator.o ${MKTEMP}.o $(gzlib) $(PRIVATE)/wgetopt.o
 
 ####################
 # applications 
@@ -245,7 +249,7 @@ $(APP)/warcvalidator: $(warcvalidator);  $(CC) $(CFLAGS) -o $@ $(warcvalidator)
 # freshing
 ##############
 
-clean:		;   rm -f $t $(libwarc) *.o *~ *.a *.so *.log \
+clean:		;   rm -f $t $(obj) *.o *~ *.a *.so *.log \
 	            $(PUBLIC)/*~ $(PRIVATE)/*~ $(PLUGIN)/*~ $(GZIP)/*~ \
 		    $(APP)/*~ $(APP)/*.exe $(TST)/*~ $(TST)/*.exe $(DOC)/*~ \
 			$(WIN32DEP)/*~ $(TIGER)/*~ semantic.cache depend \

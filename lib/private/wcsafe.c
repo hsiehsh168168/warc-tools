@@ -180,3 +180,20 @@ WPUBLIC char * w_strcasestr (const char * phaystack, const char * pneedle)
  ret0:
   return 0;
 }
+
+
+
+
+/* locate character in string */
+WPUBLIC const char * w_index (const char *s, int c)
+{
+  while (* s)
+    {
+      if (* s == c)
+        return (s);
+
+      ++ s;
+    }
+
+  return (0);
+}

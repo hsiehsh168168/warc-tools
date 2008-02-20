@@ -24,8 +24,9 @@
 /*     http://code.google.com/p/warc-tools/                            */
 /* ------------------------------------------------------------------- */
 
-#ifndef	__WARC_H__
-#define	__WARC_H__
+#ifndef	__WARC_GETOPT_H__
+#define	__WARC_GETOPT_H__
+
 
 /* to mix C and C++ */
 #ifdef __cplusplus
@@ -33,23 +34,22 @@
 #endif
 
 
+/**
+ * Portability header file
+ */
 
-#include <wport.h>       /* portability issues */
-#include <wmisc.h>       /* NIL, ARRAY_LEN ... */
-#include <wclass.h>      /* bless, destroy */
-#include <wstring.h>     /* WString */
-#include <wlist.h>       /* WList */
-#include <wrecord.h>     /* WRecord */
-#include <wanvl.h>       /* WAnvl */
-#include <wfile.h>       /* WFile */
-#include <wuuid.h>       /* WUUID */
-#include <wgetopt.h>     /* WGetOpt */
-#include <wrectype.h>    /* WRecord types (i.e. resource, revisit ...) */
+#include <wport.h>
 
 
+extern const void * WGetOpt;
+
+extern warc_i32_t   WGetOpt_parse    (void * const, warc_i32_t, const char **);
+extern warc_i32_t   WGetOpt_indice   (const void * const);
+extern char       * WGetOpt_argument (const void * const);
 
 #ifdef __cplusplus
  }
 #endif
 
-#endif /* __WARC_H__ */
+
+#endif /* __WARC_GETOPT_H__ */
