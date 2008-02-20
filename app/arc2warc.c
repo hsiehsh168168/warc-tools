@@ -40,6 +40,9 @@
 #define makeU(s) (const unsigned char *) (s), (warc_u64_t) strlen((s))
 
 /* useful macros to simplify releasing objects */
+#define free_p \
+ destroy (p)
+
 #define free_a \
  destroy (a)
 
@@ -51,6 +54,7 @@
 
 #define free_out \
 do{ \
+ free_p; \
  free_u; \
  free_w; \
  free_a; \
@@ -91,41 +95,76 @@ do{ \
 
 int main (int argc, const char ** argv)
 {
-  void          * a      = NIL; /* an ARC file object */
-  void          * w      = NIL; /* a WARC file object */
-  void          * u      = NIL; /* a UUID object */
+  void           * p        = NIL; /* WGetOpt object */
+  void           * a        = NIL; /* an ARC file object */
+  void           * w        = NIL; /* a WARC file object */
+  void           * u        = NIL; /* a UUID object */
+  char           * aname    = NIL;
+  afile_comp_t     amode    = ARC_FILE_COMPRESSED_GZIP;
+  warc_bool_t      b        = WARC_FALSE;
+  warc_i32_t       c        = 0;
+  char           * flags    = "bca:f:";
+  char           * fname    = NIL;
+  wfile_comp_t     cmode    = WARC_FILE_COMPRESSED_GZIP;
 
-  afile_comp_t    agzip  = ARC_FILE_UNCOMPRESSED; /* compression flag */
-  wfile_comp_t    wlevel = WARC_FILE_UNCOMPRESSED;/* compression flag */
-
-  warc_bool_t     b;            /* boolean */
   
-
- if (argc !=5)
+  if (argc < 5 || argc > 7) 
    {
-     fprintf (stderr, "Convert an ARC file to a WARC file.\n\n");
-     fprintf (stderr, "Usage:   %s <arcfile> <aflag> <warcfile> <wflag>\n", argv [0]);
-     fprintf (stderr, "where:\n");
-     fprintf (stderr, "\tarcfile : an ARC file\n");
-     fprintf (stderr, "\taflag   : ARC compression  (0, means uncompressed)\n");
-     fprintf (stderr, "\twarcfile: a WARC file\n");
-     fprintf (stderr, "\twflag   : WARC compression (1, means compressed)\n");
-     fprintf (stderr, "Examples:\n");
-     fprintf (stderr, "\t %s foo.arc.gz 1 bar.warc    0\n", argv [0]);
-     fprintf (stderr, "\t %s foo.arc    0 bar.warc.gz 1\n", argv [0]);
-     fprintf (stderr, "\t %s foo.arc.gz 1 bar.warc.gz 1\n", argv [0]);
-     fprintf (stderr, "\t %s foo.arc    0 bar.warc    0\n", argv [0]);
-     return (1);
+     fprintf (stderr, "ARC to WARC convertor\n");
+     fprintf (stderr, "Usage: %s -a <file.arc> [-b] -f <file.warc> [-c]\n",
+              argv [0]);
+     fprintf (stderr,"\t-a    : valid ARC file name\n");
+     fprintf (stderr,"\t[-b]  : GZIP compressed ARC (default true)\n");
+     fprintf (stderr,"\t-f    : valid WARC file name\n");
+     fprintf (stderr,"\t[-c]  : GZIP compressed WARC (default true)\n");
+     return (2);
    }
- 
- if (* argv[2] == '1')
-   agzip = ARC_FILE_COMPRESSED_GZIP;
+  
+  p = bless (WGetOpt, makeS (flags));
+  assert (p);
 
- if (* argv[4] == '1')
-   wlevel  = WARC_FILE_COMPRESSED_GZIP;
+  /* parse command line parameters */
+  while ((c = WGetOpt_parse (p, argc, argv)) != -1)
+    {
+      switch (c)
+        {
+        case 'f' :
+          if (w_index (flags, c) [1] == ':')
+            fname = WGetOpt_argument (p);
+          break;
+        case 'c' :
+          cmode = WARC_FILE_UNCOMPRESSED;
+          break;
+        case 'a' :
+          if (w_index (flags, c) [1] == ':')
+            aname = WGetOpt_argument (p);
+          break;
+        case 'b' :
+          amode = WARC_FILE_UNCOMPRESSED;
+          break;
+        case '?' :  /* illegal option or missing argument */
+          destroy (p);
+          return (1);
+        }
+    }
+
+  unless (aname)
+    {
+      fprintf (stderr, "missing ARC file name. Use -a option\n");
+      destroy (p);
+      return (1);
+    }
+  
+  unless (fname)
+    {
+      fprintf (stderr, "missing WARC file name. Use -f option\n");
+      destroy (p);
+      return (1);
+    }
+
 
 /* open an existing ARC file */  
- a = bless (AFile, argv[1], agzip);
+ a = bless (AFile, aname, amode);
  unless (a)
    {
      fprintf(stderr,"unable to create the Arc object\n");
@@ -133,7 +172,7 @@ int main (int argc, const char ** argv)
    }
 
  /* open or create a WARC file */
- w = bless(WFile, argv[3], WARC_MAX_SIZE, WARC_FILE_WRITER, wlevel);
+ w = bless(WFile, fname, WARC_MAX_SIZE, WARC_FILE_WRITER, cmode);
  unless (w)
    {
      fprintf(stderr,"unable to create the Warc object\n");

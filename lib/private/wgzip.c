@@ -503,9 +503,6 @@ WGzip_decode (const void * _self,  FILE * source, warc_u32_t offset,
   if (ret != Z_OK)
     return (ret);
   
-/*   printf(">>>>>>>>> SIZE: %lu\n", (unsigned long) meta -> gzip_header_size); */
-/*   printf(">>>>>>>>> FH  : %lu\n", (unsigned long) ftell(source)); */
-  
   meta -> csize = meta -> gzip_header_size;
 
   /* allocate inflate state */
@@ -518,8 +515,6 @@ WGzip_decode (const void * _self,  FILE * source, warc_u32_t offset,
   ret = inflateInit2 (& strm, - MAX_RBITS);
   if (ret != Z_OK)
     return (ret);
-
-/*   printf(">>>>>>>>>>>>>>+++++++++++++++ %d\n", ret); */
 
   /* decompress until deflate stream ends or end of file */
   do {
@@ -547,11 +542,7 @@ WGzip_decode (const void * _self,  FILE * source, warc_u32_t offset,
       /* start decompression */
       ret = inflate (& strm, Z_NO_FLUSH);
        
-/*       printf(">>>>>>>>>>>>>>+++++++++++++++ %d\n", ret); */
-
       meta -> csize += av_in - strm . avail_in;
-
-/*       printf(">>>>>>>>>>>>>>+++++++++++++++ %ld\n", (unsigned long)meta -> csize); */
 
       /* state not clobbered */
       if (ret != Z_OK && ret != Z_STREAM_END) 
@@ -681,7 +672,7 @@ WPUBLIC warc_u32_t WGzip_uncompress (const void * const _self,
  * @param usize pointer the uncompressed data size
  * @param csize pointer the compressed data size
  *
- * @return WACR_FALSE if succeeds,WARC_TRUE otherwise
+ * @return WARC_FALSE if succeeds,WARC_TRUE otherwise
  *
  * Try to extract uncompressed and compressed size from GZIP header
  * if any.
@@ -715,6 +706,42 @@ WGzip_analyzeHeader (const void * _self,  FILE * source,
   memset (META, 0, sizeof (struct GzipMeta));
   
   return ((* usize) == 0 && (* csize) == 0);
+}
+
+
+/**
+ * @param _self a WGzip object
+ * @param source compressed input file handle
+ * @param offset file offset in source
+ *
+ * @return WARC_FALSE if succeeds,WARC_TRUE otherwise
+ *
+ * Check if the file is a valid GZIP
+ */
+
+WPUBLIC warc_bool_t
+WGzip_check (const void * _self,  FILE * source, warc_u32_t offset)
+{
+  const struct WGzip * const self  = _self;
+
+  /* preconditions */
+  CASSERT (self);
+  assert  (source);
+  
+  /* seek to the correct record offset */
+  if (0 != fseek (source, offset, SEEK_SET))
+    return (WARC_TRUE);
+
+  /* try to extract uncompressed and compressed length from the
+     GZIP headers
+   */
+  if (WGzip_skip_header (source, META) != Z_OK)
+    return (WARC_TRUE);
+  
+  /* zero fill the GzipMeta structure  */
+  memset (META, 0, sizeof (struct GzipMeta));
+  
+  return (WARC_FALSE);
 }
 
 
