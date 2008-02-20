@@ -75,7 +75,7 @@ int main (int argc, const char ** argv)
      fprintf (stderr,"\t-f    : valid WARC file name\n");
      fprintf (stderr,"\t[-c]  : GZIP compressed WARC (default true)\n");
      fprintf (stderr,"\t-s    : pattern string\n");
-     fprintf (stderr,"\t[-t]  : compare MIME (default true)\n");
+     fprintf (stderr,"\t[-t]  : compare with MIME (default true)\n");
      return (2);
    }
   

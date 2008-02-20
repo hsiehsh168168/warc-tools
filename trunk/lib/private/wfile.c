@@ -1838,16 +1838,13 @@ WPRIVATE void * WFile_constructor (void * _self, va_list * app)
           destroy (self);
           return NIL;
         }
-      w_fseek_end (FH);
 
-      FSIZE = (warc_u64_t) w_ftell (FH);
+      w_file_size(FH, FSIZE);
       unless (FSIZE)
-           {
-            w_fclose (FH);
-            destroy (self);
-            return (NIL);
-           }
-      w_fseek_start (FH);
+        {
+          destroy (self);
+          return (NIL);
+        }
 
       /* uncompression levels meaning nothing when reading */
       switch ((warc_u32_t) (COMP))
@@ -1859,6 +1856,31 @@ WPRIVATE void * WFile_constructor (void * _self, va_list * app)
           COMP = WARC_FILE_COMPRESSED_GZIP;
           break;
         }
+
+      /* check if it's a valid GZIP file */
+      if (COMP == WARC_FILE_COMPRESSED_GZIP)
+        {
+          warc_u64_t   where = 0;
+          void       * g     = bless (WGzip);
+
+          unless (g)
+            {
+              destroy (self);
+              return (NIL);
+            }
+          
+          where = (warc_u64_t) w_ftell (FH);
+          if (WGzip_check (g, FH, 0))
+            {
+              w_fprintf (stderr, "not a valid GZIP WARC file\n");
+              destroy (g);
+              destroy (self);
+              return (NIL); 
+            }
+          w_fseek_from_start(FH, where);
+          destroy (g);
+        }
+
     }
   else if (MODE == WARC_FILE_WRITER) /* writing to a WARC file */
     {

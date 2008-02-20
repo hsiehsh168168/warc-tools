@@ -129,6 +129,29 @@ WIPUBLIC warc_bool_t AFile_hasMoreRecords (const void * const _self)
 
 
 /**
+ * @param _self AFile object instance
+ * @param offset unsigned integer offset
+ *
+ * @return WARC_TRUE if succeeds, WARC_FALSE otherwise
+ *
+ * Moves to this offset in the ARC file
+ */
+
+
+WPUBLIC warc_bool_t AFile_seek (void * _self, const warc_u64_t offset)
+{
+   struct AFile * self = _self;
+
+   /* Preconditions */
+   CASSERT (self);
+
+   w_fseek_from_start (FH, offset);
+
+   return (WARC_TRUE);
+}
+
+
+/**
  * @_self: AFile object instance
  * @param[out]: a valid ARecord object if succedds, NIL otherwise
  * Returns the next ARC-record in the ARC-file
@@ -473,10 +496,40 @@ WPRIVATE void * AFile_constructor (void * _self, va_list * app)
     }
   
   w_file_size (FH, FSIZE);
-  
+  unless (FSIZE)
+    {
+      destroy (self);
+      return (NIL);
+    }
+
   COMP  = compressed ;
   SBLOC = 0;
   
+
+  /* check if it's a valid GZIP file */
+  if (COMP == ARC_FILE_COMPRESSED_GZIP)
+    {
+      warc_u64_t   where = 0;
+      void       * g     = bless (WGzip);
+          
+      unless (g)
+        {
+          destroy (self);
+          return (NIL);
+        }
+
+      where = (warc_u64_t) w_ftell (FH);
+      if (WGzip_check (g, FH, 0))
+        {
+          w_fprintf (stderr, "not a valid GZIP ARC file\n");
+          destroy (g);
+          destroy (self);
+          return (NIL); 
+        }
+      w_fseek_from_start(FH, where);
+      destroy (g);
+    }
+
   return (self);
 }
 
