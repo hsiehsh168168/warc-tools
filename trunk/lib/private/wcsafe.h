@@ -258,9 +258,9 @@
 
 
 
-extern ptrdiff_t w_strncpy    (char *, const char *, size_t);
-extern char *    w_strcasestr (const char *, const char *);
-
+extern ptrdiff_t    w_strncpy    (char *, const char *, size_t);
+extern char       * w_strcasestr (const char *, const char *);
+extern const char * w_index      (const char *s, int c);
 
 #ifdef __cplusplus
  }
