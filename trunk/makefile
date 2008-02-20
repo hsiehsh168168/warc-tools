@@ -214,7 +214,7 @@ warcdump  = $(PRIVATE)/wclass.o $(PRIVATE)/wstring.o $(PRIVATE)/wlist.o \
 		   $(PRIVATE)/whdline.o $(PRIVATE)/wanvl.o $(PRIVATE)/wrecord.o \
 		   $(PRIVATE)/wfile.o  $(PRIVATE)/wfsmhdl.o \
            $(PRIVATE)/wfsmanvl.o $(PRIVATE)/wcsafe.o \
-           $(APP)/warcdump.o ${MKTEMP}.o $(gzlib)
+           $(APP)/warcdump.o ${MKTEMP}.o $(gzlib) $(PRIVATE)/wgetopt.o
 
 arc2warc = $(PRIVATE)/wclass.o $(PRIVATE)/wstring.o $(PRIVATE)/wlist.o \
 	   $(PRIVATE)/whdline.o $(PRIVATE)/wanvl.o $(PRIVATE)/wrecord.o \
@@ -222,13 +222,13 @@ arc2warc = $(PRIVATE)/wclass.o $(PRIVATE)/wstring.o $(PRIVATE)/wlist.o \
            $(PRIVATE)/wfsmanvl.o $(PRIVATE)/wcsafe.o $(PRIVATE)/arecord.o \
            $(PRIVATE)/afsmhdl.o $(PRIVATE)/afile.o $(TIGER)/tiger.o \
 		$(PRIVATE)/wuuid.o \
-	   $(APP)/arc2warc.o ${MKTEMP}.o  $(gzlib)
+	   $(APP)/arc2warc.o ${MKTEMP}.o  $(gzlib) $(PRIVATE)/wgetopt.o
 
 warcfilter  = $(PRIVATE)/wclass.o $(PRIVATE)/wstring.o $(PRIVATE)/wlist.o \
 		   $(PRIVATE)/whdline.o $(PRIVATE)/wanvl.o $(PRIVATE)/wrecord.o \
 		   $(PRIVATE)/wfile.o  $(PRIVATE)/wfsmhdl.o \
            $(PRIVATE)/wfsmanvl.o $(PRIVATE)/wcsafe.o \
-           $(APP)/warcfilter.o ${MKTEMP}.o $(gzlib)
+           $(APP)/warcfilter.o ${MKTEMP}.o $(gzlib) $(PRIVATE)/wgetopt.o
 
 warcvalidator = $(PRIVATE)/wclass.o $(PRIVATE)/wstring.o $(PRIVATE)/wlist.o \
 		   $(PRIVATE)/whdline.o $(PRIVATE)/wanvl.o $(PRIVATE)/wrecord.o \
