@@ -42,12 +42,6 @@ warc_bool_t match (const char * bigstring, warc_u32_t   bigstringlen,
   unless (bigstring)
     return (WARC_TRUE); 
   
-  unless (pattern)
-    return (WARC_TRUE);
-  
-  unless (patternlen)
-     return (WARC_TRUE);
-  
   if (patternlen > bigstringlen)
     return (WARC_TRUE);
 
@@ -61,32 +55,82 @@ warc_bool_t match (const char * bigstring, warc_u32_t   bigstringlen,
 
 int main (int argc, const char ** argv)
 {
-  void           * w        =  NIL; /* warc file object */
-  void           * r        = NIL;  /* to recover records */
-  wfile_comp_t     cmode    = WARC_FILE_UNCOMPRESSED;
-  warc_u32_t       mime_uri = 0;    /* match MIME */
+  void           * p        = NIL; /* WGetOpt object */
+  void           * w        = NIL; /* warc file object */
+  void           * r        = NIL; /* to recover records */
+  warc_i32_t       c        = 0;
+  const char     * string   = NIL;
+  char           * flags    = "cts:f:";
+  char           * fname    = NIL;
+  char           * pattern  = NIL;
+  wfile_comp_t     cmode    = WARC_FILE_COMPRESSED_GZIP;
+  wfile_comp_t     mime_uri = 0;    /* match MIME */
   warc_u32_t       ret      = 0;
 
   
-  if (argc != 5) 
+  if (argc < 5 || argc > 7) 
    {
-     fprintf (stderr, "Filter WARC records based MIME or URI\n");
-     fprintf (stderr, "Usage: %s file.warc <flag> <match_string> <mime_uri> \n", argv [0]);
-     fprintf (stderr,"<mime_uri>: 0 for MIME, 1 for URI\n");
-     fprintf (stderr,"<flag>    : 0 for uncompressed WARC\n");
-     return (10);
+     fprintf (stderr, "Filter WARC records based on MIME or URI\n");
+     fprintf (stderr, "Usage: %s -f <file.warc> [-c] -s <match> [-t]\n", argv [0]);
+     fprintf (stderr,"\t-f    : valid WARC file name\n");
+     fprintf (stderr,"\t[-c]  : GZIP compressed WARC (default true)\n");
+     fprintf (stderr,"\t-s    : pattern string\n");
+     fprintf (stderr,"\t[-t]  : compare MIME (default true)\n");
+     return (2);
    }
   
-  if (* argv [2] == '1')
-    cmode = WARC_FILE_COMPRESSED_GZIP;
-        
-  unless (strcmp (argv[3], ""))
-    return (1);
+  p = bless (WGetOpt, makeS (flags));
+  assert (p);
 
-  if (* argv [4] == '1') /* match URI */
-    mime_uri = 1;
+  /* parse command line parameters */
+  while ((c = WGetOpt_parse (p, argc, argv)) != -1)
+    {
+      switch (c)
+        {
+        case 'f' :
+          if (w_index (flags, c) [1] == ':')
+            fname = WGetOpt_argument (p);
+          break;
+        case 'c' :
+          cmode = WARC_FILE_UNCOMPRESSED;
+          break;
+        case 's' :
+          if (w_index (flags, c) [1] == ':')
+            pattern = WGetOpt_argument (p);
+          break;
+        case 't' :
+          mime_uri = 1;
+          break;
+        case '?' :  /* illegal option or missing argument */
+          destroy (p);
+          return (1);
+        }
+    }
+  
+  unless (fname)
+    {
+      fprintf (stderr, "missing WARC file name. Use -f option\n");
+      destroy (p);
+      return (1);
+    }
 
-  w = bless (WFile, argv[1] , WARC_MAX_SIZE,  WARC_FILE_READER, cmode);
+  unless (pattern)
+    {
+      fprintf (stderr, "missing pattern string. Use -s option\n");
+      destroy (p);
+      return (1);
+    }
+
+  unless (strcmp (pattern, ""))
+    {
+      fprintf (stderr, "empty pattern string\n");
+      destroy (p);
+      return (1);
+    }
+  
+
+
+  w = bless (WFile, fname, WARC_MAX_SIZE,  WARC_FILE_READER, cmode);
   assert (w);
 
   fprintf (stderr, "%-10s %-10s %-10s %-10s %-15s %-14s %-20s %-56s %-100s\n", 
@@ -105,9 +149,11 @@ int main (int argc, const char ** argv)
         }
 
       if (mime_uri)
-        m = match (makeS(WRecord_getSubjectUri (r)), makeS (argv[3]));
+        string = WRecord_getSubjectUri (r);
       else
-        m = match (makeS(WRecord_getContentType (r)), makeS (argv[3]));
+        string = WRecord_getContentType (r);
+
+      m = match (makeS (string), makeS (pattern));
 
       if(m)
         {
@@ -132,6 +178,7 @@ int main (int argc, const char ** argv)
       destroy (r);
     }
   
+  destroy (p);
   destroy (w);
   
   return (ret);

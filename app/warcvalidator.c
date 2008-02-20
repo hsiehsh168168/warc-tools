@@ -51,8 +51,8 @@ int main (int argc, const char ** argv)
   void           * r       = NIL;  /* to recover records */
   warc_u32_t       ret     = 0;
   warc_i32_t       c       = 0;
-  char *           flags   = "cvf:";
-  char *           fname   = NIL;
+  char           * flags   = "cvf:";
+  char           * fname   = NIL;
   wfile_comp_t     cmode   = WARC_FILE_COMPRESSED_GZIP;
   warc_bool_t      verbose = WARC_TRUE;
 
@@ -60,9 +60,9 @@ int main (int argc, const char ** argv)
    {
      fprintf (stderr, "Check WARC file consistency\n");
      fprintf (stderr, "Usage: %s -f <file.warc> [-c] [-v]\n", argv [0]);
-     fprintf (stderr,"-f    : valid WARC file name\n");
-     fprintf (stderr,"[-c]  : GZIP compressed WARC (default true)\n");
-     fprintf (stderr,"[-v]  : verbose mode (default true)\n");
+     fprintf (stderr,"\t-f    : valid WARC file name\n");
+     fprintf (stderr,"\t[-c]  : GZIP compressed WARC (default true)\n");
+     fprintf (stderr,"\t[-v]  : verbose mode (default true)\n");
      return (2);
    }
   
