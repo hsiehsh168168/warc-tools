@@ -25,7 +25,7 @@ Doxygen is optional and only needed to generate technical documentation.
     http://cygwin.com/setup.exe
     }}}
 
-  * *MacOS X (Intel)*:
+  * *MacOS X (Intel or PPC)*:
 
     Install [http://developer.apple.com/tools/xcode/ XCode]
 
