@@ -131,6 +131,7 @@
  do { \
  int ret = fclose (file); \
  assert (! ret); \
+ UNUSED (ret); \
  file = NIL; \
  } while (0)
 #endif
@@ -144,6 +145,7 @@
  do { \
  int ret = fseek (file, 0, SEEK_SET); \
  assert (! ret); \
+ UNUSED (ret); \
  } while (0)
 #endif
 
@@ -156,6 +158,7 @@
  do { \
  int ret = fseek (file, offset, SEEK_SET); \
  assert (! ret); \
+ UNUSED (ret); \
  } while (0)
 #endif
 
@@ -168,6 +171,7 @@
  do { \
  int ret = fseek (file, 0, SEEK_END); \
  assert (! ret); \
+ UNUSED (ret); \
  } while (0)
 #endif
 
@@ -180,6 +184,7 @@
  do { \
  int ret = fseek (file, offset, SEEK_END); \
  assert (! ret); \
+ UNUSED (ret); \
  } while (0)
 #endif
 
@@ -192,6 +197,7 @@
  do { \
  int ret = fseek ((file), (offset), SEEK_CUR); \
  assert (! ret); \
+ UNUSED (ret); \
  } while (0)
 #endif
 
@@ -241,6 +247,7 @@
  do { \
  int ret = ungetc (c, file); \
  assert (ret); \
+ UNUSED (ret); \
  } while (0)
 #endif
 
@@ -253,6 +260,7 @@
  do { \
  void * s = memset (a, 0, size); \
  assert (s == a); \
+ UNUSED (s); \
  } while (0)
 #endif
 

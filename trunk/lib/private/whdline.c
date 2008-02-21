@@ -35,13 +35,14 @@
  * WARC default headers 
  */
 
-#include <wclass.h>  /* bless, destroy, cassert, struct Class */
-#include <wsign.h>   /* CASSET macro */
-#include <whdline.h> /* for class's prototypes */
-#include <wstring.h> /* for class's prototypes */
-#include <wmem.h>    /* wmalloc, wfree */
-#include "wmisc.h"   /* warc_bool_t ... */
+#include <wclass.h>   /* bless, destroy, cassert, struct Class */
+#include <wsign.h>    /* CASSET macro */
+#include <whdline.h>  /* for class's prototypes */
+#include <wstring.h>  /* for class's prototypes */
+#include <wmem.h>     /* wmalloc, wfree */
+#include "wmisc.h"    /* warc_bool_t ... */
 #include <wrectype.h> /* revist, resource ... */
+#include <wversion.h> /* WARC_VERSION */
 #include <wcsafe.h>
 
 
@@ -136,7 +137,7 @@ WIPUBLIC warc_bool_t WHDLine_setWarcId (void * const _self, const char * wid,
   CASSERT (self);
   assert (wid);
 
-  if(strcmp(wid,"warc/0.9"))
+  if (strcmp (wid, WARC_VERSION))
      return (WARC_TRUE);  
   /* reset the text */
    

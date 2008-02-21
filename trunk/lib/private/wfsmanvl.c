@@ -365,6 +365,7 @@ warc_bool_t  WFsmANVL_isSharp (void * _as)
 warc_bool_t WFsmANVL_isUnknown (void * _as)
 {
   assert (_as);
+  UNUSED (_as);
 
   return (WARC_TRUE);
 }
@@ -433,7 +434,7 @@ void WFsmANVL_pushBack (void * _as)
   const ANVLState * const as = _as;
 
   assert (as);
-
+  
   w_ungetc (as -> c, as -> fin);
 }
 

@@ -152,7 +152,6 @@ int test3 (const char * fin)
   FILE       * in    = NIL;
   FILE       * out   = NIL;
   void       * g     = NIL; /* WGzip object */
-  warc_i32_t   ret   = 0;
   warc_u32_t   csize = 0;   /* compressed file size */
 
   fprintf (stdout, "%s>\n", t);
@@ -169,7 +168,6 @@ int test3 (const char * fin)
 
 
   WGzip_compress (g, in, out, WARC_GZIP_BEST_SPEED, & csize);
-  assert (! ret);
   fprintf (stderr, "\"%s\" compressed to \"%s\" [size: %u] [mode: %s]\n", 
            fin, fout, csize, makeString(WARC_GZIP_BEST_SPEED));
 
