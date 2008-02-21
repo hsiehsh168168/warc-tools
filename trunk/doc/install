@@ -20,7 +20,7 @@ WARC is a standalone library with no requirements but GCC. Doxygen is optional a
 
     wget http://cygwin.com/setup.exe
 
-    o MacOS X (Intel): 
+    o MacOS X (Intel or PPC): 
 
     Install XCode (http://developer.apple.com/tools/xcode/)
 
