@@ -36,6 +36,7 @@
  */
 
 #include <assert.h>  /* assert */
+#include <stdlib.h>  /* abort */
 
 /*
  * WARC default headers
@@ -116,5 +117,6 @@ WIPUBLIC void cassert (void * const self, const warc_u32_t sign)
 
   assert (self);
   assert (* cp);
-  assert (sign == (* cp) -> sign);
+  if (sign != (* cp) -> sign)
+    abort ();
 }

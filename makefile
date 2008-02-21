@@ -36,8 +36,11 @@ CFLAGS += $(DFLAG)
 #CFLAGS  += -Wconversion -Wtraditional -Wmissing-prototypes -Wshadow
 #CFLAGS  += -D_FILE_OFFSET_BITS=64 -D_LARGE_FILES
 
+# uncomment the line below to compile with optimization enabled
+#CFLAGS += -O3 -march=i686 -pipe
+
 # uncomment the line below to disable all assertions and traces
-#CFLAGS += -O3 -march=i686 -pipe -DNDEBUG
+#CFLAGS += -DNDEBUG
 
 # GCC extra flags
 GCC_EXTRA = -Wextra

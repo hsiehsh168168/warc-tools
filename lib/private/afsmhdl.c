@@ -334,7 +334,7 @@ warc_bool_t  AFsmHDL_isLF (void * _hs)
 warc_bool_t AFsmHDL_isUnknown (void * _hs)
 {
   assert (_hs);
-
+  UNUSED (_hs);
   return (WARC_TRUE);
 }
 

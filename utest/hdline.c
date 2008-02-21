@@ -41,7 +41,7 @@ int test1 (void)
 {	
   const char * t  = "TEST 1";
   void       * hl = bless (WHDLine, 
-                           makeS ("warc/0.9"), 
+                           makeS (WARC_VERSION), 
                            12, 
                            WARCINFO_RECORD, 
                            makeS ("http://www.w3c.org"),
@@ -71,7 +71,7 @@ int test2 (void)
 {	
   const char * t  = "TEST 2";
   void       * hl = bless (WHDLine, 
-                           makeS ("warc/0.9"), 
+                           makeS (WARC_VERSION), 
                            12, 
                            WARCINFO_RECORD, 
                            makeS ("http://www.w3c.org"),

@@ -44,6 +44,7 @@
 #include <wfsm.x>     /* Transition */
 #include <wfsmhdl.h>  /* headers */
 #include <wrectype.h> /* revist, resource ... */
+#include <wversion.h> /* WARC_VERSION */
 #include <wcsafe.h>
 
 
@@ -433,6 +434,7 @@ warc_bool_t  WFsmHDL_isLF (void * _hs)
 warc_bool_t WFsmHDL_isUnknown (void * _hs)
 {
   assert (_hs);
+  UNUSED (_hs);
 
   return (WARC_TRUE);
 }
@@ -527,7 +529,7 @@ void WFsmHDL_checkWarcID  (void * _hs)
   strtompon = WString_getText (hs -> warc_id);
  
  /* if unknown WARC record type, stop parsing */
- if (strcmp(strtompon,"warc/0.9"))
+ if (strcmp (strtompon, WARC_VERSION))
    {
      /* rewind the stream */
      WFsmHDL_rewind (hs, WString_getLength (hs -> warc_id) + 1);

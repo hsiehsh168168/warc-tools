@@ -49,6 +49,7 @@
 #include <wfsmanvl.h> /* WFsmANVL automata */
 #include <wmktmp.h>   /* WTempFile */
 #include <wgzip.h>    /* WGzip */
+#include <wversion.h> /* WARC_VERSION */
 #include <wcsafe.h>
 
 
@@ -1150,7 +1151,8 @@ WPUBLIC warc_bool_t WFile_setMaxSize (void * _self, const warc_u64_t max_size)
 #define WARC_ID_LENGTH 28
 WIPRIVATE void WFile_writeWarcId (FILE * wtfile)
 {
-  w_fwrite ("warc/0.9                    ", WARC_ID_LENGTH, 1, wtfile);
+/*   w_fwrite ("warc/0.9                    ", WARC_ID_LENGTH, 1, wtfile); */
+  w_fwrite (WARC_VERSION "                    ", WARC_ID_LENGTH, 1, wtfile);
 }
 
 
