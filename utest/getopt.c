@@ -30,14 +30,14 @@
 
 #include <warc.h>
 
-#define makeS(s) (s), strlen((s))
+#define makeS(s) ((warc_u8_t *) s), w_strlen((warc_u8_t *) (s))
 
 
 int test1 (void)
 {
   const char * t     = "TEST 1";
   void       * g     = NIL;
-  const char * flags = "abc:";
+  const warc_u8_t * flags = (unsigned char *) "abc:";
   const char * _av[] = { "test1", "-a", "-b" };
   warc_i32_t   ac    = ARRAY_LEN (_av);
   const char ** av   = _av;
@@ -92,7 +92,7 @@ int test2 (void)
 {
   const char * t     = "TEST 2";
   void       * g     = NIL;
-  const char * flags = "a:";
+  const warc_u8_t * flags = (unsigned char *) "a:";
   const char * _av[] = { "test2", "-a", "15" };
   warc_i32_t   ac    = ARRAY_LEN (_av);
   const char ** av   = _av;
@@ -148,7 +148,7 @@ int test3 (void)
 {
   const char * t     = "TEST 3";
   void       * g     = NIL;
-  const char * flags = "ab:";
+  const warc_u8_t * flags = (unsigned char *) "ab:";
   const char * _av[] = { "test3", "-a", "15", "-b", "true" };
   warc_i32_t   ac    = ARRAY_LEN (_av);
   const char ** av   = _av;
@@ -204,7 +204,7 @@ int test4 (void)
 {
   const char * t     = "TEST 4";
   void       * g     = NIL;
-  const char * flags = "ab";
+  const warc_u8_t * flags = (unsigned char *) "ab";
   const char * _av[] = { "test4", "-ab" };
   warc_i32_t   ac    = ARRAY_LEN (_av);
   const char ** av   = _av;
@@ -259,7 +259,7 @@ int test5 (void)
 {
   const char * t     = "TEST 5";
   void       * g     = NIL;
-  const char * flags = "ab:";
+  const warc_u8_t * flags = (unsigned char *) "ab:";
   const char * _av[] = { "test5", "-ab" };
   warc_i32_t   ac    = ARRAY_LEN (_av);
   const char ** av   = _av;
@@ -314,7 +314,7 @@ int test6 (void)
 {
   const char * t     = "TEST 6";
   void       * g     = NIL;
-  const char * flags = "ab";
+  const warc_u8_t * flags = (unsigned char *) "ab";
   const char * _av[] = { "test6", "-a", "--b" };
   warc_i32_t   ac    = ARRAY_LEN (_av);
   const char ** av   = _av;

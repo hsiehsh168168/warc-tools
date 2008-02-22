@@ -30,7 +30,7 @@
 
 #include <warc.h>
 
-#define makeWString(s) (bless (WString, (s), strlen ((s))))
+#define makeWString(s) (bless (WString, ((warc_u8_t *) s), w_strlen ((warc_u8_t *) (s))))
 
 int test1 (void)
 {	

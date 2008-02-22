@@ -246,7 +246,7 @@ WIPUBLIC warc_bool_t WRecord_setWFileOffset (void * _self, warc_i64_t inwoffset)
  * Returns the WARC id of the WARC-record
  */
 
-WIPUBLIC const char * WRecord_getWarcId (const void * const _self)
+WIPUBLIC const warc_u8_t * WRecord_getWarcId (const void * const _self)
 {
 	const struct WRecord * const self = _self;
 
@@ -306,7 +306,7 @@ WIPUBLIC warc_rec_t WRecord_getRecordType (const void * const _self)
  * subject URI of the WARC-record
  */
 
-WIPUBLIC const char * WRecord_getSubjectUri (const void * const _self)
+WIPUBLIC const warc_u8_t * WRecord_getSubjectUri (const void * const _self)
 {
   const struct WRecord * const self = _self;
 
@@ -325,7 +325,7 @@ WIPUBLIC const char * WRecord_getSubjectUri (const void * const _self)
  * Returns the WARC-record creation date
  */
 
-WIPUBLIC const char * WRecord_getCreationDate (const void * const _self)
+WIPUBLIC const warc_u8_t * WRecord_getCreationDate (const void * const _self)
 {
     const struct WRecord * const self = _self;
 
@@ -344,7 +344,7 @@ WIPUBLIC const char * WRecord_getCreationDate (const void * const _self)
  * Returns the WARC-record content type
  */
 
-WIPUBLIC const char * WRecord_getContentType (const void * const _self)
+WIPUBLIC const warc_u8_t * WRecord_getContentType (const void * const _self)
 {
    const struct WRecord * const self = _self;
 
@@ -363,7 +363,7 @@ WIPUBLIC const char * WRecord_getContentType (const void * const _self)
  * Returns the WARC-record id.
  */
 
-WIPUBLIC const char * WRecord_getRecordId (const void * const _self)
+WIPUBLIC const warc_u8_t * WRecord_getRecordId (const void * const _self)
 {
     const struct WRecord * const self = _self;
 
@@ -410,8 +410,9 @@ WIPUBLIC warc_bool_t WRecord_setRecordType (void * _self,const warc_rec_t t)
  * Sets the subject URI of the WARC-record
  */
 
-WIPUBLIC warc_bool_t WRecord_setSubjectUri (void * _self, const char * suri,
-                                        const warc_u32_t len)
+WIPUBLIC warc_bool_t WRecord_setSubjectUri (void * _self, 
+                                            const warc_u8_t * suri,
+                                            const warc_u32_t len)
 {
   struct WRecord * self = _self;
   warc_bool_t wrt;
@@ -438,8 +439,9 @@ WIPUBLIC warc_bool_t WRecord_setSubjectUri (void * _self, const char * suri,
  * Sets the creation date of the WARC-record
  */
 
-WIPUBLIC warc_bool_t WRecord_setCreationDate (void *  _self, const char * cd,
-                                          const warc_u32_t len)
+WIPUBLIC warc_bool_t WRecord_setCreationDate (void *  _self, 
+                                              const warc_u8_t * cd,
+                                              const warc_u32_t len)
 {
   struct WRecord *  self = _self;
   warc_bool_t wrt;
@@ -466,7 +468,8 @@ WIPUBLIC warc_bool_t WRecord_setCreationDate (void *  _self, const char * cd,
  * Sets the WARC-record's content type
  */
 
-WIPUBLIC warc_bool_t WRecord_setContentType (void * _self, const char * ct,
+WIPUBLIC warc_bool_t WRecord_setContentType (void * _self, 
+                                             const warc_u8_t * ct,
                                              const warc_u32_t len)
 {
   struct WRecord * self = _self;
@@ -494,8 +497,9 @@ WIPUBLIC warc_bool_t WRecord_setContentType (void * _self, const char * ct,
  * Sets the WARC-record id
  */
 
-WPUBLIC warc_bool_t WRecord_setRecordId (void * _self, const char * rid,
-                                     const warc_u32_t len)
+WPUBLIC warc_bool_t WRecord_setRecordId (void * _self, 
+                                         const warc_u8_t * rid,
+                                         const warc_u32_t len)
 {
   struct WRecord * self = _self;
   warc_bool_t wrt;
@@ -521,13 +525,13 @@ WPUBLIC warc_bool_t WRecord_setRecordId (void * _self, const char * rid,
  * Warc Record anvl field value corrsponding to a key
  */
 
-WIPUBLIC const char* WRecord_getAnvlValue (const void* const _self, 
-                                           const char * key)
+WIPUBLIC const warc_u8_t * WRecord_getAnvlValue (const void* const _self, 
+                                                 const warc_u8_t * key)
 {
     const struct WRecord * const self = _self;
-    const void * anvl = NIL;
-    warc_u32_t i = 0;
-    warc_u32_t lsize;
+    const void * anvl   = NIL;
+    warc_u32_t   i      = 0;
+    warc_u32_t   lsize;
 
     /* Preconditions */
     CASSERT (self);
@@ -542,7 +546,7 @@ WIPUBLIC const char* WRecord_getAnvlValue (const void* const _self,
     while (i < lsize)
       {
         anvl = WList_get (LIST, i);
-        unless (strcmp (WAnvl_getKey (anvl), key))
+        unless (w_strcmp (WAnvl_getKey (anvl), key))
           return (WAnvl_getValue (anvl));
         else
           ++ i;
@@ -564,9 +568,11 @@ WIPUBLIC const char* WRecord_getAnvlValue (const void* const _self,
  * WRecord new anvl field adding function
  */
 
-WIPUBLIC warc_bool_t WRecord_addAnvl (void * _self, const char * key, 
+WIPUBLIC warc_bool_t WRecord_addAnvl (void * _self, 
+                                      const warc_u8_t * key, 
                                       const warc_u32_t klen, 
-                                      const char * value, const warc_u32_t vlen)
+                                      const warc_u8_t * value, 
+                                      const warc_u32_t vlen)
 {
     struct WRecord * self = _self;
     void * anvl = NIL;
@@ -700,7 +706,6 @@ WIPUBLIC warc_bool_t WRecord_setContentFromFileName (void * _self,
 {
    struct WRecord * self  = _self;
    FILE           * dfile = NIL;
-
 
   /* Preconditions */
   CASSERT (self);

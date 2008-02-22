@@ -40,7 +40,7 @@ struct CallbackEnv
 };
 
 /* this callback uncompressing the entire WARC file */
-warc_u32_t callback1_warc (const char * buffer, const warc_u32_t nbr, void * env)
+warc_u32_t callback1_warc (const warc_u8_t * buffer, const warc_u32_t nbr, void * env)
 {
   FILE * out = (FILE *) env;
 
@@ -54,7 +54,7 @@ warc_u32_t callback1_warc (const char * buffer, const warc_u32_t nbr, void * env
 
 
 /* this callback stop uncompressing when it find a double CRLF in a WARC file */
-warc_u32_t callback2_warc (const char * buffer, const warc_u32_t nbr, void * _env)
+warc_u32_t callback2_warc (const warc_u8_t * buffer, const warc_u32_t nbr, void * _env)
 {
   struct CallbackEnv * env  = (struct CallbackEnv *) _env;
   warc_u32_t           i    = 0;
@@ -150,7 +150,7 @@ warc_u32_t callback2_warc (const char * buffer, const warc_u32_t nbr, void * _en
 
 
 /* this callback stop uncompressing when it finds 1 CRLF or 1 LF in ARC file */
-warc_u32_t callback3_arc (const char * buffer, const warc_u32_t nbr, void * _env)
+warc_u32_t callback3_arc (const warc_u8_t * buffer, const warc_u32_t nbr, void * _env)
 {
   struct CallbackEnv * env  = (struct CallbackEnv *) _env;
   warc_u32_t           i    = 0;

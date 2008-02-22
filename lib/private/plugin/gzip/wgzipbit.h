@@ -33,11 +33,17 @@
 #endif
 
 
+/**
+ * Portability header file
+ */
+
+#include <wport.h>
+
 
 #define DEFLATE_METHOD      0
 #define GZIP_METHOD         1
 
-int methodBits (int);
+warc_u32_t methodBits (warc_u32_t);
 
 
 #ifndef __RFC1952_H__

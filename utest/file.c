@@ -31,8 +31,8 @@
 
 #include <warc.h>
 
-#define makeS(s) (s), strlen((s))
-#define makeU(s) (const unsigned char *) (s), (warc_u64_t) strlen((s))
+#define makeS(s) ((warc_u8_t *) s), w_strlen((warc_u8_t *) (s))
+#define makeU(s) (const warc_u8_t *) (s), (warc_u64_t) w_strlen((warc_u8_t *) (s))
 
 
 warc_bool_t callback (void * env, const char* buff, const warc_u32_t size)
@@ -199,7 +199,7 @@ int test2 (void)
          return 1;
         }
 
-  if  (WRecord_addAnvl(r, "key1", 4, "val1", 4))
+  if  (WRecord_addAnvl(r, makeS ("key1"), makeS ("val1")))
      {
        fprintf (stdout,"Corrupted anvl\n");
        destroy (r);
@@ -753,7 +753,7 @@ int test8 (void)
           destroy (w); 
           return 1;
         }
-   if  (WRecord_addAnvl(r, "key 2", 5, "val1", 4))
+  if  (WRecord_addAnvl(r, makeS ("key 2"), makeS ("val1")))
        {
          fprintf (stdout, "Corrupted anvl\n");
          destroy (r);
@@ -1072,7 +1072,8 @@ while (WFile_hasMoreRecords (w))
      fprintf (stdout,"--------------------------------------------------------------------------\n");
       /* Picking anvl field value w.r.t the given keys */
 
-      fprintf (stdout,"Value of anvl having key: key1 = %s\n",WRecord_getAnvlValue (r,"key1"));
+      fprintf (stdout,"Value of anvl having key: key1 = %s\n",
+               WRecord_getAnvlValue (r, (warc_u8_t *) "key1"));
 
       fprintf (stdout, "\n\n");
 
@@ -1543,8 +1544,10 @@ int test20 (void)
       
 /* if you want to read the content, uncomment the following */
 
-       printf ("key1: %s \n", WRecord_getAnvlValue(r, "key1")); 
-       printf ("key2: %s \n", WRecord_getAnvlValue(r, "key2")); 
+       printf ("key1: %s \n", WRecord_getAnvlValue(r, 
+                                                   (warc_u8_t *) "key1")); 
+       printf ("key2: %s \n", WRecord_getAnvlValue(r, 
+                                                   (warc_u8_t *) "key2")); 
 
        if (WFile_register (w, r, callback, (void *) 0)) 
          { 

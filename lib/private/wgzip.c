@@ -116,8 +116,8 @@ WPUBLIC warc_i32_t WGzip_compress (const void * const _self,
 
     const struct WGzip * const self = _self;
 
-    unsigned   char in  [IN_BUFFER_SIZE];
-    unsigned   char out [IN_BUFFER_SIZE];
+    warc_u8_t in  [IN_BUFFER_SIZE];
+    warc_u8_t out [IN_BUFFER_SIZE];
     z_stream   strm;
     warc_i32_t ret;
     warc_u32_t have;
@@ -246,11 +246,11 @@ WPUBLIC warc_i32_t WGzip_compress (const void * const _self,
     /* copy the compressed and uncompressed size in GZIP EXTRA field */
     if (ret == Z_OK)
       {
-        unsigned char  buf [EXTRA_GZIP_HEADER];
+        warc_u8_t  buf [EXTRA_GZIP_HEADER];
         warc_u16_t    xlen = GZIP_STATIC_HEADER_SIZE;
         warc_u32_t    ecsize;
         warc_u32_t    eucsize;
-        unsigned char flg;
+        warc_u8_t flg;
 
         /* adjust the compressed size */
         (* csize) += EXTRA_GZIP_HEADER;
@@ -309,7 +309,7 @@ WPRIVATE warc_u32_t
 WGzip_getCompUncompSize (FILE * source, struct GzipMeta * meta,
                          warc_u32_t xlen) 
 {
-  unsigned char buf [GZIP_STATIC_HEADER_SIZE];
+  warc_u8_t buf [GZIP_STATIC_HEADER_SIZE];
   warc_u32_t csize  = 0;
   warc_u32_t ucsize = 0;
 
@@ -360,7 +360,7 @@ WGzip_getCompUncompSize (FILE * source, struct GzipMeta * meta,
 WPRIVATE warc_u32_t
 WGzip_skip_header_extra (FILE * source, struct GzipMeta * meta) {
 
-  unsigned char p[2];
+  warc_u8_t p[2];
   warc_u16_t    xlen = 0;
 
   if(2 != w_fread (p, 1, 2, source) || w_ferror (source))
@@ -414,8 +414,8 @@ WPRIVATE warc_u32_t
 WGzip_skip_header (FILE * source, struct GzipMeta * meta)
 {
   /* declare variables with maximum alignment */
-  unsigned char flg = 0;
-  unsigned char p [GZIP_STATIC_HEADER_SIZE];
+  warc_u8_t flg = 0;
+  warc_u8_t p [GZIP_STATIC_HEADER_SIZE];
   unsigned int  ret = Z_OK;
 
   if (w_fread (p, 1, GZIP_STATIC_HEADER_SIZE, source) != GZIP_STATIC_HEADER_SIZE 
@@ -480,7 +480,8 @@ WGzip_adjustRecord (FILE * source, struct GzipMeta * meta)
 
 WPRIVATE warc_i32_t
 WGzip_decode (const void * _self,  FILE * source, warc_u32_t offset,
-             warc_u32_t (* cb) (const char *, const warc_u32_t, void *), 
+              warc_u32_t (* cb) (const warc_u8_t *,
+                                 const warc_u32_t, void *), 
              void * env)
 { 
   struct WGzip       * self  = (void *) _self;
@@ -489,8 +490,8 @@ WGzip_decode (const void * _self,  FILE * source, warc_u32_t offset,
   warc_u32_t          have   = 0;
   warc_i32_t          ret    = 0;
   z_stream            strm;
-  char                in     [IN_BUFFER_SIZE];
-  char                out    [OUT_BUFFER_SIZE];
+  warc_u8_t       in     [IN_BUFFER_SIZE];
+  warc_u8_t       out    [OUT_BUFFER_SIZE];
   
   /* seek to the correct record offset */
   if (0 != fseek (source, offset, SEEK_SET))
@@ -620,7 +621,7 @@ WPUBLIC warc_u32_t WGzip_uncompress (const void * const _self,
                                      FILE * source, warc_u32_t offset,
                                      warc_u32_t * usize,
                                      warc_u32_t * csize,
-                                     warc_u32_t (* cb) (const char *, 
+                                     warc_u32_t (* cb) (const warc_u8_t *, 
                                                         const warc_u32_t,
                                                         void *),
                                      void * env)

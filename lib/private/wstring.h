@@ -43,14 +43,18 @@
 
 extern const void * WString;
 
-extern const char *     WString_getText   (const void * const);
-extern       warc_u32_t WString_getLength (const void * const);
-extern       warc_bool_t    WString_setText   (void * const, const char *, 
-                                           const warc_u32_t);
-extern       warc_bool_t    WString_concat    (void * const, const void * const);
-extern       warc_bool_t    WString_append    (void * const, const char * const,
-                                           warc_u32_t);
-extern       warc_i32_t WString_strstr    (const void * const, const char *);
+extern const warc_u8_t * WString_getText   (const void * const);
+extern       warc_u32_t      WString_getLength (const void * const);
+extern       warc_bool_t     WString_setText   (void * const, 
+                                                const warc_u8_t *, 
+                                                const warc_u32_t);
+extern       warc_bool_t     WString_concat    (void * const, 
+                                                const void * const);
+extern       warc_bool_t     WString_append    (void * const, 
+                                                const warc_u8_t * const,
+                                                warc_u32_t);
+extern       warc_i32_t      WString_strstr    (const void * const, 
+                                                const warc_u8_t *);
 
 
 #ifdef __cplusplus

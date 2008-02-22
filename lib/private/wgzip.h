@@ -65,7 +65,7 @@ extern warc_u32_t WGzip_uncompress (const void * const,
                                     FILE *, warc_u32_t,
                                     warc_u32_t *,
                                     warc_u32_t *,
-                                    warc_u32_t (*) (const char *, 
+                                    warc_u32_t (*) (const warc_u8_t *, 
                                                     const warc_u32_t,
                                                     void *),
                                     void *);

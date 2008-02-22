@@ -42,7 +42,8 @@
 #include <wcsafe.h>
 
 
-WPUBLIC ptrdiff_t w_strncpy (char * dst0, const char * src0, size_t size) 
+WPUBLIC ptrdiff_t w_strncpy (warc_u8_t * dst0, 
+                             const warc_u8_t * src0, size_t size) 
 {
 #define INIT_BITS	3
 #define INIT_SIZE	(1UL << (INIT_BITS))	/* must be power of two	*/
@@ -50,9 +51,9 @@ WPUBLIC ptrdiff_t w_strncpy (char * dst0, const char * src0, size_t size)
 
   if (size) 
     {
-      register size_t n   = (size + INIT_MASK) / INIT_SIZE;
-      register char * dst = dst0;
-      register char * src = (char *) src0;
+      register size_t          n   = (size + INIT_MASK) / INIT_SIZE;
+      register warc_u8_t * dst = dst0;
+      register warc_u8_t * src = (warc_u8_t *) src0;
 
       * (dst + size) = '\0';
 
@@ -92,13 +93,14 @@ WPUBLIC ptrdiff_t w_strncpy (char * dst0, const char * src0, size_t size)
 /* Port to WARC.
  * 2008 Feb 12	voidptrptr, Hanzo Archive Limited		*/
 
-WPUBLIC char * w_strcasestr (const char * phaystack, const char * pneedle)
+WPUBLIC warc_u8_t * w_strcasestr (const warc_u8_t * phaystack, 
+                                      const warc_u8_t * pneedle)
 {
-  register const unsigned char *haystack, *needle;
+  register const warc_u8_t * haystack, * needle;
   register unsigned bl, bu, cl, cu;
   
-  haystack = (const unsigned char *) phaystack;
-  needle = (const unsigned char *) pneedle;
+  haystack = (const warc_u8_t *) phaystack;
+  needle   = (const warc_u8_t *) pneedle;
   
   bl = tolower (* needle);
   if (bl != '\0')
@@ -123,7 +125,7 @@ WPUBLIC char * w_strcasestr (const char * phaystack, const char * pneedle)
       for (;;)
         {
           register unsigned a;
-          register const unsigned char *rhaystack, *rneedle;
+          register const warc_u8_t *rhaystack, *rneedle;
           
           do
             {
@@ -176,7 +178,7 @@ WPUBLIC char * w_strcasestr (const char * phaystack, const char * pneedle)
         }
     }
  foundneedle:
-  return (char*) haystack;
+  return (warc_u8_t *) haystack;
  ret0:
   return 0;
 }
@@ -185,7 +187,7 @@ WPUBLIC char * w_strcasestr (const char * phaystack, const char * pneedle)
 
 
 /* locate character in string */
-WPUBLIC const char * w_index (const char *s, int c)
+WPUBLIC const warc_u8_t * w_index (const warc_u8_t * s, int c)
 {
   while (* s)
     {
@@ -196,4 +198,28 @@ WPUBLIC const char * w_index (const char *s, int c)
     }
 
   return (0);
+}
+
+WPUBLIC warc_i32_t w_strcmp (const warc_u8_t * s1, const warc_u8_t * s2)
+{
+  while (*s1 && (*s1 == *s2)) 
+    {
+      s1++;
+      s2++;
+    }
+  
+  return ((warc_u8_t) *s1 - (warc_u8_t) *s2);
+}
+
+
+WPUBLIC warc_u32_t w_strlen (const warc_u8_t * s)
+{
+  register const warc_u8_t * pos = s;
+  
+  while (* pos) 
+    {
+      ++ pos;
+    }
+  
+  return (pos - s);
 }

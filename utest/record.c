@@ -34,7 +34,7 @@
 #include <wfsmhdl.h>
 #include <wfsmanvl.h>
 
-#define makeS(s) (s), strlen((s))
+#define makeS(s) ((warc_u8_t *) s), w_strlen((warc_u8_t *) (s))
 
 
 int test1 (void)
@@ -48,11 +48,11 @@ int test1 (void)
 
   if (r)
     {
-     WRecord_setSubjectUri (r,makeS("http://www.w3c.org"));
-     WRecord_setCreationDate (r,makeS("12172007"));
-     WRecord_setContentType (r,makeS("warcproject/testheaderline"));
-     WRecord_setRecordId (r,makeS("id://warc-x584jz39"));
-     WRecord_setRecordType (r,WARCINFO_RECORD);
+     WRecord_setSubjectUri   (r, makeS ("http://www.w3c.org"));
+     WRecord_setCreationDate (r, makeS ("12172007"));
+     WRecord_setContentType  (r, makeS ("warcproject/testheaderline"));
+     WRecord_setRecordId     (r, makeS ("id://warc-x584jz39"));
+     WRecord_setRecordType   (r, WARCINFO_RECORD);
 
       fprintf (stdout, "WarcId: %-20s\n",       WRecord_getWarcId      (r));
       fprintf (stdout, "DataLength: %-20d\n",   WRecord_getDataLength  (r));

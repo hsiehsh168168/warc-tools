@@ -67,7 +67,7 @@ warc_bool_t warc_isBigEndian (void)
 
 warc_u32_t warc_i32ToEndian (warc_u32_t i) 
 {
-    unsigned char c1, c2, c3, c4;
+    warc_u8_t c1, c2, c3, c4;
 
     unless (warc_isBigEndian ()) 
       {

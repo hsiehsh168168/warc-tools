@@ -67,10 +67,10 @@ typedef struct
   void * content_type;  /* WString */
   void * record_id;     /* WString */
 
-  FILE       * fin;     /* file handle to read from */
-  Transition * state;   /* transition state */
+  FILE           * fin;  /* file handle to read from */
+  Transition     * state;/* transition state */
   warc_bool_t      err;  /* parsing error flag */
-  char         c;       /* current char in "fin" */
+  warc_u8_t    c;    /* current char in "fin" */
 } HDLState;
 
 
@@ -102,7 +102,7 @@ struct WFsmHDL
 #define    RECORD_ID       (HDLS -> record_id)
 
 
-#define makeS(s) (s), strlen((s))
+#define makeS(s) ((warc_u8_t *) s), w_strlen((warc_u8_t *) (s))
 #define makeC(s) WString_getText((s)), WString_getLength((s))
 
 
@@ -133,26 +133,26 @@ State WANT_HDL_WARC_ID,      WANT_HDL_ID_SP,         WANT_HDL_DATA_LENGTH,
 
 
 
-WPRIVATE warc_rec_t WFsmHDL_getRecordTypeNumber (const char * rectype)
+WPRIVATE warc_rec_t WFsmHDL_getRecordTypeNumber (const warc_u8_t * rectype)
 {
   /* preconditions */
   assert (rectype);
 
- if      (! strcmp (rectype, "warcinfo"))
+ if      (! w_strcmp (rectype, (warc_u8_t *) "warcinfo"))
    return (WARCINFO_RECORD);
- else if (! strcmp (rectype, "response"))
-   return (RESPONSE_RECORD);
- else if (! strcmp (rectype, "request"))
+ else if (! w_strcmp (rectype, (warc_u8_t *) "response"))
+   return (RESPONSE_RECORD); 
+ else if (! w_strcmp (rectype, (warc_u8_t *) "request"))
    return (REQUEST_RECORD);
- else if (! strcmp (rectype, "metadata"))
+ else if (! w_strcmp (rectype, (warc_u8_t *) "metadata"))
    return (METADATA_RECORD);
- else if (! strcmp (rectype, "revisit"))
+ else if (! w_strcmp (rectype, (warc_u8_t *) "revisit"))
    return (REVISIT_RECORD);
- else if (! strcmp (rectype, "conversion"))
+ else if (! w_strcmp (rectype, (warc_u8_t *) "conversion"))
    return (CONVERSION_RECORD);
- else if (! strcmp (rectype, "continuation"))
+ else if (! w_strcmp (rectype, (warc_u8_t *) "continuation"))
    return (CONTINUATION_RECORD);
- else if (! strcmp (rectype, "resource"))
+ else if (! w_strcmp (rectype, (warc_u8_t *) "resource"))
    return (RESOURCE_RECORD);
 
  return (UNKNOWN_RECORD);
@@ -514,28 +514,28 @@ void WFsmHDL_checkRecordType (void * _hs)
      WFsmHDL_rewind (hs, WString_getLength (hs -> record_type) + 1);
 
      /* raise the flag errore */
-     WarcDebugMsg(">> Expepted  Record type\n");
+     WarcDebugMsg(">> Expecting a WARC record type\n");
      hs -> err = WARC_TRUE;
    }
 }
 
 void WFsmHDL_checkWarcID  (void * _hs)
 {
-  HDLState * const hs  = _hs;
-  const char *      strtompon;
+  HDLState * const      hs  = _hs;
+  const warc_u8_t * strtompon;
 
   assert (hs);
 
   strtompon = WString_getText (hs -> warc_id);
  
  /* if unknown WARC record type, stop parsing */
- if (strcmp (strtompon, WARC_VERSION))
+ if (w_strcmp (strtompon, (warc_u8_t *) WARC_VERSION))
    {
      /* rewind the stream */
      WFsmHDL_rewind (hs, WString_getLength (hs -> warc_id) + 1);
 
      /* raise the flag errore */
-     WarcDebugMsg(">> Exepted Warc Id\n");
+     WarcDebugMsg(">> Expecting valid WARC ID\n");
      hs -> err = WARC_TRUE;
    }
 }
@@ -795,7 +795,7 @@ WPUBLIC void * WFsmHDL_transform (const void * const _self)
 
   return (bless (WHDLine, 
                  makeC (WARC_ID), 
-                 (warc_u32_t) atoi (WString_getText (DATA_LENGTH)),
+                 (warc_u32_t) atoi ((const char *) WString_getText (DATA_LENGTH)),
                  t, 
                  makeC (SUBJECT_URI), 
                  makeC (CREATION_DATE),

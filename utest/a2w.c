@@ -35,7 +35,7 @@
 
 
 #define WARC_MAX_SIZE 629145600
-#define makeS(s) (s), strlen((s))
+#define makeS(s) ((warc_u8_t *) s), w_strlen((warc_u8_t *) (s))
 
 
 int test1 (void)
@@ -155,7 +155,8 @@ int test2 (void)
         fprintf (stdout,"-----------------------------------------------------------------------\n");
         /* Picking anvl field value w.r.t the given keys */
 
-        fprintf (stdout, "Value of anvl having key: IpAddress = %s\n", WRecord_getAnvlValue (r, "IpAddress"));
+        fprintf (stdout, "Value of anvl having key: IpAddress = %s\n", 
+                 WRecord_getAnvlValue (r, (warc_u8_t *) "IpAddress"));
 
         fprintf (stdout, "\n\n");
 
@@ -285,7 +286,8 @@ int test4 (void)
         fprintf (stdout,"-----------------------------------------------------------------------\n");
       /* Picking anvl field value w.r.t the given keys */
 
-        fprintf (stdout, "Value of anvl having key: IpAddress = %s\n", WRecord_getAnvlValue (r, "IpAddress"));
+        fprintf (stdout, "Value of anvl having key: IpAddress = %s\n", 
+                 WRecord_getAnvlValue (r, (warc_u8_t *) "IpAddress"));
 
         fprintf (stdout, "\n\n");
 
@@ -415,7 +417,8 @@ int test6 (void)
      fprintf (stdout,"-----------------------------------------------------------------------\n");
       /* Picking anvl field value w.r.t the given keys */
 
-      fprintf (stdout,"Value of anvl having key: IpAddress = %s\n",WRecord_getAnvlValue (r,"IpAddress"));
+      fprintf (stdout,"Value of anvl having key: IpAddress = %s\n",
+               WRecord_getAnvlValue (r, (warc_u8_t *) "IpAddress"));
 
       fprintf (stdout, "\n\n");
 
@@ -830,7 +833,8 @@ int test12 (void)
         fprintf (stdout,"-----------------------------------------------------------------------\n");
         /* Picking anvl field value w.r.t the given keys */
 
-        fprintf (stdout, "Value of anvl having key: IpAddress = %s\n", WRecord_getAnvlValue (r, "IpAddress"));
+        fprintf (stdout, "Value of anvl having key: IpAddress = %s\n", 
+                 WRecord_getAnvlValue (r, (warc_u8_t *) "IpAddress"));
 
         fprintf (stdout, "\n\n");
 
@@ -956,7 +960,8 @@ int test14 (void)
         fprintf (stdout,"-----------------------------------------------------------------------\n");
         /* Picking anvl field value w.r.t the given keys */
 
-        fprintf (stdout, "Value of anvl having key: IpAddress = %s\n", WRecord_getAnvlValue (r, "IpAddress"));
+        fprintf (stdout, "Value of anvl having key: IpAddress = %s\n", 
+                 WRecord_getAnvlValue (r, (warc_u8_t *) "IpAddress"));
 
         fprintf (stdout, "\n\n");
 
@@ -1083,7 +1088,8 @@ int test16 (void)
         fprintf (stdout,"-----------------------------------------------------------------------\n");
         /* Picking anvl field value w.r.t the given keys */
 
-        fprintf (stdout, "Value of anvl having key: IpAddress = %s\n", WRecord_getAnvlValue (r, "IpAddress"));
+        fprintf (stdout, "Value of anvl having key: IpAddress = %s\n", 
+                 WRecord_getAnvlValue (r, (warc_u8_t *) "IpAddress"));
 
         fprintf (stdout, "\n\n");
 

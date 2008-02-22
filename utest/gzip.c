@@ -36,7 +36,8 @@
 
 
 /* uncompress everything */
-warc_u32_t callback (const char * buffer, const warc_u32_t nbr, void * env)
+warc_u32_t callback (const warc_u8_t * buffer, 
+                     const warc_u32_t nbr, void * env)
 {
   FILE * out = (FILE *) env;
 

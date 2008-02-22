@@ -33,7 +33,7 @@
 
 
 #define WARC_MAX_SIZE 629145600
-#define makeS(s) (s), strlen((s))
+#define makeS(s) ((warc_u8_t *) s), w_strlen ((warc_u8_t *) (s))
 
 
 
@@ -43,7 +43,7 @@ int main (int argc, const char ** argv)
   void           * w       = NIL; /* warc file object */
   void           * r       = NIL; /* to recover records */
   warc_i32_t       c       = 0;
-  char           * flags   = "cf:";
+  warc_u8_t      * flags   = (warc_u8_t *) "cf:";
   char           * fname   = NIL;
   wfile_comp_t     cmode   = WARC_FILE_COMPRESSED_GZIP;
   warc_u32_t       ret     = 0;

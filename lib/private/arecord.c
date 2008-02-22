@@ -93,7 +93,7 @@ struct ARecord
  * Returns the URL of the ARC-record
  */
 
-WIPUBLIC const char * ARecord_getUrl (const void * const _self)
+WIPUBLIC const warc_u8_t * ARecord_getUrl (const void * const _self)
 {
 	const struct ARecord * const self = _self;
 
@@ -111,8 +111,9 @@ WIPUBLIC const char * ARecord_getUrl (const void * const _self)
  * Sets the ARC URL field of the ARC-record to "uri"
  */
 
-WIPUBLIC warc_bool_t ARecord_setUrl (void * const _self, const char * uri,
-                                    const warc_u32_t len)
+WIPUBLIC warc_bool_t ARecord_setUrl (void * const _self, 
+                                     const warc_u8_t * uri,
+                                     const warc_u32_t len)
 {
   struct ARecord * const self = _self;
 
@@ -173,7 +174,7 @@ WIPUBLIC warc_bool_t ARecord_setDataLength (void * const _self,
  * Returns the creation date of the ARC-record
  */
 
-WIPUBLIC const char * ARecord_getCreationDate (const void * const _self)
+WIPUBLIC const warc_u8_t * ARecord_getCreationDate (const void * const _self)
 {
 	const struct ARecord * const self = _self;
 
@@ -194,7 +195,7 @@ WIPUBLIC const char * ARecord_getCreationDate (const void * const _self)
  */
 
 WIPUBLIC warc_bool_t ARecord_setCreationDate (void * const _self, 
-                                              const char * cd,
+                                              const warc_u8_t * cd,
                                               const warc_u32_t len)
 {
   struct ARecord * const self = _self;
@@ -217,7 +218,7 @@ WIPUBLIC warc_bool_t ARecord_setCreationDate (void * const _self,
  * Returns the ARC-record mime type
  */
 
-WIPUBLIC const char * ARecord_getMimeType (const void * const _self)
+WIPUBLIC const warc_u8_t * ARecord_getMimeType (const void * const _self)
 {
 	const struct ARecord * const self = _self;
 
@@ -236,7 +237,8 @@ WIPUBLIC const char * ARecord_getMimeType (const void * const _self)
  * Sets the ARC-record Mime type
  */
 
-WIPUBLIC warc_bool_t ARecord_setMimeType (void * const _self, const char * ct,
+WIPUBLIC warc_bool_t ARecord_setMimeType (void * const _self, 
+                                          const warc_u8_t * ct,
                                           const warc_u32_t len)
 {
   struct ARecord * const self = _self;
@@ -259,7 +261,7 @@ WIPUBLIC warc_bool_t ARecord_setMimeType (void * const _self, const char * ct,
  * Returns the ARC-record IP_adress.
  */
 
-WIPUBLIC const char * ARecord_getIpAddress (const void * const _self)
+WIPUBLIC const warc_u8_t * ARecord_getIpAddress (const void * const _self)
 {
 	const struct ARecord * const self = _self;
 
@@ -278,8 +280,9 @@ WIPUBLIC const char * ARecord_getIpAddress (const void * const _self)
  * Sets the ARC-record IP-adress
  */
 
-WIPUBLIC warc_bool_t ARecord_setIpAddress (void * const _self, const char * ip,
-                                          const warc_u32_t len)
+WIPUBLIC warc_bool_t ARecord_setIpAddress (void * const _self, 
+                                           const warc_u8_t * ip,
+                                           const warc_u32_t len)
 {
   struct ARecord * const self = _self;
 

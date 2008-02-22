@@ -274,9 +274,14 @@ do{\
 
 
 
-extern ptrdiff_t    w_strncpy    (char *, const char *, size_t);
-extern char       * w_strcasestr (const char *, const char *);
-extern const char * w_index      (const char *s, int c);
+extern ptrdiff_t  w_strncpy      (warc_u8_t *, const warc_u8_t *, 
+                                  size_t);
+extern warc_u8_t * w_strcasestr  (const warc_u8_t *,
+                                  const warc_u8_t *);
+extern const warc_u8_t * w_index (const warc_u8_t *, int);
+extern warc_i32_t w_strcmp       (const warc_u8_t *, const warc_u8_t *);
+extern warc_u32_t w_strlen       (const warc_u8_t *);
+
 
 #ifdef __cplusplus
  }

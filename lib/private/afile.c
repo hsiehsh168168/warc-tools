@@ -84,7 +84,8 @@ struct AFile
 
 
 /* this is a callback for uncompressing the entire ARC file */
-warc_u32_t arecover (const char * buffer, const warc_u32_t nbr, void * env)
+WPRIVATE warc_u32_t arecover (const warc_u8_t * buffer,
+                              const warc_u32_t nbr, void * env)
 {
   FILE * out = (FILE *) env;
 
@@ -484,10 +485,10 @@ WPRIVATE void * AFile_constructor (void * _self, va_list * app)
   const char           * fname      = va_arg (* app, const char *);
   const afile_comp_t     compressed = va_arg (* app, const afile_comp_t);
 
-  FNAME = bless (WString, fname, strlen(fname));
+  FNAME = bless (WString, fname, w_strlen((warc_u8_t *) fname));
   assert (FNAME);
 
-  FH = fopen (fname, "r+b");
+  FH = w_fopen_rb (fname);
   unless (FH) 
     {
       destroy (self);

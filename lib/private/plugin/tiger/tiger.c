@@ -681,7 +681,7 @@ void
 tiger(word64 *str, word64 length, word64 res[3])
 {
   register word64 i, j;
-  unsigned char temp[64];
+  warc_u8_t temp[64];
 
 /*   res[0]=0x0123456789ABCDEFLL; */
 /*   res[1]=0xFEDCBA9876543210LL; */
