@@ -36,6 +36,7 @@
 
 #include <wport.h>       /* portability issues */
 #include <wmisc.h>       /* NIL, ARRAY_LEN ... */
+#include <wcsafe.h>      /* C safe functions */
 #include <wclass.h>      /* bless, destroy */
 #include <wstring.h>     /* WString */
 #include <wlist.h>       /* WList */

@@ -23,7 +23,7 @@
 
 typedef warc_u64_t    word64;
 typedef warc_u32_t    word32;
-typedef unsigned char byte;
+typedef warc_u8_t byte;
 
 extern void tiger(word64 *, word64, word64 res[3]);
 

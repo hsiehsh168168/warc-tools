@@ -73,7 +73,7 @@ struct WUUID {
  */
 
 WPUBLIC void WUUID_hash (const void * const _self, 
-                         const unsigned char * buf,
+                         const warc_u8_t * buf,
                          const warc_u64_t size)
 {
   const struct WUUID * const self = _self;

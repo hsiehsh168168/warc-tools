@@ -57,13 +57,13 @@
 typedef struct
 {
   void * comment; /* WString */
-  void * key;    /* WString */
-  void * value; /* WString */
+  void * key;     /* WString */
+  void * value;   /* WString */
 
-  FILE       * fin;     /* file handle to read from */
-  Transition * state;  /* transition state */
-  warc_bool_t  err;   /* parsing error flag */
-  char         c;    /* current char in "fin"*/
+  FILE        * fin;  /* file handle to read from */
+  Transition  * state;/* transition state */
+  warc_bool_t   err;  /* parsing error flag */
+  warc_u8_t c;    /* current char in "fin"*/
 } ANVLState;
 
 
@@ -91,7 +91,7 @@ struct WFsmANVL
 #define    COMMENT     (ANVLS -> comment)
 
 
-#define makeS(s) (s), strlen((s))
+#define makeS(s) ((warc_u8_t *) s), w_strlen((warc_u8_t *) (s))
 #define makeC(s) WString_getText((s)), WString_getLength((s))
 
 
@@ -377,7 +377,7 @@ warc_bool_t WFsmANVL_isCtlChar (void * _as)
 
   assert (as);
 
-  return (((as -> c >= 0 && as -> c <= 31) || as -> c == 127));
+  return (as -> c <= 31 || as -> c == 127);
 }
 
 

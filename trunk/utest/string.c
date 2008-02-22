@@ -30,8 +30,8 @@
 
 #include <warc.h>
 
-#define makeS(s) (s), strlen((s))
-#define makeWString(s) (bless (WString, (s), strlen((s))))
+#define makeS(s) ((warc_u8_t *) s), w_strlen((warc_u8_t *) (s))
+#define makeWString(s) (bless (WString, ((warc_u8_t *)s), w_strlen((warc_u8_t *) (s))))
 
 int test1 (void)
 {	
@@ -135,10 +135,10 @@ int test4 (void)
 
 int test5 (void)
 {	
-  const char * t = "TEST 5";
-  const char * x = "better";
-  const char * y = "c++";
-  void       * s = NIL; 
+  const char          * t = "TEST 5";
+  const warc_u8_t * x = (unsigned char *) "better";
+  const warc_u8_t * y = (unsigned char *) "c++";
+  void                * s = NIL; 
 
   fprintf (stdout, "%s>\n", t);
 

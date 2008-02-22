@@ -35,7 +35,7 @@
 
 
 
-#define makeS(s) (s), strlen((s))
+#define makeS(s) ((warc_u8_t *) s), w_strlen((warc_u8_t *) (s))
 
 int test1 (void)
 {	

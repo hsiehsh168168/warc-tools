@@ -32,7 +32,7 @@
 
 #include <wfsmanvl.h>
 
-#define makeS(s) (s), strlen((s))
+#define makeS(s) ((warc_u8_t *) s), w_strlen((warc_u8_t *) (s))
 
 
 int test1 (void)
@@ -63,7 +63,7 @@ int test2 (void)
 
   fprintf (stderr, "%s>\n", t);
 
-  WAnvl_setKey (a, makeS ("CCCC"));
+  WAnvl_setKey   (a, makeS ("CCCC"));
   WAnvl_setValue (a, makeS ("DDDD"));
 
   fprintf (stdout, "key  : %s\n", WAnvl_getKey   (a) );

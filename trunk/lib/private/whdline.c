@@ -87,7 +87,7 @@ struct WHDLine
  * Returns the WARC id of the WARC-record
  */
 
-WIPUBLIC const char * WHDLine_getWarcId (const void * const _self)
+WIPUBLIC const warc_u8_t * WHDLine_getWarcId (const void * const _self)
 {
 	const struct WHDLine * const self = _self;
 
@@ -128,16 +128,17 @@ WIPUBLIC warc_u32_t WHDLine_getWarcIdLen (const void * const _self)
  * Sets the WARC id field of the WARC-record to "wid"
  */
 
-WIPUBLIC warc_bool_t WHDLine_setWarcId (void * const _self, const char * wid,
-                                    const warc_u32_t len)
+WIPUBLIC warc_bool_t WHDLine_setWarcId (void * const _self, 
+                                        const warc_u8_t * wid,
+                                        const warc_u32_t len)
 {
   struct WHDLine * const self = _self;
   
   /* preconditions */
   CASSERT (self);
-  assert (wid);
+  assert  (wid);
 
-  if (strcmp (wid, WARC_VERSION))
+  if (w_strcmp (wid, (warc_u8_t *) WARC_VERSION))
      return (WARC_TRUE);  
   /* reset the text */
    
@@ -244,7 +245,7 @@ WIPUBLIC warc_bool_t WHDLine_setRecordType (void * const _self,
  * subject URI of the WARC-record
  */
 
-WIPUBLIC const char * WHDLine_getSubjectUri (const void * const _self)
+WIPUBLIC const warc_u8_t * WHDLine_getSubjectUri (const void * const _self)
 {
   const struct WHDLine * const self = _self;
   
@@ -284,8 +285,9 @@ WIPUBLIC warc_u32_t WHDLine_getSubjectUriLen (const void * const _self)
  * Sets the subject URI of the WARC-record
  */
 
-WIPUBLIC warc_bool_t WHDLine_setSubjectUri (void * const _self, const char * suri,
-                                        const warc_u32_t len)
+WIPUBLIC warc_bool_t WHDLine_setSubjectUri (void * const _self, 
+                                            const warc_u8_t * suri,
+                                            const warc_u32_t len)
 {
   struct WHDLine * const self = _self;
   /* preconditions */
@@ -311,7 +313,7 @@ WIPUBLIC warc_bool_t WHDLine_setSubjectUri (void * const _self, const char * sur
  * Returns the WARC-record's creation date
  */
 
-WIPUBLIC const char * WHDLine_getCreationDate (const void * const _self)
+WIPUBLIC const warc_u8_t * WHDLine_getCreationDate (const void * const _self)
 {
 	const struct WHDLine * const self = _self;
 
@@ -355,11 +357,12 @@ WIPUBLIC warc_u32_t WHDLine_getCreationDateLen (const void * const _self)
 
 
 WIPUBLIC warc_bool_t WHDLine_setCreationDate (void * const _self, 
-                                              const char * cd,
+                                              const warc_u8_t * cd,
                                               const warc_u32_t len)
 {
   struct WHDLine * const self = _self;
   warc_u32_t i=0;
+ 
   /* preconditions */
   CASSERT (self);
   assert (cd);
@@ -386,7 +389,7 @@ WIPUBLIC warc_bool_t WHDLine_setCreationDate (void * const _self,
  * Returns the WARC-record's content type
  */
 
-WIPUBLIC const char * WHDLine_getContentType (const void * const _self)
+WIPUBLIC const warc_u8_t * WHDLine_getContentType (const void * const _self)
 {
 	const struct WHDLine * const self = _self;
 
@@ -428,8 +431,9 @@ WIPUBLIC warc_u32_t WHDLine_getContentTypeLen (const void * const _self)
  * Sets the WARC-record's content type
  */
 
-WIPUBLIC warc_bool_t WHDLine_setContentType (void * const _self, const char * ct,
-                                         const warc_u32_t len)
+WIPUBLIC warc_bool_t WHDLine_setContentType (void * const _self, 
+                                             unsigned const char * ct,
+                                             const warc_u32_t len)
 {
   struct WHDLine * const self = _self;
   /* preconditions */
@@ -455,7 +459,7 @@ WIPUBLIC warc_bool_t WHDLine_setContentType (void * const _self, const char * ct
  * Returns the WARC-record id.
  */
 
-WIPUBLIC const char * WHDLine_getRecordId (const void * const _self)
+WIPUBLIC const warc_u8_t * WHDLine_getRecordId (const void * const _self)
 {
 	const struct WHDLine * const self = _self;
 
@@ -496,8 +500,9 @@ WIPUBLIC warc_u32_t WHDLine_getRecordIdLen (const void * const _self)
  * Sets the WARC-record id
  */
 
-WPUBLIC warc_bool_t WHDLine_setRecordId (void * const _self, const char * rid,
-                                     const warc_u32_t len)
+WPUBLIC warc_bool_t WHDLine_setRecordId (void * const _self, 
+                                         const warc_u8_t * rid,
+                                         const warc_u32_t len)
 {
   struct WHDLine * const self = _self;
 

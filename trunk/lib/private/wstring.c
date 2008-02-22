@@ -53,9 +53,9 @@ struct WString {
   const void * class;
 
   /*@{*/
-  char       * text; /**< text string */
-  warc_u32_t   len;  /**< string length */
-  warc_u32_t   max;  /**< max string length */
+  warc_u8_t * text; /**< text string */
+  warc_u32_t    len;  /**< string length */
+  warc_u32_t    max;  /**< max string length */
   /*@}*/
 };
 
@@ -104,14 +104,14 @@ WIPUBLIC warc_u32_t WString_getLength (const void * const _self)
  * Returns the object's string as a constant "char *"
  */
 
-WIPUBLIC const char * WString_getText (const void * const _self)
+WIPUBLIC const warc_u8_t * WString_getText (const void * const _self)
 {
   const struct WString * const self = _self;
 
   /* preconditions */
   CASSERT (self);
   
-  return ((const char *) TEXT);
+  return (TEXT);
 }
 
 
@@ -124,16 +124,17 @@ WIPUBLIC const char * WString_getText (const void * const _self)
  * Finds the first occurrence of a substring in the string text
  */
 
-WIPUBLIC warc_i32_t WString_strstr (const void * const _self, const char * s)
+WIPUBLIC warc_i32_t WString_strstr (const void * const _self, 
+                                    const warc_u8_t * s)
 {
   const struct WString * const self = _self;
-  char                       * ptr;
+  warc_u8_t        *       ptr;
 
   /* preconditions */
   CASSERT (self);
   assert (s);
   
-  ptr = strstr ((const char *) TEXT, s);
+  ptr = (warc_u8_t *) strstr ((const char *) TEXT, (const char *) s);
   unless (ptr)
     return (-1);
 
@@ -171,11 +172,12 @@ WPUBLIC warc_bool_t WString_concat (void * const _self, const void * const b)
  * of WString "a".
  */
 
-WPUBLIC warc_bool_t WString_append (void * const _self, const char * b,
+WPUBLIC warc_bool_t WString_append (void * const _self, 
+                                    const warc_u8_t * b,
                                     const warc_u32_t blen)
 {
 	struct WString * const self = _self;
-    char           *       text = NIL;
+    warc_u8_t  *       text = NIL;
 	warc_u32_t             ablen;
 
     /* preconditions */
@@ -234,7 +236,8 @@ WPUBLIC warc_bool_t WString_append (void * const _self, const char * b,
  * Sets a new text string
  */
 
-WPUBLIC warc_bool_t WString_setText (void * const _self, const char * text,
+WPUBLIC warc_bool_t WString_setText (void * const _self, 
+                                     const warc_u8_t * text,
                                      const warc_u32_t len)
 {
 	struct WString * const self = _self;
@@ -246,8 +249,8 @@ WPUBLIC warc_bool_t WString_setText (void * const _self, const char * text,
     /* re-allocate only if necessary */
     if (len >= MAX)
       {
-        char *     nt   = NIL;
-        warc_u32_t max;
+        warc_u8_t * nt   = NIL;
+        warc_u32_t      max;
 
         NEXT_POWER_OF(len, max);
 
@@ -292,9 +295,9 @@ WPUBLIC warc_bool_t WString_setText (void * const _self, const char * text,
 
 WPRIVATE void * WString_constructor (void * _self, va_list * app)
 {
-  struct WString   * const self = _self;
-  const char       * text = va_arg(* app, const char *);
-  const warc_u32_t   len  = va_arg(* app, const warc_u32_t);
+  struct WString      * const self = _self;
+  const warc_u8_t * text = va_arg(* app, const warc_u8_t *);
+  const warc_u32_t      len  = va_arg(* app, const warc_u32_t);
   
   /* preconditions */
   assert (text);

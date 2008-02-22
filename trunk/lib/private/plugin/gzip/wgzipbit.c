@@ -24,9 +24,15 @@
 /*     http://code.google.com/p/warc-tools/                            */
 /* ------------------------------------------------------------------- */
 
+/**
+ * Portability header file
+ */
+
+#include <wport.h>
+
 #include <wgzipbit.h>
 
-int methodBits(int method)
+warc_u32_t methodBits(warc_u32_t method)
 {
   return GZIP_METHOD == method ? 15 + 16 : 15;
 }

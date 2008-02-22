@@ -29,7 +29,7 @@
 
 #include <warc.h>
 
-#define makeU(s) (const unsigned char *) (s), (warc_u64_t) strlen((s))
+#define makeU(s) (const warc_u8_t *) (s), (warc_u64_t) w_strlen((warc_u8_t *) (s))
 
 int test1 (void)
 {	

@@ -36,8 +36,8 @@
 
 #define WARC_MAX_SIZE 629145600
 
-#define makeS(s) (s), strlen((s))
-#define makeU(s) (const unsigned char *) (s), (warc_u64_t) strlen((s))
+#define makeS(s) ((warc_u8_t *) s), w_strlen((warc_u8_t *) (s))
+#define makeU(s) (const warc_u8_t *) (s), (warc_u64_t) w_strlen((warc_u8_t *) (s))
 
 /* useful macros to simplify releasing objects */
 #define free_p \
@@ -103,7 +103,7 @@ int main (int argc, const char ** argv)
   afile_comp_t     amode    = ARC_FILE_COMPRESSED_GZIP;
   warc_bool_t      b        = WARC_FALSE;
   warc_i32_t       c        = 0;
-  char           * flags    = "bca:f:";
+  warc_u8_t      * flags    = (warc_u8_t *) "bca:f:";
   char           * fname    = NIL;
   wfile_comp_t     cmode    = WARC_FILE_COMPRESSED_GZIP;
 

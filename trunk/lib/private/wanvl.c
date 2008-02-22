@@ -92,7 +92,7 @@ WIPUBLIC warc_bool_t WAnvl_isValid (const void * const _self)
  * Returns the ANVL key as a constant "char *"
  */
 
-WIPUBLIC const char * WAnvl_getKey (const void * const _self)
+WIPUBLIC const warc_u8_t * WAnvl_getKey (const void * const _self)
 {
   const struct WAnvl * const self = _self;
 
@@ -132,12 +132,13 @@ WIPUBLIC warc_u32_t WAnvl_getKeyLen (const void * const _self)
  * Sets a new text string as a ANVL key
  */
 
-WPUBLIC warc_bool_t WAnvl_setKey (void * const _self, const char * text,
+WPUBLIC warc_bool_t WAnvl_setKey (void * const _self, 
+                                  const warc_u8_t * text,
                                   const warc_u32_t len)
 {
   struct WAnvl  * const self = _self;
-  warc_u32_t i = 1;
-  char ctl[2]= {'\x01','\0'};
+  warc_u32_t    i = 1;
+  warc_u8_t ctl [2] = {'\x01', '\0'};
 
   /* preconditions */
   CASSERT (self);
@@ -147,17 +148,18 @@ WPUBLIC warc_bool_t WAnvl_setKey (void * const _self, const char * text,
   unless (len)
     return (WARC_TRUE);
 
-  if (w_strcasestr (text," "))
+  if (w_strcasestr (text, (warc_u8_t *) " "))
     return (WARC_TRUE);
   
-  if (w_strcasestr (text, "\x7F"))
+  if (w_strcasestr (text, (warc_u8_t *) "\x7F"))
     return (WARC_TRUE);
 
-  for (i = 1; i<32 ;i++)
-     {ctl[0] = i;
-       if (w_strcasestr (text, ctl))
-         return (WARC_TRUE);
-     }
+  for (i = 1; i < 32 ;i++)
+    {
+      ctl [0] = i;
+      if (w_strcasestr (text, ctl))
+        return (WARC_TRUE);
+    }
 
   return (WString_setText (KEY, text, len));
 }
@@ -171,7 +173,7 @@ WPUBLIC warc_bool_t WAnvl_setKey (void * const _self, const char * text,
  * Returns the ANVL value as a constant "char *"
  */
 
-WIPUBLIC const char * WAnvl_getValue (const void * const _self)
+WIPUBLIC const warc_u8_t * WAnvl_getValue (const void * const _self)
 {
   const struct WAnvl * const self = _self;
 
@@ -203,22 +205,63 @@ WIPUBLIC warc_u32_t WAnvl_getValueLen (const void * const _self)
 
 /**
  * @param _self WAnvl object
- * @param text new text string
- * @param len string length in bytes
+ * @param UTF-8 text string
+ * @param len string in bytes
+ *
+ * @return returns false is succeeds, true otherwise
+ *
+ * Check if the text is a valid UTF-8
+ */
+
+WPRIVATE warc_bool_t WAnvl_validUTF8 (void * const _self, 
+                                      const warc_u8_t * text)
+{
+  warc_u32_t        nb;
+  const warc_u8_t * c;
+
+  UNUSED (_self);
+
+  for (c = text; *c; c += nb + 1)
+    {
+      if      (! (*c & 0x80)) nb = 0;
+      else if (! (*c & 0xc0) == 0x80) return (WARC_TRUE);
+      else if (! (*c & 0xe0) == 0xc0) nb = 1;
+      else if (! (*c & 0xf0) == 0xe0) nb = 2;
+      else if (! (*c & 0xf8) == 0xf0) nb = 3;
+      else if (! (*c & 0xfc) == 0xf8) nb = 4;
+      else if (! (*c & 0xfe) == 0xfc) nb = 5;
+
+      while (nb-- > 0)
+        if ((*(c + nb) & 0xc0) != 0x80) return (WARC_TRUE);
+    }
+  
+  return (WARC_FALSE);
+}
+
+
+/**
+ * @param _self WAnvl object
+ * @param UTF-8 text text string
+ * @param len string in bytes
  *
  * @return returns false is succeeds, true otherwise
  *
  * Sets a new text string as a ANVL value
  */
 
-WPUBLIC warc_bool_t WAnvl_setValue (void * const _self, const char * text,
-                                const warc_u32_t len)
+WPUBLIC warc_bool_t WAnvl_setValue (void * const _self, 
+                                    const warc_u8_t * text,
+                                    const warc_u32_t len)
 {
   struct WAnvl  * const self = _self;
 
   /* preconditions */
   CASSERT (self);
   assert (text);
+
+  /* check if the string is a valid UTF-8 */
+  if (WAnvl_validUTF8 (self, text))
+    return (WARC_TRUE);
 
   return (WString_setText (VALUE, text, len));
 }
@@ -239,10 +282,10 @@ WPUBLIC warc_bool_t WAnvl_setValue (void * const _self, const char * text,
 WPRIVATE void * WAnvl_constructor (void * _self, va_list * app)
 {
   struct WAnvl * const self  = _self;
-  const char         * key   = va_arg(* app, const char *);
-  const warc_u32_t     klen  = va_arg(* app, const warc_u32_t);
-  const char         * value = va_arg(* app, const char *);
-  const warc_u32_t     vlen  = va_arg(* app, const warc_u32_t);
+  const warc_u8_t * key   = va_arg(* app, const warc_u8_t *);
+  const warc_u32_t      klen  = va_arg(* app, const warc_u32_t);
+  const warc_u8_t * value = va_arg(* app, const warc_u8_t *);
+  const warc_u32_t      vlen  = va_arg(* app, const warc_u32_t);
 
   UNUSED(app);
 
@@ -257,7 +300,7 @@ WPRIVATE void * WAnvl_constructor (void * _self, va_list * app)
       return (NIL);
     }
 
-  if (w_strcasestr (key, " "))
+  if (w_strcasestr (key, (warc_u8_t *) " "))
     {
      destroy (self);
      return (NIL);

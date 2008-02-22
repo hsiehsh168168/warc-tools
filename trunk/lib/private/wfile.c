@@ -107,7 +107,7 @@ struct CallbackEnv
 
 
 /* this callback uncompressing the entire WARC file */
-warc_u32_t wrecover (const char * buffer, const warc_u32_t nbr, void * env)
+WPRIVATE warc_u32_t wrecover (const warc_u8_t * buffer, const warc_u32_t nbr, void * env)
 {
   FILE * out = (FILE *) env;
 
@@ -119,7 +119,8 @@ warc_u32_t wrecover (const char * buffer, const warc_u32_t nbr, void * env)
 }
 
 /* this callback stop uncompressing when it find a double CRLF */ 
-warc_u32_t getHeader (const char * buffer, const warc_u32_t nbr, void * _env) 
+WPRIVATE warc_u32_t getHeader (const warc_u8_t * buffer, const warc_u32_t nbr,
+                      void * _env) 
 {
    struct CallbackEnv * env  = (struct CallbackEnv *) _env; 
    warc_u64_t           i    = 0; 
@@ -306,7 +307,7 @@ WPRIVATE warc_bool_t WFile_fillTempFile(const void* const _self,
 
 WPRIVATE warc_bool_t WFile_checkEndCRLF(FILE *f)
 {
-  char str[5];
+  warc_u8_t str [5];
 
 
   if (4 != w_fread (str, 4, 1, f))
@@ -317,7 +318,7 @@ WPRIVATE warc_bool_t WFile_checkEndCRLF(FILE *f)
 
   str[4] = '\0';
 
-  return (! (strcmp(str, "\x0D\x0A\x0D\x0A")));
+  return (! (w_strcmp(str, (warc_u8_t *) "\x0D\x0A\x0D\x0A")));
 }
 
 
@@ -1231,7 +1232,8 @@ WPRIVATE void WFile_writeRecordType (FILE * wtfile, warc_rec_t type,
  * Warc Record Subject Uri Field writing function
  */
 
-WIPRIVATE void WFile_writeSubjectUri (FILE * wtfile, const char * suri,
+WIPRIVATE void WFile_writeSubjectUri (FILE * wtfile, 
+                                      const warc_u8_t * suri,
                                       warc_u32_t s,
                                       warc_u32_t * datalength)
 {
@@ -1253,7 +1255,8 @@ WIPRIVATE void WFile_writeSubjectUri (FILE * wtfile, const char * suri,
  * Warc Record Creation Date field writing function
  */
 
-WIPRIVATE void WFile_writeCreationDate (FILE * wtfile, const char * cdate,
+WIPRIVATE void WFile_writeCreationDate (FILE * wtfile, 
+                                        const warc_u8_t * cdate,
                                         warc_u32_t s,
                                         warc_u32_t * datalength)
 {
@@ -1275,7 +1278,8 @@ WIPRIVATE void WFile_writeCreationDate (FILE * wtfile, const char * cdate,
  * Warc Record Contenet Type writing function
  */
 
-WIPRIVATE void WFile_writeContentType (FILE * wtfile, const char * ctype,
+WIPRIVATE void WFile_writeContentType (FILE * wtfile, 
+                                       const warc_u8_t * ctype,
                                        warc_u32_t s,
                                        warc_u32_t * datalength)
 {
@@ -1297,7 +1301,8 @@ WIPRIVATE void WFile_writeContentType (FILE * wtfile, const char * ctype,
  * Warc Record Id Filed writing function
  */
 
-WIPRIVATE void WFile_writeRecordId (FILE * wtfile,const char * rec_id,
+WIPRIVATE void WFile_writeRecordId (FILE * wtfile,
+                                    const warc_u8_t * rec_id,
                                     warc_u32_t s,
                                     warc_u32_t * datalength)
 {
@@ -1425,8 +1430,8 @@ WPRIVATE warc_bool_t WFile_writeDataBloc (FILE * wtfile, FILE * bloc,
  * WFile number to string transformation function
  */
 
-WPRIVATE char * WFile_numtoString (warc_u32_t numericvalue, 
-                                   char * strvalue)
+WPRIVATE warc_u8_t * WFile_numToString (warc_u32_t numericvalue, 
+                                        warc_u8_t * strvalue)
 {
   warc_u32_t i;
   warc_u32_t quaut = 1;
@@ -1513,7 +1518,7 @@ WFile_storeRecordGzipComressed (void * _self,
 {
   struct WFile * self = _self;
 
-  char           strData [20];
+  warc_u8_t      strData [20];
   warc_u32_t     i       = 0;
   void         * gzobj   = NIL;
   warc_u32_t     csize   = 0;    /* the size of the compressed data */
@@ -1543,8 +1548,8 @@ WFile_storeRecordGzipComressed (void * _self,
 
   /* writing the data Length Field */
   w_fseek_from_start (wtfile, 10);
-  WFile_numtoString (datalength, strData);
-  w_fwrite (strData, strlen (strData), 1, wtfile);
+  WFile_numToString (datalength, strData);
+  w_fwrite (strData, w_strlen (strData), 1, wtfile);
   w_fseek_end (wtfile);
   
   /* writing Data Bloc */
@@ -1622,7 +1627,7 @@ WFile_storeRecordUncompressed (void* _self, const void * wrec,
 {
   struct WFile * self = _self;
   
-  char           strData [20];
+  warc_u8_t      strData [20];
   warc_u32_t     i    = 0;
 
   /* testing if the record writing will not overload the Warc File */
@@ -1636,8 +1641,8 @@ WFile_storeRecordUncompressed (void* _self, const void * wrec,
   
   /* writing the data Length Field */
   w_fseek_from_start (wtfile, 10);
-  WFile_numtoString (datalength, strData);
-  w_fwrite (strData, strlen (strData), 1, wtfile);
+  WFile_numToString (datalength, strData);
+  w_fwrite (strData, w_strlen (strData), 1, wtfile);
   
   /* flushing the Warc Record Header Temporary file into 
      the Warc File */

@@ -32,7 +32,6 @@
 #include <afile.h>       /* AFile */
 #include <arecord.h>     /* ARecord */
 
-#define  makeS(s) (s), strlen((s))
 
 warc_bool_t callback (void * env, const char* buff, const warc_u32_t size)
 { 

@@ -64,7 +64,7 @@ typedef struct
   FILE           * fin;       /* file handle to read from */
   Transition     * state;     /* transition state */
   warc_bool_t    err;         /* parsing error flag */
-  char         c;             /* current char in "fin"*/
+  warc_u8_t  c;             /* current char in "fin"*/
 } HDLState;
 
 
@@ -94,8 +94,6 @@ struct AFsmHDL
 #define    CREATION_DATE   (HDLS -> creation_date)
 
 
-#define makeS(s) (s), strlen((s))
-#define makeC(s) WString_getText((s)), WString_getLength((s))
 
 
 /* prototypes of all events in the FSM (defined below) */
@@ -425,87 +423,95 @@ void AFsmHDL_setDataLength (void * _hs)
 /*    } */
 /* } */
 
-WPRIVATE warc_i32_t stroccur (const char * str, char c)
+WPRIVATE warc_i32_t stroccur (const warc_u8_t * str, unsigned char c)
 {
-warc_u32_t Counter=0, index=0;
+  warc_u32_t counter = 0;
+  warc_u32_t index   = 0;
 
-while(index< strlen(str))
- { 
-   if(c==str[index])
-     {
-      Counter ++;
-      if (c==str[index+1])
-         return -1;
+  while (index < w_strlen (str))
+    { 
+      if(c == str [index])
+        {
+          ++ counter;
+          
+          if (c == str [index + 1])
+            return -1;
+        }
       
-     }
-     index ++;
-  }
-return Counter;
+      ++ index;
+    }
+
+ return counter;
 }
 
 void   AFsmHDL_checkIpAdress (void * _hs)
 {
- HDLState * const hs  = _hs;
- const char     * strtompon;
-  warc_u32_t          index;
-  warc_i32_t        Error=0;
-  warc_i32_t  Digit_Count=1;
-  assert (hs);
-  
-  strtompon = WString_getText (hs -> ip_adress);
- 
-  if(! isdigit(strtompon[0]))
-    {  
-    Error =1;
-    }
-  if(! isdigit(strtompon[strlen(strtompon)-1]) && Error !=1)
-    {
-     Error = 1;
-    }
- 
-  if (stroccur(strtompon,'.') != 3 && Error != 1)
-    {
-    Error= 1;
-    }
-  if (Error != 1)
-  {
-     
-  for(index=1;index<strlen(strtompon);index++)
-      {      
-      if (strtompon[index] != '.')
-       {
-	 
-         if (! isdigit(strtompon[index]))
-             {
-                
-             Error=1;
-             break;
-             }
-         
-         if(isdigit(strtompon[index]))
-            {
-             Digit_Count ++;
-             if (Digit_Count == 4)
-                {
-                Error = 1;
-                break;
-                }
-            }
-        }  
-      if (strtompon[index] == '.')
-        {
-        Digit_Count = 0;
-        }
-    }
-   }
-   if (Error==1)   
-    {
-     /* rewind the stream */
-     AFsmHDL_rewind (hs, WString_getLength (hs -> ip_adress) + 1);
+ HDLState            * const hs  = _hs;
+ const warc_u8_t * strtompon;
+ warc_u32_t        index;
+ warc_i32_t        Error       = 0;
+ warc_i32_t        Digit_Count = 1;
+ warc_u32_t        len;
 
-     /* raise the flag errore */
-     WarcDebugMsg(">> Exepted IpAdress\n");
-     hs -> err = WARC_TRUE;
+ assert (hs);
+ 
+ strtompon = WString_getText (hs -> ip_adress);
+ 
+ if(! isdigit(strtompon[0]))
+   {  
+     Error =1;
+   }
+
+ if(! isdigit (strtompon [w_strlen (strtompon) - 1]) 
+    && Error !=1)
+   {
+     Error = 1;
+   }
+ 
+ if (Error != 1 && stroccur (strtompon, '.') != 3)
+   {
+     Error= 1;
+   }
+ 
+ if (Error != 1)
+   {
+     len = w_strlen (strtompon);
+     for(index = 1; index < len; ++ index)
+       {      
+         if (strtompon [index] != '.')
+           {
+             
+             if (! isdigit (strtompon [index]))
+               {
+                 
+                 Error=1;
+                 break;
+               }
+             
+             if(isdigit (strtompon [index]))
+               {
+                 Digit_Count ++;
+                 if (Digit_Count == 4)
+                   {
+                     Error = 1;
+                     break;
+                   }
+               }
+           }  
+         if (strtompon [index] == '.')
+           {
+              Digit_Count = 0;
+           }
+       }
+   }
+ if (Error == 1)   
+    {
+      /* rewind the stream */
+      AFsmHDL_rewind (hs, WString_getLength (hs -> ip_adress) + 1);
+      
+      /* raise the flag errore */
+      WarcDebugMsg(">> Exepting an IpAddress\n");
+      hs -> err = WARC_TRUE;
     }
 }
 
@@ -681,18 +687,19 @@ WPUBLIC warc_bool_t AFsmHDL_run (void * const _self)
 
 WPUBLIC void * AFsmHDL_transform (const void * const _self)
 {
-  const struct AFsmHDL * const self    = _self;
+#define makeC(s) WString_getText((s)), WString_getLength((s))
 
+  const struct AFsmHDL * const self    = _self;
 
   /* preconditions */
   CASSERT (self);
 
   return (bless (ARecord, 
-                 makeC (URL), 
-                 makeC (IP_ADRESS),
-                 makeC (CREATION_DATE),
-                 makeC (MIME_TYPE),
-                 (warc_u32_t) atoi (WString_getText (DATA_LENGTH))));
+            makeC (URL), 
+            makeC (IP_ADRESS),
+            makeC (CREATION_DATE),
+            makeC (MIME_TYPE),
+           (warc_u32_t) atoi ((const char *) WString_getText (DATA_LENGTH))));
                  
                   
                
@@ -713,6 +720,8 @@ WPUBLIC void * AFsmHDL_transform (const void * const _self)
 
 WPRIVATE void * AFsmHDL_constructor (void * _self, va_list * app)
 {
+#define makeS(s) (s), w_strlen((s))
+
   struct AFsmHDL * const self = _self;
   FILE           *       fin  = va_arg (* app, FILE *);
   
@@ -724,20 +733,20 @@ WPRIVATE void * AFsmHDL_constructor (void * _self, va_list * app)
   ERROR_FLAG = WARC_FALSE;       /* no error when starting */
 
 
-  DATA_LENGTH = bless (WString, makeS(""));
+  DATA_LENGTH = bless (WString, makeS ((warc_u8_t *) ""));
   assert (DATA_LENGTH);
 
 
-  URL = bless (WString, makeS(""));
+  URL = bless (WString, makeS ((warc_u8_t *) ""));
   assert (URL);
 
-  CREATION_DATE = bless (WString, makeS(""));
+  CREATION_DATE = bless (WString, makeS ((warc_u8_t *) ""));
   assert (CREATION_DATE);
 
-  MIME_TYPE = bless (WString, makeS(""));
+  MIME_TYPE = bless (WString, makeS ((warc_u8_t *) ""));
   assert (MIME_TYPE);
 
-  IP_ADRESS = bless (WString, makeS(""));
+  IP_ADRESS = bless (WString, makeS ((warc_u8_t *) ""));
   assert (IP_ADRESS);
   
   return (self);

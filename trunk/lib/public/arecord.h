@@ -48,21 +48,21 @@ extern const void * ARecord;
 /* getters */
 
 extern       warc_u32_t ARecord_getDataLength   (const void * const);
-extern const char *     ARecord_getUrl          (const void * const);
-extern const char *     ARecord_getCreationDate (const void * const);
-extern const char *     ARecord_getMimeType     (const void * const);
-extern const char *     ARecord_getIpAddress    (const void * const);
+extern const warc_u8_t *     ARecord_getUrl          (const void * const);
+extern const warc_u8_t *     ARecord_getCreationDate (const void * const);
+extern const warc_u8_t *     ARecord_getMimeType     (const void * const);
+extern const warc_u8_t *     ARecord_getIpAddress    (const void * const);
 
 /* setters */
 
 extern warc_bool_t ARecord_setDataLength   (void * const, const warc_u32_t);
-extern warc_bool_t ARecord_setUrl          (void * const, const char *,
+extern warc_bool_t ARecord_setUrl          (void * const, const warc_u8_t *,
                                             const warc_u32_t);
-extern warc_bool_t ARecord_setCreationDate (void * const, const char *,
+extern warc_bool_t ARecord_setCreationDate (void * const, const warc_u8_t *,
                                             const warc_u32_t);
-extern warc_bool_t ARecord_setMimeType     (void * const, const char *,
+extern warc_bool_t ARecord_setMimeType     (void * const, const warc_u8_t *,
                                             const warc_u32_t);
-extern warc_bool_t  ARecord_setIpAddress   (void * const, const char *,
+extern warc_bool_t  ARecord_setIpAddress   (void * const, const warc_u8_t *,
                                             const warc_u32_t);
 
 extern warc_bool_t ARecord_setContentFromFile (void * , void *);
