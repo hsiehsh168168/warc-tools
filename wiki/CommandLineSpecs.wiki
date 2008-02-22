@@ -51,6 +51,17 @@ Usage: ./app/warcvalidator -f <file.warc> [-c] [-v]
   * [-v]  : verbose mode (default true)
 
 
+== warcvalidator.sh (done) ==
+
+Check if all WARC files in a directory are valid
+
+Usage: app/warcvalidator.sh <-d dirname> [-c wgzip] [-v] [-h]
+  * -d     : directory name containing ARC files
+  * -c     : WARC files are compressed (default yes)
+  * -h     : print this help message
+  * -v     : output version information and exit
+
+
 == arc2warc (done) ==
 SRS 11-14, 15, 44
 
@@ -61,6 +72,19 @@ Usage: ./app/arc2warc -a <file.arc> [-b] -f <file.warc> [-c]
   * [-b]  : GZIP compressed ARC (default true)
   * -f    : valid WARC file name
   * [-c]  : GZIP compressed WARC (default true)
+
+
+== arc2warc.sh (done) ==
+SRS 31-32
+
+Converts all ARC files in a directory to WARC files
+
+Usage: ./app/arc2warc.sh <-d dirname> [-b agzip] [-c wgzip] [-v] [-h]
+      * -d     : directory name containing ARC files
+      * -b     : ARC files are compressed (default yes)
+      * -c     : WARC files will be compressed (default yes)
+      * -h     : print this help message
+      * -v     : output version information and exit
 
 
 == warcserver ==
