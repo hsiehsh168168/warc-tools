@@ -46,10 +46,7 @@ HEADERS  = -I. -I$(PRIVATE) -I$(PUBLIC) -I$(GZIP) -I$(TIGER)
 ###############
 
 GCC       = gcc
-CC	  = $(GCC) $(HEADERS)
-
-#OPT      = -march=i686 -pipe
-#OPT     += -O2
+CC	  	  = $(GCC) $(HEADERS)
 
 DFLAG     = -g
 
@@ -66,6 +63,9 @@ CFLAGS += $(DFLAG)
 
 # uncomment the line below to disable all assertions and traces
 #CFLAGS += -DNDEBUG
+
+# uncomment the line below to disable all printing via "w_fprintf"
+#CFLAGS += -Dw_fprintf=""
 
 # GCC extra flags
 GCC_EXTRA = -Wextra
