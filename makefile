@@ -81,8 +81,7 @@ endif
 ifeq ($(UNAME_S),FreeBSD)
 endif
 ifeq ($(UNAME_S),OpenBSD)
-	CFLAGS    += -DWIPUBLIC=
-	CFLAGS    += -DWIPRIVATE=
+	CFLAGS    += -DINLINE=""
 	GCC_EXTRA  = 
 endif
 ifeq ($(UNAME_S),NetBSD)

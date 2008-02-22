@@ -46,13 +46,20 @@
 /* Perl if not */
 #define unless(C) if(!(C))
 
+/* INLINE macro */
+#ifndef WINLINE
+#define WINLINE inline /* or "extern inline" */
+#else
+#define WINLINE 
+#endif
+
 /* Quikly find functions and protect them */
 #ifndef WPRIVATE
 #define WPRIVATE static
 #endif
 
 #ifndef WIPRIVATE
-#define WIPRIVATE static
+#define WIPRIVATE static WINLINE
 #endif
 
 #ifndef WPUBLIC
@@ -60,7 +67,7 @@
 #endif
 
 #ifndef WIPUBLIC
-#define WIPUBLIC inline
+#define WIPUBLIC WINLINE
 #endif
 
 /* To disable warnings about unused variable */
