@@ -261,7 +261,10 @@ WPUBLIC warc_bool_t WAnvl_setValue (void * const _self,
 
   /* check if the string is a valid UTF-8 */
   if (WAnvl_validUTF8 (self, text))
-    return (WARC_TRUE);
+    {
+      WarcDebugMsg("invalid UTF-8 string\n");
+      return (WARC_TRUE);
+    }
 
   return (WString_setText (VALUE, text, len));
 }
