@@ -610,7 +610,7 @@ WIPUBLIC warc_bool_t ARecord_transferContent (void * _self, void * wrec,
 
   if (AFile_register(arcf, self, temp_writer, (void *) & envstr))
    {
-     w_fprintf (stderr ,"Unable to register the extracted ArcRecord object\n");
+     w_fprintf (fprintf (stderr ,"Unable to register the extracted ArcRecord object\n"));
      destroy (objatfile);
      return (WARC_TRUE);
    }

@@ -311,9 +311,10 @@ int test7 (void)
   fprintf (stderr, "%s>\n", t);
 
   if (WAnvl_setKey (a, makeS ("C\x7F")))
-     {WarcDebugMsg ("Invalid key\n");
-     destroy (a);
-     return 1;
+     {
+       WarcDebugMsg ("Invalid key\n");
+       destroy (a);
+       return 1;
      }
   WAnvl_setValue (a, makeS ("DDDD"));
 
@@ -336,9 +337,10 @@ int test8 (void)
   fprintf (stderr, "%s>\n", t);
 
   if (WAnvl_setKey (a, makeS ("C\x0Ausing")))
-     {WarcDebugMsg ("An other invalid key\n");
-     destroy (a);
-     return 1;
+     {
+       WarcDebugMsg ("An other invalid key\n");
+       destroy (a);
+       return 1;
      }
   WAnvl_setValue (a, makeS ("DDDD"));
 

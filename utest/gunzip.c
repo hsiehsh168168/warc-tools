@@ -437,7 +437,6 @@ int test4 (const char * fin)
   return 0;
 }
 
-
 int test5 (const char * fin)
 {	
   const char * t     = "TEST 5";
@@ -454,12 +453,12 @@ int test5 (const char * fin)
   in = openReading (fin);
   assert (in);
 
-  /* uncompress file from offset 0 using the callback with env = fout */
+  /* check the validity of GZIP file from offset 0 */
   ret = WGzip_check (g, in, 0);
   unless (ret)
-    fprintf (stdout, "\"%s\" is a valid GZIP file\n", fin);
+    w_fprintf(fprintf (stdout, "\"%s\" is a valid GZIP file\n", fin));
   else
-    fprintf (stdout, "\"%s\" is an invalid GZIP file\n", fin);
+    w_fprintf (fprintf(stdout, "\"%s\" is an invalid GZIP file\n", fin));
 
   fclose (in);
 

@@ -83,7 +83,7 @@
 #ifndef WARC_MSG_DEBUG
 #define WARC_MSG_DEBUG
 #define WarcDebugMsg(m) \
-       (w_fprintf(stderr, __FILE__ " :%d:" #m "\n", __LINE__), (m))
+       (fprintf(stderr, __FILE__ " :%d:" #m "\n", __LINE__), (m))
 #else
 #define WarcDebugMsg(m) (m)
 #endif

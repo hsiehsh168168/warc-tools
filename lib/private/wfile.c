@@ -427,8 +427,8 @@ WPRIVATE void * WFile_nextRecordGzipCompressedFast (void * _self,
   else 
     {
       /* error when parsing the WARC header line */
-      w_fprintf (stderr ,"error in FSM state address %p,\n", 
-               WFsmHDL_state (hfsm));
+      w_fprintf (fprintf (stderr ,"error in FSM state address %p,\n", 
+                          WFsmHDL_state (hfsm)));
       
       destroy (objrectfile);
       destroy (hfsm);
@@ -458,8 +458,8 @@ WPRIVATE void * WFile_nextRecordGzipCompressedFast (void * _self,
       else
         {
           /* error when parsing the WARC header line */
-          w_fprintf (stderr ,"error in FSM state address %p\n", 
-                   WFsmANVL_state (afsm));
+          w_fprintf (fprintf (stderr ,"error in FSM state address %p\n", 
+                   WFsmANVL_state (afsm)));
           
           destroy (objrectfile);
           destroy (lanvl);
@@ -621,8 +621,8 @@ WPRIVATE void * WFile_nextRecordGzipCompressed (void * _self)
   else 
     {
       /* error when parsing the WARC header line */
-      w_fprintf (stderr ,"error in FSM state address %p,\n", 
-               WFsmHDL_state (hfsm));
+      w_fprintf (fprintf (stderr ,"error in FSM state address %p,\n", 
+                          WFsmHDL_state (hfsm)));
       
       destroy (objrectfile);
       destroy (hfsm);
@@ -652,8 +652,8 @@ WPRIVATE void * WFile_nextRecordGzipCompressed (void * _self)
       else
         {
           /* error when parsing the WARC header line */
-          w_fprintf (stderr ,"error in FSM state address %p\n", 
-                   WFsmANVL_state (afsm));
+          w_fprintf (fprintf (stderr ,"error in FSM state address %p\n", 
+                              WFsmANVL_state (afsm)));
           
           destroy (objrectfile);
           destroy (lanvl);
@@ -788,8 +788,8 @@ WPRIVATE void * WFile_nextRecordUncompressed (void * _self)
   else
     {
       /* error when parsing the WARC header line */
-      w_fprintf (stderr ,"error in FSM state address %p, at offset %ld in The Warc File \n", 
-               WFsmHDL_state (hfsm), w_ftell (FH));
+      w_fprintf (fprintf (stderr ,"error in FSM state address %p, at offset %ld in The Warc File \n", 
+                          WFsmHDL_state (hfsm), w_ftell (FH)));
       destroy (hfsm);
       destroy (wobject);
       return (NIL);
@@ -817,8 +817,8 @@ WPRIVATE void * WFile_nextRecordUncompressed (void * _self)
       else
         {
           /* error when parsing the WARC header line */
-          w_fprintf (stderr ,"error in FSM state address %p, at offset %ld \"%s\"\n", 
-                   WFsmANVL_state (afsm), w_ftell (FH), "");
+          w_fprintf (fprintf (stderr ,"error in FSM state address %p, at offset %ld \"%s\"\n", 
+                   WFsmANVL_state (afsm), w_ftell (FH), ""));
           
           destroy (lanvl);
           destroy (hdl);
@@ -1874,7 +1874,7 @@ WPRIVATE void * WFile_constructor (void * _self, va_list * app)
           where = (warc_u64_t) w_ftell (FH);
           if (WGzip_check (g, FH, 0))
             {
-              w_fprintf (stderr, "not a valid GZIP WARC file\n");
+              w_fprintf (fprintf (stderr, "not a valid GZIP WARC file\n"));
               destroy (g);
               destroy (self);
               return (NIL); 
@@ -1897,7 +1897,7 @@ WPRIVATE void * WFile_constructor (void * _self, va_list * app)
 
       if (FSIZE >= MAXSIZE)
         {
-          w_fprintf (stderr ,"WARC file maximum size reached\n");
+          w_fprintf (fprintf (stderr ,"WARC file maximum size reached\n"));
           destroy (self);
           return NIL;
         }
