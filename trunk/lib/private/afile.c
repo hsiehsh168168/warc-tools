@@ -258,8 +258,7 @@ WPUBLIC void * AFile_nextRecord ( void * _self)
       arcfsm = bless (AFsmHDL, FH);
       if (AFsmHDL_run (arcfsm))
         {
-          w_fprintf (stderr ,"error in FSM state address %p, at offset %ld in the arc file\n", 
-               AFsmHDL_state (arcfsm), w_ftell (FH));
+          w_fprintf (fprintf (stderr ,"error in FSM state address %p, at offset %ld in the arc file\n", AFsmHDL_state (arcfsm), w_ftell (FH)));
           destroy (arcfsm);
           return (NIL);
         }
@@ -521,7 +520,7 @@ WPRIVATE void * AFile_constructor (void * _self, va_list * app)
       where = (warc_u64_t) w_ftell (FH);
       if (WGzip_check (g, FH, 0))
         {
-          w_fprintf (stderr, "not a valid GZIP ARC file\n");
+          w_fprintf (fprintf (stderr, "not a valid GZIP ARC file\n"));
           destroy (g);
           destroy (self);
           return (NIL); 

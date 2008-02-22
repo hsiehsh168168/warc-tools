@@ -218,9 +218,17 @@
  * Macro to print in the standard system output
  */
 
-#ifndef w_fprintf 
-#define w_fprintf fprintf
+/* #ifndef w_fprintf  */
+/* #define w_fprintf fprintf */
+/* #endif */
+
+#ifndef w_fprintf
+#define w_fprintf(s) \
+do{\
+(s); \
+}while(0)
 #endif
+
 
 /**
  * Macro to write output according to a format into a string
