@@ -438,6 +438,37 @@ int test4 (const char * fin)
 }
 
 
+int test5 (const char * fin)
+{	
+  const char * t     = "TEST 5";
+  FILE       * in    = NIL;
+  void       * g     = NIL; /* WGzip object */
+  warc_bool_t  ret   = WARC_FALSE;
+
+  fprintf (stdout, "%s>\n", t);
+
+  /* empty string */
+  g = bless (WGzip);
+  assert (g);
+
+  in = openReading (fin);
+  assert (in);
+
+  /* uncompress file from offset 0 using the callback with env = fout */
+  ret = WGzip_check (g, in, 0);
+  unless (ret)
+    fprintf (stdout, "\"%s\" is a valid GZIP file\n", fin);
+  else
+    fprintf (stdout, "\"%s\" is an invalid GZIP file\n", fin);
+
+  fclose (in);
+
+  destroy (g);
+
+  return 0;
+}
+
+
 int main (int argc, char ** argv)
 {	
   if (argc != 3)
@@ -450,15 +481,13 @@ int main (int argc, char ** argv)
       return (1);
     }
 
-/* uncomment to try a spesific test */
+  /* uncomment to try a spesific test */
 
 /*   test1 (argv [1]); */
 /*   test2 (argv [1]); */
-
-/*   test3  (argv [2]); */
-
-     test4 (argv [1]);
-
+/*   test3 (argv [2]); */
+/*   test4 (argv [1]); */
+  test5 (argv [1]);
 
   return 0;
 }
