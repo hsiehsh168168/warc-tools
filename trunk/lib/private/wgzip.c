@@ -120,6 +120,7 @@ WPUBLIC warc_i32_t WGzip_compress (const void * const _self,
     warc_u8_t out [IN_BUFFER_SIZE];
     z_stream   strm;
     warc_i32_t ret;
+    warc_u32_t space = EXTRA_GZIP_HEADER;
     warc_u32_t have;
     warc_u32_t flush;
     warc_u32_t level;
@@ -136,11 +137,15 @@ WPUBLIC warc_i32_t WGzip_compress (const void * const _self,
     w_file_size_from_offset(source, ucsize, offset);
 
     /* create extra space in GZIP header */
-    if (w_fwrite (" ", 1, EXTRA_GZIP_HEADER, dest) !=  EXTRA_GZIP_HEADER 
-        || w_ferror (dest))
+    while (space)
       {
-        ret = Z_WARC_EXTRA_FIELD_ERROR;
-        goto END;
+        if (w_fwrite (" ", 1, 1, dest) != 1 || w_ferror (dest))
+          {
+            ret = Z_WARC_EXTRA_FIELD_ERROR;
+            goto END;
+          }
+
+        -- space;
       }
 
 
