@@ -144,7 +144,7 @@ WPRIVATE void * WTempFile_destructor (void * _self)
   if (HANDLE)
     w_fclose (HANDLE);
 
-  unlink (WString_getText (TEMPLATE));
+  unlink ((const char *) WString_getText (TEMPLATE));
     
   if (TEMPLATE)
     destroy (TEMPLATE), TEMPLATE = NIL;
