@@ -40,7 +40,8 @@
 #include <wmisc.h>    /* NIL ... */
 #include <wmem.h>     /* wmalloc, wfree ... */
 #include <wstring.h>  /* WString */
-#include <arecord.h>  /* AHDLine */
+#include <arecord.h>  /* ARecord */
+#include <arecord.x>  /* private ARecord functions */
 #include <wfsm.x>     /* Transition */
 #include <afsmhdl.h>  /* headers */
 #include <wcsafe.h>
@@ -399,7 +400,7 @@ void AFsmHDL_setDataLength (void * _hs)
 /*      AFsmHDL_rewind (hs, WString_getLength (hs -> url) + 1); */
 
 /*      /\* raise the flag errore *\/ */
-/*      WarcDebugMsg(">> Exepted Url\n"); */
+/*      WarcDebugMsg("exepting a valid URL"); */
 /*      hs -> err = WARC_TRUE; */
 /*    } */
 /* } */
@@ -418,7 +419,7 @@ void AFsmHDL_setDataLength (void * _hs)
 /*      AFsmHDL_rewind (hs, WString_getLength (hs -> mime_type) + 1); */
 
 /*      /\* raise the flag errore *\/ */
-/*      WarcDebugMsg(">> Exepted MimeType\n"); */
+/*      WarcDebugMsg("exepting a valid MimeType"); */
 /*      hs -> err = WARC_TRUE; */
 /*    } */
 /* } */
@@ -510,7 +511,7 @@ void   AFsmHDL_checkIpAdress (void * _hs)
       AFsmHDL_rewind (hs, WString_getLength (hs -> ip_adress) + 1);
       
       /* raise the flag errore */
-      WarcDebugMsg(">> Exepting an IpAddress\n");
+      WarcDebugMsg("exepting a valid IP address");
       hs -> err = WARC_TRUE;
     }
 }
@@ -576,7 +577,7 @@ void AFsmHDL_raiseErrorDlength (void * _hs)
 
   assert (hs);
    w_ungetc (hs -> c, hs -> fin);
-   WarcDebugMsg(">> Exepted DataLength\n");
+   WarcDebugMsg("exepting a valid data length");
   /* raise "on" the error flag */
   hs -> err = WARC_TRUE;
 }
@@ -586,7 +587,7 @@ void  AFsmHDL_raiseErrorCrDate (void * _hs)
 
   assert (hs);
    w_ungetc (hs -> c, hs -> fin);
-   WarcDebugMsg(">>Exepted Creation Date\n");
+   WarcDebugMsg("exepting a valid creation date");
   /* raise "on" the error flag */
   hs -> err = WARC_TRUE;
 }

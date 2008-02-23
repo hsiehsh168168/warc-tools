@@ -280,7 +280,7 @@ WPRIVATE warc_bool_t WFile_fillTempFile(const void* const _self,
        p = w_fread (buf, 1, r, FH);
        if (w_ferror (wtfile) || r != p)
          {
-           WarcDebugMsg("data fill temporary error");
+           WarcDebugMsg("error when copying data");
            return (WARC_TRUE);
          }
        
@@ -403,7 +403,7 @@ WPRIVATE void * WFile_nextRecordGzipCompressedFast (void * _self,
                           getHeader, (void *) & cbenv);
   if (ret)
     {
-      WarcDebugMsg ("unable to uncompress more record");
+      WarcDebugMsg ("unable to read gzipped record");
       destroy (objrectfile);
       destroy (gzobj);
       destroy (wobject);
@@ -545,7 +545,7 @@ WPRIVATE void * WFile_nextRecordGzipCompressed (void * _self)
   objrectfile = bless (WTempFile);
   unless (objrectfile)
     {
-      WarcDebugMsg ("Unable to create temporary file for record decompression");
+      WarcDebugMsg ("unable to create temporary space");
       return (NIL);
     }
   rectfile = WTempFile_handle (objrectfile);
@@ -579,26 +579,26 @@ WPRIVATE void * WFile_nextRecordGzipCompressed (void * _self)
 
   if (WRecord_setCompressedSize (wobject, csize))
     {
-    destroy (wobject);
-    destroy (gzobj);
-    destroy (objrectfile);
-    return (NIL);
+      destroy (wobject);
+      destroy (gzobj);
+      destroy (objrectfile);
+      return (NIL);
     }
 
-
- if ( WRecord_setUncompressedSize (wobject, usize))
+  
+  if ( WRecord_setUncompressedSize (wobject, usize))
     {
-    destroy (wobject);
-    destroy (gzobj);
-    destroy (objrectfile);
-    return (NIL);
+      destroy (wobject);
+      destroy (gzobj);
+      destroy (objrectfile);
+      return (NIL);
     }
-
+  
 
 
   if (ret)
     {
-      WarcDebugMsg ("unable to uncompress more record");
+      WarcDebugMsg ("unable to read gzipped record");
       destroy (objrectfile);
       destroy (gzobj);
       destroy (wobject);
@@ -678,7 +678,7 @@ WPRIVATE void * WFile_nextRecordGzipCompressed (void * _self)
   /* checking the presence of the two end CRLF */      
   unless (WFile_checkEndCRLF (rectfile))
     {
-      WarcDebugMsg ("Corrupted record found");
+      WarcDebugMsg ("found a corrupted record");
       destroy (objrectfile);
       destroy (hdl);
       destroy (wobject);
@@ -860,7 +860,7 @@ WPRIVATE void * WFile_nextRecordUncompressed (void * _self)
   
   unless (WFile_checkEndCRLF(FH))
     {
-      WarcDebugMsg ("Failed in trying copying record in temporary file\n");
+      WarcDebugMsg ("failed to copy the record in a temporary space");
       destroy (hdl);
       destroy (lanvl);
       destroy (wobject);
@@ -929,7 +929,7 @@ WPUBLIC void * WFile_nextRecord (void * _self)
     case WARC_FILE_UNCOMPRESSED:
       return (WFile_nextRecordUncompressed (self));
     default:
-      WarcDebugMsg ("WFile opened with an unknown mode\n");
+      WarcDebugMsg ("WFile opened with an unknown mode");
     }
   
   return (NIL);
@@ -983,7 +983,7 @@ WPUBLIC warc_bool_t WFile_register (void* _self, void * wrec,
 
   unless (callback)
     {
-      WarcDebugMsg ("error: giving NULL callback function \n");
+      WarcDebugMsg ("NULL callback pointer");
       return (WARC_TRUE);
     }
  
@@ -1022,7 +1022,7 @@ WPUBLIC warc_bool_t WFile_register (void* _self, void * wrec,
                                   & csize, wrecover, (void *) wtfile);
           if (ret)
             {
-              WarcDebugMsg ("Unable to uncompress compressed Record");
+              WarcDebugMsg ("unable to uncompress a gzipped record");
               destroy (objwtfile);
               destroy (gzobj);
               return (WARC_TRUE);
@@ -1034,7 +1034,7 @@ WPUBLIC warc_bool_t WFile_register (void* _self, void * wrec,
           
           unless (WFile_checkEndCRLF (wtfile))
             {
-              WarcDebugMsg ("Error: End DoubleCRLf missed\n");
+              WarcDebugMsg ("missing double CRLF");
               destroy (objwtfile);
               return (WARC_TRUE);
             }
@@ -1043,7 +1043,7 @@ WPUBLIC warc_bool_t WFile_register (void* _self, void * wrec,
 
           if (WRecord_setContentFromFileHandle (wrec, objwtfile))
             {
-              WarcDebugMsg ("Faild in trying to guive the bloc file descriptor to the Record");
+              WarcDebugMsg ("faild to give load date from handle");
               destroy (objwtfile);
               return (WARC_TRUE);
             }
@@ -1055,7 +1055,7 @@ WPUBLIC warc_bool_t WFile_register (void* _self, void * wrec,
       objwtfile = bless (WTempFile);
       unless (objwtfile)
         {
-          WarcDebugMsg ("unable to create temporary file for the record bloc\n");
+          WarcDebugMsg ("unable to create temporary space");
           return (WARC_TRUE);
         }
       wtfile = WTempFile_handle (objwtfile);
@@ -1084,7 +1084,7 @@ WPUBLIC warc_bool_t WFile_register (void* _self, void * wrec,
       break;
 
     default:
-      WarcDebugMsg ("WFile opened with an unknown mode\n");
+      WarcDebugMsg ("WFile opened with an unknown mode");
       return (WARC_TRUE);
     }
   
@@ -1400,7 +1400,7 @@ WPRIVATE warc_bool_t WFile_writeDataBloc (FILE * wtfile, FILE * bloc,
       p = w_fread (buf, 1, r, bloc);
       if (w_ferror (wtfile) || r != p)
         {
-          WarcDebugMsg("data fill temporary error");
+          WarcDebugMsg("data copying error");
           return (WARC_TRUE);
         }
       
@@ -1570,7 +1570,7 @@ WFile_storeRecordGzipComressed (void * _self,
   objcrec = bless (WTempFile);
   unless (objcrec)
     {
-      WarcDebugMsg ("Unable to create temporary file for the compressed record\n");
+      WarcDebugMsg ("unable to create temporary space for the gzipped record");
       destroy (objwtfile), wtfile = NIL;
       return (WARC_TRUE);
     }
@@ -1582,7 +1582,7 @@ WFile_storeRecordGzipComressed (void * _self,
 
   if (WGzip_compress (gzobj, wtfile, crec, level, & csize))
     {
-      WarcDebugMsg ("failed in compressing the record\n");
+      WarcDebugMsg ("failed to GZIP compress the record");
       destroy (objwtfile);
       destroy (objcrec);
       destroy (gzobj);
@@ -1596,7 +1596,7 @@ WFile_storeRecordGzipComressed (void * _self,
   if ((MAXSIZE - w_ftell (FH)) < csize)
     {
       destroy (objcrec);
-      WarcDebugMsg ("Couldn't add record to the warc file, maximum size reached\n");
+      WarcDebugMsg ("couldn't add record to the warc file, maximum size reached");
       return (WARC_TRUE);
     }
   
@@ -1635,7 +1635,7 @@ WFile_storeRecordUncompressed (void* _self, const void * wrec,
       (MAXSIZE - w_ftell (FH)) < (datalength + 4))
     {
       destroy (objwtfile);
-      WarcDebugMsg ("Couldn't add record to the warc file, maximum size reached\n");
+      WarcDebugMsg ("couldn't add record to the warc file, maximum size reached");
       return (WARC_TRUE);
     }
   
@@ -1712,7 +1712,7 @@ WPUBLIC warc_bool_t WFile_storeRecord (void* _self, const void * wrec)
   
   unless (WRecord_check (wrec))
     {
-      WarcDebugMsg ("some header line fields are missing.\n");
+      WarcDebugMsg ("some header line fields are missing");
       return (WARC_TRUE);
     }
   
@@ -1725,7 +1725,7 @@ WPUBLIC warc_bool_t WFile_storeRecord (void* _self, const void * wrec)
   objwtfile = bless (WTempFile);
   unless (objwtfile)
     {
-      WarcDebugMsg ("failure in trying creating File pointer on temporary file\n");
+      WarcDebugMsg ("failure to create temporary space");
       return (WARC_TRUE);
     }
   wtfile = WTempFile_handle (objwtfile);
@@ -1781,7 +1781,7 @@ WPUBLIC warc_bool_t WFile_storeRecord (void* _self, const void * wrec)
       return (WFile_storeRecordUncompressed (self, wrec, datalength, bloc,
                                              wtfile, objwtfile));
     default:
-      WarcDebugMsg ("WFile file opened with an unknown mode\n");
+      WarcDebugMsg ("WARC file opened with an unknown mode");
     }
 
   return (WARC_TRUE); 

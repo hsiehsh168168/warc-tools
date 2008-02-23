@@ -114,13 +114,6 @@
 #define w_fwrite(buff, nbel, size, file) fwrite (buff, nbel, size, file)
 #endif
 
-/**
- * Macro to get current offset of o file
- */
-
-#ifndef w_ftell
-#define w_ftell(file) ftell(file)
-#endif
 
 /**
  * Macro to safetly close a file
@@ -136,6 +129,24 @@
  } while (0)
 #endif
 
+
+/**
+ * Macro to saftely use seek (32 bits and 64 bits architecture)
+ */
+
+#ifndef w_fseek
+#define w_fseek fseek
+#endif
+
+/**
+ * Macro to get current offset of o file
+ */
+
+#ifndef w_ftell
+#define w_ftell(file) ftell(file)
+#endif
+
+
 /**
  * Macro to saftely seek the begining of a file
  */
@@ -143,7 +154,7 @@
 #ifndef w_fseek_start 
 #define w_fseek_start(file) \
  do { \
- int ret = fseek (file, 0, SEEK_SET); \
+ int ret = w_fseek (file, 0, SEEK_SET); \
  assert (! ret); \
  UNUSED (ret); \
  } while (0)
@@ -156,7 +167,7 @@
 #ifndef w_fseek_from_start
 #define w_fseek_from_start(file, offset) \
  do { \
- int ret = fseek (file, offset, SEEK_SET); \
+ int ret = w_fseek (file, offset, SEEK_SET); \
  assert (! ret); \
  UNUSED (ret); \
  } while (0)
@@ -169,7 +180,7 @@
 #ifndef w_fseek_end
 #define w_fseek_end(file); \
  do { \
- int ret = fseek (file, 0, SEEK_END); \
+ int ret = w_fseek (file, 0, SEEK_END); \
  assert (! ret); \
  UNUSED (ret); \
  } while (0)
@@ -182,7 +193,7 @@
 #ifndef w_fseek_from_end
 #define w_fseek_from_end(file, offset) \
  do { \
- int ret = fseek (file, offset, SEEK_END); \
+ int ret = w_fseek (file, offset, SEEK_END); \
  assert (! ret); \
  UNUSED (ret); \
  } while (0)
@@ -195,14 +206,14 @@
 #ifndef w_fseek_from_here 
 #define w_fseek_from_here(file,offset) \
  do { \
- int ret = fseek ((file), (offset), SEEK_CUR); \
+ int ret = w_fseek ((file), (offset), SEEK_CUR); \
  assert (! ret); \
  UNUSED (ret); \
  } while (0)
 #endif
 
 /**
- * Macro to saftely seek the begining of a file
+ * Macro to compute file size
  */
 
 #ifndef w_file_size 
@@ -213,6 +224,20 @@
   w_fseek_start((file)); \
  } while (0)
 #endif
+
+/**
+ * Macro to compute file size starting from an offset
+ */
+
+#ifndef w_file_size_from_offset 
+#define w_file_size_from_offset(file,size,offset) \
+ do { \
+  w_fseek_end((file)); \
+  (size) = (warc_u64_t) w_ftell((file)) - offset; \
+  w_fseek_from_start((file), (offset)); \
+ } while (0)
+#endif
+
 
 /**
  * Macro to print in the standard system output

@@ -39,6 +39,7 @@
 #include <wmem.h>    /* wmalloc, wfree */
 #include <wmisc.h>   /* unless */
 #include <arecord.h> /* for class prototype */
+#include <arecord.x> /* private ARecord functions */
 #include <wstring.h> /* WString */
 #include <wmktmp.h>  /* WTempFile */
 #include <wrecord.x> /* for calss prototype */
@@ -427,15 +428,15 @@ WIPUBLIC warc_bool_t ARecord_getContent (const void* const _self)
  * ARecord data bloc offset provider
  */
 
-WIPUBLIC warc_i64_t ARecord_getAoffset (const void * const _self)
+WIPUBLIC warc_i64_t ARecord_getRecordOffset (const void * const _self)
 {
-    const struct ARecord * const self = _self;
+  const struct ARecord * const self = _self;
 
-/* Preconditions */
+  /* Preconditions */
   CASSERT (self);
-
+  
   if (OFFSET >= 0)
-     return (OFFSET);
+    return (OFFSET);
 
   return (-1);
 }
@@ -447,19 +448,20 @@ WIPUBLIC warc_i64_t ARecord_getAoffset (const void * const _self)
  * ARecord offset in Arc File updating function
  */
 
-WIPUBLIC warc_bool_t ARecord_setAoffset (void * _self, const warc_i64_t offset)
+WIPUBLIC warc_bool_t ARecord_setRecordOffset (void * _self,
+                                              const warc_i64_t offset)
 {
-    struct ARecord * self = _self;
-
-/* Preconditions */
-CASSERT (self);
-
+  struct ARecord * self = _self;
+  
+  /* Preconditions */
+  CASSERT (self);
+  
   if (offset >= 0)
-     {
+    {
       OFFSET = offset;
       return (WARC_FALSE);
-     }
-
+    }
+  
   return (WARC_TRUE);
 }
 

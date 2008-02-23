@@ -82,12 +82,12 @@ int test1 (void)
       fprintf (stdout, "IP:   %s\n", ARecord_getIpAddress (ar));
 
      if (AFile_register (a, ar, callback, (void *) 0))
-        {
-        WarcDebugMsg ("Unable to register the record\n");
-        destroy (a);
-        destroy (ar);
-        return 1;
-        }
+       {
+         fprintf (stderr, "unable to register the callbck\n");
+         destroy (a);
+         destroy (ar);
+         return 1;
+       }
 
      ARecord_getContent (ar);
      
@@ -133,10 +133,10 @@ int test2 (void)
      destroy (a);
       if (AFile_register (a2, ar, callback, (void *) 0))
         {
-        WarcDebugMsg ("Unable to register the record\n");
-        destroy (a2);
-        destroy (ar);
-        return 1;
+          fprintf (stderr, "unable to register the callback\n");
+          destroy (a2);
+          destroy (ar);
+          return 1;
         }
 
      ARecord_getContent (ar);
@@ -179,12 +179,12 @@ int test3 (void)
       fprintf (stdout, "IP:   %s\n", ARecord_getIpAddress (ar));
 
      if (AFile_register (a, ar, callback, (void *) 0))
-        {
-        WarcDebugMsg ("Unable to register the record\n");
-        destroy (a);
-        destroy (ar);
-        return 1;
-        }
+       {
+         fprintf (stderr, "unable to register the callback\n");
+         destroy (a);
+         destroy (ar);
+         return 1;
+       }
 
      ARecord_getContent (ar);
 
@@ -226,12 +226,12 @@ int test4 (void)
       fprintf (stdout, "IP:   %s\n", ARecord_getIpAddress (ar));
 
      if (AFile_register (a, ar, callback, (void *) 0))
-        {
-        WarcDebugMsg ("Unable to register the record\n");
-        destroy (a);
-        destroy (ar);
-        return 1;
-        }
+       {
+         fprintf (stderr, "unable to register the callback\n");
+         destroy (a);
+         destroy (ar);
+         return 1;
+       }
 
      ARecord_getContent (ar);
      
@@ -273,11 +273,11 @@ int test5 (void)
       fprintf (stdout, "IP:   %s\n", ARecord_getIpAddress (ar));
 
      if (AFile_register (a, ar, callback, (void *) 0))
-        {
-        WarcDebugMsg ("Unable to register the record\n");
-        destroy (a);
-        destroy (ar);
-        return 1;
+       {
+         fprintf (stderr, "unable to register the callback\n");
+         destroy (a);
+         destroy (ar);
+         return 1;
         }
 
      ARecord_getContent (ar);
@@ -320,10 +320,10 @@ int test6 (void)
       fprintf (stdout, "IP:   %s\n", ARecord_getIpAddress (ar));
       if (AFile_register (a, ar, callback, (void *) 0))
         {
-        WarcDebugMsg ("Unable to register the record\n");
-        destroy (a);
-        destroy (ar);
-        return 1;
+          fprintf (stderr, "unable to register the callback\n");
+          destroy (a);
+          destroy (ar);
+          return 1;
         }
 
      ARecord_getContent (ar);
@@ -366,12 +366,12 @@ int test7 (void)
       fprintf (stdout, "IP:   %s\n", ARecord_getIpAddress (ar));
       if (AFile_register (a, ar, callback, (void *) 0))
         {
-        WarcDebugMsg ("Unable to register the record\n");
-        destroy (a);
-        destroy (ar);
-        return 1;
+          fprintf (stderr, "unable to register the callback\n");
+          destroy (a);
+          destroy (ar);
+          return 1;
         }
-
+      
      ARecord_getContent (ar);
       
      fin = 0;
@@ -412,10 +412,10 @@ int test8 (void)
       fprintf (stdout, "IP:   %s\n", ARecord_getIpAddress (ar));
       if (AFile_register (a, ar, callback, (void *) 0))
         {
-        WarcDebugMsg ("Unable to register the record\n");
-        destroy (a);
-        destroy (ar);
-        return 1;
+          fprintf (stderr, "unable to register the callback\n");
+          destroy (a);
+          destroy (ar);
+          return 1;
         }
 
       ARecord_getContent (ar);
@@ -458,10 +458,10 @@ int test9 (void)
       fprintf (stdout, "IP:   %s\n", ARecord_getIpAddress (ar));
       if (AFile_register (a, ar, callback, (void *) 0))
         {
-        WarcDebugMsg ("Unable to register the record\n");
-        destroy (a);
-        destroy (ar);
-        return 1;
+          fprintf (stderr, "unable to register the callback\n");
+          destroy (a);
+          destroy (ar);
+          return 1;
         }
 
      ARecord_getContent (ar);
