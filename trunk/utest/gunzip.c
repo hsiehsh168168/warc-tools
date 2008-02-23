@@ -36,7 +36,7 @@ struct CallbackEnv
 {
   FILE     * out;
   warc_u32_t crlf;
-  warc_u32_t usize;
+  warc_u64_t usize;
 };
 
 /* this callback uncompressing the entire WARC file */
@@ -248,8 +248,8 @@ int test1 (const char * fin)
   FILE       * out   = NIL;
   void       * g     = NIL; /* WGzip object */
   warc_i32_t   ret   = 0;
-  warc_u32_t   usize = 0;   /* uncompressed file size */
-  warc_u32_t   csize = 0;   /* compressed file size */
+  warc_u64_t   usize = 0;   /* uncompressed file size */
+  warc_u64_t   csize = 0;   /* compressed file size */
 
 
   fprintf (stdout, "%s>\n", t);
@@ -269,7 +269,7 @@ int test1 (const char * fin)
                           callback1_warc, (void *) out);
   assert (! ret);
   fprintf (stdout,
-           "uncompressed \"%s\" to \"%s\" [usize: %u][csize: %u]\n", 
+           "uncompressed \"%s\" to \"%s\" [usize: %llu][csize: %llu]\n", 
            fin, fout, usize, csize);
 
   fclose (out);
@@ -289,8 +289,8 @@ int test2 (const char * fin)
   FILE       * out   = NIL;
   void       * g     = NIL; /* WGzip object */
   warc_i32_t   ret   = 0;
-  warc_u32_t   usize = 0;   /* uncompressed file size */
-  warc_u32_t   csize = 0;   /* compressed file size */
+  warc_u64_t   usize = 0;   /* uncompressed file size */
+  warc_u64_t   csize = 0;   /* compressed file size */
   struct CallbackEnv cenv;
 
   fprintf (stdout, "%s>\n", t);
@@ -315,7 +315,7 @@ int test2 (const char * fin)
                           callback2_warc, (void *) & cenv);
   assert (! ret);
   fprintf (stdout,
-           "uncompressed \"%s\" to \"%s\" [usize: %u][csize: %u]\n", 
+           "uncompressed \"%s\" to \"%s\" [usize: %llu][csize: %llu]\n", 
            fin, fout, cenv . usize, csize);
 
   fclose (out);
@@ -336,9 +336,9 @@ int test3 (const char * fin)
   FILE       * out    = NIL;
   void       * g      = NIL; /* WGzip object */
   warc_i32_t   ret    = 0;
-  warc_u32_t   usize  = 0;   /* uncompressed file size */
-  warc_u32_t   csize  = 0;   /* compressed file size */
-  warc_u32_t   offset = 0;   /* WARC record offset */
+  warc_u64_t   usize  = 0;   /* uncompressed file size */
+  warc_u64_t   csize  = 0;   /* compressed file size */
+  warc_u64_t   offset = 0;   /* WARC record offset */
   struct CallbackEnv cenv;
 
 
@@ -370,7 +370,7 @@ int test3 (const char * fin)
                               callback3_arc, (void *) & cenv);
       assert (! ret);
       fprintf (stdout,
-               "uncompressed \"%s\" to \"%s\" [usize: %u][csize: %u]\n", 
+               "uncompressed \"%s\" to \"%s\" [usize: %llu][csize: %llu]\n", 
                fin, fout, cenv . usize, csize);
 
       /* goto to the next record */
@@ -394,9 +394,9 @@ int test4 (const char * fin)
   FILE       * out    = NIL;
   void       * g      = NIL; /* WGzip object */
   warc_i32_t   ret    = 0;
-  warc_u32_t   usize  = 0;   /* uncompressed file size */
-  warc_u32_t   csize  = 0;   /* compressed file size */
-  warc_u32_t   offset = 0;   /* WARC record offset */
+  warc_u64_t   usize  = 0;   /* uncompressed file size */
+  warc_u64_t   csize  = 0;   /* compressed file size */
+  warc_u64_t   offset = 0;   /* WARC record offset */
 
   fprintf (stdout, "%s>\n", t);
 
@@ -422,7 +422,7 @@ int test4 (const char * fin)
         break;
 
       fprintf (stdout,
-               "uncompressed \"%s\" to \"%s\" [usize: %u][csize: %u]\n", 
+               "uncompressed \"%s\" to \"%s\" [usize: %llu][csize: %llu]\n", 
                fin, fout, usize, csize);
       
       /* goto to the next record */

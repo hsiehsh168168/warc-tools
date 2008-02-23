@@ -234,12 +234,14 @@ int main (int argc, const char ** argv)
        free_err (10);
     
      /* Create a UUID (Universal Unique IDentifier) based on URL + Timestamp */
-     WUUID_reinit(u);
      WUUID_hash (u, makeU (ARecord_getUrl (ar)));
      WUUID_hash (u, makeU (ARecord_getCreationDate (ar)));
+
      b = WRecord_setRecordId (wr, makeS (WUUID_text (u)));
      if (b)
        free_err (11);
+
+     WUUID_reinit(u); /* re-initialize the UUID object */
      
      /* add the ARC IP as an Anvl */
      b = WRecord_addAnvl (wr, makeS ("IpAddress"), 
@@ -252,7 +254,7 @@ int main (int argc, const char ** argv)
      if (b)
        free_err (13);
      
-     /* save the WARC record in the WARC file */
+     /* save the WARC record into the WARC file */
      b = WFile_storeRecord (w, wr);
      if (b)
        free_err (14);

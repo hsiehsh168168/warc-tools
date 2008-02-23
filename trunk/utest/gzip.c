@@ -83,7 +83,7 @@ int test1 (const char * fin)
   FILE       * out   = NIL;
   void       * g     = NIL; /* WGzip object */
   warc_i32_t   ret   = 0;
-  warc_u32_t   csize = 0;   /* compressed file size */
+  warc_u64_t   csize = 0;   /* compressed file size */
 
   fprintf (stdout, "%s>\n", t);
 
@@ -100,7 +100,7 @@ int test1 (const char * fin)
 
   ret = WGzip_compress (g, in, out, WARC_GZIP_NO_COMPRESSION, & csize);
   assert (!ret);
-  fprintf (stderr, "\"%s\" compressed to \"%s\" [size: %u] [mode: %s]\n", 
+  fprintf (stderr, "\"%s\" compressed to \"%s\" [size: %llu] [mode: %s]\n", 
            fin, fout, csize, makeString(WARC_GZIP_NO_COMPRESSION));
 
   destroy (g);
@@ -119,7 +119,7 @@ int test2 (const char * fin)
   FILE       * out   = NIL;
   void       * g     = NIL; /* WGzip object */
   warc_i32_t   ret   = 0;
-  warc_u32_t   csize = 0;   /* compressed file size */
+  warc_u64_t   csize = 0;   /* compressed file size */
 
   fprintf (stdout, "%s>\n", t);
 
@@ -136,7 +136,7 @@ int test2 (const char * fin)
 
   ret = WGzip_compress (g, in, out, WARC_GZIP_DEFAULT_COMPRESSION, & csize);
   assert (! ret);
-  fprintf (stdout, "\"%s\" compressed to \"%s\" [size: %u] [mode: %s]\n", 
+  fprintf (stdout, "\"%s\" compressed to \"%s\" [size: %llu] [mode: %s]\n", 
            fin, fout, csize, makeString(WARC_GZIP_DEFAULT_COMPRESSION));
 
   destroy (g);
@@ -153,7 +153,7 @@ int test3 (const char * fin)
   FILE       * in    = NIL;
   FILE       * out   = NIL;
   void       * g     = NIL; /* WGzip object */
-  warc_u32_t   csize = 0;   /* compressed file size */
+  warc_u64_t   csize = 0;   /* compressed file size */
 
   fprintf (stdout, "%s>\n", t);
 
@@ -169,7 +169,7 @@ int test3 (const char * fin)
 
 
   WGzip_compress (g, in, out, WARC_GZIP_BEST_SPEED, & csize);
-  fprintf (stderr, "\"%s\" compressed to \"%s\" [size: %u] [mode: %s]\n", 
+  fprintf (stderr, "\"%s\" compressed to \"%s\" [size: %llu] [mode: %s]\n", 
            fin, fout, csize, makeString(WARC_GZIP_BEST_SPEED));
 
   destroy (g);
@@ -187,7 +187,7 @@ int test4 (const char * fin)
   FILE       * out   = NIL;
   void       * g     = NIL; /* WGzip object */
   warc_i32_t   ret   = 0;
-  warc_u32_t   csize = 0;   /* compressed file size */
+  warc_u64_t   csize = 0;   /* compressed file size */
 
   fprintf (stdout, "%s>\n", t);
 
@@ -204,7 +204,7 @@ int test4 (const char * fin)
 
   ret = WGzip_compress (g, in, out, WARC_GZIP_BEST_COMPRESSION, & csize);
   assert (! ret);
-  fprintf (stderr, "\"%s\" compressed to \"%s\" [size: %u] [mode: %s]\n", 
+  fprintf (stderr, "\"%s\" compressed to \"%s\" [size: %llu] [mode: %s]\n", 
            fin, fout, csize, makeString(WARC_GZIP_BEST_COMPRESSION));
 
   destroy (g);
@@ -223,7 +223,7 @@ int test5 (const char * fin)
   FILE       * out   = NIL;
   void       * g     = NIL; /* WGzip object */
   warc_i32_t   ret   = 0;
-  warc_u32_t   csize = 0;   /* compressed file size */
+  warc_u64_t   csize = 0;   /* compressed file size */
 
   fprintf (stdout, "%s>\n", t);
 
@@ -240,7 +240,7 @@ int test5 (const char * fin)
 
   ret = WGzip_compress (g, in, out, WARC_GZIP_BEST_COMPRESSION, & csize);
   assert (! ret);
-  fprintf (stderr, "\"%s\" compressed to \"%s\" [size: %u] [mode: %s]\n", 
+  fprintf (stderr, "\"%s\" compressed to \"%s\" [size: %llu] [mode: %s]\n", 
            fin, fout, csize, makeString(WARC_GZIP_BEST_COMPRESSION));
 
   destroy (g);
@@ -257,8 +257,8 @@ int test6 (const char * unused)
   const char * fin   = "compress.gz";
   FILE       * in    = NIL;
   void       * g     = NIL; /* WGzip object */
-  warc_u32_t   usize = 0;   /* uncompressed file size */
-  warc_u32_t   csize = 0;   /* compressed file size */
+  warc_u64_t   usize = 0;   /* uncompressed file size */
+  warc_u64_t   csize = 0;   /* compressed file size */
   warc_bool_t  ret;
 
   unused = 0;
@@ -277,7 +277,7 @@ int test6 (const char * unused)
 
   unless (ret)
     fprintf (stdout,
-             "Found data in the GZIP header:\n\t compressed : %u\n\t uncompressed : %u\n", csize, usize);
+             "Found data in the GZIP header:\n\t compressed : %llu\n\t uncompressed : %llu\n", csize, usize);
   else
     fprintf (stdout, "GZIP header contains no information. Sorry !!!\n");
 
@@ -298,8 +298,8 @@ int test7 (const char * unused)
   FILE       * out   = NIL;
   void       * g     = NIL; /* WGzip object */
   warc_i32_t   ret   = 0;
-  warc_u32_t   usize = 0;   /* uncompressed file size */
-  warc_u32_t   csize = 0;   /* compressed file size */
+  warc_u64_t   usize = 0;   /* uncompressed file size */
+  warc_u64_t   csize = 0;   /* compressed file size */
 
   unused = 0;
 
@@ -320,7 +320,7 @@ int test7 (const char * unused)
                           callback, (void *) out);
   assert (! ret);
   fprintf (stdout,
-           "uncompressed \"%s\" to \"%s\" [usize: %u][csize: %u]\n", 
+           "uncompressed \"%s\" to \"%s\" [usize: %llu][csize: %llu]\n", 
            fin, fout, usize, csize);
 
   fclose (out);

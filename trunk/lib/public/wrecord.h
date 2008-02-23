@@ -71,9 +71,9 @@ extern warc_bool_t   WRecord_addAnvl         (void *, const warc_u8_t *,
                                               const warc_u32_t);
 extern warc_bool_t   WRecord_setContentFromFileName (void *, const char *);
 
-extern warc_i64_t WRecord_getOffset           (const void * const );
-extern warc_u64_t WRecord_getUncompressedSize (const void * const );
-extern warc_u64_t WRecord_getCompressedSize   (const void * const);
+extern warc_i64_t    WRecord_getOffset           (const void * const );
+extern warc_u64_t    WRecord_getUncompressedSize (const void * const );
+extern warc_u64_t    WRecord_getCompressedSize   (const void * const);
 
 
 #ifdef __cplusplus

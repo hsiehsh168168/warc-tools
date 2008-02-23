@@ -106,10 +106,8 @@ int main (int argc, const char ** argv)
 
       /* dump WRecord */
 
-      fprintf (stdout, "%-10li ",  (unsigned long) WRecord_getOffset  (r));
-      fprintf (stdout, "%-10lu ",  
-               (unsigned long) WRecord_getCompressedSize (r));
-
+      fprintf (stdout, "%-10llu ", WRecord_getOffset (r));
+      fprintf (stdout, "%-10llu ", WRecord_getCompressedSize (r));
       fprintf (stdout, "%-10s ",   WRecord_getWarcId      (r));
       fprintf (stdout, "%-10u ",   WRecord_getDataLength  (r));
       fprintf (stdout, "%-15u ",   WRecord_getRecordType  (r));

@@ -163,8 +163,8 @@ WPUBLIC void * AFile_nextRecord ( void * _self)
   void       * arec     = NIL;
   void       * arcfsm   = NIL;
   void       * gzobj    = NIL; /* for decompression */
-  warc_u32_t   usize    = 0; /* uncompressed data size */
-  warc_u32_t   csize    = 0; /* compressed data size */
+  warc_u64_t   usize    = 0; /* uncompressed data size */
+  warc_u64_t   csize    = 0; /* compressed data size */
   warc_u32_t   ret      = 0;
   void       * objrectfile = NIL;
   FILE       * rectfile = NIL; /* to uncompress the ARecord */

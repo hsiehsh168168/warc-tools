@@ -59,21 +59,21 @@ enum {Z_STOP_DECODING = 111};
 extern warc_i32_t WGzip_compress   (const void * const,
                                     FILE *, FILE *, 
                                     const warc_gzlevel_t,
-                                    warc_u32_t *);
+                                    warc_u64_t *);
 
 extern warc_u32_t WGzip_uncompress (const void * const,
-                                    FILE *, warc_u32_t,
-                                    warc_u32_t *,
-                                    warc_u32_t *,
+                                    FILE *, warc_u64_t,
+                                    warc_u64_t *,
+                                    warc_u64_t *,
                                     warc_u32_t (*) (const warc_u8_t *, 
                                                     const warc_u32_t,
                                                     void *),
                                     void *);
-extern warc_bool_t WGzip_check     (const void *,  FILE *, warc_u32_t);
+extern warc_bool_t WGzip_check     (const void *,  FILE *, warc_u64_t);
 
 extern warc_bool_t WGzip_analyzeHeader (const void *,  FILE *, 
-                                        warc_u32_t, warc_u32_t *,
-                                        warc_u32_t *);
+                                        warc_u64_t, warc_u64_t *,
+                                        warc_u64_t *);
 
 
 #ifdef __cplusplus
