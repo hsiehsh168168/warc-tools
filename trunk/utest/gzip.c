@@ -101,7 +101,8 @@ int test1 (const char * fin)
   ret = WGzip_compress (g, in, out, WARC_GZIP_NO_COMPRESSION, & csize);
   assert (!ret);
   fprintf (stderr, "\"%s\" compressed to \"%s\" [size: %llu] [mode: %s]\n", 
-           fin, fout, csize, makeString(WARC_GZIP_NO_COMPRESSION));
+           fin, fout, (unsigned long long) csize, 
+           makeString(WARC_GZIP_NO_COMPRESSION));
 
   destroy (g);
   fclose (out);
@@ -137,7 +138,8 @@ int test2 (const char * fin)
   ret = WGzip_compress (g, in, out, WARC_GZIP_DEFAULT_COMPRESSION, & csize);
   assert (! ret);
   fprintf (stdout, "\"%s\" compressed to \"%s\" [size: %llu] [mode: %s]\n", 
-           fin, fout, csize, makeString(WARC_GZIP_DEFAULT_COMPRESSION));
+           fin, fout, (unsigned long long) csize,
+           makeString(WARC_GZIP_DEFAULT_COMPRESSION));
 
   destroy (g);
   fclose (out);
@@ -170,7 +172,8 @@ int test3 (const char * fin)
 
   WGzip_compress (g, in, out, WARC_GZIP_BEST_SPEED, & csize);
   fprintf (stderr, "\"%s\" compressed to \"%s\" [size: %llu] [mode: %s]\n", 
-           fin, fout, csize, makeString(WARC_GZIP_BEST_SPEED));
+           fin, fout, (unsigned long long) csize,
+           makeString(WARC_GZIP_BEST_SPEED));
 
   destroy (g);
   fclose (out);
@@ -205,7 +208,8 @@ int test4 (const char * fin)
   ret = WGzip_compress (g, in, out, WARC_GZIP_BEST_COMPRESSION, & csize);
   assert (! ret);
   fprintf (stderr, "\"%s\" compressed to \"%s\" [size: %llu] [mode: %s]\n", 
-           fin, fout, csize, makeString(WARC_GZIP_BEST_COMPRESSION));
+           fin, fout, (unsigned long long) csize, 
+           makeString(WARC_GZIP_BEST_COMPRESSION));
 
   destroy (g);
   fclose (out);
@@ -241,7 +245,8 @@ int test5 (const char * fin)
   ret = WGzip_compress (g, in, out, WARC_GZIP_BEST_COMPRESSION, & csize);
   assert (! ret);
   fprintf (stderr, "\"%s\" compressed to \"%s\" [size: %llu] [mode: %s]\n", 
-           fin, fout, csize, makeString(WARC_GZIP_BEST_COMPRESSION));
+           fin, fout, (unsigned long long) csize, 
+           makeString(WARC_GZIP_BEST_COMPRESSION));
 
   destroy (g);
   fclose (out);
@@ -277,7 +282,7 @@ int test6 (const char * unused)
 
   unless (ret)
     fprintf (stdout,
-             "Found data in the GZIP header:\n\t compressed : %llu\n\t uncompressed : %llu\n", csize, usize);
+             "Found data in the GZIP header:\n\t compressed : %llu\n\t uncompressed : %llu\n", (unsigned long long) csize, (unsigned long long) usize);
   else
     fprintf (stdout, "GZIP header contains no information. Sorry !!!\n");
 
@@ -321,7 +326,7 @@ int test7 (const char * unused)
   assert (! ret);
   fprintf (stdout,
            "uncompressed \"%s\" to \"%s\" [usize: %llu][csize: %llu]\n", 
-           fin, fout, usize, csize);
+           fin, fout, (unsigned long long) usize, (unsigned long long) csize);
 
   fclose (out);
   fclose (in);

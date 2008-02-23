@@ -270,7 +270,7 @@ int test1 (const char * fin)
   assert (! ret);
   fprintf (stdout,
            "uncompressed \"%s\" to \"%s\" [usize: %llu][csize: %llu]\n", 
-           fin, fout, usize, csize);
+           fin, fout, (unsigned long long) usize, (unsigned long long) csize);
 
   fclose (out);
   fclose (in);
@@ -316,7 +316,8 @@ int test2 (const char * fin)
   assert (! ret);
   fprintf (stdout,
            "uncompressed \"%s\" to \"%s\" [usize: %llu][csize: %llu]\n", 
-           fin, fout, cenv . usize, csize);
+           fin, fout, 
+           (unsigned long long) cenv . usize, (unsigned long long) csize);
 
   fclose (out);
   fclose (in);
@@ -371,7 +372,8 @@ int test3 (const char * fin)
       assert (! ret);
       fprintf (stdout,
                "uncompressed \"%s\" to \"%s\" [usize: %llu][csize: %llu]\n", 
-               fin, fout, cenv . usize, csize);
+               fin, fout, 
+               (unsigned long long) cenv . usize, (unsigned long long) csize);
 
       /* goto to the next record */
       offset += csize;
@@ -423,7 +425,8 @@ int test4 (const char * fin)
 
       fprintf (stdout,
                "uncompressed \"%s\" to \"%s\" [usize: %llu][csize: %llu]\n", 
-               fin, fout, usize, csize);
+               fin, fout, 
+               (unsigned long long) usize, (unsigned long long) csize);
       
       /* goto to the next record */
       offset += csize;

@@ -660,7 +660,7 @@ WPUBLIC warc_u32_t WGzip_uncompress (const void * const _self,
       /* maybe uncompress failure or EOF */
       if (Z_EOF != ret) 
         {
-          w_fprintf (fprintf (stdout, "error when uncompressing data at offset %llu (Gzip error number: %u)\n", offset, ret));
+          w_fprintf (fprintf (stdout, "error when uncompressing data at offset %llu (Gzip error number: %d)\n", (unsigned long long) offset, ret));
         }
     }      
   else
