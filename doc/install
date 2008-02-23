@@ -3,6 +3,8 @@ Requirements
 
 WARC is a standalone library with no requirements but GCC. Doxygen is optional and only needed to generate technical documentation. (http://www.stack.nl/~dimitri/doxygen).
 
+The library was tested in x86 and PPC on both 32 bits and 64 bits architectures.
+
     o Linux: 
 
     GCC >= 3.x.y 
