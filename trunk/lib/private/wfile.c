@@ -71,7 +71,7 @@ struct WFile
   FILE * fh;    /**< file handle */
   wfile_mode_t mode;  /**< Warc object access mode*/
   wfile_comp_t compressed; /**< indicates if the record is compressed */
-  warc_u32_t maxsize; /**< Maximum Warc file size in BYTES */ 
+  warc_u64_t maxsize; /**< Maximum Warc file size in BYTES */ 
   warc_u64_t fsize; /**< The current WarcFile Size */
   /*@}*/
 };
@@ -1593,7 +1593,7 @@ WFile_storeRecordGzipComressed (void * _self,
   destroy (gzobj), gzobj = NIL;
   
   /* testing if the record will not overload the Warc File */
-  if ((MAXSIZE - w_ftell (FH)) < csize)
+  if ((warc_u64_t) (MAXSIZE - w_ftell (FH)) < csize)
     {
       destroy (objcrec);
       WarcDebugMsg ("couldn't add record to the warc file, maximum size reached");
