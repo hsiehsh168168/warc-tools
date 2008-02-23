@@ -42,6 +42,7 @@
 #include <wlist.h>    /* WList  */
 #include <wstring.h>  /* WString */
 #include <arecord.h>  /* ARecord */
+#include <arecord.x>  /* private ARecord functions */
 #include <afsmhdl.h>  /* AFsmHDLine */
 #include <wmktmp.h>   /* WTempFile */
 #include <wgzip.h>    /* Z_STOP_DECODING ... */
@@ -112,18 +113,14 @@ WIPUBLIC warc_bool_t AFile_hasMoreRecords (const void * const _self)
   /* preconditions */
   CASSERT (self);
    
-    
-        
-       if (w_ftell (FH) == (warc_i64_t)  FSIZE)
-          {
-          w_fseek_start (FH);
-          return (WARC_FALSE);
-          }
-       else 
-         return (WARC_TRUE);
+  if (w_ftell (FH) == (warc_i64_t)  FSIZE)
+    {
+      w_fseek_start (FH);
+      return (WARC_FALSE);
+    }
+  else 
+    return (WARC_TRUE);
    
-     
-  
   return (WARC_FALSE);
 }
 
@@ -171,7 +168,7 @@ WPUBLIC void * AFile_nextRecord ( void * _self)
   warc_u32_t   ret      = 0;
   void       * objrectfile = NIL;
   FILE       * rectfile = NIL; /* to uncompress the ARecord */
-  warc_i64_t   offset   = 0;
+  warc_u64_t   offset   = 0;
 
   
  
@@ -184,7 +181,7 @@ WPUBLIC void * AFile_nextRecord ( void * _self)
       objrectfile = bless (WTempFile);
       unless (objrectfile)
         {
-          WarcDebugMsg ("Unable to create temporary file for record decompression");
+          WarcDebugMsg ("unable to create temporary space");
           return (NIL);
         }
       rectfile = WTempFile_handle (objrectfile);
@@ -195,7 +192,7 @@ WPUBLIC void * AFile_nextRecord ( void * _self)
                               arecover, (void *) rectfile);
       if (ret)
         {
-          WarcDebugMsg ("unable to uncompress more record");
+          WarcDebugMsg ("unable to uncompress the gzipped record");
           destroy (objrectfile);
           destroy (gzobj);
           return (NIL);
@@ -226,7 +223,7 @@ WPUBLIC void * AFile_nextRecord ( void * _self)
           return (NIL);
         }
       
-      if (ARecord_setAoffset (arec, w_ftell (rectfile)))
+      if (ARecord_setRecordOffset (arec, w_ftell (rectfile)))
         {
           destroy (arec);
           destroy (arcfsm);
@@ -275,7 +272,7 @@ WPUBLIC void * AFile_nextRecord ( void * _self)
           return (NIL);
         }
       
-      if (ARecord_setAoffset (arec, w_ftell (FH)))
+      if (ARecord_setRecordOffset (arec, w_ftell (FH)))
         {
           destroy (arec);
           destroy (arcfsm);
@@ -349,7 +346,7 @@ WPRIVATE warc_bool_t AFile_fillTempFile(const void* const _self,
       p = w_fread (buf, 1, r, FH);
       if (w_ferror (atfile) || r != p)
         {
-          WarcDebugMsg("data fill temporary error");
+          WarcDebugMsg("error when copying data");
           return (WARC_TRUE);
         }
       
@@ -407,7 +404,7 @@ WPUBLIC warc_bool_t AFile_register (void* _self, void * arec,
   
   unless (callback)
     {
-      WarcDebugMsg ("error: giving NULL callback function \n");
+      WarcDebugMsg ("NULL callback pointer");
       return (WARC_TRUE);
     }
 
@@ -417,7 +414,7 @@ WPUBLIC warc_bool_t AFile_register (void* _self, void * arec,
   if (ARecord_setEnv (arec, env))
      return (WARC_TRUE);
 
-  offset = ARecord_getAoffset (arec);
+  offset = ARecord_getRecordOffset (arec);
 
   if (offset < 0)
     return (WARC_TRUE);
@@ -432,7 +429,7 @@ WPUBLIC warc_bool_t AFile_register (void* _self, void * arec,
        objatfile = bless (WTempFile);
        unless (objatfile)
          {
-           WarcDebugMsg ("unable to create temporary file for the record bloc\n");
+           WarcDebugMsg ("unable to create temporary space");
            return (WARC_TRUE);
          }
        atfile = WTempFile_handle (objatfile);
@@ -461,7 +458,7 @@ WPUBLIC warc_bool_t AFile_register (void* _self, void * arec,
      }
    else
      {
-       WarcDebugMsg ("AFile opened with an unkown compression\n");
+       WarcDebugMsg ("ARC file opened with an unknown mode");
        return (WARC_TRUE);
      }
 

@@ -79,14 +79,24 @@
 /* forever loops */
 #define EVER ;;
 
-/* Trace any function before calling it */
+/* print message tp STDERR */
 #ifndef WARC_MSG_DEBUG
 #define WARC_MSG_DEBUG
 #define WarcDebugMsg(m) \
-       (fprintf(stderr, __FILE__ " :%d:" #m "\n", __LINE__), (m))
+  (fprintf(stderr, "> debug: " __FILE__ " :%d:" #m "\n", __LINE__))
 #else
 #define WarcDebugMsg(m) (m)
 #endif
+
+/* Trace any function before calling it */
+#ifndef WARC_MSG_DEBUG_ACTION
+#define WARC_MSG_DEBUG_ACTION
+#define WarcDebugMsgAction(m) \
+  (fprintf(stderr, "> debug action: " __FILE__ " :%d:" #m "\n", __LINE__), (m))
+#else
+#define WarcDebugMsgAction(m) (m)
+#endif
+
 
 
 #ifdef __cplusplus

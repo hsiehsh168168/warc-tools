@@ -24,8 +24,8 @@
 /*     http://code.google.com/p/warc-tools/                            */
 /* ------------------------------------------------------------------- */
 
-#ifndef	__ARC_RECORD_H__
-#define	__ARC_RECORD_H__
+#ifndef	__ARC_RECORD_X__
+#define	__ARC_RECORD_X__
 
 
 /* to mix C and C++ */
@@ -47,17 +47,28 @@ extern const void * ARecord;
 
 /* getters */
 
-extern const warc_u8_t *  ARecord_getUrl          (const void * const);
-extern const warc_u8_t *  ARecord_getCreationDate (const void * const);
-extern const warc_u8_t *  ARecord_getMimeType     (const void * const);
-extern const warc_u8_t *  ARecord_getIpAddress    (const void * const);
-extern warc_bool_t        ARecord_getContent      (const void* const );
-extern warc_bool_t        ARecord_transferContent (void *, void *, void *);
-extern warc_bool_t        ARecord_setCallback     (void *, 
-                                                   warc_bool_t (*)
-                                                   (void *,  const char *,
-                                                    warc_u32_t));
+extern warc_u32_t ARecord_getDataLength   (const void * const);
+extern FILE *     ARecord_getDataFile     (const void * const);
+extern warc_u64_t ARecord_getDataSize     (const void * const);
+extern warc_i64_t ARecord_getRecordOffset (const void * const);
+extern void *     ARecord_fromWho         (const void * const);
 
+/* setters */
+
+extern warc_bool_t ARecord_setDataLength   (void * const, const warc_u32_t);
+extern warc_bool_t ARecord_setUrl          (void * const, const warc_u8_t *,
+                                            const warc_u32_t);
+extern warc_bool_t ARecord_setCreationDate (void * const, const warc_u8_t *,
+                                            const warc_u32_t);
+extern warc_bool_t ARecord_setMimeType     (void * const, const warc_u8_t *,
+                                            const warc_u32_t);
+extern warc_bool_t  ARecord_setIpAddress   (void * const, const warc_u8_t *,
+                                            const warc_u32_t);
+extern warc_bool_t ARecord_setContentFromFile (void *, void *);
+extern warc_bool_t ARecord_setContentSize  (void *,warc_i64_t);
+extern warc_bool_t ARecord_setRecordOffset (void *, const warc_i64_t);
+extern warc_bool_t ARecord_setEnv          (void *, void *);
+extern warc_bool_t ARecord_setAfile        (void *, void *);
 
 
 #ifdef __cplusplus
@@ -65,4 +76,4 @@ extern warc_bool_t        ARecord_setCallback     (void *,
 #endif
 
 
-#endif /* __ARC_RECORD_H__ */
+#endif /* __ARC_RECORD_X__ */

@@ -1282,12 +1282,12 @@ while (WFile_hasMoreRecords (w))
      r2 = bless (WRecord);
 
      if (WFile_register (w, r2, callback, (void *) env))
-        {
-        WarcDebugMsg ("Unable to register the record\n");
-        destroy (w);
-        destroy (r2);
-        return 1;
-        }
+       {
+         fprintf (stderr, "unable to register the callback"); 
+         destroy (w);
+         destroy (r2);
+         return 1;
+       }
 
      WRecord_getContent (r2);
      destroy (r2);
@@ -1342,7 +1342,7 @@ while (WFile_hasMoreRecords (w))
        
         if (WFile_register (w2, r, callback, (void *) env)) 
           { 
-            WarcDebugMsg ("Unable to register the record\n"); 
+            fprintf (stderr, "unable to register the callback");  
             destroy (w2); 
             destroy (r);
             destroy (w);
@@ -1551,7 +1551,7 @@ int test20 (void)
 
        if (WFile_register (w, r, callback, (void *) 0)) 
          { 
-           WarcDebugMsg ("Unable to register the record"); 
+           fprintf (stderr, "unable to register the callback"); 
            destroy (r); 
            destroy (w); 
            return (1); 

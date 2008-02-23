@@ -115,7 +115,7 @@ int test3 (void)
         {
           /* error when parsing the WARC header line */
           fprintf (stderr,  "error in FSM state address %p, at offset %ld in \"%s\"\n",
-          WFsmANVL_state (afsm), ftell (fin), filename);
+                   WFsmANVL_state (afsm), ftell (fin), filename);
           more = WARC_FALSE;
         }
 
@@ -311,16 +311,17 @@ int test7 (void)
   fprintf (stderr, "%s>\n", t);
 
   if (WAnvl_setKey (a, makeS ("C\x7F")))
-     {
-       WarcDebugMsg ("Invalid key\n");
-       destroy (a);
-       return 1;
-     }
-  WAnvl_setValue (a, makeS ("DDDD"));
+    {
+      fprintf (stderr, ("Invalid key\n"));
+      destroy (a);
+      return 1;
+    }
 
+  WAnvl_setValue (a, makeS ("DDDD"));
+  
   fprintf (stdout, "key  : %s\n", WAnvl_getKey   (a) );
   fprintf (stdout, "value: %s\n", WAnvl_getValue (a) );
-
+  
   destroy (a);
       
   return 0;
@@ -337,18 +338,18 @@ int test8 (void)
   fprintf (stderr, "%s>\n", t);
 
   if (WAnvl_setKey (a, makeS ("C\x0Ausing")))
-     {
-       WarcDebugMsg ("An other invalid key\n");
-       destroy (a);
-       return 1;
-     }
+    {
+      fprintf (stderr, ("An other invalid key\n"));
+      destroy (a);
+      return 1;
+    }
   WAnvl_setValue (a, makeS ("DDDD"));
-
+  
   fprintf (stdout, "key  : %s\n", WAnvl_getKey   (a) );
   fprintf (stdout, "value: %s\n", WAnvl_getValue (a) );
-
+  
   destroy (a);
-      
+  
   return 0;
 }
 

@@ -56,7 +56,9 @@ CFLAGS += $(DFLAG)
 #CFLAGS  += -Wunreachable-code 
 #CFLAGS  += -NDEBUG
 #CFLAGS  += -Wconversion -Wtraditional -Wmissing-prototypes -Wshadow
-#CFLAGS  += -D_FILE_OFFSET_BITS=64 -D_LARGE_FILES
+
+# uncomment the line below to compile with large file settings (i.e. 64 bits offsets)
+CFLAGS  += -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGE_FILES
 
 # uncomment the line below to compile with optimization enabled
 #CFLAGS += -O3 -march=i686 -pipe

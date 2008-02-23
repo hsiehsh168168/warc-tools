@@ -32,6 +32,7 @@
 
 #include <afsmhdl.h>
 #include <arecord.h>
+#include <arecord.x>
 #include <afile.h>
 
 

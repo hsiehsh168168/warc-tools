@@ -514,7 +514,7 @@ void WFsmHDL_checkRecordType (void * _hs)
      WFsmHDL_rewind (hs, WString_getLength (hs -> record_type) + 1);
 
      /* raise the flag errore */
-     WarcDebugMsg(">> Expecting a WARC record type\n");
+     WarcDebugMsg("expecting a valid WARC record type");
      hs -> err = WARC_TRUE;
    }
 }
@@ -535,7 +535,7 @@ void WFsmHDL_checkWarcID  (void * _hs)
      WFsmHDL_rewind (hs, WString_getLength (hs -> warc_id) + 1);
 
      /* raise the flag errore */
-     WarcDebugMsg(">> Expecting valid WARC ID\n");
+     WarcDebugMsg("expecting a valid WARC ID");
      hs -> err = WARC_TRUE;
    }
 }
@@ -556,7 +556,7 @@ void WFsmHDL_checkWarcID  (void * _hs)
 /*      WFsmHDL_rewind (hs, WString_getLength (hs -> subject_uri) + 1); */
 
 /*      /\* raise the flag errore *\/ */
-/*      WarcDebugMsg(">> Exepted Uri\n"); */
+/*      WarcDebugMsg("exepting a valid URI"); */
 /*      hs -> err = WARC_TRUE; */
 /*    } */
 /* } */
@@ -577,7 +577,7 @@ void WFsmHDL_checkWarcID  (void * _hs)
 /*      WFsmHDL_rewind (hs, WString_getLength (hs -> record_id) + 1); */
 
 /*      /\* raise the flag errore *\/ */
-/*      WarcDebugMsg(">> Exepted Record Id\n"); */
+/*      WarcDebugMsg("exepting a valid record ID"); */
 /*      hs -> err = WARC_TRUE; */
 /*    } */
 /* } */
@@ -597,7 +597,7 @@ void WFsmHDL_checkWarcID  (void * _hs)
 /*      WFsmHDL_rewind (hs, WString_getLength (hs -> content_type) + 1); */
 
 /*      /\* raise the flag errore *\/ */
-/*      WarcDebugMsg(">> Exepted ContentType\n"); */
+/*      WarcDebugMsg("exepting a valid ContentType"); */
 /*      hs -> err = WARC_TRUE; */
 /*    } */
 /* } */
@@ -666,7 +666,7 @@ void WFsmHDL_raiseErrorDlength (void * _hs)
 
   assert (hs);
   w_ungetc (hs -> c, hs -> fin);
-  WarcDebugMsg(">> exepted DataLength\n");
+  WarcDebugMsg("exepting a valid dataLength");
   /* raise "on" the error flag */
   hs -> err = WARC_TRUE;
 }
@@ -677,7 +677,7 @@ void  WFsmHDL_raiseErrorCrDate (void * _hs)
   
   assert (hs);
   w_ungetc (hs -> c, hs -> fin);
-  WarcDebugMsg(">> expected Creation Date\n");
+  WarcDebugMsg("expecting a valid creation date");
   /* raise "on" the error flag */
   hs -> err = WARC_TRUE;
 }

@@ -134,10 +134,12 @@ WPUBLIC warc_i32_t WGzip_compress (const void * const _self,
     assert  (dest);
 
     /* compute "source" file size */
-    offset = w_ftell (source);
-    fseek (source, 0, SEEK_END);
-    ucsize = w_ftell (source) - offset;
-    fseek (source, offset, SEEK_SET);
+    w_file_size_from_offset(source, ucsize, offset);
+
+/*     offset = w_ftell (source); */
+/*     w_fseek (source, 0, SEEK_END); */
+/*     ucsize = w_ftell (source) - offset; */
+/*     fseek (source, offset, SEEK_SET); */
 
     /* create extra space in GZIP header */
     while (space)
@@ -256,19 +258,19 @@ WPUBLIC warc_i32_t WGzip_compress (const void * const _self,
         (* csize) += EXTRA_GZIP_HEADER;
 
         /* move the GZIP header to the front of file */
-        fseek (dest, EXTRA_GZIP_HEADER, SEEK_SET);
+        w_fseek_from_start (dest, EXTRA_GZIP_HEADER);
         w_fread (buf, 1, GZIP_STATIC_HEADER_SIZE, dest);
 
-        fseek (dest, 0, SEEK_SET);
+        w_fseek_start(dest);
         w_fwrite (buf, 1, GZIP_STATIC_HEADER_SIZE, dest);
 
         /* set the EXTRA field */
         flg = buf[OFF_FLG] | FLG_FEXTRA;
-        fseek (dest, OFF_FLG, SEEK_SET);
+        w_fseek_from_start (dest, OFF_FLG);
         w_fwrite (& flg, 1, 1, dest);
 
         /* goto the EXTRA field land */
-        fseek (dest, GZIP_STATIC_HEADER_SIZE, SEEK_SET);
+        w_fseek_from_start (dest, GZIP_STATIC_HEADER_SIZE);
 
         /* set XLEN in bytes */
         buf [0] = (xlen & 255);
@@ -341,7 +343,7 @@ WGzip_getCompUncompSize (FILE * source, struct GzipMeta * meta,
   else /* skip XLEN bytes */
     {
       /* rewind GZIP_STATIC_HEADER_SIZE bytes */
-      w_fseek_from_here(source, - GZIP_STATIC_HEADER_SIZE);
+      w_fseek_from_here (source, - GZIP_STATIC_HEADER_SIZE);
 
       /* consume XLEN bytes */
       while (xlen) 
@@ -390,9 +392,8 @@ WPRIVATE warc_u32_t
 WGzip_skip_nb_chars (FILE * source, const warc_u32_t offset, 
                      struct GzipMeta * meta)
 {
-  if (0 != fseek (source, offset, SEEK_CUR)) 
-    return (Z_FSEEK_ERROR);
-  
+  w_fseek_from_here (source, offset);
+
   meta -> gzip_header_size += offset;
   
   return (Z_OK);
@@ -402,8 +403,7 @@ WPRIVATE warc_u32_t
 WGzip_skip_nb_chars_footer (FILE * source, const warc_u32_t offset, 
                             struct GzipMeta * meta) 
 {
-  if (0 != fseek (source, offset, SEEK_CUR))
-    return Z_FSEEK_ERROR;
+  w_fseek_from_here (source, offset);
   
   meta -> gzip_footer_size = offset;
   
@@ -494,11 +494,7 @@ WGzip_decode (const void * _self,  FILE * source, warc_u32_t offset,
   warc_u8_t       out    [OUT_BUFFER_SIZE];
   
   /* seek to the correct record offset */
-  if (0 != fseek (source, offset, SEEK_SET))
-    {
-      ret = Z_REWIND_ERROR;
-      goto END;
-    }
+  w_fseek_from_start (source, offset);
   
   ret = WGzip_skip_header (source, meta);
   if (ret != Z_OK)
@@ -586,13 +582,10 @@ WGzip_decode (const void * _self,  FILE * source, warc_u32_t offset,
   /* adjust CSize on record boundary */
   if (Z_OK == ret) 
     {
-      if (0 == fseek(source, offset + meta -> csize, SEEK_SET)) 
-        WGzip_adjustRecord (source, meta);
-      else
-        ret = Z_ADJUST_CSIZE_ERROR;
+      w_fseek_from_start (source, offset + meta -> csize);
+      WGzip_adjustRecord (source, meta);
     }
   
-
  END:  
 
   inflateEnd (&strm);
@@ -691,8 +684,7 @@ WGzip_analyzeHeader (const void * _self,  FILE * source,
   assert  (source);
 
   /* seek to the correct record offset */
-  if (0 != fseek (source, offset, SEEK_SET))
-    return (WARC_TRUE);
+  w_fseek_from_here (source, offset);
 
   /* try to extract uncompressed and compressed length from the
      GZIP headers
@@ -730,8 +722,7 @@ WGzip_check (const void * _self,  FILE * source, warc_u32_t offset)
   assert  (source);
   
   /* seek to the correct record offset */
-  if (0 != fseek (source, offset, SEEK_SET))
-    return (WARC_TRUE);
+  w_fseek_from_here (source, offset);
 
   /* try to extract uncompressed and compressed length from the
      GZIP headers
