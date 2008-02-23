@@ -354,8 +354,8 @@ WPRIVATE void * WFile_nextRecordGzipCompressedFast (void * _self,
   void          * oldlanvl = NIL; /* for destruction of old value*/
   void          * hfsm     = NIL; /* Header Line automatum */
   void          * afsm     = NIL; /* Anvl Field automatum */
-  warc_u32_t      husize    = 0;   /* uncompressed data size */
-  warc_u32_t      hcsize   = 0;   /* compressed data size stored in header */
+  warc_u64_t      husize    = 0;   /* uncompressed data size */
+  warc_u64_t      hcsize   = 0;   /* compressed data size stored in header */
   warc_u32_t      ret      = 0;
   warc_bool_t     more     = WARC_TRUE;
   struct CallbackEnv cbenv;
@@ -533,10 +533,10 @@ WPRIVATE void * WFile_nextRecordGzipCompressed (void * _self)
   void          * hfsm     = NIL; /* Header Line automatum */
   void          * afsm     = NIL; /* Anvl Field automatum */
   void          * gzobj    = NIL; /* for decompression */
-  warc_u32_t      usize    = 0;   /* uncompressed data size */
-  warc_u32_t      csize    = 0;   /* compressed data size */
-  warc_u32_t      ret      = 0;
+  warc_u64_t      usize    = 0;   /* uncompressed data size */
+  warc_u64_t      csize    = 0;   /* compressed data size */
   warc_i64_t      offset   = 0;
+  warc_u32_t      ret      = 0;
   FILE          * rectfile = NIL; /* to uncompress the WRecord */
   void          * objrectfile = NIL;
   warc_bool_t     more     = WARC_TRUE;
@@ -964,8 +964,8 @@ WPUBLIC warc_bool_t WFile_register (void* _self, void * wrec,
   warc_u32_t     ret       = 0;
   void         * objwtfile = NIL;
   void         * gzobj     = NIL; /* to manage compression */
-  warc_u32_t     usize     = 0;
-  warc_u32_t     csize     = 0;
+  warc_u64_t     usize     = 0;
+  warc_u64_t     csize     = 0;
   FILE         * wtfile    = NIL;
   
 
@@ -1521,7 +1521,7 @@ WFile_storeRecordGzipComressed (void * _self,
   warc_u8_t      strData [20];
   warc_u32_t     i       = 0;
   void         * gzobj   = NIL;
-  warc_u32_t     csize   = 0;    /* the size of the compressed data */
+  warc_u64_t     csize   = 0;    /* the size of the compressed data */
   FILE         * crec    = NIL;  /* to store the compressed record */
   void         * objcrec = NIL;
   warc_gzlevel_t level;

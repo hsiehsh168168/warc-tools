@@ -114,6 +114,8 @@ warc_u32_t methodBits (warc_u32_t);
 #define  Z_DISK_CACHE_READING_ERROR   34
 #define  Z_DISK_CACHE_WRITING_ERROR   35
 #define  Z_DISK_CACHE_REWIND_ERROR    36
+#define  Z_WARC_FLUSH_ERROR           37 
+#define  Z_WARC_EXTRA_FIELD_ERROR     38
 
 #define  CMD_MAX_LINE                 1000
 #define  FOOTER_CRC32_ISIZE           8

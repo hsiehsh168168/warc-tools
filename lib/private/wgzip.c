@@ -43,32 +43,32 @@
 #include <wendian.h>  /* warc_i32ToEndian ... */
 #include <wcsafe.h>
 
+
 #ifndef  MAX_WBITS
 #define  MAX_WBITS   15+16 /* 32K LZ77 window */
 #include <zlib.h>
 #endif
-
+#include <wgzipbit.h>
 
 #define OUT_BUFFER_SIZE  65536
 #define IN_BUFFER_SIZE   16384
-#define Z_WARC_FLUSH     -78
 
-#include <wgzipbit.h>
+
 
 
 #define SIGN 8
 
 
 /**
- * GzipMetat structur
+ * GzipMetat structure
  */
 
 
 struct GzipMeta {
-  warc_u32_t    csize;     /**< compressed raw size */
-  warc_u32_t    ocsize;    /**< compressed raw size in EXTRA field */
-  warc_u32_t    usize;     /**< uncompressed raw size */
-  warc_u32_t    oucsize;   /**< uncompressed raw size in EXTRA field */
+  warc_u64_t    csize;     /**< compressed raw size */
+  warc_u64_t    ocsize;    /**< compressed raw size in EXTRA field */
+  warc_u64_t    usize;     /**< uncompressed raw size */
+  warc_u64_t    oucsize;   /**< uncompressed raw size in EXTRA field */
   warc_u32_t    gzip_header_size;
   warc_u32_t    gzip_footer_size;
 };
@@ -110,7 +110,7 @@ struct WGzip
 WPUBLIC warc_i32_t WGzip_compress (const void * const _self,
                                    FILE * source, FILE * dest,
                                    const warc_gzlevel_t _level, 
-                                   warc_u32_t * csize)
+                                   warc_u64_t * csize)
 {
 #define EXTRA_GZIP_HEADER 12
 
@@ -124,9 +124,8 @@ WPUBLIC warc_i32_t WGzip_compress (const void * const _self,
     warc_u32_t flush;
     warc_u32_t level;
 
-    warc_u32_t space  = EXTRA_GZIP_HEADER;
-    warc_u32_t offset = 0;
-    warc_u32_t ucsize = 0;
+    warc_u64_t offset = 0;
+    warc_u64_t ucsize = 0;
 
     /* preconditions */
     CASSERT (self);
@@ -134,17 +133,16 @@ WPUBLIC warc_i32_t WGzip_compress (const void * const _self,
     assert  (dest);
 
     /* compute "source" file size */
-    offset = w_ftell (source);
-    fseek (source, 0, SEEK_END);
-    ucsize = w_ftell (source) - offset;
-    fseek (source, offset, SEEK_SET);
+    w_file_size_from_offset(source, ucsize, offset);
 
     /* create extra space in GZIP header */
-    while (space)
+    if (w_fwrite (" ", 1, EXTRA_GZIP_HEADER, dest) !=  EXTRA_GZIP_HEADER 
+        || w_ferror (dest))
       {
-        w_fwrite (" ", 1, 1, dest);
-        -- space;
+        ret = Z_WARC_EXTRA_FIELD_ERROR;
+        goto END;
       }
+
 
     /* ensure that the compressed file is in binary mode */
     SET_BINARY_MODE (dest);
@@ -217,7 +215,7 @@ WPUBLIC warc_i32_t WGzip_compress (const void * const _self,
 
             if (fflush (dest)) 
               {
-                ret = Z_WARC_FLUSH;
+                ret = Z_WARC_FLUSH_ERROR;
                 goto END;
               }
 
@@ -248,27 +246,27 @@ WPUBLIC warc_i32_t WGzip_compress (const void * const _self,
       {
         warc_u8_t  buf [EXTRA_GZIP_HEADER];
         warc_u16_t    xlen = GZIP_STATIC_HEADER_SIZE;
-        warc_u32_t    ecsize;
-        warc_u32_t    eucsize;
+        warc_u64_t    ecsize;
+        warc_u64_t    eucsize;
         warc_u8_t flg;
 
         /* adjust the compressed size */
         (* csize) += EXTRA_GZIP_HEADER;
 
         /* move the GZIP header to the front of file */
-        fseek (dest, EXTRA_GZIP_HEADER, SEEK_SET);
+        w_fseek_from_start (dest, EXTRA_GZIP_HEADER);
         w_fread (buf, 1, GZIP_STATIC_HEADER_SIZE, dest);
 
-        fseek (dest, 0, SEEK_SET);
+        w_fseek_start (dest);
         w_fwrite (buf, 1, GZIP_STATIC_HEADER_SIZE, dest);
 
         /* set the EXTRA field */
         flg = buf[OFF_FLG] | FLG_FEXTRA;
-        fseek (dest, OFF_FLG, SEEK_SET);
+        w_fseek_from_start (dest, OFF_FLG);
         w_fwrite (& flg, 1, 1, dest);
 
         /* goto the EXTRA field land */
-        fseek (dest, GZIP_STATIC_HEADER_SIZE, SEEK_SET);
+        w_fseek_from_start (dest, GZIP_STATIC_HEADER_SIZE);
 
         /* set XLEN in bytes */
         buf [0] = (xlen & 255);
@@ -310,8 +308,8 @@ WGzip_getCompUncompSize (FILE * source, struct GzipMeta * meta,
                          warc_u32_t xlen) 
 {
   warc_u8_t buf [GZIP_STATIC_HEADER_SIZE];
-  warc_u32_t csize  = 0;
-  warc_u32_t ucsize = 0;
+  warc_u64_t csize  = 0;
+  warc_u64_t ucsize = 0;
 
   assert (meta) ;
 
@@ -341,7 +339,7 @@ WGzip_getCompUncompSize (FILE * source, struct GzipMeta * meta,
   else /* skip XLEN bytes */
     {
       /* rewind GZIP_STATIC_HEADER_SIZE bytes */
-      w_fseek_from_here(source, - GZIP_STATIC_HEADER_SIZE);
+      w_fseek_from_here (source, - GZIP_STATIC_HEADER_SIZE);
 
       /* consume XLEN bytes */
       while (xlen) 
@@ -390,9 +388,10 @@ WPRIVATE warc_u32_t
 WGzip_skip_nb_chars (FILE * source, const warc_u32_t offset, 
                      struct GzipMeta * meta)
 {
-  if (0 != fseek (source, offset, SEEK_CUR)) 
-    return (Z_FSEEK_ERROR);
-  
+/*   if (0 != fseek (source, offset, SEEK_CUR)) */
+/*     return (Z_FSEEK_ERROR); */
+  w_fseek_from_here (source, offset);
+
   meta -> gzip_header_size += offset;
   
   return (Z_OK);
@@ -402,9 +401,11 @@ WPRIVATE warc_u32_t
 WGzip_skip_nb_chars_footer (FILE * source, const warc_u32_t offset, 
                             struct GzipMeta * meta) 
 {
-  if (0 != fseek (source, offset, SEEK_CUR))
-    return Z_FSEEK_ERROR;
-  
+ /*  if (0 != fseek (source, offset, SEEK_CUR)) */
+/*     return Z_FSEEK_ERROR; */
+
+  w_fseek_from_here (source, offset);
+
   meta -> gzip_footer_size = offset;
   
   return (Z_OK);
@@ -479,7 +480,7 @@ WGzip_adjustRecord (FILE * source, struct GzipMeta * meta)
 
 
 WPRIVATE warc_i32_t
-WGzip_decode (const void * _self,  FILE * source, warc_u32_t offset,
+WGzip_decode (const void * _self,  FILE * source, warc_u64_t offset,
               warc_u32_t (* cb) (const warc_u8_t *,
                                  const warc_u32_t, void *), 
              void * env)
@@ -490,15 +491,16 @@ WGzip_decode (const void * _self,  FILE * source, warc_u32_t offset,
   warc_u32_t          have   = 0;
   warc_i32_t          ret    = 0;
   z_stream            strm;
-  warc_u8_t       in     [IN_BUFFER_SIZE];
-  warc_u8_t       out    [OUT_BUFFER_SIZE];
+  warc_u8_t           in     [IN_BUFFER_SIZE];
+  warc_u8_t           out    [OUT_BUFFER_SIZE];
   
   /* seek to the correct record offset */
-  if (0 != fseek (source, offset, SEEK_SET))
-    {
-      ret = Z_REWIND_ERROR;
-      goto END;
-    }
+/*   if (0 != fseek (source, offset, SEEK_SET)) */
+/*     { */
+/*       ret = Z_REWIND_ERROR; */
+/*       goto END; */
+/*     } */
+  w_fseek_from_start (source, offset);
   
   ret = WGzip_skip_header (source, meta);
   if (ret != Z_OK)
@@ -586,10 +588,12 @@ WGzip_decode (const void * _self,  FILE * source, warc_u32_t offset,
   /* adjust CSize on record boundary */
   if (Z_OK == ret) 
     {
-      if (0 == fseek(source, offset + meta -> csize, SEEK_SET)) 
-        WGzip_adjustRecord (source, meta);
-      else
-        ret = Z_ADJUST_CSIZE_ERROR;
+/*       if (0 == fseek(source, offset + meta -> csize, SEEK_SET))  */
+/*         WGzip_adjustRecord (source, meta); */
+/*       else */
+/*         ret = Z_ADJUST_CSIZE_ERROR; */
+      w_fseek_from_start (source, offset + meta -> csize);
+      WGzip_adjustRecord (source, meta);
     }
   
 
@@ -618,9 +622,10 @@ WGzip_decode (const void * _self,  FILE * source, warc_u32_t offset,
  */
 
 WPUBLIC warc_u32_t WGzip_uncompress (const void * const _self,
-                                     FILE * source, warc_u32_t offset,
-                                     warc_u32_t * usize,
-                                     warc_u32_t * csize,
+                                     FILE *       source, 
+                                     warc_u64_t   offset,
+                                     warc_u64_t * usize,
+                                     warc_u64_t * csize,
                                      warc_u32_t (* cb) (const warc_u8_t *, 
                                                         const warc_u32_t,
                                                         void *),
@@ -650,7 +655,7 @@ WPUBLIC warc_u32_t WGzip_uncompress (const void * const _self,
       /* maybe uncompress failure or EOF */
       if (Z_EOF != ret) 
         {
-          w_fprintf (fprintf (stdout, "error when uncompressing data at offset %lu (Gzip error number: %d)\n", (unsigned long) offset, ret));
+          w_fprintf (fprintf (stdout, "error when uncompressing data at offset %llu (Gzip error number: %u)\n", offset, ret));
         }
     }      
   else
@@ -681,8 +686,8 @@ WPUBLIC warc_u32_t WGzip_uncompress (const void * const _self,
 
 WPUBLIC warc_bool_t
 WGzip_analyzeHeader (const void * _self,  FILE * source, 
-                     warc_u32_t offset, warc_u32_t * usize,
-                     warc_u32_t * csize)
+                     warc_u64_t offset, warc_u64_t * usize,
+                     warc_u64_t * csize)
 {
   const struct WGzip * const self = _self;
   
@@ -691,8 +696,7 @@ WGzip_analyzeHeader (const void * _self,  FILE * source,
   assert  (source);
 
   /* seek to the correct record offset */
-  if (0 != fseek (source, offset, SEEK_SET))
-    return (WARC_TRUE);
+  w_fseek_from_start (source, offset);
 
   /* try to extract uncompressed and compressed length from the
      GZIP headers
@@ -721,7 +725,7 @@ WGzip_analyzeHeader (const void * _self,  FILE * source,
  */
 
 WPUBLIC warc_bool_t
-WGzip_check (const void * _self,  FILE * source, warc_u32_t offset)
+WGzip_check (const void * _self,  FILE * source, warc_u64_t offset)
 {
   const struct WGzip * const self  = _self;
 
@@ -730,8 +734,7 @@ WGzip_check (const void * _self,  FILE * source, warc_u32_t offset)
   assert  (source);
   
   /* seek to the correct record offset */
-  if (0 != fseek (source, offset, SEEK_SET))
-    return (WARC_TRUE);
+  w_fseek_from_start (source, offset);
 
   /* try to extract uncompressed and compressed length from the
      GZIP headers
