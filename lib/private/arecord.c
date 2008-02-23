@@ -556,19 +556,18 @@ WIPUBLIC warc_bool_t ARecord_setAfile (void * _self, void * wfile)
 struct writingstruct 
 {
   FILE * _tfile; 
-  warc_u64_t _wrtsize;
+  warc_u32_t _wrtsize;
 };
 
 warc_bool_t temp_writer (void * _envstr, const char * buff, warc_u32_t size)
 {
-  struct writingstruct * envstr = _envstr;
-  FILE * fout = envstr -> _tfile;
-  warc_u64_t wrtsize = envstr -> _wrtsize;
-  warc_u64_t realsize = size;
+  struct writingstruct * envstr   = _envstr;
+  FILE                 * fout     = envstr -> _tfile;
+  warc_u32_t             wrtsize  = envstr -> _wrtsize;
+  warc_u32_t             realsize = size;
 
   if (w_ftell (fout) + size > wrtsize)
      realsize = wrtsize - w_ftell (fout);
-
 
   w_fwrite (buff, realsize, 1, fout);
 
