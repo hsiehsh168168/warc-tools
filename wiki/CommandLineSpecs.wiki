@@ -18,21 +18,22 @@ SRS 11-14, 27-28
 
 Dump a WARC file
 
-Usage: ./app/warcdump -f <file.warc> [-c]
+Usage: ./app/warcdump -f <file.warc> [-c] [-v]
   * -f    : valid WARC file name
   * [-c]  : GZIP compressed WARC (default true)
-
+  * [-v]  : dump ANVL (default false)
 
 == warcfilter (done) ==
 SRS 16-20
 
 Filter WARC records based on MIME or URI
 
-Usage: ./app/warcfilter -f <file.warc> [-c] -s <match> [-t]
+Usage: ./app/warcfilter -f <file.warc> [-c] -s <match> [-t] [-v]
   * -f    : valid WARC file name
   * [-c]  : GZIP compressed WARC (default true)
   * -s    : pattern string
   * [-t]  : compare with MIME (default true)
+  * [-v]  : dump ANVL (default false)\n"
 
 == warcappend ==
 SRS 8-10
