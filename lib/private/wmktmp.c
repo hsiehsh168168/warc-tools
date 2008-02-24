@@ -31,7 +31,7 @@
 #include <wport.h>
 
 /*
- * WARC default headers 
+ * WARC default headers
  */
 
 #include <wclass.h>  /* bless, destroy, cassert, struct Class */
@@ -47,13 +47,16 @@
  */
 
 #define SIGN 13
-struct WTempFile {
-  const void * class;
 
-  /*@{*/
-  FILE * handle; /**< temporary file handle */
-  /*@}*/
-};
+struct WTempFile
+  {
+
+    const void * class;
+
+    /*@{*/
+    FILE * handle; /**< temporary file handle */
+    /*@}*/
+  };
 
 
 #define HANDLE  (self -> handle)
@@ -71,8 +74,9 @@ struct WTempFile {
 
 WIPUBLIC FILE * WTempFile_handle  (const void * const _self)
 {
+
   const struct WTempFile * const self = _self;
-  
+
   assert (self);
 
   return (HANDLE);
@@ -102,15 +106,17 @@ WPRIVATE void * WTempFile_constructor (void * _self, va_list * app)
   UNUSED (app);
 
   /* create file with restrictive permissions */
-  old_mode = umask(077);
-  if ((wfd = mkstemp (template)) < 0)
+  old_mode = umask (077);
+
+  if ( (wfd = mkstemp (template) ) < 0)
     {
       destroy (self);
       return (NIL);
     }
-  umask(old_mode);
 
-  if ((HANDLE = fdopen (wfd, "w+b")) == NIL || unlink (template) < 0)
+  umask (old_mode);
+
+  if ( (HANDLE = fdopen (wfd, "w+b") ) == NIL || unlink (template) < 0)
     {
       close (wfd);
       destroy (self);
@@ -123,22 +129,23 @@ WPRIVATE void * WTempFile_constructor (void * _self, va_list * app)
 
 /**
  * WTempFile_destructor - delete an existing WTempFile object
- * 
+ *
  * @param _self: WTempFile object instance
  *
  * @brief WARC Temporary File object destructor
  */
 
 WPRIVATE void * WTempFile_destructor (void * _self)
-{	
+{
+
   struct WTempFile * self = _self;
 
   /* preconditions */
   CASSERT (self);
-  
+
   if (HANDLE)
     fclose (HANDLE), HANDLE = NIL;
-  
+
   return (self);
 }
 
@@ -147,10 +154,11 @@ WPRIVATE void * WTempFile_destructor (void * _self)
  * WARC WTempFile class
  */
 
-static const struct Class _WTempFile = {
-	sizeof(struct WTempFile),
-	SIGN,
-	WTempFile_constructor, WTempFile_destructor
+static const struct Class _WTempFile =
+{
+  sizeof (struct WTempFile),
+  SIGN,
+  WTempFile_constructor, WTempFile_destructor
 };
 
 const void * WTempFile = & _WTempFile;

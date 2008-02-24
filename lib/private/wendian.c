@@ -32,7 +32,7 @@
 
 
 /*
- * WARC default headers 
+ * WARC default headers
  */
 
 
@@ -47,14 +47,14 @@
 #define WLITTLE_ENDIAN WARC_FALSE
 #define WBIG_ENDIAN    WARC_TRUE
 
-warc_bool_t warc_isBigEndian (void) 
+warc_bool_t warc_isBigEndian (void)
 {
   warc_i32_t  i = 1;
   char      * p = (char *) & i;
-  
+
   if (p[0] == 1)
     return WLITTLE_ENDIAN;
-  
+
   return WBIG_ENDIAN;
 }
 
@@ -65,20 +65,20 @@ warc_bool_t warc_isBigEndian (void)
  * Write warc_i32_t based endianness
  */
 
-warc_u32_t warc_i32ToEndian (warc_u32_t i) 
+warc_u32_t warc_i32ToEndian (warc_u32_t i)
 {
-    warc_u8_t c1, c2, c3, c4;
+  warc_u8_t c1, c2, c3, c4;
 
-    unless (warc_isBigEndian ()) 
-      {
-        c1 = i & 255;
-        c2 = (i >> 8) & 255;
-        c3 = (i >> 16) & 255;
-        c4 = (i >> 24) & 255;
-        
-        i = ((warc_i32_t) c1 << 24) + ((warc_i32_t) c2 << 16) + 
-            ((warc_i32_t) c3 << 8)   + (warc_i32_t) c4;
-      }
+  unless (warc_isBigEndian () )
+  {
+    c1 = i & 255;
+    c2 = (i >> 8) & 255;
+    c3 = (i >> 16) & 255;
+    c4 = (i >> 24) & 255;
 
-    return (i);
+    i = ( (warc_i32_t) c1 << 24) + ( (warc_i32_t) c2 << 16) +
+        ( (warc_i32_t) c3 << 8)   + (warc_i32_t) c4;
+  }
+
+  return (i);
 }

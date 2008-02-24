@@ -29,7 +29,8 @@
 
 /* to mix C and C++ */
 #ifdef __cplusplus
- extern "C" {
+extern "C"
+  {
 #endif
 
 
@@ -51,7 +52,8 @@
 
 
 #ifdef __cplusplus
- }
+  }
+
 #endif
 
 #endif /* __WARC_H__ */

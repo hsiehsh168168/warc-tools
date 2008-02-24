@@ -31,7 +31,7 @@
 #include <wport.h>
 
 /*
- * WARC default headers 
+ * WARC default headers
  */
 
 #include <wclass.h>  /* bless, destroy, cassert, struct Class */
@@ -49,13 +49,15 @@
  */
 
 struct WLNode
-{
-  /*@{*/
-  void          * object; /**< object node */
-  struct WLNode * next; /**< next object */ 
-  struct WLNode * prev; /**< previous object */ 
-  /*@}*/
-};
+  {
+    /*@{*/
+    void          * object; /**< object node */
+
+    struct WLNode * next; /**< next object */
+
+    struct WLNode * prev; /**< previous object */
+    /*@}*/
+  };
 
 
 #define MAKE_LNODE \
@@ -71,15 +73,17 @@ struct WLNode
  */
 
 
-struct WList 
-{ 
-  const void * class;
-  
-  /*@{*/
-  struct WLNode  * dummy; /**< dummy list node */
-  warc_u32_t       cnt; /**<  how many objects are there */
-  /*@}*/
-};
+struct WList
+  {
+
+    const void * class;
+
+    /*@{*/
+
+    struct WLNode  * dummy; /**< dummy list node */
+    warc_u32_t       cnt; /**<  how many objects are there */
+    /*@}*/
+  };
 
 
 #define DUMMY    (self -> dummy)
@@ -93,37 +97,39 @@ struct WList
  *
  * @return false if the operation succeeds, true if not
  *
- * WList : Treats the list as a stack, and pushes the 
+ * WList : Treats the list as a stack, and pushes the
  * object onto the end of the list.
  */
 
 WPUBLIC warc_bool_t WList_push (void * const _self, void * const o)
 {
-	struct WList  * const self = _self;
-    struct WLNode * n          = NIL;
 
-    /* preconditions */
-    CASSERT (self);
-    assert (o);
+  struct WList  * const self = _self;
 
-    /* create a new list node for the object "o" */
-    n = MAKE_LNODE;
-    unless (n)
-      return (WARC_TRUE);
- 
-    /* store the reference to "o" */
-    n -> object = o;
+  struct WLNode * n          = NIL;
 
-    /* add the node to the end of list  */
-    DUMMY -> prev -> next = n;
-    n -> prev             = DUMMY -> prev;
-    n -> next             = DUMMY;
-    DUMMY -> prev         = n;
+  /* preconditions */
+  CASSERT (self);
+  assert (o);
 
-    /* reset list's counter */
-    ++ CNT;
+  /* create a new list node for the object "o" */
+  n = MAKE_LNODE;
+  unless (n)
+  return (WARC_TRUE);
 
-    return (WARC_FALSE);
+  /* store the reference to "o" */
+  n -> object = o;
+
+  /* add the node to the end of list  */
+  DUMMY -> prev -> next = n;
+  n -> prev             = DUMMY -> prev;
+  n -> next             = DUMMY;
+  DUMMY -> prev         = n;
+
+  /* reset list's counter */
+  ++ CNT;
+
+  return (WARC_FALSE);
 }
 
 
@@ -133,35 +139,37 @@ WPUBLIC warc_bool_t WList_push (void * const _self, void * const o)
  *
  * @return a pointer object
  *
- * WList : Pops and returns the last object of the list, 
+ * WList : Pops and returns the last object of the list,
  * shortening the list by one element.
  */
 
 WPUBLIC void * WList_pop (void * const _self)
 {
-	struct WList  * const self = _self;
-    struct WLNode * n          = NIL;
-    void          * o          = NIL;
 
-    /* preconditions */
-    CASSERT (self);
-    unless (CNT)
-      return (NIL);
+  struct WList  * const self = _self;
 
-    /* get the last object */
-    n                 = DUMMY -> prev;
-    DUMMY -> prev     = n -> prev;
+  struct WLNode * n          = NIL;
+  void          * o          = NIL;
 
-    n -> prev -> next = n -> next;
-    o                 = n -> object;
+  /* preconditions */
+  CASSERT (self);
+  unless (CNT)
+  return (NIL);
 
-    /* delete the list node */
-    DELETE_LNODE (n);
+  /* get the last object */
+  n                 = DUMMY -> prev;
+  DUMMY -> prev     = n -> prev;
 
-    /* reset list's counter */
-    -- CNT;
+  n -> prev -> next = n -> next;
+  o                 = n -> object;
 
-    return (o);
+  /* delete the list node */
+  DELETE_LNODE (n);
+
+  /* reset list's counter */
+  -- CNT;
+
+  return (o);
 }
 
 
@@ -171,36 +179,38 @@ WPUBLIC void * WList_pop (void * const _self)
  *
  * @return a pointer object
  *
- * WList : Shifts the first object of the list off and 
+ * WList : Shifts the first object of the list off and
  * returns it, shortening the list by 1 and moving everything down.
  */
 
 WPUBLIC void * WList_shift (void * const _self)
 {
-	struct WList  * const self = _self;
-    struct WLNode * n          = NIL;
-    void          * o          = NIL;
 
-    /* preconditions */
-    CASSERT (self);
-    unless (CNT)
-      return (NIL);
+  struct WList  * const self = _self;
 
-    /* get the first object */
-    n                 = DUMMY -> next;
-    o                 = n -> object;
+  struct WLNode * n          = NIL;
+  void          * o          = NIL;
 
-    DUMMY -> next     = n -> next;
-    n -> next -> prev = DUMMY;
+  /* preconditions */
+  CASSERT (self);
+  unless (CNT)
+  return (NIL);
+
+  /* get the first object */
+  n                 = DUMMY -> next;
+  o                 = n -> object;
+
+  DUMMY -> next     = n -> next;
+  n -> next -> prev = DUMMY;
 
 
-    /* delete the list node */
-    DELETE_LNODE (n);
+  /* delete the list node */
+  DELETE_LNODE (n);
 
-    /* reset list's counter */
-    -- CNT;
+  /* reset list's counter */
+  -- CNT;
 
-    return (o);
+  return (o);
 }
 
 
@@ -209,37 +219,39 @@ WPUBLIC void * WList_shift (void * const _self)
  *
  * @return false if the operation succeeds, true if not
  *
- * WList : Does the opposite of a "shift". Prepends the object to 
+ * WList : Does the opposite of a "shift". Prepends the object to
  * the front of the list.
  */
 
 WPUBLIC warc_bool_t WList_unshift (void * const _self, void * const o)
 {
-	struct WList  * const self = _self;
-    struct WLNode * n          = NIL;
 
-    /* preconditions */
-    CASSERT (self);
-    assert (o);
+  struct WList  * const self = _self;
 
-    /* create a new list node for the object "o" */
-    n = MAKE_LNODE;
-    unless (n)
-      return (WARC_TRUE);
- 
-    /* store the reference to "o" */
-    n -> object = o;
+  struct WLNode * n          = NIL;
 
-    /* add the node to the front of list  */
-    DUMMY -> next -> prev = n;
-    n -> next     = DUMMY -> next;
-    n -> prev     = DUMMY;
-    DUMMY -> next = n;
+  /* preconditions */
+  CASSERT (self);
+  assert (o);
 
-    /* reset list's counter */
-    ++ CNT;
+  /* create a new list node for the object "o" */
+  n = MAKE_LNODE;
+  unless (n)
+  return (WARC_TRUE);
 
-    return (WARC_FALSE);
+  /* store the reference to "o" */
+  n -> object = o;
+
+  /* add the node to the front of list  */
+  DUMMY -> next -> prev = n;
+  n -> next     = DUMMY -> next;
+  n -> prev     = DUMMY;
+  DUMMY -> next = n;
+
+  /* reset list's counter */
+  ++ CNT;
+
+  return (WARC_FALSE);
 }
 
 
@@ -253,12 +265,13 @@ WPUBLIC warc_bool_t WList_unshift (void * const _self, void * const o)
 
 WIPUBLIC warc_u32_t WList_size (const void * const _self)
 {
-	const struct WList * const self = _self;
 
-    /* preconditions */
-    CASSERT (self);
+  const struct WList * const self = _self;
 
-    return (CNT);
+  /* preconditions */
+  CASSERT (self);
+
+  return (CNT);
 }
 
 
@@ -273,22 +286,26 @@ WIPUBLIC warc_u32_t WList_size (const void * const _self)
  */
 
 WPRIVATE struct WLNode * gotoIndex (const void * const _self,
-                                    const warc_u32_t index)
-{
-	const struct WList * const self = _self;
+                                          const warc_u32_t index)
+  {
+
+    const struct WList * const self = _self;
+
     struct WLNode            * node;
     warc_u32_t                 i;
 
     /* empty list */
     unless (CNT)
-      return (NIL);
+    return (NIL);
 
     if (index > CNT)
       return (NIL);
 
     /* start from the first node */
     i    = 0;
+
     node = DUMMY -> next;
+
     while (i < index)
       {
         node = node -> next;
@@ -296,7 +313,7 @@ WPRIVATE struct WLNode * gotoIndex (const void * const _self,
       }
 
     return (node);
-}
+  }
 
 
 /**
@@ -312,18 +329,20 @@ WPRIVATE struct WLNode * gotoIndex (const void * const _self,
 WPUBLIC const void * WList_get (const void * const _self,
                                 const warc_u32_t index)
 {
-	const struct WList * const self = _self;
-    struct WLNode            * n;
 
-    /* preconditions */
-    CASSERT (self);
+  const struct WList * const self = _self;
 
-    /* position node on the target node */
-    n = gotoIndex (self, index);
-    unless (n)
-      return (NIL);
+  struct WLNode            * n;
 
-    return (n -> object);
+  /* preconditions */
+  CASSERT (self);
+
+  /* position node on the target node */
+  n = gotoIndex (self, index);
+  unless (n)
+  return (NIL);
+
+  return (n -> object);
 }
 
 
@@ -341,24 +360,26 @@ WPUBLIC const void * WList_get (const void * const _self,
 WPUBLIC void * WList_set (void * const _self, const warc_u32_t index,
                           void * const o)
 {
-	struct WList * const self = _self;
-    struct WLNode      * n;
-    void               * old;
 
-    /* preconditions */
-    CASSERT (self);
-    assert (o);
+  struct WList * const self = _self;
 
-    /* position node on the target node */
-    n = gotoIndex (self, index);
-    unless (n)
-      return (NIL);
+  struct WLNode      * n;
+  void               * old;
 
-    /* save the new object and return the old one */
-    old         = n -> object;
-    n -> object = o;
+  /* preconditions */
+  CASSERT (self);
+  assert (o);
 
-    return (old);
+  /* position node on the target node */
+  n = gotoIndex (self, index);
+  unless (n)
+  return (NIL);
+
+  /* save the new object and return the old one */
+  old         = n -> object;
+  n -> object = o;
+
+  return (old);
 }
 
 
@@ -375,25 +396,27 @@ WPUBLIC void * WList_set (void * const _self, const warc_u32_t index,
 
 WPUBLIC void * WList_remove (void * const _self, const warc_u32_t index)
 {
-	struct WList * const self = _self;
-    struct WLNode      * n;
-    void               * o;
 
-    /* preconditions */
-    CASSERT (self);
+  struct WList * const self = _self;
 
-    /* position node on the target node */
-    n = gotoIndex (self, index);
-    unless (n)
-      return (NIL);
+  struct WLNode      * n;
+  void               * o;
 
-    /* return the object and free its node */
-    o                 = n -> object;
-    n -> next -> prev = n -> prev;
-    n -> prev -> next = n -> next;
-    DELETE_LNODE(n);
+  /* preconditions */
+  CASSERT (self);
 
-    return (o);
+  /* position node on the target node */
+  n = gotoIndex (self, index);
+  unless (n)
+  return (NIL);
+
+  /* return the object and free its node */
+  o                 = n -> object;
+  n -> next -> prev = n -> prev;
+  n -> prev -> next = n -> next;
+  DELETE_LNODE (n);
+
+  return (o);
 }
 
 
@@ -410,21 +433,22 @@ WPUBLIC void * WList_remove (void * const _self, const warc_u32_t index)
 
 WPRIVATE void * WList_constructor (void * _self, va_list * app)
 {
-  struct WList * const self = _self;
-  
-  UNUSED(app);
 
-  /* create dummy head node */ 
-  DUMMY = MAKE_LNODE; 
+  struct WList * const self = _self;
+
+  UNUSED (app);
+
+  /* create dummy head node */
+  DUMMY = MAKE_LNODE;
   unless (DUMMY)
-    return (NIL);
-  
+  return (NIL);
+
   /* set object's counter */
   CNT = 0;
-  
+
   /* link prev and next to dummy */
   DUMMY -> prev = DUMMY -> next = DUMMY;
-  
+
   return (self);
 }
 
@@ -436,8 +460,10 @@ WPRIVATE void * WList_constructor (void * _self, va_list * app)
  */
 
 WPRIVATE void * WList_destructor (void * _self)
-{	
+{
+
   struct WList  * const self = _self;
+
   struct WLNode       * n;
 
   /* preconditions */
@@ -446,19 +472,21 @@ WPRIVATE void * WList_destructor (void * _self)
   /* destory all objects in the list */
 
   n = DUMMY -> next;
+
   while (n != DUMMY)
     {
       n = n -> next;
       destroy (n -> prev -> object);
       DELETE_LNODE (n -> prev);
     }
-  
+
   CNT = 0;
 
   /* free the dummy node */
+
   if (DUMMY)
     DELETE_LNODE (DUMMY);
-  
+
   return (self);
 }
 
@@ -467,10 +495,11 @@ WPRIVATE void * WList_destructor (void * _self)
  * WARC WList class
  */
 
-static const struct Class _WList = {
-	sizeof(struct WList),
-	SIGN,
-	WList_constructor, WList_destructor
-};
+static const struct Class _WList =
+  {
+    sizeof (struct WList),
+    SIGN,
+    WList_constructor, WList_destructor
+  };
 
 const void * WList = & _WList;

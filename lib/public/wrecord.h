@@ -30,54 +30,58 @@
 
 /* to mix C and C++ */
 #ifdef __cplusplus
- extern "C" {
+extern "C"
+  {
 #endif
 
 
 
-/**
- * Portability header file
- */
+    /**
+     * Portability header file
+     */
 
 #include <wport.h>
 #include <wrectype.h>
 
 #include <stdio.h> /* FILE */
 
-extern const void * WRecord;
+    extern const void * WRecord;
 
-extern const warc_u8_t *  WRecord_getWarcId      (const void * const);
-extern warc_u32_t    WRecord_getDataLength  (const void * const);
-extern warc_rec_t    WRecord_getRecordType  (const void * const);
-extern const warc_u8_t *  WRecord_getSubjectUri  (const void * const);
-extern const warc_u8_t *  WRecord_getCreationDate(const void * const);
-extern const warc_u8_t *  WRecord_getContentType (const void * const);
-extern const warc_u8_t *  WRecord_getRecordId    (const void * const);
-extern warc_bool_t   WRecord_getContent     (const void * const);
-extern const warc_u8_t *   WRecord_getAnvlValue   (const void * const,
-                                                       const warc_u8_t *);
+    extern const warc_u8_t *  WRecord_getWarcId      (const void * const);
+    extern warc_u32_t    WRecord_getDataLength  (const void * const);
+    extern warc_rec_t    WRecord_getRecordType  (const void * const);
+    extern const warc_u8_t *  WRecord_getSubjectUri  (const void * const);
+    extern const warc_u8_t *  WRecord_getCreationDate (const void * const);
+    extern const warc_u8_t *  WRecord_getContentType (const void * const);
+    extern const warc_u8_t *  WRecord_getRecordId    (const void * const);
+    extern warc_bool_t   WRecord_getContent     (const void * const);
+    extern const warc_u8_t *   WRecord_getAnvlValue   (const void * const,
+          const warc_u8_t *);
+    extern const void * WRecord_getAnvl         (const void * const);
 
-extern warc_bool_t   WRecord_setRecordType   (void *, const warc_rec_t);
-extern warc_bool_t   WRecord_setSubjectUri   (void *, const warc_u8_t *,
-                                              const warc_u32_t);
-extern warc_bool_t   WRecord_setCreationDate (void *, const warc_u8_t *,
-                                              const warc_u32_t);
-extern warc_bool_t   WRecord_setContentType  (void *, const warc_u8_t *,
-                                              const warc_u32_t );
-extern warc_bool_t   WRecord_setRecordId     (void *, const warc_u8_t *,
-                                              const warc_u32_t );
-extern warc_bool_t   WRecord_addAnvl         (void *, const warc_u8_t *, 
-                                              const warc_u32_t, const warc_u8_t *,
-                                              const warc_u32_t);
-extern warc_bool_t   WRecord_setContentFromFileName (void *, const char *);
 
-extern warc_i64_t    WRecord_getOffset           (const void * const );
-extern warc_u64_t    WRecord_getUncompressedSize (const void * const );
-extern warc_u64_t    WRecord_getCompressedSize   (const void * const);
+    extern warc_bool_t   WRecord_setRecordType   (void *, const warc_rec_t);
+    extern warc_bool_t   WRecord_setSubjectUri   (void *, const warc_u8_t *,
+          const warc_u32_t);
+    extern warc_bool_t   WRecord_setCreationDate (void *, const warc_u8_t *,
+          const warc_u32_t);
+    extern warc_bool_t   WRecord_setContentType  (void *, const warc_u8_t *,
+          const warc_u32_t );
+    extern warc_bool_t   WRecord_setRecordId     (void *, const warc_u8_t *,
+          const warc_u32_t );
+    extern warc_bool_t   WRecord_addAnvl         (void *, const warc_u8_t *,
+          const warc_u32_t, const warc_u8_t *,
+          const warc_u32_t);
+    extern warc_bool_t   WRecord_setContentFromFileName (void *, const char *);
+
+    extern warc_i64_t    WRecord_getOffset           (const void * const );
+    extern warc_u64_t    WRecord_getUncompressedSize (const void * const );
+    extern warc_u64_t    WRecord_getCompressedSize   (const void * const);
 
 
 #ifdef __cplusplus
- }
+  }
+
 #endif
 
 

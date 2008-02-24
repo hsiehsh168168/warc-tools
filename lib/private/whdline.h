@@ -29,58 +29,60 @@
 
 /* to mix C and C++ */
 #ifdef __cplusplus
- extern "C" {
+extern "C"
+  {
 #endif
 
-/**
- * Portability header file
- */
+    /**
+     * Portability header file
+     */
 
 #include <wport.h>
 
-extern const void * WHDLine;
+    extern const void * WHDLine;
 
 #include <wrectype.h>
 
 
-/* getters */
-extern const warc_u8_t *  WHDLine_getWarcId (const void * const);
-extern warc_u32_t       WHDLine_getWarcIdLen       (const void * const);
-extern warc_u32_t       WHDLine_getDataLength      (const void * const);
-extern warc_rec_t       WHDLine_getRecordType      (const void * const);
-extern const warc_u8_t * WHDLine_getSubjectUri      (const void * const);
-extern warc_u32_t       WHDLine_getSubjectUriLen   (const void * const);
-extern const warc_u8_t * WHDLine_getCreationDate    (const void * const);
-extern warc_u32_t       WHDLine_getCreationDateLen (const void * const);
-extern const warc_u8_t * WHDLine_getContentType     (const void * const);
-extern warc_u32_t       WHDLine_getContentTypeLen  (const void * const);
-extern const warc_u8_t * WHDLine_getRecordId        (const void * const);
-extern warc_u32_t       WHDLine_getRecordIdLen     (const void * const);
+    /* getters */
+    extern const warc_u8_t *  WHDLine_getWarcId (const void * const);
+    extern warc_u32_t       WHDLine_getWarcIdLen       (const void * const);
+    extern warc_u32_t       WHDLine_getDataLength      (const void * const);
+    extern warc_rec_t       WHDLine_getRecordType      (const void * const);
+    extern const warc_u8_t * WHDLine_getSubjectUri      (const void * const);
+    extern warc_u32_t       WHDLine_getSubjectUriLen   (const void * const);
+    extern const warc_u8_t * WHDLine_getCreationDate    (const void * const);
+    extern warc_u32_t       WHDLine_getCreationDateLen (const void * const);
+    extern const warc_u8_t * WHDLine_getContentType     (const void * const);
+    extern warc_u32_t       WHDLine_getContentTypeLen  (const void * const);
+    extern const warc_u8_t * WHDLine_getRecordId        (const void * const);
+    extern warc_u32_t       WHDLine_getRecordIdLen     (const void * const);
 
-/* setters */
-extern warc_bool_t WHDLine_setWarcId       (void * const, 
-                                            const warc_u8_t *,
-                                        const warc_u32_t len);
-extern warc_bool_t WHDLine_setDataLength      (void * const, 
-                                        const warc_u32_t);
-extern warc_bool_t WHDLine_setRecordType      (void * const, 
-                                        const warc_rec_t);
-extern warc_bool_t WHDLine_setSubjectUri   (void * const , 
-                                            const warc_u8_t *,
-                                        const warc_u32_t);
-extern warc_bool_t WHDLine_setCreationDate (void * const , 
-                                            const warc_u8_t *,
-                                        const warc_u32_t);
-extern warc_bool_t WHDLine_setContentType  (void * const, 
-                                            const warc_u8_t *,
-                                        const warc_u32_t);
-   extern warc_bool_t WHDLine_setRecordId  (void * const, 
-                                            const warc_u8_t *,
-                                            const warc_u32_t);
+    /* setters */
+    extern warc_bool_t WHDLine_setWarcId       (void * const,
+          const warc_u8_t *,
+          const warc_u32_t len);
+    extern warc_bool_t WHDLine_setDataLength      (void * const,
+          const warc_u32_t);
+    extern warc_bool_t WHDLine_setRecordType      (void * const,
+          const warc_rec_t);
+    extern warc_bool_t WHDLine_setSubjectUri   (void * const ,
+          const warc_u8_t *,
+          const warc_u32_t);
+    extern warc_bool_t WHDLine_setCreationDate (void * const ,
+          const warc_u8_t *,
+          const warc_u32_t);
+    extern warc_bool_t WHDLine_setContentType  (void * const,
+          const warc_u8_t *,
+          const warc_u32_t);
+    extern warc_bool_t WHDLine_setRecordId  (void * const,
+          const warc_u8_t *,
+          const warc_u32_t);
 
 
 #ifdef __cplusplus
- }
+  }
+
 #endif
 
 #endif /* __WARC_STRING_H__ */

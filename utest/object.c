@@ -35,13 +35,13 @@
 #define makeWString(s) (bless (WString, ((warc_u8_t *) s), w_strlen((warc_u8_t *) (s))))
 
 int test1 (void)
-{	
+{
   const char * t   = "TEST 1";
-  void       * s   = makeWString("");
+  void       * s   = makeWString ("");
   void       * a   = bless (WAnvl);
 
   fprintf (stderr, "%s>\n", t);
-  
+
   assert (s);
   assert (a);
 
@@ -51,18 +51,18 @@ int test1 (void)
   /* never reached */
   destroy (a);
   destroy (s);
-      
+
   return 0;
 }
 
 int test2 (void)
-{	
+{
   const char * t   = "TEST 2";
-  void       * s   = makeWString("");
+  void       * s   = makeWString ("");
   void       * l   = bless (WList);
 
   fprintf (stderr, "%s>\n", t);
-  
+
   assert (s);
   assert (l);
 
@@ -72,18 +72,18 @@ int test2 (void)
   /* never reached */
   destroy (l);
   destroy (s);
-      
+
   return 0;
 }
 
 
 
 int main (void)
-{	
-  int (* tests [])() = { test1, test2 };
+{
+  int (* tests []) () = { test1, test2 };
   warc_u32_t  i      = 0;
 
-  for(i = 0; i < ARRAY_LEN (tests); ++ i)
+  for (i = 0; i < ARRAY_LEN (tests); ++ i)
     {
       tests[i] ();
     }

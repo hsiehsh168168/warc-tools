@@ -30,30 +30,31 @@
 
 /* to mix C and C++ */
 #ifdef __cplusplus
- extern "C" {
+extern "C"
+  {
 #endif
 
-/*
- * C default headers
- */
+    /*
+     * C default headers
+     */
 
 #include <wcsafe.h>
 
 
-/* Pointer to NULL */
+    /* Pointer to NULL */
 #define NIL    (void *)0
 
-/* Perl if not */
+    /* Perl if not */
 #define unless(C) if(!(C))
 
-/* INLINE macro */
+    /* INLINE macro */
 #ifndef WINLINE
 #define WINLINE inline /* or "extern inline" */
 #else
-#define WINLINE 
+#define WINLINE
 #endif
 
-/* Quikly find functions and protect them */
+    /* Quikly find functions and protect them */
 #ifndef WPRIVATE
 #define WPRIVATE static
 #endif
@@ -70,16 +71,16 @@
 #define WIPUBLIC WINLINE
 #endif
 
-/* To disable warnings about unused variable */
+    /* To disable warnings about unused variable */
 #define UNUSED(obj) ((void) obj)
 
-/* Get array size */
+    /* Get array size */
 #define ARRAY_LEN(array) (sizeof(array)/sizeof(array[0]))
 
-/* forever loops */
+    /* forever loops */
 #define EVER ;;
 
-/* print message tp STDERR */
+    /* print message tp STDERR */
 #ifndef WARC_MSG_DEBUG
 #define WARC_MSG_DEBUG
 #define WarcDebugMsg(m) \
@@ -88,7 +89,7 @@
 #define WarcDebugMsg(m) (m)
 #endif
 
-/* Trace any function before calling it */
+    /* Trace any function before calling it */
 #ifndef WARC_MSG_DEBUG_ACTION
 #define WARC_MSG_DEBUG_ACTION
 #define WarcDebugMsgAction(m) \
@@ -100,7 +101,8 @@
 
 
 #ifdef __cplusplus
- }
+  }
+
 #endif
 
 

@@ -24,20 +24,4 @@
 /*     http://code.google.com/p/warc-tools/                            */
 /* ------------------------------------------------------------------- */
 
-#ifndef	__WARC_VERSION_H__
-#define	__WARC_VERSION_H__
-
-/* to mix C and C++ */
-#ifdef __cplusplus
-extern "C"
-  {
-#endif
-
-#define WARC_VERSION "warc/0.9"
-
-#ifdef __cplusplus
-  }
-
-#endif
-
-#endif /* __WARC_VERSION_H__ */
+Miscelenious applications not directly related to WARC-tools

@@ -30,12 +30,13 @@
 
 /* to mix C and C++ */
 #ifdef __cplusplus
- extern "C" {
+extern "C"
+  {
 #endif
 
-/**
- * Portability header file
- */
+    /**
+     * Portability header file
+     */
 
 #include <wport.h>
 
@@ -43,16 +44,17 @@
 
 
 
-extern const void * WFsmHDL;
+    extern const void * WFsmHDL;
 
 
-extern warc_bool_t  WFsmHDL_run       (void * const);
-extern void *       WFsmHDL_transform (const void * const);
-extern const void * WFsmHDL_state     (const void * const);
+    extern warc_bool_t  WFsmHDL_run       (void * const);
+    extern void *       WFsmHDL_transform (const void * const);
+    extern const void * WFsmHDL_state     (const void * const);
 
 
 #ifdef __cplusplus
- }
+  }
+
 #endif
 
 #endif /* __WFSM_HDL_H__ */

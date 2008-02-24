@@ -32,7 +32,7 @@
 
 
 /**
- * WARC default headers 
+ * WARC default headers
  */
 
 #include <wclass.h>   /* bless, destroy, struct Class */
@@ -55,17 +55,18 @@
 #define SIGN 12
 
 struct AFile
-{ 
-  const void * class;
-  
-  /*@{*/
-  void * fname; /**< WString containing AFile File name*/
-  FILE * fh; /**< The file handle */
-  afile_comp_t compressed; /**< indicates if the record is compressed */
-  warc_u64_t fsize; /**< Arc file size */
-  warc_u64_t sbloc ; /**< The current data bloc file size */
-  /*@}*/
-};
+  {
+
+    const void * class;
+
+    /*@{*/
+    void * fname; /**< WString containing AFile File name*/
+    FILE * fh; /**< The file handle */
+    afile_comp_t compressed; /**< indicates if the record is compressed */
+    warc_u64_t fsize; /**< Arc file size */
+    warc_u64_t sbloc ; /**< The current data bloc file size */
+    /*@}*/
+  };
 
 
 #define FNAME   (self -> fname)
@@ -91,7 +92,8 @@ WPRIVATE warc_u32_t arecover (const warc_u8_t * buffer,
   FILE * out = (FILE *) env;
 
   /* copy the uncompressed 'nbr' bytes to out */
-  if (w_fwrite (buffer, 1, nbr, out) != nbr || w_ferror (out))
+
+  if (w_fwrite (buffer, 1, nbr, out) != nbr || w_ferror (out) )
     return (Z_STOP_DECODING); /* return this value to stop the uncompression */
 
   return (Z_CONTINUE_DECODING);
@@ -108,19 +110,21 @@ WPRIVATE warc_u32_t arecover (const warc_u8_t * buffer,
 
 WIPUBLIC warc_bool_t AFile_hasMoreRecords (const void * const _self)
 {
+
   const struct AFile * const self = _self;
 
   /* preconditions */
   CASSERT (self);
-   
+
   if (w_ftell (FH) == (warc_i64_t)  FSIZE)
     {
       w_fseek_start (FH);
       return (WARC_FALSE);
     }
-  else 
+
+  else
     return (WARC_TRUE);
-   
+
   return (WARC_FALSE);
 }
 
@@ -138,14 +142,15 @@ WIPUBLIC warc_bool_t AFile_hasMoreRecords (const void * const _self)
 
 WPUBLIC warc_bool_t AFile_seek (void * _self, const warc_u64_t offset)
 {
-   struct AFile * self = _self;
 
-   /* Preconditions */
-   CASSERT (self);
+  struct AFile * self = _self;
 
-   w_fseek_from_start (FH, offset);
+  /* Preconditions */
+  CASSERT (self);
 
-   return (WARC_TRUE);
+  w_fseek_from_start (FH, offset);
+
+  return (WARC_TRUE);
 }
 
 
@@ -159,6 +164,7 @@ WPUBLIC warc_bool_t AFile_seek (void * _self, const warc_u64_t offset)
 
 WPUBLIC void * AFile_nextRecord ( void * _self)
 {
+
   struct AFile * self   = _self;
   void       * arec     = NIL;
   void       * arcfsm   = NIL;
@@ -170,26 +176,28 @@ WPUBLIC void * AFile_nextRecord ( void * _self)
   FILE       * rectfile = NIL; /* to uncompress the ARecord */
   warc_u64_t   offset   = 0;
 
-  
- 
+
+
 
   /* Preconditions */
   CASSERT (self);
-  
+
   if (COMP == ARC_FILE_COMPRESSED_GZIP)
     {
       objrectfile = bless (WTempFile);
       unless (objrectfile)
-        {
-          WarcDebugMsg ("unable to create temporary space");
-          return (NIL);
-        }
+      {
+        WarcDebugMsg ("unable to create temporary space");
+        return (NIL);
+      }
+
       rectfile = WTempFile_handle (objrectfile);
 
       gzobj = bless (WGzip);
       offset = w_ftell (FH);
-      ret = WGzip_uncompress (gzobj, FH, w_ftell (FH), & usize, & csize, 
+      ret = WGzip_uncompress (gzobj, FH, w_ftell (FH), & usize, & csize,
                               arecover, (void *) rectfile);
+
       if (ret)
         {
           WarcDebugMsg ("unable to uncompress the gzipped record");
@@ -199,98 +207,106 @@ WPUBLIC void * AFile_nextRecord ( void * _self)
         }
 
       offset += csize;
+
       w_fseek_from_start (FH, offset);
       destroy (gzobj);
       w_fseek_start (rectfile);
       arcfsm = bless (AFsmHDL, rectfile);
-      
-      if (AFsmHDL_run (arcfsm))
+
+      if (AFsmHDL_run (arcfsm) )
         {
-          
+
           destroy (arcfsm);
           destroy (objrectfile);
           return (NIL);
         }
-      
+
       arec = AFsmHDL_transform (arcfsm);
-      SBLOC = ARecord_getDataLength(arec);  
-      
-      if (ARecord_setAfile (arec, self))
+
+      SBLOC = ARecord_getDataLength (arec);
+
+      if (ARecord_setAfile (arec, self) )
         {
           destroy (arec);
           destroy (arcfsm);
           destroy (objrectfile);
           return (NIL);
         }
-      
-      if (ARecord_setRecordOffset (arec, w_ftell (rectfile)))
+
+      if (ARecord_setRecordOffset (arec, w_ftell (rectfile) ) )
         {
           destroy (arec);
           destroy (arcfsm);
           destroy (objrectfile);
           return (NIL);
         }
-      
-      if (ARecord_setContentSize (arec, SBLOC))
+
+      if (ARecord_setContentSize (arec, SBLOC) )
         {
           destroy (arec);
           destroy (arcfsm);
           destroy (objrectfile);
           return (NIL);
         }
-      
-      
-      if (ARecord_setContentFromFile (arec, objrectfile))
+
+
+      if (ARecord_setContentFromFile (arec, objrectfile) )
         {
           destroy (arec);
           destroy (objrectfile);
           return (NIL);
         }
-      
+
       destroy (arcfsm);
+
       return (arec);
 
     }
+
   else if (COMP == ARC_FILE_UNCOMPRESSED)
-    { 
+    {
       arcfsm = bless (AFsmHDL, FH);
-      if (AFsmHDL_run (arcfsm))
+
+      if (AFsmHDL_run (arcfsm) )
         {
-          w_fprintf (fprintf (stderr ,"error in FSM state address %p, at offset %ld in the arc file\n", AFsmHDL_state (arcfsm), w_ftell (FH)));
+          w_fprintf (fprintf (stderr , "error in FSM state address %p, at offset %ld in the arc file\n", AFsmHDL_state (arcfsm), w_ftell (FH) ) );
           destroy (arcfsm);
           return (NIL);
         }
-      
+
       arec = AFsmHDL_transform (arcfsm);
-      SBLOC = ARecord_getDataLength(arec);  
-      
-      
-      if (ARecord_setAfile (arec, self))
-        {
-          destroy (arec);
-          destroy (arcfsm);
-          return (NIL);
-        }
-      
-      if (ARecord_setRecordOffset (arec, w_ftell (FH)))
+
+      SBLOC = ARecord_getDataLength (arec);
+
+
+      if (ARecord_setAfile (arec, self) )
         {
           destroy (arec);
           destroy (arcfsm);
           return (NIL);
         }
 
-      w_fseek_from_here (FH , SBLOC +1);
-      if (ARecord_setContentSize (arec, SBLOC))
+      if (ARecord_setRecordOffset (arec, w_ftell (FH) ) )
         {
           destroy (arec);
           destroy (arcfsm);
           return (NIL);
         }
-      
+
+      w_fseek_from_here (FH , SBLOC + 1);
+
+      if (ARecord_setContentSize (arec, SBLOC) )
+        {
+          destroy (arec);
+          destroy (arcfsm);
+          return (NIL);
+        }
+
       destroy (arcfsm);
+
       return (arec);
     }
-  
+
   return (NIL);
 }
 
@@ -303,12 +319,13 @@ WPUBLIC void * AFile_nextRecord ( void * _self)
 
 WIPUBLIC warc_u64_t AFile_getContentSize (const  void * const _self)
 {
-    const struct AFile * self = _self;
+
+  const struct AFile * self = _self;
 
   /* Preconditions */
   CASSERT (self);
-  
- return (SBLOC);
+
+  return (SBLOC);
 }
 
 /**
@@ -320,8 +337,8 @@ WIPUBLIC warc_u64_t AFile_getContentSize (const  void * const _self)
  */
 
 
-WPRIVATE warc_bool_t AFile_fillTempFile(const void* const _self, 
-                                        FILE * atfile, warc_u64_t size)
+WPRIVATE warc_bool_t AFile_fillTempFile (const void* const _self,
+    FILE * atfile, warc_u64_t size)
 {
 #define WFLUSH_SIZ 4096
 
@@ -329,40 +346,41 @@ WPRIVATE warc_bool_t AFile_fillTempFile(const void* const _self,
   char                       buf [WFLUSH_SIZ];
   warc_u32_t                 r ;
   warc_u32_t                 p ;
-  
+
   /* Preconditions */
   CASSERT (self);
   assert (atfile);
 
   while (size)
     {
-      if(size > WFLUSH_SIZ)
+      if (size > WFLUSH_SIZ)
         r = WFLUSH_SIZ;
       else
         r = size;
-      
+
       size = size - r;
-      
+
       p = w_fread (buf, 1, r, FH);
+
       if (w_ferror (atfile) || r != p)
         {
-          WarcDebugMsg("error when copying data");
+          WarcDebugMsg ("error when copying data");
           return (WARC_TRUE);
         }
-      
+
       if (w_fwrite (buf, 1, r, atfile) != r)
         return (WARC_TRUE);
     }
-  
+
   return (WARC_FALSE);
-   
-/*    while (size) */
-/*      { */
-/*        w_fread  (& byte, 1, 1, FH); */
-/*        w_fwrite (& byte, 1, 1, atfile); */
-/*        -- size; */
-/*      } */
-/*    return (WARC_FALSE); */
+
+  /*    while (size) */
+  /*      { */
+  /*        w_fread  (& byte, 1, 1, FH); */
+  /*        w_fwrite (& byte, 1, 1, atfile); */
+  /*        -- size; */
+  /*      } */
+  /*    return (WARC_FALSE); */
 
 }
 
@@ -377,42 +395,43 @@ WPRIVATE warc_bool_t AFile_fillTempFile(const void* const _self,
  */
 
 WPUBLIC warc_bool_t AFile_register (void* _self, void * arec,
-                                    warc_bool_t (* callback) 
+                                    warc_bool_t (* callback)
                                     (void *, const char *, const warc_u32_t),
                                     void * env)
 {
+
   struct AFile * self      = _self;
   void         * objatfile = NIL;
-  FILE         * atfile    = NIL;  /* the temporary file 
+  FILE         * atfile    = NIL;  /* the temporary file
                                       which will hold the record bloc */
-  warc_i64_t     acurrent  = -1;   /* to return to the current postion 
+  warc_i64_t     acurrent  = -1;   /* to return to the current postion
                                       of the AFile */
-  warc_i64_t     offset    = -1;   /* to recover the bloc offset in the 
+  warc_i64_t     offset    = -1;   /* to recover the bloc offset in the
                                       Arc file */
-  warc_u32_t     size      = 0;    /* to recover the bloc size from the 
+  warc_u32_t     size      = 0;    /* to recover the bloc size from the
                                       record */
-  
+
   /* Precondition */
   CASSERT (self);
 
   unless (arec)
-    return (WARC_TRUE);
-  
+  return (WARC_TRUE);
+
   /* check if "self" is the correct AFile object */
-  unless (self == ARecord_fromWho (arec))
-    return (WARC_TRUE);
-  
+  unless (self == ARecord_fromWho (arec) )
+  return (WARC_TRUE);
+
   unless (callback)
-    {
-      WarcDebugMsg ("NULL callback pointer");
-      return (WARC_TRUE);
-    }
+  {
+    WarcDebugMsg ("NULL callback pointer");
+    return (WARC_TRUE);
+  }
 
-  if (ARecord_setCallback (arec, callback))
-     return (WARC_TRUE);
+  if (ARecord_setCallback (arec, callback) )
+    return (WARC_TRUE);
 
-  if (ARecord_setEnv (arec, env))
-     return (WARC_TRUE);
+  if (ARecord_setEnv (arec, env) )
+    return (WARC_TRUE);
 
   offset = ARecord_getRecordOffset (arec);
 
@@ -420,49 +439,53 @@ WPUBLIC warc_bool_t AFile_register (void* _self, void * arec,
     return (WARC_TRUE);
 
 
-   if (COMP == ARC_FILE_COMPRESSED_GZIP)
+  if (COMP == ARC_FILE_COMPRESSED_GZIP)
     {
-      w_fseek_from_start (ARecord_getDataFile(arec), offset);
+      w_fseek_from_start (ARecord_getDataFile (arec), offset);
     }
-   else if (COMP == ARC_FILE_UNCOMPRESSED)
-     {
-       objatfile = bless (WTempFile);
-       unless (objatfile)
-         {
-           WarcDebugMsg ("unable to create temporary space");
-           return (WARC_TRUE);
-         }
-       atfile = WTempFile_handle (objatfile);
-       
-       size = ARecord_getDataSize (arec);
-       
-       acurrent = (warc_i64_t) w_ftell(FH);
-       w_fseek_from_start (FH, offset);
-       
-       if (AFile_fillTempFile (self, atfile, size))
-         {
-           destroy (objatfile);
-           w_fseek_from_start (FH, acurrent);
-           return (WARC_TRUE);
-         }
-       
-       w_fseek_start (atfile);
-       w_fseek_from_start (FH, acurrent);
 
-       if(ARecord_setContentFromFile (arec, objatfile))
-         {
-           destroy (objatfile);
-           w_fseek_from_start (FH, acurrent);
-           return (WARC_TRUE);
-         }
-     }
-   else
-     {
-       WarcDebugMsg ("ARC file opened with an unknown mode");
-       return (WARC_TRUE);
-     }
+  else if (COMP == ARC_FILE_UNCOMPRESSED)
+    {
+      objatfile = bless (WTempFile);
+      unless (objatfile)
+      {
+        WarcDebugMsg ("unable to create temporary space");
+        return (WARC_TRUE);
+      }
 
-   return (WARC_FALSE);
+      atfile = WTempFile_handle (objatfile);
+
+      size = ARecord_getDataSize (arec);
+
+      acurrent = (warc_i64_t) w_ftell (FH);
+      w_fseek_from_start (FH, offset);
+
+      if (AFile_fillTempFile (self, atfile, size) )
+        {
+          destroy (objatfile);
+          w_fseek_from_start (FH, acurrent);
+          return (WARC_TRUE);
+        }
+
+      w_fseek_start (atfile);
+
+      w_fseek_from_start (FH, acurrent);
+
+      if (ARecord_setContentFromFile (arec, objatfile) )
+        {
+          destroy (objatfile);
+          w_fseek_from_start (FH, acurrent);
+          return (WARC_TRUE);
+        }
+    }
+
+  else
+    {
+      WarcDebugMsg ("ARC file opened with an unknown mode");
+      return (WARC_TRUE);
+    }
+
+  return (WARC_FALSE);
 }
 
 
@@ -478,52 +501,57 @@ WPUBLIC warc_bool_t AFile_register (void* _self, void * arec,
 
 WPRIVATE void * AFile_constructor (void * _self, va_list * app)
 {
+
   struct AFile         * const self = _self;
   const char           * fname      = va_arg (* app, const char *);
   const afile_comp_t     compressed = va_arg (* app, const afile_comp_t);
 
-  FNAME = bless (WString, fname, w_strlen((warc_u8_t *) fname));
+  FNAME = bless (WString, fname, w_strlen ( (warc_u8_t *) fname) );
   assert (FNAME);
 
   FH = w_fopen_rb (fname);
-  unless (FH) 
-    {
-      destroy (self);
-      return NIL;
-    }
-  
+  unless (FH)
+  {
+    destroy (self);
+    return NIL;
+  }
+
   w_file_size (FH, FSIZE);
   unless (FSIZE)
-    {
-      destroy (self);
-      return (NIL);
-    }
+  {
+    destroy (self);
+    return (NIL);
+  }
 
   COMP  = compressed ;
   SBLOC = 0;
-  
+
 
   /* check if it's a valid GZIP file */
+
   if (COMP == ARC_FILE_COMPRESSED_GZIP)
     {
       warc_u64_t   where = 0;
       void       * g     = bless (WGzip);
-          
+
       unless (g)
+      {
+        destroy (self);
+        return (NIL);
+      }
+
+      where = (warc_u64_t) w_ftell (FH);
+
+      if (WGzip_check (g, FH, 0) )
         {
+          w_fprintf (fprintf (stderr, "not a valid GZIP ARC file\n") );
+          destroy (g);
           destroy (self);
           return (NIL);
         }
 
-      where = (warc_u64_t) w_ftell (FH);
-      if (WGzip_check (g, FH, 0))
-        {
-          w_fprintf (fprintf (stderr, "not a valid GZIP ARC file\n"));
-          destroy (g);
-          destroy (self);
-          return (NIL); 
-        }
-      w_fseek_from_start(FH, where);
+      w_fseek_from_start (FH, where);
+
       destroy (g);
     }
 
@@ -539,23 +567,27 @@ WPRIVATE void * AFile_constructor (void * _self, va_list * app)
  */
 
 WPRIVATE void * AFile_destructor (void * _self)
-{	
+{
+
   struct AFile  * const self = _self;
 
   /* preconditions */
   CASSERT (self);
 
   /* free the file handle */
+
   if (FH)
     w_fclose (FH);
- 
-  if(FNAME)
+
+  if (FNAME)
     destroy (FNAME), FNAME = NIL;
 
   COMP =  0;
+
   FSIZE = 0;
+
   SBLOC = 0;
-  
+
   return (self);
 }
 
@@ -566,10 +598,11 @@ WPRIVATE void * AFile_destructor (void * _self)
  * ARC WFile class
  */
 
-static const struct Class _AFile = {
-	sizeof(struct AFile),
+static const struct Class _AFile =
+  {
+    sizeof (struct AFile),
     SIGN,
-	AFile_constructor, AFile_destructor
-};
+    AFile_constructor, AFile_destructor
+  };
 
 const void * AFile = & _AFile;

@@ -30,32 +30,34 @@
 
 /* to mix C and C++ */
 #ifdef __cplusplus
- extern "C" {
+extern "C"
+  {
 #endif
 
 
-/**
- * Portability header file
- */
+    /**
+     * Portability header file
+     */
 
 #include <wport.h>
 
 
-/**
- * C default headers 
- */
+    /**
+     * C default headers
+     */
 
 #include <stdio.h> /* FILE */
 
 
-/* OS independante temporary file object */
-extern const void * WTempFile;
+    /* OS independante temporary file object */
+    extern const void * WTempFile;
 
-extern FILE  * WTempFile_handle  (const void * const);
+    extern FILE  * WTempFile_handle  (const void * const);
 
 
 #ifdef __cplusplus
- }
+  }
+
 #endif
 
 #endif /* __WARC_MKTMP_H__ */

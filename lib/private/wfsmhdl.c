@@ -31,7 +31,7 @@
 #include <wport.h>
 
 /*
- * WARC default headers 
+ * WARC default headers
  */
 
 #include <wclass.h>   /* bless, destroy, cassert, struct Class */
@@ -58,32 +58,33 @@
 
 
 typedef struct
-{
-  void * warc_id;       /* WString */
-  void * data_length;   /* WString */
-  void * record_type;   /* WString */
-  void * subject_uri;   /* WString */
-  void * creation_date; /* WString */
-  void * content_type;  /* WString */
-  void * record_id;     /* WString */
+  {
+    void * warc_id;       /* WString */
+    void * data_length;   /* WString */
+    void * record_type;   /* WString */
+    void * subject_uri;   /* WString */
+    void * creation_date; /* WString */
+    void * content_type;  /* WString */
+    void * record_id;     /* WString */
 
-  FILE           * fin;  /* file handle to read from */
-  Transition     * state;/* transition state */
-  warc_bool_t      err;  /* parsing error flag */
-  warc_u8_t    c;    /* current char in "fin" */
-} HDLState;
-
-
+    FILE           * fin;  /* file handle to read from */
+    Transition     * state;/* transition state */
+    warc_bool_t      err;  /* parsing error flag */
+    warc_u8_t    c;    /* current char in "fin" */
+  } HDLState;
 
 
-struct WFsmHDL 
-{ 
-  const void * class;
-  
-  /*@{*/
-  HDLState * hdls; /**< HDL State */
-  /*@}*/
-};
+
+
+struct WFsmHDL
+  {
+
+    const void * class;
+
+    /*@{*/
+    HDLState * hdls; /**< HDL State */
+    /*@}*/
+  };
 
 
 #define    HDLS            (self -> hdls)
@@ -108,17 +109,17 @@ struct WFsmHDL
 
 /* prototypes of all events in the FSM (defined below) */
 warc_bool_t WFsmHDL_isSpace   (void *), WFsmHDL_isText    (void *),
-        WFsmHDL_isInteger (void *), WFsmHDL_isCR      (void *),
-        WFsmHDL_isLF      (void *), WFsmHDL_isUnknown (void *);
+WFsmHDL_isInteger (void *), WFsmHDL_isCR      (void *),
+WFsmHDL_isLF      (void *), WFsmHDL_isUnknown (void *);
 
 /* prototypes of all actions in the FSM (defined below) */
-void WFsmHDL_setWarcId       (void *), WFsmHDL_setDataLength  (void *), 
-     WFsmHDL_setRecordType   (void *), WFsmHDL_setSubjectUri  (void *),
-     WFsmHDL_setCreationDate (void *), WFsmHDL_setContentType (void *), 
-     WFsmHDL_setRecordId     (void *), WFsmHDL_pushBack       (void *),
-     WFsmHDL_checkRecordType (void *), WFsmHDL_raiseError     (void *),
-     WFsmHDL_checkWarcID     (void *), 
-     WFsmHDL_raiseErrorDlength (void *),  WFsmHDL_raiseErrorCrDate (void *);
+void WFsmHDL_setWarcId       (void *), WFsmHDL_setDataLength  (void *),
+WFsmHDL_setRecordType   (void *), WFsmHDL_setSubjectUri  (void *),
+WFsmHDL_setCreationDate (void *), WFsmHDL_setContentType (void *),
+WFsmHDL_setRecordId     (void *), WFsmHDL_pushBack       (void *),
+WFsmHDL_checkRecordType (void *), WFsmHDL_raiseError     (void *),
+WFsmHDL_checkWarcID     (void *),
+WFsmHDL_raiseErrorDlength (void *),  WFsmHDL_raiseErrorCrDate (void *);
 
 /* WFsmHDL_checkContentType (void *), */
 /* WFsmHDL_checkRecordId   (void *) */
@@ -126,10 +127,10 @@ void WFsmHDL_setWarcId       (void *), WFsmHDL_setDataLength  (void *),
 
 /* prototypes of all states in the FSM (defined below) */
 State WANT_HDL_WARC_ID,      WANT_HDL_ID_SP,         WANT_HDL_DATA_LENGTH,
-      WANT_HDL_DATA_SP ,     WANT_HDL_RECORD_TYPE,   WANT_HDL_RECORD_SP,
-      WANT_HDL_SUBJECT_URI,  WANT_HDL_SUBJECT_SP ,   WANT_HDL_CREATION_DATE,
-      WANT_HDL_CREATION_SP,  WANT_HDL_CONTENT_TYPE,  WANT_HDL_CONTENT_SP,
-      WANT_HDL_RECORD_ID,    WANT_HDL_CR,            WANT_HDL_LF;
+WANT_HDL_DATA_SP ,     WANT_HDL_RECORD_TYPE,   WANT_HDL_RECORD_SP,
+WANT_HDL_SUBJECT_URI,  WANT_HDL_SUBJECT_SP ,   WANT_HDL_CREATION_DATE,
+WANT_HDL_CREATION_SP,  WANT_HDL_CONTENT_TYPE,  WANT_HDL_CONTENT_SP,
+WANT_HDL_RECORD_ID,    WANT_HDL_CR,            WANT_HDL_LF;
 
 
 
@@ -138,24 +139,24 @@ WPRIVATE warc_rec_t WFsmHDL_getRecordTypeNumber (const warc_u8_t * rectype)
   /* preconditions */
   assert (rectype);
 
- if      (! w_strcmp (rectype, (warc_u8_t *) "warcinfo"))
-   return (WARCINFO_RECORD);
- else if (! w_strcmp (rectype, (warc_u8_t *) "response"))
-   return (RESPONSE_RECORD); 
- else if (! w_strcmp (rectype, (warc_u8_t *) "request"))
-   return (REQUEST_RECORD);
- else if (! w_strcmp (rectype, (warc_u8_t *) "metadata"))
-   return (METADATA_RECORD);
- else if (! w_strcmp (rectype, (warc_u8_t *) "revisit"))
-   return (REVISIT_RECORD);
- else if (! w_strcmp (rectype, (warc_u8_t *) "conversion"))
-   return (CONVERSION_RECORD);
- else if (! w_strcmp (rectype, (warc_u8_t *) "continuation"))
-   return (CONTINUATION_RECORD);
- else if (! w_strcmp (rectype, (warc_u8_t *) "resource"))
-   return (RESOURCE_RECORD);
+  if      (! w_strcmp (rectype, (warc_u8_t *) "warcinfo") )
+    return (WARCINFO_RECORD);
+  else if (! w_strcmp (rectype, (warc_u8_t *) "response") )
+    return (RESPONSE_RECORD);
+  else if (! w_strcmp (rectype, (warc_u8_t *) "request") )
+    return (REQUEST_RECORD);
+  else if (! w_strcmp (rectype, (warc_u8_t *) "metadata") )
+    return (METADATA_RECORD);
+  else if (! w_strcmp (rectype, (warc_u8_t *) "revisit") )
+    return (REVISIT_RECORD);
+  else if (! w_strcmp (rectype, (warc_u8_t *) "conversion") )
+    return (CONVERSION_RECORD);
+  else if (! w_strcmp (rectype, (warc_u8_t *) "continuation") )
+    return (CONTINUATION_RECORD);
+  else if (! w_strcmp (rectype, (warc_u8_t *) "resource") )
+    return (RESOURCE_RECORD);
 
- return (UNKNOWN_RECORD);
+  return (UNKNOWN_RECORD);
 }
 
 
@@ -165,7 +166,7 @@ WIPRIVATE void WFsmHDL_rewind (void * _hs, warc_u32_t n)
   const HDLState * const hs = _hs;
 
   assert (hs);
-  
+
   w_fseek_from_here (hs -> fin, - n);
 }
 
@@ -175,207 +176,207 @@ WIPRIVATE void WFsmHDL_rewind (void * _hs, warc_u32_t n)
 
 /*
 
-@@@@@@@@   @@@@@@   @@@@@@@@@@   
-@@@@@@@@  @@@@@@@   @@@@@@@@@@@  
-@@!       !@@       @@! @@! @@!  
-!@!       !@!       !@! !@! !@!  
-@!!!:!    !!@@!!    @!! !!@ @!@  
-!!!!!:     !!@!!!   !@!   ! !@!  
-!!:            !:!  !!:     !!:  
-:!:           !:!   :!:     :!:  
- ::       :::: ::   :::     ::   
- :        :: : :     :      :    
-                                 
-                                                          
- @@@@@@   @@@@@@@   @@@@@@   @@@@@@@  @@@@@@@@   @@@@@@   
-@@@@@@@   @@@@@@@  @@@@@@@@  @@@@@@@  @@@@@@@@  @@@@@@@   
-!@@         @@!    @@!  @@@    @@!    @@!       !@@       
-!@!         !@!    !@!  @!@    !@!    !@!       !@!       
-!!@@!!      @!!    @!@!@!@!    @!!    @!!!:!    !!@@!!    
- !!@!!!     !!!    !!!@!!!!    !!!    !!!!!:     !!@!!!   
-     !:!    !!:    !!:  !!!    !!:    !!:            !:!  
-    !:!     :!:    :!:  !:!    :!:    :!:           !:!   
-:::: ::      ::    ::   :::     ::     :: ::::  :::: ::   
-:: : :       :      :   : :     :     : :: ::   :: : :    
+@@@@@@@@   @@@@@@   @@@@@@@@@@
+@@@@@@@@  @@@@@@@   @@@@@@@@@@@
+@@!       !@@       @@! @@! @@!
+!@!       !@!       !@! !@! !@!
+@!!!:!    !!@@!!    @!! !!@ @!@
+!!!!!:     !!@!!!   !@!   ! !@!
+!!:            !:!  !!:     !!:
+:!:           !:!   :!:     :!:
+ ::       :::: ::   :::     ::
+ :        :: : :     :      :
+
+
+ @@@@@@   @@@@@@@   @@@@@@   @@@@@@@  @@@@@@@@   @@@@@@
+@@@@@@@   @@@@@@@  @@@@@@@@  @@@@@@@  @@@@@@@@  @@@@@@@
+!@@         @@!    @@!  @@@    @@!    @@!       !@@
+!@!         !@!    !@!  @!@    !@!    !@!       !@!
+!!@@!!      @!!    @!@!@!@!    @!!    @!!!:!    !!@@!!
+ !!@!!!     !!!    !!!@!!!!    !!!    !!!!!:     !!@!!!
+     !:!    !!:    !!:  !!!    !!:    !!:            !:!
+    !:!     :!:    :!:  !:!    :!:    :!:           !:!
+:::: ::      ::    ::   :::     ::     :: ::::  :::: ::
+:: : :       :      :   : :     :     : :: ::   :: : :
 
 */
 
 
 
-State WANT_HDL_WARC_ID = 
-  {
-    /* TEST_EVENT             ACTION                   NEXT_STATE */
+State WANT_HDL_WARC_ID =
+{
+  /* TEST_EVENT             ACTION                   NEXT_STATE */
 
-    {WFsmHDL_isText,          WFsmHDL_setWarcId,       WANT_HDL_WARC_ID},
-    {WFsmHDL_isSpace,         WFsmHDL_checkWarcID,     WANT_HDL_ID_SP  },
-    {WFsmHDL_isUnknown,       WFsmHDL_raiseError,      NIL}
-  };
+  {WFsmHDL_isText,          WFsmHDL_setWarcId,       WANT_HDL_WARC_ID},
+  {WFsmHDL_isSpace,         WFsmHDL_checkWarcID,     WANT_HDL_ID_SP  },
+  {WFsmHDL_isUnknown,       WFsmHDL_raiseError,      NIL}
+};
 
 
 State WANT_HDL_ID_SP =
-  {
-    /* TEST_EVENT             ACTION                   NEXT_STATE */
+{
+  /* TEST_EVENT             ACTION                   NEXT_STATE */
 
-    {WFsmHDL_isSpace,         NIL,                           WANT_HDL_ID_SP       },
-    {WFsmHDL_isInteger,       WFsmHDL_setDataLength  ,       WANT_HDL_DATA_LENGTH },
-    {WFsmHDL_isUnknown,       WFsmHDL_raiseErrorDlength,     NIL}
-  };
+  {WFsmHDL_isSpace,         NIL,                           WANT_HDL_ID_SP       },
+  {WFsmHDL_isInteger,       WFsmHDL_setDataLength  ,       WANT_HDL_DATA_LENGTH },
+  {WFsmHDL_isUnknown,       WFsmHDL_raiseErrorDlength,     NIL}
+};
 
 
 State WANT_HDL_DATA_LENGTH =
-  {
-    /* TEST_EVENT             ACTION                   NEXT_STATE */
+{
+  /* TEST_EVENT             ACTION                   NEXT_STATE */
 
-    {WFsmHDL_isInteger,       WFsmHDL_setDataLength,      WANT_HDL_DATA_LENGTH },
-    {WFsmHDL_isSpace,         NIL,                        WANT_HDL_DATA_SP     },
-    {WFsmHDL_isUnknown,       WFsmHDL_raiseErrorDlength,  NIL}
-  };
+  {WFsmHDL_isInteger,       WFsmHDL_setDataLength,      WANT_HDL_DATA_LENGTH },
+  {WFsmHDL_isSpace,         NIL,                        WANT_HDL_DATA_SP     },
+  {WFsmHDL_isUnknown,       WFsmHDL_raiseErrorDlength,  NIL}
+};
 
 
 State WANT_HDL_DATA_SP =
-  {
-    /* TEST_EVENT             ACTION                   NEXT_STATE */
+{
+  /* TEST_EVENT             ACTION                   NEXT_STATE */
 
-    {WFsmHDL_isSpace,         NIL,                     WANT_HDL_DATA_SP       },
-    {WFsmHDL_isText,          WFsmHDL_setRecordType,   WANT_HDL_RECORD_TYPE   },
-    {WFsmHDL_isUnknown,       WFsmHDL_raiseError,      NIL}
-  };
+  {WFsmHDL_isSpace,         NIL,                     WANT_HDL_DATA_SP       },
+  {WFsmHDL_isText,          WFsmHDL_setRecordType,   WANT_HDL_RECORD_TYPE   },
+  {WFsmHDL_isUnknown,       WFsmHDL_raiseError,      NIL}
+};
 
 
 State WANT_HDL_RECORD_TYPE =
-  {
-    /* TEST_EVENT             ACTION                   NEXT_STATE */
+{
+  /* TEST_EVENT             ACTION                   NEXT_STATE */
 
-    {WFsmHDL_isText,          WFsmHDL_setRecordType,   WANT_HDL_RECORD_TYPE},
-    {WFsmHDL_isSpace,         WFsmHDL_checkRecordType, WANT_HDL_RECORD_SP},
-    {WFsmHDL_isUnknown,       WFsmHDL_raiseError,      NIL}
-  };
+  {WFsmHDL_isText,          WFsmHDL_setRecordType,   WANT_HDL_RECORD_TYPE},
+  {WFsmHDL_isSpace,         WFsmHDL_checkRecordType, WANT_HDL_RECORD_SP},
+  {WFsmHDL_isUnknown,       WFsmHDL_raiseError,      NIL}
+};
 
 
-State WANT_HDL_RECORD_SP = 
-  {
-    /* TEST_EVENT             ACTION                   NEXT_STATE */
+State WANT_HDL_RECORD_SP =
+{
+  /* TEST_EVENT             ACTION                   NEXT_STATE */
 
-    {WFsmHDL_isSpace,         NIL,                     WANT_HDL_RECORD_SP },
-    {WFsmHDL_isText,          WFsmHDL_setSubjectUri,   WANT_HDL_SUBJECT_URI},
-    {WFsmHDL_isUnknown,       WFsmHDL_raiseError,      NIL}
-  };
+  {WFsmHDL_isSpace,         NIL,                     WANT_HDL_RECORD_SP },
+  {WFsmHDL_isText,          WFsmHDL_setSubjectUri,   WANT_HDL_SUBJECT_URI},
+  {WFsmHDL_isUnknown,       WFsmHDL_raiseError,      NIL}
+};
 
 
 State WANT_HDL_SUBJECT_URI =
-  {
-    /* TEST_EVENT             ACTION                   NEXT_STATE */
+{
+  /* TEST_EVENT             ACTION                   NEXT_STATE */
 
-    {WFsmHDL_isText,          WFsmHDL_setSubjectUri,   WANT_HDL_SUBJECT_URI},
-    {WFsmHDL_isSpace,         NIL,                     WANT_HDL_SUBJECT_SP },
-    {WFsmHDL_isUnknown,       WFsmHDL_raiseError,      NIL}
-  };
+  {WFsmHDL_isText,          WFsmHDL_setSubjectUri,   WANT_HDL_SUBJECT_URI},
+  {WFsmHDL_isSpace,         NIL,                     WANT_HDL_SUBJECT_SP },
+  {WFsmHDL_isUnknown,       WFsmHDL_raiseError,      NIL}
+};
 
 
 State WANT_HDL_SUBJECT_SP =
-  {
-    /* TEST_EVENT             ACTION                   NEXT_STATE */
+{
+  /* TEST_EVENT             ACTION                   NEXT_STATE */
 
-    {WFsmHDL_isSpace,         NIL,                       WANT_HDL_SUBJECT_SP   },
-    {WFsmHDL_isInteger,       WFsmHDL_setCreationDate,   WANT_HDL_CREATION_DATE},
-    {WFsmHDL_isUnknown,       WFsmHDL_raiseErrorCrDate,  NIL}
-  };
+  {WFsmHDL_isSpace,         NIL,                       WANT_HDL_SUBJECT_SP   },
+  {WFsmHDL_isInteger,       WFsmHDL_setCreationDate,   WANT_HDL_CREATION_DATE},
+  {WFsmHDL_isUnknown,       WFsmHDL_raiseErrorCrDate,  NIL}
+};
 
 
 State WANT_HDL_CREATION_DATE =
-  {
-    /* TEST_EVENT             ACTION                   NEXT_STATE */
+{
+  /* TEST_EVENT             ACTION                   NEXT_STATE */
 
-    {WFsmHDL_isInteger,       WFsmHDL_setCreationDate,  WANT_HDL_CREATION_DATE},
-    {WFsmHDL_isSpace,         NIL,                      WANT_HDL_CREATION_SP  },
-    {WFsmHDL_isUnknown,       WFsmHDL_raiseErrorCrDate, NIL}
-  };
+  {WFsmHDL_isInteger,       WFsmHDL_setCreationDate,  WANT_HDL_CREATION_DATE},
+  {WFsmHDL_isSpace,         NIL,                      WANT_HDL_CREATION_SP  },
+  {WFsmHDL_isUnknown,       WFsmHDL_raiseErrorCrDate, NIL}
+};
 
 
 State   WANT_HDL_CREATION_SP =
-  {
-    /* TEST_EVENT             ACTION                   NEXT_STATE */
+{
+  /* TEST_EVENT             ACTION                   NEXT_STATE */
 
-    {WFsmHDL_isSpace,         NIL,                     WANT_HDL_CREATION_SP },
-    {WFsmHDL_isText,          WFsmHDL_setContentType,  WANT_HDL_CONTENT_TYPE},
-    {WFsmHDL_isUnknown,       WFsmHDL_raiseError,      NIL}
-  };
- 
+  {WFsmHDL_isSpace,         NIL,                     WANT_HDL_CREATION_SP },
+  {WFsmHDL_isText,          WFsmHDL_setContentType,  WANT_HDL_CONTENT_TYPE},
+  {WFsmHDL_isUnknown,       WFsmHDL_raiseError,      NIL}
+};
+
 
 State WANT_HDL_CONTENT_TYPE =
-  {
-    /* TEST_EVENT             ACTION                   NEXT_STATE */
+{
+  /* TEST_EVENT             ACTION                   NEXT_STATE */
 
-    {WFsmHDL_isText,          WFsmHDL_setContentType,   WANT_HDL_CONTENT_TYPE},
-    {WFsmHDL_isSpace,         NIL, WANT_HDL_CONTENT_SP  },
-    {WFsmHDL_isUnknown,       WFsmHDL_raiseError,       NIL}
-  };
+  {WFsmHDL_isText,          WFsmHDL_setContentType,   WANT_HDL_CONTENT_TYPE},
+  {WFsmHDL_isSpace,         NIL, WANT_HDL_CONTENT_SP  },
+  {WFsmHDL_isUnknown,       WFsmHDL_raiseError,       NIL}
+};
 
 
 State WANT_HDL_CONTENT_SP =
-   {
-    /* TEST_EVENT             ACTION                   NEXT_STATE */
+{
+  /* TEST_EVENT             ACTION                   NEXT_STATE */
 
-    {WFsmHDL_isSpace,         NIL,                     WANT_HDL_CONTENT_SP},
-    {WFsmHDL_isText,          WFsmHDL_setRecordId,     WANT_HDL_RECORD_ID },
-    {WFsmHDL_isUnknown,       WFsmHDL_raiseError,      NIL}
-  };
+  {WFsmHDL_isSpace,         NIL,                     WANT_HDL_CONTENT_SP},
+  {WFsmHDL_isText,          WFsmHDL_setRecordId,     WANT_HDL_RECORD_ID },
+  {WFsmHDL_isUnknown,       WFsmHDL_raiseError,      NIL}
+};
 
 
 State WANT_HDL_RECORD_ID   =
-  {
-    /* TEST_EVENT             ACTION                   NEXT_STATE */
+{
+  /* TEST_EVENT             ACTION                   NEXT_STATE */
 
-    {WFsmHDL_isCR,            WFsmHDL_pushBack,        WANT_HDL_CR       },
-    {WFsmHDL_isText,          WFsmHDL_setRecordId,     WANT_HDL_RECORD_ID},
-    {WFsmHDL_isUnknown,       WFsmHDL_raiseError,      NIL}
-  };
+  {WFsmHDL_isCR,            WFsmHDL_pushBack,        WANT_HDL_CR       },
+  {WFsmHDL_isText,          WFsmHDL_setRecordId,     WANT_HDL_RECORD_ID},
+  {WFsmHDL_isUnknown,       WFsmHDL_raiseError,      NIL}
+};
 
 
 State WANT_HDL_CR          =
-  {
-    /* TEST_EVENT             ACTION                   NEXT_STATE */
+{
+  /* TEST_EVENT             ACTION                   NEXT_STATE */
 
-    {WFsmHDL_isCR,            NIL,  WANT_HDL_LF},
-    {WFsmHDL_isUnknown,       WFsmHDL_raiseError,     NIL}
-  };
+  {WFsmHDL_isCR,            NIL,  WANT_HDL_LF},
+  {WFsmHDL_isUnknown,       WFsmHDL_raiseError,     NIL}
+};
 
 
 State WANT_HDL_LF          =
-  {
-    /* TEST_EVENT             ACTION                   NEXT_STATE */
+{
+  /* TEST_EVENT             ACTION                   NEXT_STATE */
 
-    {WFsmHDL_isLF,            NIL,                     NIL},
-    {WFsmHDL_isUnknown,       WFsmHDL_raiseError,      NIL}
-  };
+  {WFsmHDL_isLF,            NIL,                     NIL},
+  {WFsmHDL_isUnknown,       WFsmHDL_raiseError,      NIL}
+};
 
 
 
 
 /*
 
-@@@@@@@@   @@@@@@   @@@@@@@@@@   
-@@@@@@@@  @@@@@@@   @@@@@@@@@@@  
-@@!       !@@       @@! @@! @@!  
-!@!       !@!       !@! !@! !@!  
-@!!!:!    !!@@!!    @!! !!@ @!@  
-!!!!!:     !!@!!!   !@!   ! !@!  
-!!:            !:!  !!:     !!:  
-:!:           !:!   :!:     :!:  
- ::       :::: ::   :::     ::   
- :        :: : :     :      :    
-                                 
-                                                           
-@@@@@@@@  @@@  @@@  @@@@@@@@  @@@  @@@  @@@@@@@   @@@@@@   
-@@@@@@@@  @@@  @@@  @@@@@@@@  @@@@ @@@  @@@@@@@  @@@@@@@   
-@@!       @@!  @@@  @@!       @@!@!@@@    @@!    !@@       
-!@!       !@!  @!@  !@!       !@!!@!@!    !@!    !@!       
-@!!!:!    @!@  !@!  @!!!:!    @!@ !!@!    @!!    !!@@!!    
-!!!!!:    !@!  !!!  !!!!!:    !@!  !!!    !!!     !!@!!!   
-!!:       :!:  !!:  !!:       !!:  !!!    !!:         !:!  
-:!:        ::!!:!   :!:       :!:  !:!    :!:        !:!   
- :: ::::    ::::     :: ::::   ::   ::     ::    :::: ::   
-: :: ::      :      : :: ::   ::    :      :     :: : :    
+@@@@@@@@   @@@@@@   @@@@@@@@@@
+@@@@@@@@  @@@@@@@   @@@@@@@@@@@
+@@!       !@@       @@! @@! @@!
+!@!       !@!       !@! !@! !@!
+@!!!:!    !!@@!!    @!! !!@ @!@
+!!!!!:     !!@!!!   !@!   ! !@!
+!!:            !:!  !!:     !!:
+:!:           !:!   :!:     :!:
+ ::       :::: ::   :::     ::
+ :        :: : :     :      :
+
+
+@@@@@@@@  @@@  @@@  @@@@@@@@  @@@  @@@  @@@@@@@   @@@@@@
+@@@@@@@@  @@@  @@@  @@@@@@@@  @@@@ @@@  @@@@@@@  @@@@@@@
+@@!       @@!  @@@  @@!       @@!@!@@@    @@!    !@@
+!@!       !@!  @!@  !@!       !@!!@!@!    !@!    !@!
+@!!!:!    @!@  !@!  @!!!:!    @!@ !!@!    @!!    !!@@!!
+!!!!!:    !@!  !!!  !!!!!:    !@!  !!!    !!!     !!@!!!
+!!:       :!:  !!:  !!:       !!:  !!!    !!:         !:!
+:!:        ::!!:!   :!:       :!:  !:!    :!:        !:!
+ :: ::::    ::::     :: ::::   ::   ::     ::    :::: ::
+: :: ::      :      : :: ::   ::    :      :     :: : :
 
  */
 
@@ -386,28 +387,28 @@ warc_bool_t WFsmHDL_isSpace (void * _hs)
 
   assert (hs);
 
-  return ((hs -> c == ' ')  || (hs -> c == '\t') ||
-          (hs -> c == '\r') || (hs -> c == '\n'));
+  return ( (hs -> c == ' ')  || (hs -> c == '\t') ||
+           (hs -> c == '\r') || (hs -> c == '\n') );
 }
 
 
-warc_bool_t WFsmHDL_isText (void * _hs) 
+warc_bool_t WFsmHDL_isText (void * _hs)
 {
   const HDLState * const hs = _hs;
 
   assert (hs);
 
-  return ((hs -> c != ' ')  && (hs -> c != '\t') &&
-          (hs -> c != '\r') && (hs -> c != '\n'));
+  return ( (hs -> c != ' ')  && (hs -> c != '\t') &&
+           (hs -> c != '\r') && (hs -> c != '\n') );
 }
 
 warc_bool_t WFsmHDL_isInteger (void * _hs)
 {
   const HDLState * const hs = _hs;
-  
+
   assert (hs);
 
-  return ((hs -> c >= 48) && (hs -> c <= 57));
+  return ( (hs -> c >= 48) && (hs -> c <= 57) );
 }
 
 
@@ -443,37 +444,37 @@ warc_bool_t WFsmHDL_isUnknown (void * _hs)
 
 /*
 
-@@@@@@@@   @@@@@@   @@@@@@@@@@   
-@@@@@@@@  @@@@@@@   @@@@@@@@@@@  
-@@!       !@@       @@! @@! @@!  
-!@!       !@!       !@! !@! !@!  
-@!!!:!    !!@@!!    @!! !!@ @!@  
-!!!!!:     !!@!!!   !@!   ! !@!  
-!!:            !:!  !!:     !!:  
-:!:           !:!   :!:     :!:  
- ::       :::: ::   :::     ::   
- :        :: : :     :      :    
-                                 
-                                                                
- @@@@@@    @@@@@@@  @@@@@@@  @@@   @@@@@@   @@@  @@@   @@@@@@   
-@@@@@@@@  @@@@@@@@  @@@@@@@  @@@  @@@@@@@@  @@@@ @@@  @@@@@@@   
-@@!  @@@  !@@         @@!    @@!  @@!  @@@  @@!@!@@@  !@@       
-!@!  @!@  !@!         !@!    !@!  !@!  @!@  !@!!@!@!  !@!       
-@!@!@!@!  !@!         @!!    !!@  @!@  !@!  @!@ !!@!  !!@@!!    
-!!!@!!!!  !!!         !!!    !!!  !@!  !!!  !@!  !!!   !!@!!!   
-!!:  !!!  :!!         !!:    !!:  !!:  !!!  !!:  !!!       !:!  
-:!:  !:!  :!:         :!:    :!:  :!:  !:!  :!:  !:!      !:!   
-::   :::   ::: :::     ::     ::  ::::: ::   ::   ::  :::: ::   
- :   : :   :: :: :     :     :     : :  :   ::    :   :: : :    
+@@@@@@@@   @@@@@@   @@@@@@@@@@
+@@@@@@@@  @@@@@@@   @@@@@@@@@@@
+@@!       !@@       @@! @@! @@!
+!@!       !@!       !@! !@! !@!
+@!!!:!    !!@@!!    @!! !!@ @!@
+!!!!!:     !!@!!!   !@!   ! !@!
+!!:            !:!  !!:     !!:
+:!:           !:!   :!:     :!:
+ ::       :::: ::   :::     ::
+ :        :: : :     :      :
+
+
+ @@@@@@    @@@@@@@  @@@@@@@  @@@   @@@@@@   @@@  @@@   @@@@@@
+@@@@@@@@  @@@@@@@@  @@@@@@@  @@@  @@@@@@@@  @@@@ @@@  @@@@@@@
+@@!  @@@  !@@         @@!    @@!  @@!  @@@  @@!@!@@@  !@@
+!@!  @!@  !@!         !@!    !@!  !@!  @!@  !@!!@!@!  !@!
+@!@!@!@!  !@!         @!!    !!@  @!@  !@!  @!@ !!@!  !!@@!!
+!!!@!!!!  !!!         !!!    !!!  !@!  !!!  !@!  !!!   !!@!!!
+!!:  !!!  :!!         !!:    !!:  !!:  !!!  !!:  !!!       !:!
+:!:  !:!  :!:         :!:    :!:  :!:  !:!  :!:  !:!      !:!
+::   :::   ::: :::     ::     ::  ::::: ::   ::   ::  :::: ::
+ :   : :   :: :: :     :     :     : :  :   ::    :   :: : :
 
 */
 
- 
+
 
 void WFsmHDL_setWarcId (void * _hs)
 {
   const HDLState * const hs  = _hs;
-  
+
   assert (hs -> warc_id);
 
   WString_append (hs -> warc_id, & (hs -> c), 1);
@@ -505,18 +506,19 @@ void WFsmHDL_checkRecordType (void * _hs)
 
   assert (hs);
 
-  t = WFsmHDL_getRecordTypeNumber (WString_getText (hs -> record_type)); 
+  t = WFsmHDL_getRecordTypeNumber (WString_getText (hs -> record_type) );
 
- /* if unknown WARC record type, stop parsing */
- if (t == UNKNOWN_RECORD)
-   {
-     /* rewind the stream */
-     WFsmHDL_rewind (hs, WString_getLength (hs -> record_type) + 1);
+  /* if unknown WARC record type, stop parsing */
 
-     /* raise the flag errore */
-     WarcDebugMsg("expecting a valid WARC record type");
-     hs -> err = WARC_TRUE;
-   }
+  if (t == UNKNOWN_RECORD)
+    {
+      /* rewind the stream */
+      WFsmHDL_rewind (hs, WString_getLength (hs -> record_type) + 1);
+
+      /* raise the flag errore */
+      WarcDebugMsg ("expecting a valid WARC record type");
+      hs -> err = WARC_TRUE;
+    }
 }
 
 void WFsmHDL_checkWarcID  (void * _hs)
@@ -527,28 +529,29 @@ void WFsmHDL_checkWarcID  (void * _hs)
   assert (hs);
 
   strtompon = WString_getText (hs -> warc_id);
- 
- /* if unknown WARC record type, stop parsing */
- if (w_strcmp (strtompon, (warc_u8_t *) WARC_VERSION))
-   {
-     /* rewind the stream */
-     WFsmHDL_rewind (hs, WString_getLength (hs -> warc_id) + 1);
 
-     /* raise the flag errore */
-     WarcDebugMsg("expecting a valid WARC ID");
-     hs -> err = WARC_TRUE;
-   }
+  /* if unknown WARC record type, stop parsing */
+
+  if (w_strcmp (strtompon, (warc_u8_t *) WARC_VERSION) )
+    {
+      /* rewind the stream */
+      WFsmHDL_rewind (hs, WString_getLength (hs -> warc_id) + 1);
+
+      /* raise the flag errore */
+      WarcDebugMsg ("expecting a valid WARC ID");
+      hs -> err = WARC_TRUE;
+    }
 }
 
 
 /* void WFsmHDL_checkUri  (void * _hs) */
 /* { */
 /*   HDLState * const hs  = _hs; */
-  
+
 /*   warc_i32_t        i; */
 /*   assert (hs); */
 /*   i= WString_strstr(hs->subject_uri,"://"); */
-  
+
 /*  /\* if unknown uri, stop parsing *\/ */
 /*  if (i == -1) */
 /*    { */
@@ -565,7 +568,7 @@ void WFsmHDL_checkWarcID  (void * _hs)
 /* void WFsmHDL_checkRecordId    (void * _hs) */
 /* { */
 /*   HDLState * const hs  = _hs; */
-  
+
 /*   warc_i32_t        i; */
 /*   assert (hs); */
 /*   i= WString_strstr(hs->record_id,"://"); */
@@ -586,7 +589,7 @@ void WFsmHDL_checkWarcID  (void * _hs)
 /* void   WFsmHDL_checkContentType (void * _hs) */
 /* { */
 /*   HDLState * const hs  = _hs; */
-  
+
 /*   warc_i32_t        i; */
 /*   assert (hs); */
 /*   i= WString_strstr(hs->content_type,"/"); */
@@ -619,7 +622,7 @@ void WFsmHDL_setCreationDate (void * _hs)
 
   assert (hs);
 
-  WString_append (hs -> creation_date, & (hs -> c), 1);  
+  WString_append (hs -> creation_date, & (hs -> c), 1);
 }
 
 void WFsmHDL_setContentType (void * _hs)
@@ -666,7 +669,7 @@ void WFsmHDL_raiseErrorDlength (void * _hs)
 
   assert (hs);
   w_ungetc (hs -> c, hs -> fin);
-  WarcDebugMsg("exepting a valid dataLength");
+  WarcDebugMsg ("exepting a valid dataLength");
   /* raise "on" the error flag */
   hs -> err = WARC_TRUE;
 }
@@ -674,10 +677,10 @@ void WFsmHDL_raiseErrorDlength (void * _hs)
 void  WFsmHDL_raiseErrorCrDate (void * _hs)
 {
   HDLState * const hs  = _hs;
-  
+
   assert (hs);
   w_ungetc (hs -> c, hs -> fin);
-  WarcDebugMsg("expecting a valid creation date");
+  WarcDebugMsg ("expecting a valid creation date");
   /* raise "on" the error flag */
   hs -> err = WARC_TRUE;
 }
@@ -685,16 +688,16 @@ void  WFsmHDL_raiseErrorCrDate (void * _hs)
 
 /*
 
-@@@@@@@@   @@@@@@   @@@@@@@@@@       @@@@@@   @@@@@@@   @@@  
-@@@@@@@@  @@@@@@@   @@@@@@@@@@@     @@@@@@@@  @@@@@@@@  @@@  
-@@!       !@@       @@! @@! @@!     @@!  @@@  @@!  @@@  @@!  
-!@!       !@!       !@! !@! !@!     !@!  @!@  !@!  @!@  !@!  
-@!!!:!    !!@@!!    @!! !!@ @!@     @!@!@!@!  @!@@!@!   !!@  
-!!!!!:     !!@!!!   !@!   ! !@!     !!!@!!!!  !!@!!!    !!!  
-!!:            !:!  !!:     !!:     !!:  !!!  !!:       !!:  
-:!:           !:!   :!:     :!:     :!:  !:!  :!:       :!:  
- ::       :::: ::   :::     ::      ::   :::   ::        ::  
- :        :: : :     :      :        :   : :   :        :    
+@@@@@@@@   @@@@@@   @@@@@@@@@@       @@@@@@   @@@@@@@   @@@
+@@@@@@@@  @@@@@@@   @@@@@@@@@@@     @@@@@@@@  @@@@@@@@  @@@
+@@!       !@@       @@! @@! @@!     @@!  @@@  @@!  @@@  @@!
+!@!       !@!       !@! !@! !@!     !@!  @!@  !@!  @!@  !@!
+@!!!:!    !!@@!!    @!! !!@ @!@     @!@!@!@!  @!@@!@!   !!@
+!!!!!:     !!@!!!   !@!   ! !@!     !!!@!!!!  !!@!!!    !!!
+!!:            !:!  !!:     !!:     !!:  !!!  !!:       !!:
+:!:           !:!   :!:     :!:     :!:  !:!  :!:       :!:
+ ::       :::: ::   :::     ::      ::   :::   ::        ::
+ :        :: : :     :      :        :   : :   :        :
 
 */
 
@@ -710,6 +713,7 @@ void  WFsmHDL_raiseErrorCrDate (void * _hs)
 
 WIPUBLIC const void * WFsmHDL_state (const void * const _self)
 {
+
   const struct WFsmHDL * const self    = _self;
 
   /* preconditions */
@@ -724,14 +728,15 @@ WIPUBLIC const void * WFsmHDL_state (const void * const _self)
  *
  * @return warc_bool_t
  *
- * Runs the FSM to detect a WARC header line. Returns a warc_bool_t FSM 
- * detection succeeds or not. 
+ * Runs the FSM to detect a WARC header line. Returns a warc_bool_t FSM
+ * detection succeeds or not.
  *
  * @brief FSM scheduler for WHDLine detection
  */
 
 WPUBLIC warc_bool_t WFsmHDL_run (void * const _self)
 {
+
   struct WFsmHDL * const self = _self;
   char                   c;
 
@@ -748,29 +753,30 @@ WPUBLIC warc_bool_t WFsmHDL_run (void * const _self)
       c = w_fgetc (FIN);
 
       /* EOF or "read error" ? */
-      if (! w_feof (FIN) && ! w_ferror (FIN))
+
+      if (! w_feof (FIN) && ! w_ferror (FIN) )
         CAR = c;
       else
         return (WARC_TRUE);
 
       /* check all events in the current state */
-      for (tp = STATE; tp -> thisEvent (HDLS) == WARC_FALSE; ++ tp) 
+      for (tp = STATE; tp -> thisEvent (HDLS) == WARC_FALSE; ++ tp)
         /* empty body */ ;
 
       /* call the action corresponding to the event */
       if (tp -> action != NIL)
         tp -> action (HDLS);
-      
+
       /* move to the new state if no error */
       /* don't forget to advance the "id" state number */
       unless (ERROR_FLAG)
-        STATE = tp -> newState;
+      STATE = tp -> newState;
       else
         break;
-}
+    }
 
   /* STATE != NIL means "error", otherwise "success" */
-  return (STATE != NIL); 
+  return (STATE != NIL);
 }
 
 
@@ -785,22 +791,23 @@ WPUBLIC warc_bool_t WFsmHDL_run (void * const _self)
 
 WPUBLIC void * WFsmHDL_transform (const void * const _self)
 {
+
   const struct WFsmHDL * const self    = _self;
   warc_rec_t                   t;
 
   /* preconditions */
   CASSERT (self);
 
-  t = WFsmHDL_getRecordTypeNumber (WString_getText (RECORD_TYPE));
+  t = WFsmHDL_getRecordTypeNumber (WString_getText (RECORD_TYPE) );
 
-  return (bless (WHDLine, 
-                 makeC (WARC_ID), 
-                 (warc_u32_t) atoi ((const char *) WString_getText (DATA_LENGTH)),
-                 t, 
-                 makeC (SUBJECT_URI), 
+  return (bless (WHDLine,
+                 makeC (WARC_ID),
+                 (warc_u32_t) atoi ( (const char *) WString_getText (DATA_LENGTH) ),
+                 t,
+                 makeC (SUBJECT_URI),
                  makeC (CREATION_DATE),
-                 makeC (CONTENT_TYPE), 
-                 makeC (RECORD_ID)));
+                 makeC (CONTENT_TYPE),
+                 makeC (RECORD_ID) ) );
 }
 
 
@@ -819,37 +826,38 @@ WPUBLIC void * WFsmHDL_transform (const void * const _self)
 
 WPRIVATE void * WFsmHDL_constructor (void * _self, va_list * app)
 {
+
   struct WFsmHDL * const self = _self;
   FILE           *       fin  = va_arg (* app, FILE *);
-  
-  HDLS = wmalloc (sizeof (HDLState));
+
+  HDLS = wmalloc (sizeof (HDLState) );
   assert (HDLS);
 
   FIN   = fin;              /* read from this readable stream */
   STATE = WANT_HDL_WARC_ID; /* start state */
   ERROR_FLAG = WARC_FALSE;       /* no error when starting */
 
-  WARC_ID = bless (WString, makeS(""));
+  WARC_ID = bless (WString, makeS ("") );
   assert (WARC_ID);
 
-  DATA_LENGTH = bless (WString, makeS(""));
+  DATA_LENGTH = bless (WString, makeS ("") );
   assert (DATA_LENGTH);
 
-  RECORD_TYPE = bless (WString, makeS(""));
+  RECORD_TYPE = bless (WString, makeS ("") );
   assert (RECORD_TYPE);
 
-  SUBJECT_URI = bless (WString, makeS(""));
+  SUBJECT_URI = bless (WString, makeS ("") );
   assert (SUBJECT_URI);
 
-  CREATION_DATE = bless (WString, makeS(""));
+  CREATION_DATE = bless (WString, makeS ("") );
   assert (CREATION_DATE);
 
-  CONTENT_TYPE = bless (WString, makeS(""));
+  CONTENT_TYPE = bless (WString, makeS ("") );
   assert (CONTENT_TYPE);
 
-  RECORD_ID = bless (WString, makeS(""));
+  RECORD_ID = bless (WString, makeS ("") );
   assert (RECORD_ID);
-  
+
   return (self);
 }
 
@@ -861,7 +869,8 @@ WPRIVATE void * WFsmHDL_constructor (void * _self, va_list * app)
  */
 
 WPRIVATE void * WFsmHDL_destructor (void * _self)
-{	
+{
+
   struct WFsmHDL  * const self = _self;
 
   /* preconditions */
@@ -890,7 +899,7 @@ WPRIVATE void * WFsmHDL_destructor (void * _self)
     destroy (CONTENT_TYPE), CONTENT_TYPE = NIL;
 
   if (RECORD_ID)
-    destroy (RECORD_ID), RECORD_ID= NIL;
+    destroy (RECORD_ID), RECORD_ID = NIL;
 
   wfree (HDLS), HDLS = NIL;
 
@@ -902,10 +911,11 @@ WPRIVATE void * WFsmHDL_destructor (void * _self)
  * WARC WFsmHDL class
  */
 
-static const struct Class _WFsmHDL = {
-	sizeof(struct WFsmHDL),
-	SIGN,
-	WFsmHDL_constructor, WFsmHDL_destructor
-};
+static const struct Class _WFsmHDL =
+  {
+    sizeof (struct WFsmHDL),
+    SIGN,
+    WFsmHDL_constructor, WFsmHDL_destructor
+  };
 
 const void * WFsmHDL = & _WFsmHDL;

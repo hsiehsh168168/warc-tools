@@ -36,7 +36,7 @@
 
 
 /* uncompress everything */
-warc_u32_t callback (const warc_u8_t * buffer, 
+warc_u32_t callback (const warc_u8_t * buffer,
                      const warc_u32_t nbr, void * env)
 {
   FILE * out = (FILE *) env;
@@ -49,34 +49,34 @@ warc_u32_t callback (const warc_u8_t * buffer,
 }
 
 FILE * openReading (const char * fin)
-{	
+{
   FILE * in;
-  unless (in = fopen(fin, "r+b"))
-    {
-      fprintf(stderr, "error: cannot open file \"%s\" for reading\n", 
-              fin);
-      return NIL;
-    }
+  unless (in = fopen (fin, "r+b") )
+  {
+    fprintf (stderr, "error: cannot open file \"%s\" for reading\n",
+             fin);
+    return NIL;
+  }
 
   return in;
 }
 
 FILE * openWriting (const char * fout)
-{	
+{
   FILE * out;
-  unless (out = fopen(fout, "w+b"))
-    {
-      fprintf(stderr, "error: cannot open file \"%s\" for binary writing\n", 
-              fout);
-      return NIL;
-    }
+  unless (out = fopen (fout, "w+b") )
+  {
+    fprintf (stderr, "error: cannot open file \"%s\" for binary writing\n",
+             fout);
+    return NIL;
+  }
 
   return out;
 }
 
 
 int test1 (const char * fin)
-{	
+{
   const char * t     = "TEST 1";
   const char * fout  = "compress_none.gz";
   FILE       * in    = NIL;
@@ -100,9 +100,9 @@ int test1 (const char * fin)
 
   ret = WGzip_compress (g, in, out, WARC_GZIP_NO_COMPRESSION, & csize);
   assert (!ret);
-  fprintf (stderr, "\"%s\" compressed to \"%s\" [size: %llu] [mode: %s]\n", 
-           fin, fout, (unsigned long long) csize, 
-           makeString(WARC_GZIP_NO_COMPRESSION));
+  fprintf (stderr, "\"%s\" compressed to \"%s\" [size: %llu] [mode: %s]\n",
+           fin, fout, (unsigned long long) csize,
+           makeString (WARC_GZIP_NO_COMPRESSION) );
 
   destroy (g);
   fclose (out);
@@ -113,7 +113,7 @@ int test1 (const char * fin)
 
 
 int test2 (const char * fin)
-{	
+{
   const char * t     = "TEST 2";
   const char * fout  = "compress_default.gz";
   FILE       * in    = NIL;
@@ -137,9 +137,9 @@ int test2 (const char * fin)
 
   ret = WGzip_compress (g, in, out, WARC_GZIP_DEFAULT_COMPRESSION, & csize);
   assert (! ret);
-  fprintf (stdout, "\"%s\" compressed to \"%s\" [size: %llu] [mode: %s]\n", 
+  fprintf (stdout, "\"%s\" compressed to \"%s\" [size: %llu] [mode: %s]\n",
            fin, fout, (unsigned long long) csize,
-           makeString(WARC_GZIP_DEFAULT_COMPRESSION));
+           makeString (WARC_GZIP_DEFAULT_COMPRESSION) );
 
   destroy (g);
   fclose (out);
@@ -149,7 +149,7 @@ int test2 (const char * fin)
 }
 
 int test3 (const char * fin)
-{	
+{
   const char * t     = "TEST 3";
   const char * fout  = "compress_speed.gz";
   FILE       * in    = NIL;
@@ -171,9 +171,9 @@ int test3 (const char * fin)
 
 
   WGzip_compress (g, in, out, WARC_GZIP_BEST_SPEED, & csize);
-  fprintf (stderr, "\"%s\" compressed to \"%s\" [size: %llu] [mode: %s]\n", 
+  fprintf (stderr, "\"%s\" compressed to \"%s\" [size: %llu] [mode: %s]\n",
            fin, fout, (unsigned long long) csize,
-           makeString(WARC_GZIP_BEST_SPEED));
+           makeString (WARC_GZIP_BEST_SPEED) );
 
   destroy (g);
   fclose (out);
@@ -183,7 +183,7 @@ int test3 (const char * fin)
 }
 
 int test4 (const char * fin)
-{	
+{
   const char * t     = "TEST 4";
   const char * fout  = "compress_size.gz";
   FILE       * in    = NIL;
@@ -207,9 +207,9 @@ int test4 (const char * fin)
 
   ret = WGzip_compress (g, in, out, WARC_GZIP_BEST_COMPRESSION, & csize);
   assert (! ret);
-  fprintf (stderr, "\"%s\" compressed to \"%s\" [size: %llu] [mode: %s]\n", 
-           fin, fout, (unsigned long long) csize, 
-           makeString(WARC_GZIP_BEST_COMPRESSION));
+  fprintf (stderr, "\"%s\" compressed to \"%s\" [size: %llu] [mode: %s]\n",
+           fin, fout, (unsigned long long) csize,
+           makeString (WARC_GZIP_BEST_COMPRESSION) );
 
   destroy (g);
   fclose (out);
@@ -220,7 +220,7 @@ int test4 (const char * fin)
 
 
 int test5 (const char * fin)
-{	
+{
   const char * t     = "TEST 5";
   const char * fout  = "compress.gz";
   FILE       * in    = NIL;
@@ -244,9 +244,9 @@ int test5 (const char * fin)
 
   ret = WGzip_compress (g, in, out, WARC_GZIP_BEST_COMPRESSION, & csize);
   assert (! ret);
-  fprintf (stderr, "\"%s\" compressed to \"%s\" [size: %llu] [mode: %s]\n", 
-           fin, fout, (unsigned long long) csize, 
-           makeString(WARC_GZIP_BEST_COMPRESSION));
+  fprintf (stderr, "\"%s\" compressed to \"%s\" [size: %llu] [mode: %s]\n",
+           fin, fout, (unsigned long long) csize,
+           makeString (WARC_GZIP_BEST_COMPRESSION) );
 
   destroy (g);
   fclose (out);
@@ -257,7 +257,7 @@ int test5 (const char * fin)
 
 
 int test6 (const char * unused)
-{	
+{
   const char * t     = "TEST 6";
   const char * fin   = "compress.gz";
   FILE       * in    = NIL;
@@ -281,8 +281,8 @@ int test6 (const char * unused)
   ret = WGzip_analyzeHeader (g, in, 0, & usize, & csize);
 
   unless (ret)
-    fprintf (stdout,
-             "Found data in the GZIP header:\n\t compressed : %llu\n\t uncompressed : %llu\n", (unsigned long long) csize, (unsigned long long) usize);
+  fprintf (stdout,
+           "Found data in the GZIP header:\n\t compressed : %llu\n\t uncompressed : %llu\n", (unsigned long long) csize, (unsigned long long) usize);
   else
     fprintf (stdout, "GZIP header contains no information. Sorry !!!\n");
 
@@ -295,7 +295,7 @@ int test6 (const char * unused)
 
 
 int test7 (const char * unused)
-{	
+{
   const char * t     = "TEST 7";
   const char * fin   = "compress.gz";
   const char * fout  = "compressed";
@@ -321,11 +321,11 @@ int test7 (const char * unused)
   assert (out);
 
   /* uncompress file from offset 0 using the callback with env = fout */
-  ret = WGzip_uncompress (g, in, 0, & usize, & csize, 
+  ret = WGzip_uncompress (g, in, 0, & usize, & csize,
                           callback, (void *) out);
   assert (! ret);
   fprintf (stdout,
-           "uncompressed \"%s\" to \"%s\" [usize: %llu][csize: %llu]\n", 
+           "uncompressed \"%s\" to \"%s\" [usize: %llu][csize: %llu]\n",
            fin, fout, (unsigned long long) usize, (unsigned long long) csize);
 
   fclose (out);
@@ -338,10 +338,10 @@ int test7 (const char * unused)
 
 
 int main (int argc, char ** argv)
-{	
-  int (* tests [])(const char *) = { test5, test6, test7 };
+{
+  int (* tests []) (const char *) = { test5, test6, test7 };
 
-/*   int (* tests [])(const char *) = { test1, test2, test3, test4 }; */
+  /*   int (* tests [])(const char *) = { test1, test2, test3, test4 }; */
 
   warc_u32_t  i = 0;
 
@@ -355,7 +355,7 @@ int main (int argc, char ** argv)
       return (1);
     }
 
-  for(i = 0; i < ARRAY_LEN (tests); ++ i)
+  for (i = 0; i < ARRAY_LEN (tests); ++ i)
     {
       tests [i] (argv [1]);
     }

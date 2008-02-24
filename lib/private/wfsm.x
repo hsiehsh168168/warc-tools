@@ -29,28 +29,31 @@
 
 /* to mix C and C++ */
 #ifdef __cplusplus
- extern "C" {
+extern "C"
+  {
 #endif
 
-/**
- * Portability header file
- */
+    /**
+     * Portability header file
+     */
 
 #include <wport.h>
 #include <wmisc.h>
 
-typedef const struct eventAct 
-{
-  warc_bool_t (* thisEvent) (void *);
-  void    (* action)    (void *);
-  const struct eventAct * newState;
-} Transition;
+    typedef const struct eventAct
+      {
+        warc_bool_t (* thisEvent) (void *);
+        void    (* action)    (void *);
 
-typedef Transition State[];
+        const struct eventAct * newState;
+      } Transition;
+
+    typedef Transition State[];
 
 
 #ifdef __cplusplus
- }
+  }
+
 #endif
 
 #endif /* __FSM_X__ */

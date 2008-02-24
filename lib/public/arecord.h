@@ -30,38 +30,40 @@
 
 /* to mix C and C++ */
 #ifdef __cplusplus
- extern "C" {
+extern "C"
+  {
 #endif
 
 
 
-/**
- * Portability header file
- */
+    /**
+     * Portability header file
+     */
 
 #include <wport.h>
 
 
 
-extern const void * ARecord;
+    extern const void * ARecord;
 
-/* getters */
+    /* getters */
 
-extern const warc_u8_t *  ARecord_getUrl          (const void * const);
-extern const warc_u8_t *  ARecord_getCreationDate (const void * const);
-extern const warc_u8_t *  ARecord_getMimeType     (const void * const);
-extern const warc_u8_t *  ARecord_getIpAddress    (const void * const);
-extern warc_bool_t        ARecord_getContent      (const void* const );
-extern warc_bool_t        ARecord_transferContent (void *, void *, void *);
-extern warc_bool_t        ARecord_setCallback     (void *, 
-                                                   warc_bool_t (*)
-                                                   (void *,  const char *,
-                                                    warc_u32_t));
+    extern const warc_u8_t *  ARecord_getUrl          (const void * const);
+    extern const warc_u8_t *  ARecord_getCreationDate (const void * const);
+    extern const warc_u8_t *  ARecord_getMimeType     (const void * const);
+    extern const warc_u8_t *  ARecord_getIpAddress    (const void * const);
+    extern warc_bool_t        ARecord_getContent      (const void* const );
+    extern warc_bool_t        ARecord_transferContent (void *, void *, void *);
+    extern warc_bool_t        ARecord_setCallback     (void *,
+          warc_bool_t (*)
+          (void *,  const char *,
+           warc_u32_t) );
 
 
 
 #ifdef __cplusplus
- }
+  }
+
 #endif
 
 

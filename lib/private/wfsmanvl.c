@@ -31,7 +31,7 @@
 #include <wport.h>
 
 /*
- * WARC default headers 
+ * WARC default headers
  */
 
 #include <wclass.h>   /* bless, destroy, cassert, struct Class */
@@ -55,28 +55,29 @@
 
 
 typedef struct
-{
-  void * comment; /* WString */
-  void * key;     /* WString */
-  void * value;   /* WString */
+  {
+    void * comment; /* WString */
+    void * key;     /* WString */
+    void * value;   /* WString */
 
-  FILE        * fin;  /* file handle to read from */
-  Transition  * state;/* transition state */
-  warc_bool_t   err;  /* parsing error flag */
-  warc_u8_t c;    /* current char in "fin"*/
-} ANVLState;
-
-
+    FILE        * fin;  /* file handle to read from */
+    Transition  * state;/* transition state */
+    warc_bool_t   err;  /* parsing error flag */
+    warc_u8_t c;    /* current char in "fin"*/
+  } ANVLState;
 
 
-struct WFsmANVL 
-{ 
-  const void * class;
-  
-  /*@{*/
-  ANVLState * anvls; /**< ANVL State */
-  /*@}*/
-};
+
+
+struct WFsmANVL
+  {
+
+    const void * class;
+
+    /*@{*/
+    ANVLState * anvls; /**< ANVL State */
+    /*@}*/
+  };
 
 
 #define    ANVLS            (self -> anvls)
@@ -97,19 +98,19 @@ struct WFsmANVL
 
 /* prototypes of all events in the FSM (defined below) */
 warc_bool_t WFsmANVL_isSpace   (void *), WFsmANVL_isText    (void *),
-            WFsmANVL_isVdots (void *), WFsmANVL_isCR      (void *),
-            WFsmANVL_isLF      (void *), WFsmANVL_isUnknown (void *),
-            WFsmANVL_isSharp (void *), WFsmANVL_isCtlChar (void *);
+WFsmANVL_isVdots (void *), WFsmANVL_isCR      (void *),
+WFsmANVL_isLF      (void *), WFsmANVL_isUnknown (void *),
+WFsmANVL_isSharp (void *), WFsmANVL_isCtlChar (void *);
 
 /* prototypes of all actions in the FSM (defined below) */
-void WFsmANVL_setKey         (void *), WFsmANVL_setValue  (void *), 
-     WFsmANVL_pushBack       (void *), WFsmANVL_raiseError (void *),
-     WFsmANVL_setComment     (void *);
+void WFsmANVL_setKey         (void *), WFsmANVL_setValue  (void *),
+WFsmANVL_pushBack       (void *), WFsmANVL_raiseError (void *),
+WFsmANVL_setComment     (void *);
 
 /* prototypes of all states in the FSM (defined below) */
 State WANT_ANVL_KEYFIRST, WANT_ANVL_ENDLF,      WANT_ANVL_KEY,
-      WANT_ANVL_VALUE,    WANT_ANVL_LF,         WANT_ANVL_TEXT,
-      WANT_ANVL_SPACE,    ANVL_IGNORE_COMMENT,  WANT_ANVL_COMMENTLF;
+WANT_ANVL_VALUE,    WANT_ANVL_LF,         WANT_ANVL_TEXT,
+WANT_ANVL_SPACE,    ANVL_IGNORE_COMMENT,  WANT_ANVL_COMMENTLF;
 
 
 
@@ -119,7 +120,7 @@ State WANT_ANVL_KEYFIRST, WANT_ANVL_ENDLF,      WANT_ANVL_KEY,
 /*   const ANVLState * const as = _as; */
 
 /*   assert (as); */
-  
+
 /*   w_fseek_from_here (as -> fin, - n); */
 /* } */
 
@@ -129,28 +130,28 @@ State WANT_ANVL_KEYFIRST, WANT_ANVL_ENDLF,      WANT_ANVL_KEY,
 
 /*
 
-@@@@@@@@   @@@@@@   @@@@@@@@@@   
-@@@@@@@@  @@@@@@@   @@@@@@@@@@@  
-@@!       !@@       @@! @@! @@!  
-!@!       !@!       !@! !@! !@!  
-@!!!:!    !!@@!!    @!! !!@ @!@  
-!!!!!:     !!@!!!   !@!   ! !@!  
-!!:            !:!  !!:     !!:  
-:!:           !:!   :!:     :!:  
- ::       :::: ::   :::     ::   
- :        :: : :     :      :    
-                                 
-                                                          
- @@@@@@   @@@@@@@   @@@@@@   @@@@@@@  @@@@@@@@   @@@@@@   
-@@@@@@@   @@@@@@@  @@@@@@@@  @@@@@@@  @@@@@@@@  @@@@@@@   
-!@@         @@!    @@!  @@@    @@!    @@!       !@@       
-!@!         !@!    !@!  @!@    !@!    !@!       !@!       
-!!@@!!      @!!    @!@!@!@!    @!!    @!!!:!    !!@@!!    
- !!@!!!     !!!    !!!@!!!!    !!!    !!!!!:     !!@!!!   
-     !:!    !!:    !!:  !!!    !!:    !!:            !:!  
-    !:!     :!:    :!:  !:!    :!:    :!:           !:!   
-:::: ::      ::    ::   :::     ::     :: ::::  :::: ::   
-:: : :       :      :   : :     :     : :: ::   :: : :    
+@@@@@@@@   @@@@@@   @@@@@@@@@@
+@@@@@@@@  @@@@@@@   @@@@@@@@@@@
+@@!       !@@       @@! @@! @@!
+!@!       !@!       !@! !@! !@!
+@!!!:!    !!@@!!    @!! !!@ @!@
+!!!!!:     !!@!!!   !@!   ! !@!
+!!:            !:!  !!:     !!:
+:!:           !:!   :!:     :!:
+ ::       :::: ::   :::     ::
+ :        :: : :     :      :
+
+
+ @@@@@@   @@@@@@@   @@@@@@   @@@@@@@  @@@@@@@@   @@@@@@
+@@@@@@@   @@@@@@@  @@@@@@@@  @@@@@@@  @@@@@@@@  @@@@@@@
+!@@         @@!    @@!  @@@    @@!    @@!       !@@
+!@!         !@!    !@!  @!@    !@!    !@!       !@!
+!!@@!!      @!!    @!@!@!@!    @!!    @!!!:!    !!@@!!
+ !!@!!!     !!!    !!!@!!!!    !!!    !!!!!:     !!@!!!
+     !:!    !!:    !!:  !!!    !!:    !!:            !:!
+    !:!     :!:    :!:  !:!    :!:    :!:           !:!
+:::: ::      ::    ::   :::     ::     :: ::::  :::: ::
+:: : :       :      :   : :     :     : :: ::   :: : :
 
 */
 
@@ -158,146 +159,146 @@ State WANT_ANVL_KEYFIRST, WANT_ANVL_ENDLF,      WANT_ANVL_KEY,
 
 State WANT_ANVL_KEYFIRST =
 {
-    /* TEST_EVENT             ACTION                 NEXT_STATE */
+  /* TEST_EVENT             ACTION                 NEXT_STATE */
 
-    {WFsmANVL_isText ,        WFsmANVL_setKey    ,   WANT_ANVL_KEY       },
-    {WFsmANVL_isCR   ,        NIL                ,   WANT_ANVL_ENDLF     },
-    {WFsmANVL_isSharp,        NIL                ,   ANVL_IGNORE_COMMENT },
-    {WFsmANVL_isCtlChar,      WFsmANVL_raiseError,   NIL},
-    {WFsmANVL_isUnknown,      WFsmANVL_raiseError,   NIL},
+  {WFsmANVL_isText ,        WFsmANVL_setKey    ,   WANT_ANVL_KEY       },
+  {WFsmANVL_isCR   ,        NIL                ,   WANT_ANVL_ENDLF     },
+  {WFsmANVL_isSharp,        NIL                ,   ANVL_IGNORE_COMMENT },
+  {WFsmANVL_isCtlChar,      WFsmANVL_raiseError,   NIL},
+  {WFsmANVL_isUnknown,      WFsmANVL_raiseError,   NIL},
 };
 
-State WANT_ANVL_KEY = 
-  {
-    /* TEST_EVENT             ACTION                 NEXT_STATE */
+State WANT_ANVL_KEY =
+{
+  /* TEST_EVENT             ACTION                 NEXT_STATE */
 
-    {WFsmANVL_isText,         WFsmANVL_setKey,        WANT_ANVL_KEY  },
-    {WFsmANVL_isSharp,        WFsmANVL_setKey,        WANT_ANVL_KEY  },
-    {WFsmANVL_isVdots,        NIL,                    WANT_ANVL_VALUE},
-    {WFsmANVL_isCtlChar,      WFsmANVL_raiseError,    NIL},
-    {WFsmANVL_isUnknown,      WFsmANVL_raiseError,    NIL}
-  };
+  {WFsmANVL_isText,         WFsmANVL_setKey,        WANT_ANVL_KEY  },
+  {WFsmANVL_isSharp,        WFsmANVL_setKey,        WANT_ANVL_KEY  },
+  {WFsmANVL_isVdots,        NIL,                    WANT_ANVL_VALUE},
+  {WFsmANVL_isCtlChar,      WFsmANVL_raiseError,    NIL},
+  {WFsmANVL_isUnknown,      WFsmANVL_raiseError,    NIL}
+};
 
 State WANT_ANVL_VALUE =
-  {
-    /* TEST_EVENT             ACTION                   NEXT_STATE */
+{
+  /* TEST_EVENT             ACTION                   NEXT_STATE */
 
-    {WFsmANVL_isText,         WFsmANVL_setValue,       WANT_ANVL_VALUE},
-    {WFsmANVL_isCR,           WFsmANVL_setValue,       WANT_ANVL_LF   },
-    {WFsmANVL_isSpace,        WFsmANVL_setValue,       WANT_ANVL_VALUE},
-    {WFsmANVL_isVdots,        WFsmANVL_setValue,       WANT_ANVL_VALUE},
-    {WFsmANVL_isLF,           WFsmANVL_setValue,       WANT_ANVL_VALUE},
-    {WFsmANVL_isSharp,        WFsmANVL_setValue,       WANT_ANVL_VALUE},
-    {WFsmANVL_isCtlChar,      WFsmANVL_setValue,       WANT_ANVL_VALUE},
-    {WFsmANVL_isUnknown,      WFsmANVL_raiseError,     NIL}
-  };
+  {WFsmANVL_isText,         WFsmANVL_setValue,       WANT_ANVL_VALUE},
+  {WFsmANVL_isCR,           WFsmANVL_setValue,       WANT_ANVL_LF   },
+  {WFsmANVL_isSpace,        WFsmANVL_setValue,       WANT_ANVL_VALUE},
+  {WFsmANVL_isVdots,        WFsmANVL_setValue,       WANT_ANVL_VALUE},
+  {WFsmANVL_isLF,           WFsmANVL_setValue,       WANT_ANVL_VALUE},
+  {WFsmANVL_isSharp,        WFsmANVL_setValue,       WANT_ANVL_VALUE},
+  {WFsmANVL_isCtlChar,      WFsmANVL_setValue,       WANT_ANVL_VALUE},
+  {WFsmANVL_isUnknown,      WFsmANVL_raiseError,     NIL}
+};
 
 State WANT_ANVL_LF =
-  {
-    /* TEST_EVENT             ACTION                   NEXT_STATE */
+{
+  /* TEST_EVENT             ACTION                   NEXT_STATE */
 
-    {WFsmANVL_isText,         WFsmANVL_setValue,      WANT_ANVL_VALUE},
-    {WFsmANVL_isLF,           WFsmANVL_setValue,      WANT_ANVL_SPACE},
-    {WFsmANVL_isSpace,        WFsmANVL_setValue,      WANT_ANVL_VALUE},
-    {WFsmANVL_isSharp,        WFsmANVL_setValue,      WANT_ANVL_VALUE},
-    {WFsmANVL_isVdots,        WFsmANVL_setValue,      WANT_ANVL_VALUE},
-    {WFsmANVL_isCR,           WFsmANVL_setValue,      WANT_ANVL_VALUE},
-    {WFsmANVL_isCtlChar,      WFsmANVL_setValue,      WANT_ANVL_VALUE},
-    {WFsmANVL_isUnknown,      WFsmANVL_raiseError,    NIL}
-  };
+  {WFsmANVL_isText,         WFsmANVL_setValue,      WANT_ANVL_VALUE},
+  {WFsmANVL_isLF,           WFsmANVL_setValue,      WANT_ANVL_SPACE},
+  {WFsmANVL_isSpace,        WFsmANVL_setValue,      WANT_ANVL_VALUE},
+  {WFsmANVL_isSharp,        WFsmANVL_setValue,      WANT_ANVL_VALUE},
+  {WFsmANVL_isVdots,        WFsmANVL_setValue,      WANT_ANVL_VALUE},
+  {WFsmANVL_isCR,           WFsmANVL_setValue,      WANT_ANVL_VALUE},
+  {WFsmANVL_isCtlChar,      WFsmANVL_setValue,      WANT_ANVL_VALUE},
+  {WFsmANVL_isUnknown,      WFsmANVL_raiseError,    NIL}
+};
 
 
 State WANT_ANVL_SPACE =
-  {
-    /* TEST_EVENT             ACTION                   NEXT_STATE */
+{
+  /* TEST_EVENT             ACTION                   NEXT_STATE */
 
-	{WFsmANVL_isText,         WFsmANVL_pushBack,       NIL},
-    {WFsmANVL_isSpace,        WFsmANVL_setValue,       WANT_ANVL_TEXT },
-    {WFsmANVL_isCR,           WFsmANVL_pushBack,       NIL},
-    {WFsmANVL_isLF,           WFsmANVL_pushBack,       NIL},
-    {WFsmANVL_isSharp,        WFsmANVL_pushBack,       NIL},
-    {WFsmANVL_isVdots,        WFsmANVL_pushBack,       NIL},
-    {WFsmANVL_isUnknown,      WFsmANVL_raiseError,     NIL}
-  };
+  {WFsmANVL_isText,         WFsmANVL_pushBack,       NIL},
+  {WFsmANVL_isSpace,        WFsmANVL_setValue,       WANT_ANVL_TEXT },
+  {WFsmANVL_isCR,           WFsmANVL_pushBack,       NIL},
+  {WFsmANVL_isLF,           WFsmANVL_pushBack,       NIL},
+  {WFsmANVL_isSharp,        WFsmANVL_pushBack,       NIL},
+  {WFsmANVL_isVdots,        WFsmANVL_pushBack,       NIL},
+  {WFsmANVL_isUnknown,      WFsmANVL_raiseError,     NIL}
+};
 
 State WANT_ANVL_TEXT =
-  {
-    /* TEST_EVENT             ACTION                   NEXT_STATE */
-
-    {WFsmANVL_isText,         WFsmANVL_setValue,       WANT_ANVL_VALUE},
-    {WFsmANVL_isVdots,        WFsmANVL_setValue,       WANT_ANVL_VALUE},
-    {WFsmANVL_isSharp,        WFsmANVL_setValue,       WANT_ANVL_VALUE},
-    {WFsmANVL_isCtlChar,      WFsmANVL_setValue,       WANT_ANVL_VALUE},
-    {WFsmANVL_isUnknown,      WFsmANVL_raiseError,     NIL}
-  };
-
-
-State WANT_ANVL_ENDLF = 
 {
-    /* TEST_EVENT             ACTION                   NEXT_STATE */
+  /* TEST_EVENT             ACTION                   NEXT_STATE */
 
-    {WFsmANVL_isLF,           WFsmANVL_pushBack  ,     NIL},
-    {WFsmANVL_isUnknown,      WFsmANVL_raiseError,     NIL}
+  {WFsmANVL_isText,         WFsmANVL_setValue,       WANT_ANVL_VALUE},
+  {WFsmANVL_isVdots,        WFsmANVL_setValue,       WANT_ANVL_VALUE},
+  {WFsmANVL_isSharp,        WFsmANVL_setValue,       WANT_ANVL_VALUE},
+  {WFsmANVL_isCtlChar,      WFsmANVL_setValue,       WANT_ANVL_VALUE},
+  {WFsmANVL_isUnknown,      WFsmANVL_raiseError,     NIL}
+};
+
+
+State WANT_ANVL_ENDLF =
+{
+  /* TEST_EVENT             ACTION                   NEXT_STATE */
+
+  {WFsmANVL_isLF,           WFsmANVL_pushBack  ,     NIL},
+  {WFsmANVL_isUnknown,      WFsmANVL_raiseError,     NIL}
 
 };
 
 
-State ANVL_IGNORE_COMMENT = 
+State ANVL_IGNORE_COMMENT =
 {
-    /* TEST_EVENT             ACTION                   NEXT_STATE */
+  /* TEST_EVENT             ACTION                   NEXT_STATE */
 
-    {WFsmANVL_isCR     ,      WFsmANVL_setComment,     WANT_ANVL_COMMENTLF},
-    {WFsmANVL_isText   ,      WFsmANVL_setComment,     ANVL_IGNORE_COMMENT},
-    {WFsmANVL_isSpace  ,      WFsmANVL_setComment,     ANVL_IGNORE_COMMENT},
-    {WFsmANVL_isVdots  ,      WFsmANVL_setComment,     ANVL_IGNORE_COMMENT},
-    {WFsmANVL_isLF     ,      WFsmANVL_setComment,     ANVL_IGNORE_COMMENT},
-    {WFsmANVL_isText   ,      WFsmANVL_setComment,     ANVL_IGNORE_COMMENT},
-    {WFsmANVL_isSharp  ,      WFsmANVL_setComment,     ANVL_IGNORE_COMMENT},
-    {WFsmANVL_isUnknown,      WFsmANVL_raiseError,     NIL}
+  {WFsmANVL_isCR     ,      WFsmANVL_setComment,     WANT_ANVL_COMMENTLF},
+  {WFsmANVL_isText   ,      WFsmANVL_setComment,     ANVL_IGNORE_COMMENT},
+  {WFsmANVL_isSpace  ,      WFsmANVL_setComment,     ANVL_IGNORE_COMMENT},
+  {WFsmANVL_isVdots  ,      WFsmANVL_setComment,     ANVL_IGNORE_COMMENT},
+  {WFsmANVL_isLF     ,      WFsmANVL_setComment,     ANVL_IGNORE_COMMENT},
+  {WFsmANVL_isText   ,      WFsmANVL_setComment,     ANVL_IGNORE_COMMENT},
+  {WFsmANVL_isSharp  ,      WFsmANVL_setComment,     ANVL_IGNORE_COMMENT},
+  {WFsmANVL_isUnknown,      WFsmANVL_raiseError,     NIL}
 
 };
 
 
 State WANT_ANVL_COMMENTLF =
 {
-    /* TEST_EVENT             ACTION                   NEXT_STATE */
+  /* TEST_EVENT             ACTION                   NEXT_STATE */
 
-    {WFsmANVL_isCR     ,      WFsmANVL_setComment,     ANVL_IGNORE_COMMENT},
-    {WFsmANVL_isText   ,      WFsmANVL_setComment,     ANVL_IGNORE_COMMENT},
-    {WFsmANVL_isSpace  ,      WFsmANVL_setComment,     ANVL_IGNORE_COMMENT},
-    {WFsmANVL_isVdots  ,      WFsmANVL_setComment,     ANVL_IGNORE_COMMENT},
-    {WFsmANVL_isText   ,      WFsmANVL_setComment,     ANVL_IGNORE_COMMENT},
-    {WFsmANVL_isSharp  ,      WFsmANVL_setComment,     ANVL_IGNORE_COMMENT},
-    {WFsmANVL_isLF     ,      WFsmANVL_setComment,     WANT_ANVL_KEYFIRST },
-    {WFsmANVL_isUnknown,      WFsmANVL_raiseError,     NIL}
+  {WFsmANVL_isCR     ,      WFsmANVL_setComment,     ANVL_IGNORE_COMMENT},
+  {WFsmANVL_isText   ,      WFsmANVL_setComment,     ANVL_IGNORE_COMMENT},
+  {WFsmANVL_isSpace  ,      WFsmANVL_setComment,     ANVL_IGNORE_COMMENT},
+  {WFsmANVL_isVdots  ,      WFsmANVL_setComment,     ANVL_IGNORE_COMMENT},
+  {WFsmANVL_isText   ,      WFsmANVL_setComment,     ANVL_IGNORE_COMMENT},
+  {WFsmANVL_isSharp  ,      WFsmANVL_setComment,     ANVL_IGNORE_COMMENT},
+  {WFsmANVL_isLF     ,      WFsmANVL_setComment,     WANT_ANVL_KEYFIRST },
+  {WFsmANVL_isUnknown,      WFsmANVL_raiseError,     NIL}
 
 };
 
 
 /*
 
-@@@@@@@@   @@@@@@   @@@@@@@@@@   
-@@@@@@@@  @@@@@@@   @@@@@@@@@@@  
-@@!       !@@       @@! @@! @@!  
-!@!       !@!       !@! !@! !@!  
-@!!!:!    !!@@!!    @!! !!@ @!@  
-!!!!!:     !!@!!!   !@!   ! !@!  
-!!:            !:!  !!:     !!:  
-:!:           !:!   :!:     :!:  
- ::       :::: ::   :::     ::   
- :        :: : :     :      :    
-                                 
-                                                           
-@@@@@@@@  @@@  @@@  @@@@@@@@  @@@  @@@  @@@@@@@   @@@@@@   
-@@@@@@@@  @@@  @@@  @@@@@@@@  @@@@ @@@  @@@@@@@  @@@@@@@   
-@@!       @@!  @@@  @@!       @@!@!@@@    @@!    !@@       
-!@!       !@!  @!@  !@!       !@!!@!@!    !@!    !@!       
-@!!!:!    @!@  !@!  @!!!:!    @!@ !!@!    @!!    !!@@!!    
-!!!!!:    !@!  !!!  !!!!!:    !@!  !!!    !!!     !!@!!!   
-!!:       :!:  !!:  !!:       !!:  !!!    !!:         !:!  
-:!:        ::!!:!   :!:       :!:  !:!    :!:        !:!   
- :: ::::    ::::     :: ::::   ::   ::     ::    :::: ::   
-: :: ::      :      : :: ::   ::    :      :     :: : :    
+@@@@@@@@   @@@@@@   @@@@@@@@@@
+@@@@@@@@  @@@@@@@   @@@@@@@@@@@
+@@!       !@@       @@! @@! @@!
+!@!       !@!       !@! !@! !@!
+@!!!:!    !!@@!!    @!! !!@ @!@
+!!!!!:     !!@!!!   !@!   ! !@!
+!!:            !:!  !!:     !!:
+:!:           !:!   :!:     :!:
+ ::       :::: ::   :::     ::
+ :        :: : :     :      :
+
+
+@@@@@@@@  @@@  @@@  @@@@@@@@  @@@  @@@  @@@@@@@   @@@@@@
+@@@@@@@@  @@@  @@@  @@@@@@@@  @@@@ @@@  @@@@@@@  @@@@@@@
+@@!       @@!  @@@  @@!       @@!@!@@@    @@!    !@@
+!@!       !@!  @!@  !@!       !@!!@!@!    !@!    !@!
+@!!!:!    @!@  !@!  @!!!:!    @!@ !!@!    @!!    !!@@!!
+!!!!!:    !@!  !!!  !!!!!:    !@!  !!!    !!!     !!@!!!
+!!:       :!:  !!:  !!:       !!:  !!!    !!:         !:!
+:!:        ::!!:!   :!:       :!:  !:!    :!:        !:!
+ :: ::::    ::::     :: ::::   ::   ::     ::    :::: ::
+: :: ::      :      : :: ::   ::    :      :     :: : :
 
  */
 
@@ -308,29 +309,29 @@ warc_bool_t WFsmANVL_isSpace (void * _as)
 
   assert (as);
 
-  return ((as -> c == ' ')  || (as -> c == '\t') );
+  return ( (as -> c == ' ')  || (as -> c == '\t') );
 }
 
 
-warc_bool_t WFsmANVL_isText (void * _as) 
+warc_bool_t WFsmANVL_isText (void * _as)
 {
   const ANVLState * const as = _as;
 
   assert (as);
 
-  return ((as -> c != ' ')  && (as -> c != '\t') &&
-            (as -> c != '\r') && (as -> c != '\n') &&
-		  (as -> c != ':') && (as -> c != '#') && 
-            (as -> c > 31) && (as -> c != 127));
+  return ( (as -> c != ' ')  && (as -> c != '\t') &&
+           (as -> c != '\r') && (as -> c != '\n') &&
+           (as -> c != ':') && (as -> c != '#') &&
+           (as -> c > 31) && (as -> c != 127) );
 }
 
 warc_bool_t WFsmANVL_isVdots (void * _as)
 {
   const ANVLState * const as = _as;
-  
+
   assert (as);
 
-  return ((as -> c == ':'));
+  return ( (as -> c == ':') );
 }
 
 
@@ -383,37 +384,37 @@ warc_bool_t WFsmANVL_isCtlChar (void * _as)
 
 /*
 
-@@@@@@@@   @@@@@@   @@@@@@@@@@   
-@@@@@@@@  @@@@@@@   @@@@@@@@@@@  
-@@!       !@@       @@! @@! @@!  
-!@!       !@!       !@! !@! !@!  
-@!!!:!    !!@@!!    @!! !!@ @!@  
-!!!!!:     !!@!!!   !@!   ! !@!  
-!!:            !:!  !!:     !!:  
-:!:           !:!   :!:     :!:  
- ::       :::: ::   :::     ::   
- :        :: : :     :      :    
-                                 
-                                                                
- @@@@@@    @@@@@@@  @@@@@@@  @@@   @@@@@@   @@@  @@@   @@@@@@   
-@@@@@@@@  @@@@@@@@  @@@@@@@  @@@  @@@@@@@@  @@@@ @@@  @@@@@@@   
-@@!  @@@  !@@         @@!    @@!  @@!  @@@  @@!@!@@@  !@@       
-!@!  @!@  !@!         !@!    !@!  !@!  @!@  !@!!@!@!  !@!       
-@!@!@!@!  !@!         @!!    !!@  @!@  !@!  @!@ !!@!  !!@@!!    
-!!!@!!!!  !!!         !!!    !!!  !@!  !!!  !@!  !!!   !!@!!!   
-!!:  !!!  :!!         !!:    !!:  !!:  !!!  !!:  !!!       !:!  
-:!:  !:!  :!:         :!:    :!:  :!:  !:!  :!:  !:!      !:!   
-::   :::   ::: :::     ::     ::  ::::: ::   ::   ::  :::: ::   
- :   : :   :: :: :     :     :     : :  :   ::    :   :: : :    
+@@@@@@@@   @@@@@@   @@@@@@@@@@
+@@@@@@@@  @@@@@@@   @@@@@@@@@@@
+@@!       !@@       @@! @@! @@!
+!@!       !@!       !@! !@! !@!
+@!!!:!    !!@@!!    @!! !!@ @!@
+!!!!!:     !!@!!!   !@!   ! !@!
+!!:            !:!  !!:     !!:
+:!:           !:!   :!:     :!:
+ ::       :::: ::   :::     ::
+ :        :: : :     :      :
+
+
+ @@@@@@    @@@@@@@  @@@@@@@  @@@   @@@@@@   @@@  @@@   @@@@@@
+@@@@@@@@  @@@@@@@@  @@@@@@@  @@@  @@@@@@@@  @@@@ @@@  @@@@@@@
+@@!  @@@  !@@         @@!    @@!  @@!  @@@  @@!@!@@@  !@@
+!@!  @!@  !@!         !@!    !@!  !@!  @!@  !@!!@!@!  !@!
+@!@!@!@!  !@!         @!!    !!@  @!@  !@!  @!@ !!@!  !!@@!!
+!!!@!!!!  !!!         !!!    !!!  !@!  !!!  !@!  !!!   !!@!!!
+!!:  !!!  :!!         !!:    !!:  !!:  !!!  !!:  !!!       !:!
+:!:  !:!  :!:         :!:    :!:  :!:  !:!  :!:  !:!      !:!
+::   :::   ::: :::     ::     ::  ::::: ::   ::   ::  :::: ::
+ :   : :   :: :: :     :     :     : :  :   ::    :   :: : :
 
 */
 
- 
+
 
 void WFsmANVL_setKey (void * _as)
 {
   const ANVLState * const as  = _as;
-  
+
   assert (as);
 
   WString_append (as -> key, & (as -> c), 1);
@@ -434,7 +435,7 @@ void WFsmANVL_pushBack (void * _as)
   const ANVLState * const as = _as;
 
   assert (as);
-  
+
   w_ungetc (as -> c, as -> fin);
 }
 
@@ -442,7 +443,7 @@ void WFsmANVL_pushBack (void * _as)
 void WFsmANVL_setComment (void * _as)
 {
   const ANVLState * const as  = _as;
-  
+
   assert (as);
 
   WString_append (as -> comment, & (as -> c), 1);
@@ -464,16 +465,16 @@ void WFsmANVL_raiseError (void * _as)
 
 /*
 
-@@@@@@@@   @@@@@@   @@@@@@@@@@       @@@@@@   @@@@@@@   @@@  
-@@@@@@@@  @@@@@@@   @@@@@@@@@@@     @@@@@@@@  @@@@@@@@  @@@  
-@@!       !@@       @@! @@! @@!     @@!  @@@  @@!  @@@  @@!  
-!@!       !@!       !@! !@! !@!     !@!  @!@  !@!  @!@  !@!  
-@!!!:!    !!@@!!    @!! !!@ @!@     @!@!@!@!  @!@@!@!   !!@  
-!!!!!:     !!@!!!   !@!   ! !@!     !!!@!!!!  !!@!!!    !!!  
-!!:            !:!  !!:     !!:     !!:  !!!  !!:       !!:  
-:!:           !:!   :!:     :!:     :!:  !:!  :!:       :!:  
- ::       :::: ::   :::     ::      ::   :::   ::        ::  
- :        :: : :     :      :        :   : :   :        :    
+@@@@@@@@   @@@@@@   @@@@@@@@@@       @@@@@@   @@@@@@@   @@@
+@@@@@@@@  @@@@@@@   @@@@@@@@@@@     @@@@@@@@  @@@@@@@@  @@@
+@@!       !@@       @@! @@! @@!     @@!  @@@  @@!  @@@  @@!
+!@!       !@!       !@! !@! !@!     !@!  @!@  !@!  @!@  !@!
+@!!!:!    !!@@!!    @!! !!@ @!@     @!@!@!@!  @!@@!@!   !!@
+!!!!!:     !!@!!!   !@!   ! !@!     !!!@!!!!  !!@!!!    !!!
+!!:            !:!  !!:     !!:     !!:  !!!  !!:       !!:
+:!:           !:!   :!:     :!:     :!:  !:!  :!:       :!:
+ ::       :::: ::   :::     ::      ::   :::   ::        ::
+ :        :: : :     :      :        :   : :   :        :
 
 */
 
@@ -489,6 +490,7 @@ void WFsmANVL_raiseError (void * _as)
 
 WIPUBLIC const void * WFsmANVL_state (const void * const _self)
 {
+
   const struct WFsmANVL * const self    = _self;
 
   /* preconditions */
@@ -503,14 +505,15 @@ WIPUBLIC const void * WFsmANVL_state (const void * const _self)
  *
  * @return warc_bool_t
  *
- * Runs the FSM to detect a WARC anvl field. Returns a warc_bool_t FSM 
- * detection succeeds or not. 
+ * Runs the FSM to detect a WARC anvl field. Returns a warc_bool_t FSM
+ * detection succeeds or not.
  *
  * @brief FSM scheduler for WAnvl detection
  */
 
 WPUBLIC warc_bool_t WFsmANVL_run (void * const _self)
 {
+
   struct WFsmANVL * const self = _self;
   char                   c;
 
@@ -527,29 +530,30 @@ WPUBLIC warc_bool_t WFsmANVL_run (void * const _self)
       c = w_fgetc (FIN);
 
       /* EOF or "read error" ? */
-      if (! w_feof (FIN) && ! w_ferror (FIN))
+
+      if (! w_feof (FIN) && ! w_ferror (FIN) )
         CAR = c;
       else
         return (WARC_TRUE);
 
       /* check all events in the current state */
-      for (tp = STATE; tp -> thisEvent (ANVLS) == WARC_FALSE; ++ tp) 
+      for (tp = STATE; tp -> thisEvent (ANVLS) == WARC_FALSE; ++ tp)
         /* empty body */ ;
 
       /* call the action corresponding to the event */
       if (tp -> action != NIL)
         tp -> action (ANVLS);
-      
+
       /* move to the new state if no error */
       /* don't forget to advance the "id" state number */
       unless (ERROR_FLAG)
-        STATE = tp -> newState;
+      STATE = tp -> newState;
       else
         break;
-}
+    }
 
   /* STATE != NIL means "error", otherwise "success" */
-  return (STATE != NIL); 
+  return (STATE != NIL);
 }
 
 
@@ -564,23 +568,24 @@ WPUBLIC warc_bool_t WFsmANVL_run (void * const _self)
 
 WPUBLIC void * WFsmANVL_transform (const void * const _self)
 {
+
   const struct WFsmANVL * const self = _self;
   warc_u32_t                    dec1  = 2, dec2 = 2;
-  
+
   /* preconditions */
   CASSERT (self);
 
-  unless (WString_getLength (KEY))
-    dec1 = 0;
+  unless (WString_getLength (KEY) )
+  dec1 = 0;
 
-  unless (WString_getLength (COMMENT))
-    dec2 = 0;
+  unless (WString_getLength (COMMENT) )
+  dec2 = 0;
 
 
   return (bless (WAnvl,
-                 makeC (KEY), 
+                 makeC (KEY),
                  makeC (VALUE) - dec1,
-                 makeC (COMMENT) - dec2));
+                 makeC (COMMENT) - dec2) );
 }
 
 
@@ -599,23 +604,24 @@ WPUBLIC void * WFsmANVL_transform (const void * const _self)
 
 WPRIVATE void * WFsmANVL_constructor (void * _self, va_list * app)
 {
+
   struct WFsmANVL * const self = _self;
   FILE           *       fin  = va_arg (* app, FILE *);
-  
-  ANVLS = wmalloc (sizeof (ANVLState));
+
+  ANVLS = wmalloc (sizeof (ANVLState) );
   assert (ANVLS);
 
   FIN   = fin;              /* read from this readable stream */
   STATE = WANT_ANVL_KEYFIRST;   /* start state */
   ERROR_FLAG = WARC_FALSE;     /* no error when starting */
 
-  KEY = bless (WString, makeS(""));
+  KEY = bless (WString, makeS ("") );
   assert (KEY);
 
-  VALUE = bless (WString, makeS(""));
+  VALUE = bless (WString, makeS ("") );
   assert (VALUE);
 
-  COMMENT = bless (WString, makeS(""));
+  COMMENT = bless (WString, makeS ("") );
   assert (COMMENT);
 
   return (self);
@@ -629,7 +635,8 @@ WPRIVATE void * WFsmANVL_constructor (void * _self, va_list * app)
  */
 
 WPRIVATE void * WFsmANVL_destructor (void * _self)
-{	
+{
+
   struct WFsmANVL  * const self = _self;
 
   /* preconditions */
@@ -646,7 +653,7 @@ WPRIVATE void * WFsmANVL_destructor (void * _self)
     destroy (VALUE), VALUE = NIL;
 
   if (COMMENT)
-    destroy(COMMENT), COMMENT = NIL;
+    destroy (COMMENT), COMMENT = NIL;
 
   wfree (ANVLS), ANVLS = NIL;
 
@@ -658,10 +665,11 @@ WPRIVATE void * WFsmANVL_destructor (void * _self)
  * WARC WFsmANVL class
  */
 
-static const struct Class _WFsmANVL = {
-	sizeof(struct WFsmANVL),
-	SIGN,
-	WFsmANVL_constructor, WFsmANVL_destructor
-};
+static const struct Class _WFsmANVL =
+  {
+    sizeof (struct WFsmANVL),
+    SIGN,
+    WFsmANVL_constructor, WFsmANVL_destructor
+  };
 
 const void * WFsmANVL = & _WFsmANVL;

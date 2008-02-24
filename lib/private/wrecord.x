@@ -29,43 +29,44 @@
 
 /* to mix C and C++ */
 #ifdef __cplusplus
- extern "C" {
+extern "C"
+  {
 #endif
 
 
 #include <stdlib.h> /* FILE */
 
-extern warc_bool_t  WRecord_check             (const void * const);
-extern FILE       * WRecord_getDataFile       (const void * const);
-extern FILE       * WRecord_getDataFileExtern (const void * const);
-extern const void * WRecord_getHDLine         (const void * const);
-extern const void * WRecord_getAnvl           (const void * const);
-extern warc_i64_t   WRecord_getDataSize       (const void * const);
-extern void       * WRecord_setHDLine         (void * const, void *);
-extern void       * WRecord_setAnvl           (void * const, void * const);
-extern warc_bool_t WRecord_setContentSize     (void *, warc_i64_t);
-extern warc_bool_t WRecord_setContentFromFileHandle (void *, void *);
-extern warc_bool_t WRecord_setWoffset         (void *, warc_i64_t);
-extern warc_i64_t  WRecord_getWoffset         (const void * const);
-extern warc_bool_t WRecord_setEnv             (void *, void * );
-extern warc_bool_t WRecord_setWfile           (void * , void * );
-extern void      * WRecord_fromWho            (const void * const );
-extern warc_bool_t WRecord_setCallback        (void * _self, 
-                                               warc_bool_t (* cback) 
-                                               (void* env, const char * buff, 
-                                                warc_u32_t size));
+    extern warc_bool_t  WRecord_check             (const void * const);
+    extern FILE       * WRecord_getDataFile       (const void * const);
+    extern FILE       * WRecord_getDataFileExtern (const void * const);
+    extern const void * WRecord_getHDLine         (const void * const);
+    extern warc_i64_t   WRecord_getDataSize       (const void * const);
+    extern void       * WRecord_setHDLine         (void * const, void *);
+    extern void       * WRecord_setAnvl           (void * const, void * const);
+    extern warc_bool_t WRecord_setContentSize     (void *, warc_i64_t);
+    extern warc_bool_t WRecord_setContentFromFileHandle (void *, void *);
+    extern warc_bool_t WRecord_setWoffset         (void *, warc_i64_t);
+    extern warc_i64_t  WRecord_getWoffset         (const void * const);
+    extern warc_bool_t WRecord_setEnv             (void *, void * );
+    extern warc_bool_t WRecord_setWfile           (void * , void * );
+    extern void      * WRecord_fromWho            (const void * const );
+    extern warc_bool_t WRecord_setCallback        (void * _self,
+          warc_bool_t (* cback)
+          (void* env, const char * buff,
+           warc_u32_t size) );
 
-extern warc_bool_t WRecord_getCHeaderPresent  (const void * const );
-extern void WRecord_setCHeaderPresence        (void * , const warc_bool_t );
-extern warc_bool_t WRecord_setContentFromArc  (void * , void *);
+    extern warc_bool_t WRecord_getCHeaderPresent  (const void * const );
+    extern void WRecord_setCHeaderPresence        (void * , const warc_bool_t );
+    extern warc_bool_t WRecord_setContentFromArc  (void * , void *);
 
-extern warc_bool_t WRecord_setWFileOffset (void * , warc_i64_t);
-extern warc_bool_t WRecord_setUncompressedSize (void * , warc_u64_t);
-extern warc_bool_t WRecord_setCompressedSize (void * , warc_u64_t);
+    extern warc_bool_t WRecord_setWFileOffset (void * , warc_i64_t);
+    extern warc_bool_t WRecord_setUncompressedSize (void * , warc_u64_t);
+    extern warc_bool_t WRecord_setCompressedSize (void * , warc_u64_t);
 
 
 #ifdef __cplusplus
- }
+  }
+
 #endif
 
 

@@ -30,35 +30,37 @@
 
 /* to mix C and C++ */
 #ifdef __cplusplus
- extern "C" {
+extern "C"
+  {
 #endif
 
 
-/*
- * Portability header file
- */
+    /*
+     * Portability header file
+     */
 
 #include <wport.h>
 
 
-/*
- * C default headers
- */
+    /*
+     * C default headers
+     */
 
 #include <stddef.h> /* va_list */
 
 
-struct Class 
-{
-  size_t size;
-  warc_u32_t sign;
-  void * (* constructor) (void * self, va_list * app);
-  void * (* destructor)  (void * self);
-};
+    struct Class
+      {
+        size_t size;
+        warc_u32_t sign;
+        void * (* constructor) (void * self, va_list * app);
+        void * (* destructor)  (void * self);
+      };
 
 
 #ifdef __cplusplus
- }
+  }
+
 #endif
 
 #endif /* __WARC_CLASS_X__ */

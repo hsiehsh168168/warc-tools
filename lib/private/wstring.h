@@ -30,35 +30,37 @@
 
 /* to mix C and C++ */
 #ifdef __cplusplus
- extern "C" {
+extern "C"
+  {
 #endif
 
 
-/**
- * Portability header file
- */
+    /**
+     * Portability header file
+     */
 
 #include <wport.h>
 
 
-extern const void * WString;
+    extern const void * WString;
 
-extern const warc_u8_t * WString_getText   (const void * const);
-extern       warc_u32_t      WString_getLength (const void * const);
-extern       warc_bool_t     WString_setText   (void * const, 
-                                                const warc_u8_t *, 
-                                                const warc_u32_t);
-extern       warc_bool_t     WString_concat    (void * const, 
-                                                const void * const);
-extern       warc_bool_t     WString_append    (void * const, 
-                                                const warc_u8_t * const,
-                                                warc_u32_t);
-extern       warc_i32_t      WString_strstr    (const void * const, 
-                                                const warc_u8_t *);
+    extern const warc_u8_t * WString_getText   (const void * const);
+    extern       warc_u32_t      WString_getLength (const void * const);
+    extern       warc_bool_t     WString_setText   (void * const,
+          const warc_u8_t *,
+          const warc_u32_t);
+    extern       warc_bool_t     WString_concat    (void * const,
+          const void * const);
+    extern       warc_bool_t     WString_append    (void * const,
+          const warc_u8_t * const,
+          warc_u32_t);
+    extern       warc_i32_t      WString_strstr    (const void * const,
+          const warc_u8_t *);
 
 
 #ifdef __cplusplus
- }
+  }
+
 #endif
 
 

@@ -29,12 +29,13 @@
 
 /* to mix C and C++ */
 #ifdef __cplusplus
- extern "C" {
+extern "C"
+  {
 #endif
 
-/**
- * Portability header file
- */
+    /**
+     * Portability header file
+     */
 
 #include <wport.h>
 
@@ -42,16 +43,17 @@
 
 
 
-extern const void * WFsmANVL;
+    extern const void * WFsmANVL;
 
 
-extern warc_bool_t      WFsmANVL_run       (void * const);
-extern void *       WFsmANVL_transform (const void * const);
-extern const void * WFsmANVL_state      (const void * const);
+    extern warc_bool_t      WFsmANVL_run       (void * const);
+    extern void *       WFsmANVL_transform (const void * const);
+    extern const void * WFsmANVL_state      (const void * const);
 
 
 #ifdef __cplusplus
- }
+  }
+
 #endif
 
 

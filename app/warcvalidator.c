@@ -37,10 +37,10 @@
 
 /* unused callback */
 warc_bool_t callback (void * env, const char* buff, const warc_u32_t size)
-{ 
-  UNUSED(env);
-  UNUSED(size);
-  UNUSED(buff);
+{
+  UNUSED (env);
+  UNUSED (size);
+  UNUSED (buff);
   return (WARC_TRUE);
 }
 
@@ -56,70 +56,83 @@ int main (int argc, const char ** argv)
   wfile_comp_t     cmode   = WARC_FILE_COMPRESSED_GZIP;
   warc_bool_t      verbose = WARC_TRUE;
 
-  if (argc < 2 || argc > 5) 
-   {
-     fprintf (stderr, "Check WARC file consistency\n");
-     fprintf (stderr, "Usage: %s -f <file.warc> [-c] [-v]\n", argv [0]);
-     fprintf (stderr,"\t-f    : valid WARC file name\n");
-     fprintf (stderr,"\t[-c]  : GZIP compressed WARC (default true)\n");
-     fprintf (stderr,"\t[-v]  : verbose mode (default true)\n");
-     return (2);
-   }
-  
+  if (argc < 2 || argc > 5)
+    {
+      fprintf (stderr, "Check WARC file consistency\n");
+      fprintf (stderr, "Usage: %s -f <file.warc> [-c] [-v]\n", argv [0]);
+      fprintf (stderr, "\t-f    : valid WARC file name\n");
+      fprintf (stderr, "\t[-c]  : GZIP compressed WARC (default true)\n");
+      fprintf (stderr, "\t[-v]  : verbose mode (default true)\n");
+      return (2);
+    }
 
 
-  p = bless (WGetOpt, makeS (flags));
+
+  p = bless (WGetOpt, makeS (flags) );
+
   assert (p);
 
   /* parse command line parameters */
-  while ((c = WGetOpt_parse (p, argc, argv)) != -1)
+
+  while ( (c = WGetOpt_parse (p, argc, argv) ) != -1)
     {
       switch (c)
         {
-        case 'f' :
-          if (w_index (flags, c) [1] == ':')
-            fname = WGetOpt_argument (p);
-          break;
-        case 'c' :
-          cmode = WARC_FILE_UNCOMPRESSED;
-          break;
-        case 'v' :
-          verbose = WARC_FALSE;
-          break;
-        case '?' :  /* illegal option or missing argument */
-          destroy (p);
-          return (1);
+
+          case 'f' :
+
+            if (w_index (flags, c) [1] == ':')
+              fname = WGetOpt_argument (p);
+
+            break;
+
+          case 'c' :
+            cmode = WARC_FILE_UNCOMPRESSED;
+
+            break;
+
+          case 'v' :
+            verbose = WARC_FALSE;
+
+            break;
+
+          case '?' :  /* illegal option or missing argument */
+            destroy (p);
+
+            return (1);
         }
     }
-  
+
   unless (fname)
-    {
-      fprintf (stderr, "missing WARC file name. Use -f option\n");
-      destroy (p);
-      return (1);
-    }
+
+  {
+    fprintf (stderr, "missing WARC file name. Use -f option\n");
+    destroy (p);
+    return (1);
+  }
 
   w = bless (WFile, fname, WARC_MAX_SIZE, WARC_FILE_READER, cmode);
   assert (w);
 
-  while (WFile_hasMoreRecords (w))
+  while (WFile_hasMoreRecords (w) )
     {
       r = WFile_nextRecord (w);
       unless (r)
-        {
-          ret = 1;
-          break;
-        }
+      {
+        ret = 1;
+        break;
+      }
 
       WFile_register (w, r, callback, (void *) 0);
       WRecord_getContent (r);
-      
+
       destroy (r);
     }
-  
+
   destroy (p);
+
   destroy (w);
-  
+
   if (verbose)
     {
       if (ret)

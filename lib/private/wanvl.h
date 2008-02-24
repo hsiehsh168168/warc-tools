@@ -29,32 +29,34 @@
 
 /* to mix C and C++ */
 #ifdef __cplusplus
- extern "C" {
+extern "C"
+  {
 #endif
 
-/**
- * Portability header file
- */
+    /**
+     * Portability header file
+     */
 
 #include <wport.h>
 
 
-extern const void * WAnvl;
+    extern const void * WAnvl;
 
 
-extern const warc_u8_t *   WAnvl_getKey  (const void * const);
-extern warc_u32_t     WAnvl_getKeyLen    (const void * const);
-extern warc_bool_t    WAnvl_setKey       (void * const, const warc_u8_t *,
-                                          const warc_u32_t);
-extern const warc_u8_t *   WAnvl_getValue     (const void * const);
-extern warc_u32_t     WAnvl_getValueLen  (const void * const);
-extern warc_bool_t    WAnvl_setValue     (void * const, const warc_u8_t *,
-                                          const warc_u32_t);
-extern warc_bool_t    WAnvl_isValid      (const void * const);
+    extern const warc_u8_t *   WAnvl_getKey  (const void * const);
+    extern warc_u32_t     WAnvl_getKeyLen    (const void * const);
+    extern warc_bool_t    WAnvl_setKey       (void * const, const warc_u8_t *,
+          const warc_u32_t);
+    extern const warc_u8_t *   WAnvl_getValue     (const void * const);
+    extern warc_u32_t     WAnvl_getValueLen  (const void * const);
+    extern warc_bool_t    WAnvl_setValue     (void * const, const warc_u8_t *,
+          const warc_u32_t);
+    extern warc_bool_t    WAnvl_isValid      (const void * const);
 
 
 #ifdef __cplusplus
- }
+  }
+
 #endif
 
 #endif /* __WARC_WANVL_H__ */

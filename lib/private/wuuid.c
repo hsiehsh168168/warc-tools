@@ -32,7 +32,7 @@
 
 
 /*
- * WARC default headers 
+ * WARC default headers
  */
 
 
@@ -52,14 +52,16 @@
  * WARC WUUID internal structure
  */
 
-struct WUUID {
-  const void * class;
+struct WUUID
+  {
 
-  /*@{*/
-  warc_u64_t * tiger;  /**< Tiger Hash 3 x 64 bits */
-  char * buf;
-  /*@}*/
-};
+    const void * class;
+
+    /*@{*/
+    warc_u64_t * tiger;  /**< Tiger Hash 3 x 64 bits */
+    char * buf;
+    /*@}*/
+  };
 
 
 #define TIGER    (self -> tiger)
@@ -72,17 +74,18 @@ struct WUUID {
  * Compute a Tiger hash value (192 bits)
  */
 
-WPUBLIC void WUUID_hash (const void * const _self, 
+WPUBLIC void WUUID_hash (const void * const _self,
                          const warc_u8_t * buf,
                          const warc_u64_t size)
 {
+
   const struct WUUID * const self = _self;
 
   /* preconditions */
   CASSERT (self);
 
   /* compute the tiger hash */
-  tiger((warc_u64_t *) buf, size, TIGER);
+  tiger ( (warc_u64_t *) buf, size, TIGER);
 
 }
 
@@ -97,21 +100,22 @@ WPUBLIC void WUUID_hash (const void * const _self,
 
 WIPUBLIC const char * WUUID_text (const void * const _self)
 {
+
   const struct WUUID * const self = _self;
-  
+
   /* preconditions */
   CASSERT (self);
 
-  w_snprintf(BUF, (2 * 3 * sizeof (warc_u64_t)) + 5 + 1,"%s%08X%08X%08X%08X%08X%08X", 
-             "uuid:", /* 5 chars */
-             (warc_u32_t) (TIGER [0]>>32),
-             (warc_u32_t) (TIGER [0]),
-             (warc_u32_t) (TIGER [1]>>32),
-             (warc_u32_t) (TIGER [1]),
-             (warc_u32_t) (TIGER [2]>>32),
-             (warc_u32_t) (TIGER [2]));
+  w_snprintf (BUF, (2 * 3 * sizeof (warc_u64_t) ) + 5 + 1, "%s%08X%08X%08X%08X%08X%08X",
+              "uuid:", /* 5 chars */
+              (warc_u32_t) (TIGER [0] >> 32),
+              (warc_u32_t) (TIGER [0]),
+              (warc_u32_t) (TIGER [1] >> 32),
+              (warc_u32_t) (TIGER [1]),
+              (warc_u32_t) (TIGER [2] >> 32),
+              (warc_u32_t) (TIGER [2]) );
 
-   return (BUF);
+  return (BUF);
 }
 
 
@@ -122,8 +126,9 @@ WIPUBLIC const char * WUUID_text (const void * const _self)
 
 WIPUBLIC void WUUID_reinit (const void * const _self)
 {
+
   const struct WUUID * const self = _self;
-  
+
   /* preconditions */
   CASSERT (self);
 
@@ -147,25 +152,26 @@ WIPUBLIC void WUUID_reinit (const void * const _self)
 
 WPRIVATE void * WUUID_constructor (void * _self, va_list * app)
 {
+
   struct WUUID     * const self = _self;
-  
+
   UNUSED (app);
 
   /* allocate memory of 3 x 64 bits */
-  TIGER = wmalloc (3 * sizeof (warc_u64_t));
+  TIGER = wmalloc (3 * sizeof (warc_u64_t) );
   unless (TIGER)
-    {
-      destroy (self);
-      return (NIL);
-    }
+  {
+    destroy (self);
+    return (NIL);
+  }
 
   /* allocate memory of 2 * 3 x 8 bits */
-  BUF = wmalloc ((2 * 3 * sizeof (warc_u64_t)) + 5 + 1); /* 384 bits + "uuid:" + 1 */
+  BUF = wmalloc ( (2 * 3 * sizeof (warc_u64_t) ) + 5 + 1); /* 384 bits + "uuid:" + 1 */
   unless (BUF)
-    {
-      destroy (self);
-      return (NIL);
-    }
+  {
+    destroy (self);
+    return (NIL);
+  }
 
   /* zero fill the tiger buffer */
   WUUID_reinit (self);
@@ -183,13 +189,14 @@ WPRIVATE void * WUUID_constructor (void * _self, va_list * app)
  */
 
 WPRIVATE void * WUUID_destructor (void * _self)
-{	
+{
+
   struct WUUID * self = _self;
 
   /* preconditions */
   CASSERT (self);
- 
-  
+
+
   if (TIGER)
     wfree (TIGER), TIGER = NIL;
 
@@ -204,10 +211,11 @@ WPRIVATE void * WUUID_destructor (void * _self)
  * WARC WUUID class
  */
 
-static const struct Class _WUUID = {
-	sizeof(struct WUUID),
-	SIGN,
-	WUUID_constructor, WUUID_destructor
-};
+static const struct Class _WUUID =
+  {
+    sizeof (struct WUUID),
+    SIGN,
+    WUUID_constructor, WUUID_destructor
+  };
 
 const void * WUUID = & _WUUID;

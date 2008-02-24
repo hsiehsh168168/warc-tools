@@ -32,10 +32,10 @@
 #define makeU(s) (const warc_u8_t *) (s), (warc_u64_t) w_strlen((warc_u8_t *) (s))
 
 int test1 (void)
-{	
+{
   const char * t = "TEST 1";
-  void       * u = NIL; 
-  const char * s = NIL; 
+  void       * u = NIL;
+  const char * s = NIL;
 
   fprintf (stdout, "%s>\n", t);
 
@@ -43,14 +43,14 @@ int test1 (void)
   u = bless (WUUID);
   assert (u);
 
-  WUUID_hash (u, makeU(""));
-  s = WUUID_text(u);
+  WUUID_hash (u, makeU ("") );
+  s = WUUID_text (u);
   fprintf (stdout, "%s\n", s);
 
 
-  WUUID_reinit(u); /* re-initialize the Tiger buffer */
-  WUUID_hash (u, makeU("Hello World"));
-  s = WUUID_text(u);
+  WUUID_reinit (u); /* re-initialize the Tiger buffer */
+  WUUID_hash (u, makeU ("Hello World") );
+  s = WUUID_text (u);
   fprintf (stdout, "%s\n", s);
 
   destroy (u);
@@ -59,10 +59,10 @@ int test1 (void)
 }
 
 int test2 (void)
-{	
+{
   const char * t = "TEST 2";
-  void       * u = NIL; 
-  const char * s = NIL; 
+  void       * u = NIL;
+  const char * s = NIL;
 
   fprintf (stdout, "%s>\n", t);
 
@@ -70,12 +70,12 @@ int test2 (void)
   u = bless (WUUID);
   assert (u);
 
-  WUUID_hash (u, makeU("Tiger Hashing"));
-  s = WUUID_text(u);
+  WUUID_hash (u, makeU ("Tiger Hashing") );
+  s = WUUID_text (u);
   fprintf (stdout, "%s\n", s);
 
-  WUUID_reinit(u); /* re-initialize the Tiger buffer */
-  s = WUUID_text(u);
+  WUUID_reinit (u); /* re-initialize the Tiger buffer */
+  s = WUUID_text (u);
   fprintf (stdout, "%s\n", s);
 
   destroy (u);
@@ -84,10 +84,10 @@ int test2 (void)
 }
 
 int test3 (void)
-{	
+{
   const char * t = "TEST 3";
-  void       * u = NIL; 
-  const char * s = NIL; 
+  void       * u = NIL;
+  const char * s = NIL;
 
   fprintf (stdout, "%s>\n", t);
 
@@ -95,14 +95,14 @@ int test3 (void)
   u = bless (WUUID);
   assert (u);
 
-  WUUID_hash (u, makeU("Hello"));
-  WUUID_hash (u, makeU("World"));
-  s = WUUID_text(u);
+  WUUID_hash (u, makeU ("Hello") );
+  WUUID_hash (u, makeU ("World") );
+  s = WUUID_text (u);
   fprintf (stdout, "%s\n", s);
 
-  WUUID_reinit(u); /* re-initialize the Tiger buffer */
-  WUUID_hash (u, makeU("Hello World"));
-  s = WUUID_text(u);
+  WUUID_reinit (u); /* re-initialize the Tiger buffer */
+  WUUID_hash (u, makeU ("Hello World") );
+  s = WUUID_text (u);
   fprintf (stdout, "%s\n", s);
 
   destroy (u);
@@ -112,12 +112,12 @@ int test3 (void)
 
 
 int main (void)
-{	
-  int (* tests [])() = { test1, test2, test3 };
+{
+  int (* tests []) () = { test1, test2, test3 };
 
   warc_u32_t  i      = 0;
 
-  for(i = 0; i < ARRAY_LEN (tests); ++ i)
+  for (i = 0; i < ARRAY_LEN (tests); ++ i)
     {
       tests[i] ();
     }

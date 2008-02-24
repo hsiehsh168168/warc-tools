@@ -47,44 +47,49 @@ int test1 (void)
   fprintf (stdout, "%s>\n", t);
 
 
-  g = bless (WGetOpt, makeS(flags));
+  g = bless (WGetOpt, makeS (flags) );
   assert (g);
 
   fprintf (stdout, "flags : %s\n", flags);
   fprintf (stdout, "params: ");
+
   for (i = 0; i < ac; ++ i)
     {
       fprintf (stdout, "%s ", av [i]);
     }
+
   fprintf (stdout, "\n");
 
   /* print flags */
-  while ((c = WGetOpt_parse (g, ac, av)) != -1)
+
+  while ( (c = WGetOpt_parse (g, ac, av) ) != -1)
     {
       if (c == '?') /* illegal option or missing argument */
-       {
-         destroy (g);
-         return (1);
-       }
+        {
+          destroy (g);
+          return (1);
+        }
 
-      fprintf (stdout, "-%c %s ", c, 
+      fprintf (stdout, "-%c %s ", c,
+
                w_index (flags, c) [1] == ':' ? WGetOpt_argument (g) : "");
     }
-  
+
   /* end of flags; print the rest of options. */
   fprintf (stdout, "-- ");
-  
+
   i = WGetOpt_indice (g);
+
   if (i < ac)
     {
       for (; i < ac; ++ i)
-        fprintf (stdout, "%s ", * (av + i));
+        fprintf (stdout, "%s ", * (av + i) );
     }
 
   fprintf (stdout, "\n");
 
   destroy (g);
-  
+
   return (0);
 }
 
@@ -102,44 +107,49 @@ int test2 (void)
   fprintf (stdout, "%s>\n", t);
 
 
-  g = bless (WGetOpt, makeS(flags));
+  g = bless (WGetOpt, makeS (flags) );
   assert (g);
 
   fprintf (stdout, "flags : %s\n", flags);
   fprintf (stdout, "params: ");
+
   for (i = 0; i < ac; ++ i)
     {
       fprintf (stdout, "%s ", av [i]);
     }
+
   fprintf (stdout, "\n");
 
   /* print flags */
-  while ((c = WGetOpt_parse (g, ac, av)) != -1)
+
+  while ( (c = WGetOpt_parse (g, ac, av) ) != -1)
     {
       if (c == '?') /* illegal option or missing argument */
         {
           destroy (g);
           return (1);
         }
-      
-      fprintf (stdout, "-%c %s ", c, 
+
+      fprintf (stdout, "-%c %s ", c,
+
                w_index (flags, c) [1] == ':' ? WGetOpt_argument (g) : "");
     }
-  
+
   /* end of flags; print the rest of options. */
   fprintf (stdout, "-- ");
-  
+
   i = WGetOpt_indice (g);
+
   if (i < ac)
     {
       for (; i < ac; ++ i)
-        fprintf (stdout, "%s ", * (av + i));
+        fprintf (stdout, "%s ", * (av + i) );
     }
 
   fprintf (stdout, "\n");
 
   destroy (g);
-  
+
   return (0);
 }
 
@@ -158,44 +168,49 @@ int test3 (void)
   fprintf (stdout, "%s>\n", t);
 
 
-  g = bless (WGetOpt, makeS(flags));
+  g = bless (WGetOpt, makeS (flags) );
   assert (g);
 
   fprintf (stdout, "flags : %s\n", flags);
   fprintf (stdout, "params: ");
+
   for (i = 0; i < ac; ++ i)
     {
       fprintf (stdout, "%s ", av [i]);
     }
+
   fprintf (stdout, "\n");
 
   /* print flags */
-  while ((c = WGetOpt_parse (g, ac, av)) != -1)
+
+  while ( (c = WGetOpt_parse (g, ac, av) ) != -1)
     {
       if (c == '?') /* illegal option or missing argument */
         {
           destroy (g);
           return (1);
         }
-      
-      fprintf (stdout, "-%c %s ", c, 
+
+      fprintf (stdout, "-%c %s ", c,
+
                w_index (flags, c) [1] == ':' ? WGetOpt_argument (g) : "");
     }
-  
+
   /* end of flags; print the rest of options. */
   fprintf (stdout, "-- ");
-  
+
   i = WGetOpt_indice (g);
+
   if (i < ac)
     {
       for (; i < ac; ++ i)
-        fprintf (stdout, "%s ", * (av + i));
+        fprintf (stdout, "%s ", * (av + i) );
     }
 
   fprintf (stdout, "\n");
 
   destroy (g);
-  
+
   return (0);
 }
 
@@ -214,44 +229,49 @@ int test4 (void)
   fprintf (stdout, "%s>\n", t);
 
 
-  g = bless (WGetOpt, makeS(flags));
+  g = bless (WGetOpt, makeS (flags) );
   assert (g);
 
   fprintf (stdout, "flags : %s\n", flags);
   fprintf (stdout, "params: ");
+
   for (i = 0; i < ac; ++ i)
     {
       fprintf (stdout, "%s ", av [i]);
     }
+
   fprintf (stdout, "\n");
 
   /* print flags */
-  while ((c = WGetOpt_parse (g, ac, av)) != -1)
+
+  while ( (c = WGetOpt_parse (g, ac, av) ) != -1)
     {
       if (c == '?') /* illegal option or missing argument */
         {
           destroy (g);
           return (1);
         }
-      
-      fprintf (stdout, "-%c %s ", c, 
+
+      fprintf (stdout, "-%c %s ", c,
+
                w_index (flags, c) [1] == ':' ? WGetOpt_argument (g) : "");
     }
-  
+
   /* end of flags; print the rest of options. */
   fprintf (stdout, "-- ");
-  
+
   i = WGetOpt_indice (g);
+
   if (i < ac)
     {
       for (; i < ac; ++ i)
-        fprintf (stdout, "%s ", * (av + i));
+        fprintf (stdout, "%s ", * (av + i) );
     }
 
   fprintf (stdout, "\n");
 
   destroy (g);
-  
+
   return (0);
 }
 
@@ -269,44 +289,49 @@ int test5 (void)
   fprintf (stdout, "%s>\n", t);
 
 
-  g = bless (WGetOpt, makeS(flags));
+  g = bless (WGetOpt, makeS (flags) );
   assert (g);
-  
+
   fprintf (stdout, "flags : %s\n", flags);
   fprintf (stdout, "params: ");
+
   for (i = 0; i < ac; ++ i)
     {
       fprintf (stdout, "%s ", av [i]);
     }
+
   fprintf (stdout, "\n");
 
   /* print flags */
-  while ((c = WGetOpt_parse (g, ac, av)) != -1)
+
+  while ( (c = WGetOpt_parse (g, ac, av) ) != -1)
     {
       if (c == '?') /* illegal option or missing argument */
         {
           destroy (g);
           return (1);
         }
-      
-      fprintf (stdout, "-%c %s ", c, 
+
+      fprintf (stdout, "-%c %s ", c,
+
                w_index (flags, c) [1] == ':' ? WGetOpt_argument (g) : "");
     }
-  
+
   /* end of flags; print the rest of options. */
   fprintf (stdout, "-- ");
-  
+
   i = WGetOpt_indice (g);
+
   if (i < ac)
     {
       for (; i < ac; ++ i)
-        fprintf (stdout, "%s ", * (av + i));
+        fprintf (stdout, "%s ", * (av + i) );
     }
 
   fprintf (stdout, "\n");
 
   destroy (g);
-  
+
   return (0);
 }
 
@@ -324,58 +349,63 @@ int test6 (void)
   fprintf (stdout, "%s>\n", t);
 
 
-  g = bless (WGetOpt, makeS(flags));
+  g = bless (WGetOpt, makeS (flags) );
   assert (g);
-  
+
   fprintf (stdout, "flags : %s\n", flags);
   fprintf (stdout, "params: ");
+
   for (i = 0; i < ac; ++ i)
     {
       fprintf (stdout, "%s ", av [i]);
     }
+
   fprintf (stdout, "\n");
 
   /* print flags */
-  while ((c = WGetOpt_parse (g, ac, av)) != -1)
+
+  while ( (c = WGetOpt_parse (g, ac, av) ) != -1)
     {
       if (c == '?') /* illegal option or missing argument */
         {
           destroy (g);
           return (1);
         }
-      
-      fprintf (stdout, "-%c %s ", c, 
+
+      fprintf (stdout, "-%c %s ", c,
+
                w_index (flags, c) [1] == ':' ? WGetOpt_argument (g) : "");
     }
-  
+
   /* end of flags; print the rest of options. */
   fprintf (stdout, "-- ");
-  
+
   i = WGetOpt_indice (g);
+
   if (i < ac)
     {
       for (; i < ac; ++ i)
-        fprintf (stdout, "%s ", * (av + i));
+        fprintf (stdout, "%s ", * (av + i) );
     }
 
   fprintf (stdout, "\n");
 
   destroy (g);
-  
+
   return (0);
 }
 
 
 int main (void)
-{	
-  int (* tests [])() = { test1, test2, test3, test4, test5, test6 };
-  
+{
+  int (* tests []) () = { test1, test2, test3, test4, test5, test6 };
+
   warc_u32_t  i      = 0;
-  
-  for(i = 0; i < ARRAY_LEN (tests); ++ i)
+
+  for (i = 0; i < ARRAY_LEN (tests); ++ i)
     {
       tests [i] ();
     }
-  
+
   return 0;
 }
