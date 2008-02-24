@@ -30,25 +30,27 @@
 
 /* to mix C and C++ */
 #ifdef __cplusplus
- extern "C" {
+extern "C"
+  {
 #endif
 
 
-/**
- * Portability header file
- */
+    /**
+     * Portability header file
+     */
 
 #include <wport.h>
 
 
-extern const void * WGetOpt;
+    extern const void * WGetOpt;
 
-extern warc_i32_t   WGetOpt_parse    (void * const, warc_i32_t, const char **);
-extern warc_i32_t   WGetOpt_indice   (const void * const);
-extern char       * WGetOpt_argument (const void * const);
+    extern warc_i32_t   WGetOpt_parse    (void * const, warc_i32_t, const char **);
+    extern warc_i32_t   WGetOpt_indice   (const void * const);
+    extern char       * WGetOpt_argument (const void * const);
 
 #ifdef __cplusplus
- }
+  }
+
 #endif
 
 

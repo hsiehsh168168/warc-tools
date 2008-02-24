@@ -30,45 +30,49 @@
 
 /* to mix C and C++ */
 #ifdef __cplusplus
- extern "C" {
+extern "C"
+  {
 #endif
 
 
-/**
- * Portability header file
- */
+    /**
+     * Portability header file
+     */
 
 #include <wport.h>
 
-extern const void * WFile;
+    extern const void * WFile;
 
-typedef enum {WARC_FILE_UNCOMPRESSED = 0,
-              WARC_FILE_COMPRESSED_GZIP,
-              WARC_FILE_COMPRESSED_GZIP_DEFAULT_COMPRESSION,
-              WARC_FILE_COMPRESSED_GZIP_NO_COMPRESSION,
-              WARC_FILE_COMPRESSED_GZIP_BEST_SPEED,
-              WARC_FILE_COMPRESSED_GZIP_BEST_COMPRESSION} wfile_comp_t;
+    typedef enum {WARC_FILE_UNCOMPRESSED = 0,
+                  WARC_FILE_COMPRESSED_GZIP,
+                  WARC_FILE_COMPRESSED_GZIP_DEFAULT_COMPRESSION,
+                  WARC_FILE_COMPRESSED_GZIP_NO_COMPRESSION,
+                  WARC_FILE_COMPRESSED_GZIP_BEST_SPEED,
+                  WARC_FILE_COMPRESSED_GZIP_BEST_COMPRESSION
+                 } wfile_comp_t;
 
-typedef enum {WARC_FILE_INVALID = 0,
-              WARC_FILE_READER,
-              WARC_FILE_WRITER} wfile_mode_t;
+    typedef enum {WARC_FILE_INVALID = 0,
+                  WARC_FILE_READER,
+                  WARC_FILE_WRITER
+                 } wfile_mode_t;
 
-extern warc_bool_t     WFile_hasMoreRecords (const void * const);
-extern void *          WFile_nextRecord     (void *);
+    extern warc_bool_t     WFile_hasMoreRecords (const void * const);
+    extern void *          WFile_nextRecord     (void *);
 
-extern warc_bool_t     WFile_setMaxSize     (void *, const warc_u64_t);
-extern warc_bool_t     WFile_storeRecord    (void *, const void *);
-extern warc_bool_t     WFile_seek           (void *, const warc_u64_t);
-extern warc_bool_t     WFile_register       (void *, void *,
-                                             warc_bool_t (*)
-                                             (void *, const char *,
-                                              const warc_u32_t), 
-                                             void *);
-                                              
+    extern warc_bool_t     WFile_setMaxSize     (void *, const warc_u64_t);
+    extern warc_bool_t     WFile_storeRecord    (void *, const void *);
+    extern warc_bool_t     WFile_seek           (void *, const warc_u64_t);
+    extern warc_bool_t     WFile_register       (void *, void *,
+          warc_bool_t (*)
+          (void *, const char *,
+           const warc_u32_t),
+          void *);
+
 
 
 #ifdef __cplusplus
- }
+  }
+
 #endif
 
 

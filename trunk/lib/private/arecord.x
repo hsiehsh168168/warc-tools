@@ -30,49 +30,51 @@
 
 /* to mix C and C++ */
 #ifdef __cplusplus
- extern "C" {
+extern "C"
+  {
 #endif
 
 
 
-/**
- * Portability header file
- */
+    /**
+     * Portability header file
+     */
 
 #include <wport.h>
 
 
 
-extern const void * ARecord;
+    extern const void * ARecord;
 
-/* getters */
+    /* getters */
 
-extern warc_u32_t ARecord_getDataLength   (const void * const);
-extern FILE *     ARecord_getDataFile     (const void * const);
-extern warc_u64_t ARecord_getDataSize     (const void * const);
-extern warc_i64_t ARecord_getRecordOffset (const void * const);
-extern void *     ARecord_fromWho         (const void * const);
+    extern warc_u32_t ARecord_getDataLength   (const void * const);
+    extern FILE *     ARecord_getDataFile     (const void * const);
+    extern warc_u64_t ARecord_getDataSize     (const void * const);
+    extern warc_i64_t ARecord_getRecordOffset (const void * const);
+    extern void *     ARecord_fromWho         (const void * const);
 
-/* setters */
+    /* setters */
 
-extern warc_bool_t ARecord_setDataLength   (void * const, const warc_u32_t);
-extern warc_bool_t ARecord_setUrl          (void * const, const warc_u8_t *,
-                                            const warc_u32_t);
-extern warc_bool_t ARecord_setCreationDate (void * const, const warc_u8_t *,
-                                            const warc_u32_t);
-extern warc_bool_t ARecord_setMimeType     (void * const, const warc_u8_t *,
-                                            const warc_u32_t);
-extern warc_bool_t  ARecord_setIpAddress   (void * const, const warc_u8_t *,
-                                            const warc_u32_t);
-extern warc_bool_t ARecord_setContentFromFile (void *, void *);
-extern warc_bool_t ARecord_setContentSize  (void *,warc_i64_t);
-extern warc_bool_t ARecord_setRecordOffset (void *, const warc_i64_t);
-extern warc_bool_t ARecord_setEnv          (void *, void *);
-extern warc_bool_t ARecord_setAfile        (void *, void *);
+    extern warc_bool_t ARecord_setDataLength   (void * const, const warc_u32_t);
+    extern warc_bool_t ARecord_setUrl          (void * const, const warc_u8_t *,
+          const warc_u32_t);
+    extern warc_bool_t ARecord_setCreationDate (void * const, const warc_u8_t *,
+          const warc_u32_t);
+    extern warc_bool_t ARecord_setMimeType     (void * const, const warc_u8_t *,
+          const warc_u32_t);
+    extern warc_bool_t  ARecord_setIpAddress   (void * const, const warc_u8_t *,
+          const warc_u32_t);
+    extern warc_bool_t ARecord_setContentFromFile (void *, void *);
+    extern warc_bool_t ARecord_setContentSize  (void *, warc_i64_t);
+    extern warc_bool_t ARecord_setRecordOffset (void *, const warc_i64_t);
+    extern warc_bool_t ARecord_setEnv          (void *, void *);
+    extern warc_bool_t ARecord_setAfile        (void *, void *);
 
 
 #ifdef __cplusplus
- }
+  }
+
 #endif
 
 

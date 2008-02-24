@@ -40,40 +40,40 @@
 
 
 int test1 (void)
-{	
+{
   const char * t  = "TEST 1";
-  void       * hl = bless (ARecord, 
+  void       * hl = bless (ARecord,
                            makeS ("http://www.w3c.org"),
                            makeS ("192.168.4.1"),
-                           makeS ("12172007"), 
+                           makeS ("12172007"),
                            makeS ("warcproject/testheaderline"),
-                            12);
+                           12);
 
   assert (hl);
 
   fprintf (stdout, "%s>\n", t);
-  fprintf (stdout, "DataLength:   %d\n", ARecord_getDataLength  (hl));
-  fprintf (stdout, "MimeType:   %s\n", ARecord_getMimeType  (hl));
-  fprintf (stdout, "Url:   %s\n",        ARecord_getUrl  (hl));
-  fprintf (stdout, "CreationDate: %s\n", ARecord_getCreationDate(hl));
-  fprintf (stdout, "IP-adress:     %s\n", ARecord_getIpAddress    (hl));
+  fprintf (stdout, "DataLength:   %d\n", ARecord_getDataLength  (hl) );
+  fprintf (stdout, "MimeType:   %s\n", ARecord_getMimeType  (hl) );
+  fprintf (stdout, "Url:   %s\n",        ARecord_getUrl  (hl) );
+  fprintf (stdout, "CreationDate: %s\n", ARecord_getCreationDate (hl) );
+  fprintf (stdout, "IP-adress:     %s\n", ARecord_getIpAddress    (hl) );
 
   destroy (hl);
-    
+
   return 0;
 }
 
 
 int test2 (void)
-{	
+{
   const char * t  = "TEST 2";
-  
-    void       * hl = bless (ARecord, 
+
+  void       * hl = bless (ARecord,
                            makeS ("http://www.w3c.org"),
                            makeS ("192.168.4.1"),
-                           makeS ("12172007"), 
+                           makeS ("12172007"),
                            makeS ("warcproject/testheaderline"),
-                            12);
+                           12);
 
 
   fprintf (stdout, "%s>\n", t);
@@ -81,30 +81,30 @@ int test2 (void)
   assert (hl);
 
   ARecord_setDataLength   (hl, 15);
-  ARecord_setUrl   (hl, makeS ("http://www.iso.net"));
-  ARecord_setCreationDate (hl, makeS ("01012999"));
-  ARecord_setMimeType  (hl, makeS ("application/xpdf"));
-  ARecord_setIpAddress     (hl, makeS ("168.12.0.0"));
+  ARecord_setUrl   (hl, makeS ("http://www.iso.net") );
+  ARecord_setCreationDate (hl, makeS ("01012999") );
+  ARecord_setMimeType  (hl, makeS ("application/xpdf") );
+  ARecord_setIpAddress     (hl, makeS ("168.12.0.0") );
 
- 
-  fprintf (stdout, "DataLength:   %d\n", ARecord_getDataLength  (hl));
-  fprintf (stdout, "MimeType:   %s\n", ARecord_getMimeType  (hl));
-  fprintf (stdout, "Url:   %s\n",        ARecord_getUrl  (hl));
-  fprintf (stdout, "CreationDate: %s\n", ARecord_getCreationDate(hl));
-  fprintf (stdout, "IP-adress:     %s\n", ARecord_getIpAddress    (hl));
+
+  fprintf (stdout, "DataLength:   %d\n", ARecord_getDataLength  (hl) );
+  fprintf (stdout, "MimeType:   %s\n", ARecord_getMimeType  (hl) );
+  fprintf (stdout, "Url:   %s\n",        ARecord_getUrl  (hl) );
+  fprintf (stdout, "CreationDate: %s\n", ARecord_getCreationDate (hl) );
+  fprintf (stdout, "IP-adress:     %s\n", ARecord_getIpAddress    (hl) );
 
   destroy (hl);
-    
+
   return 0;
 }
 
 
 int test3 (void)
-{	
+{
   const char * t        = "TEST 3";
   const char * filename = "app/wdata/testarc/file.arc";
-  void       * fin      = NIL; 
-  void       * hl       = NIL; 
+  void       * fin      = NIL;
+  void       * hl       = NIL;
   void       * fsm      = NIL;
 
   fprintf (stdout, "%s>\n", t);
@@ -112,47 +112,49 @@ int test3 (void)
   /* open a valid WARC header file */
   fin = fopen (filename, "r");
   unless (fin)
-    return (1);
+  return (1);
 
   /* init HDL FSM */
   fsm = bless (AFsmHDL, fin);
   assert (fsm);
 
   /* run the FSM for WHDLine object detection */
-  unless (AFsmHDL_run (fsm))
-    {
-      /* generate the WHDLine object from the FSM */
-      hl = AFsmHDL_transform (fsm);
-      
+  unless (AFsmHDL_run (fsm) )
+  {
+    /* generate the WHDLine object from the FSM */
+    hl = AFsmHDL_transform (fsm);
 
-  fprintf (stdout, "DataLength:   %d\n", ARecord_getDataLength  (hl));
-  fprintf (stdout, "MimeType:   %s\n", ARecord_getMimeType  (hl));
-  fprintf (stdout, "Url:   %s\n",        ARecord_getUrl  (hl));
-  fprintf (stdout, "CreationDate: %s\n", ARecord_getCreationDate(hl));
-  fprintf (stdout, "IP-adress:     %s\n", ARecord_getIpAddress    (hl));
 
-      destroy (hl);
-    }
+    fprintf (stdout, "DataLength:   %d\n", ARecord_getDataLength  (hl) );
+    fprintf (stdout, "MimeType:   %s\n", ARecord_getMimeType  (hl) );
+    fprintf (stdout, "Url:   %s\n",        ARecord_getUrl  (hl) );
+    fprintf (stdout, "CreationDate: %s\n", ARecord_getCreationDate (hl) );
+    fprintf (stdout, "IP-adress:     %s\n", ARecord_getIpAddress    (hl) );
+
+    destroy (hl);
+  }
+
   else
     {
       /* error when parsing the WARC header line */
-     fprintf (stderr,  "error in FSM state address %p, at offset %ld in \"%s\"\n", 
+      fprintf (stderr,  "error in FSM state address %p, at offset %ld in \"%s\"\n",
                AFsmHDL_state (fsm), ftell (fin), filename);
     }
 
-  
+
   destroy (fsm);
+
   fclose  (fin);
 
   return 0;
 }
 
 int test4 (void)
-{	
+{
   const char * t        = "TEST 4";
   const char * filename = "app/wdata/testarc/err1.arc";
-  void       * fin      = NIL; 
-  void       * hl       = NIL; 
+  void       * fin      = NIL;
+  void       * hl       = NIL;
   void       * fsm      = NIL;
 
 
@@ -160,36 +162,38 @@ int test4 (void)
   /* open a valid WARC header file */
   fin = fopen (filename, "r");
   unless (fin)
-    return (1);
+  return (1);
 
   /* init HDL FSM */
   fsm = bless (AFsmHDL, fin);
   assert (fsm);
 
   /* run the FSM for WHDLine object detection */
-  unless (AFsmHDL_run (fsm))
-    {
-      /* generate the WHDLine object from the FSM */
-      hl = AFsmHDL_transform (fsm);
-      
- 
-  fprintf (stdout, "DataLength:   %d\n", ARecord_getDataLength  (hl));
-  fprintf (stdout, "MimeType:   %s\n", ARecord_getMimeType  (hl));
-  fprintf (stdout, "Url:   %s\n",        ARecord_getUrl  (hl));
-  fprintf (stdout, "CreationDate: %s\n", ARecord_getCreationDate(hl));
-  fprintf (stdout, "IP-adress:     %s\n", ARecord_getIpAddress    (hl));
+  unless (AFsmHDL_run (fsm) )
+  {
+    /* generate the WHDLine object from the FSM */
+    hl = AFsmHDL_transform (fsm);
 
-      destroy (hl);
-    }
+
+    fprintf (stdout, "DataLength:   %d\n", ARecord_getDataLength  (hl) );
+    fprintf (stdout, "MimeType:   %s\n", ARecord_getMimeType  (hl) );
+    fprintf (stdout, "Url:   %s\n",        ARecord_getUrl  (hl) );
+    fprintf (stdout, "CreationDate: %s\n", ARecord_getCreationDate (hl) );
+    fprintf (stdout, "IP-adress:     %s\n", ARecord_getIpAddress    (hl) );
+
+    destroy (hl);
+  }
+
   else
     {
       /* error when parsing the WARC header line */
-     fprintf (stderr,  "error in FSM state address %p, at offset %ld in \"%s\"\n", 
+      fprintf (stderr,  "error in FSM state address %p, at offset %ld in \"%s\"\n",
                AFsmHDL_state (fsm), ftell (fin), filename);
     }
 
-  
+
   destroy (fsm);
+
   fclose  (fin);
 
   return 0;
@@ -197,11 +201,11 @@ int test4 (void)
 
 
 int test5 (void)
-{	
+{
   const char * t        = "TEST 5";
   const char * filename = "app/wdata/testarc/err2.arc";
-  void       * fin      = NIL; 
-  void       * hl       = NIL; 
+  void       * fin      = NIL;
+  void       * hl       = NIL;
   void       * fsm      = NIL;
 
   fprintf (stdout, "%s>\n", t);
@@ -209,47 +213,49 @@ int test5 (void)
   /* open a valid WARC header file */
   fin = fopen (filename, "r");
   unless (fin)
-    return (1);
+  return (1);
 
   /* init HDL FSM */
   fsm = bless (AFsmHDL, fin);
   assert (fsm);
 
   /* run the FSM for WHDLine object detection */
-  unless (AFsmHDL_run (fsm))
-    {
-      /* generate the WHDLine object from the FSM */
-      hl = AFsmHDL_transform (fsm);
-      
- 
-  fprintf (stdout, "DataLength:   %d\n", ARecord_getDataLength  (hl));
-  fprintf (stdout, "MimeType:   %s\n", ARecord_getMimeType  (hl));
-  fprintf (stdout, "Url:   %s\n",        ARecord_getUrl  (hl));
-  fprintf (stdout, "CreationDate: %s\n", ARecord_getCreationDate(hl));
-  fprintf (stdout, "IP-adress:     %s\n", ARecord_getIpAddress    (hl));
+  unless (AFsmHDL_run (fsm) )
+  {
+    /* generate the WHDLine object from the FSM */
+    hl = AFsmHDL_transform (fsm);
 
-      destroy (hl);
-    }
+
+    fprintf (stdout, "DataLength:   %d\n", ARecord_getDataLength  (hl) );
+    fprintf (stdout, "MimeType:   %s\n", ARecord_getMimeType  (hl) );
+    fprintf (stdout, "Url:   %s\n",        ARecord_getUrl  (hl) );
+    fprintf (stdout, "CreationDate: %s\n", ARecord_getCreationDate (hl) );
+    fprintf (stdout, "IP-adress:     %s\n", ARecord_getIpAddress    (hl) );
+
+    destroy (hl);
+  }
+
   else
     {
       /* error when parsing the WARC header line */
-     fprintf (stderr,  "error in FSM state address %p, at offset %ld in \"%s\"\n", 
+      fprintf (stderr,  "error in FSM state address %p, at offset %ld in \"%s\"\n",
                AFsmHDL_state (fsm), ftell (fin), filename);
     }
 
-  
+
   destroy (fsm);
+
   fclose  (fin);
 
   return 0;
 }
 
 int test6 (void)
-{	
+{
   const char * t        = "TEST 6";
   const char * filename = "app/wdata/testarc/err3.arc";
-  void       * fin      = NIL; 
-  void       * hl       = NIL; 
+  void       * fin      = NIL;
+  void       * hl       = NIL;
   void       * fsm      = NIL;
 
   fprintf (stdout, "%s>\n", t);
@@ -257,47 +263,49 @@ int test6 (void)
   /* open a valid WARC header file */
   fin = fopen (filename, "r");
   unless (fin)
-    return (1);
+  return (1);
 
   /* init HDL FSM */
   fsm = bless (AFsmHDL, fin);
   assert (fsm);
 
   /* run the FSM for WHDLine object detection */
-  unless (AFsmHDL_run (fsm))
-    {
-      /* generate the WHDLine object from the FSM */
-      hl = AFsmHDL_transform (fsm);
-      
+  unless (AFsmHDL_run (fsm) )
+  {
+    /* generate the WHDLine object from the FSM */
+    hl = AFsmHDL_transform (fsm);
 
-  fprintf (stdout, "DataLength:   %d\n", ARecord_getDataLength  (hl));
-  fprintf (stdout, "MimeType:   %s\n", ARecord_getMimeType  (hl));
-  fprintf (stdout, "Url:   %s\n",        ARecord_getUrl  (hl));
-  fprintf (stdout, "CreationDate: %s\n", ARecord_getCreationDate(hl));
-  fprintf (stdout, "IP-adress:     %s\n", ARecord_getIpAddress    (hl));
 
-      destroy (hl);
-    }
+    fprintf (stdout, "DataLength:   %d\n", ARecord_getDataLength  (hl) );
+    fprintf (stdout, "MimeType:   %s\n", ARecord_getMimeType  (hl) );
+    fprintf (stdout, "Url:   %s\n",        ARecord_getUrl  (hl) );
+    fprintf (stdout, "CreationDate: %s\n", ARecord_getCreationDate (hl) );
+    fprintf (stdout, "IP-adress:     %s\n", ARecord_getIpAddress    (hl) );
+
+    destroy (hl);
+  }
+
   else
     {
       /* error when parsing the WARC header line */
-     fprintf (stderr,  "error in FSM state address %p, at offset %ld in \"%s\"\n", 
+      fprintf (stderr,  "error in FSM state address %p, at offset %ld in \"%s\"\n",
                AFsmHDL_state (fsm), ftell (fin), filename);
     }
 
-  
+
   destroy (fsm);
+
   fclose  (fin);
 
   return 0;
 }
 
 int test7 (void)
-{	
+{
   const char * t        = "TEST 7";
   const char * filename = "app/wdata/testarc/err4.arc";
-  void       * fin      = NIL; 
-  void       * hl       = NIL; 
+  void       * fin      = NIL;
+  void       * hl       = NIL;
   void       * fsm      = NIL;
 
   fprintf (stdout, "%s>\n", t);
@@ -305,36 +313,38 @@ int test7 (void)
   /* open a valid WARC header file */
   fin = fopen (filename, "r");
   unless (fin)
-    return (1);
+  return (1);
 
   /* init HDL FSM */
   fsm = bless (AFsmHDL, fin);
   assert (fsm);
 
   /* run the FSM for WHDLine object detection */
-  unless (AFsmHDL_run (fsm))
-    {
-      /* generate the WHDLine object from the FSM */
-      hl = AFsmHDL_transform (fsm);
-      
+  unless (AFsmHDL_run (fsm) )
+  {
+    /* generate the WHDLine object from the FSM */
+    hl = AFsmHDL_transform (fsm);
 
-  fprintf (stdout, "DataLength:   %d\n", ARecord_getDataLength  (hl));
-  fprintf (stdout, "MimeType:   %s\n", ARecord_getMimeType  (hl));
-  fprintf (stdout, "Url:   %s\n",        ARecord_getUrl  (hl));
-  fprintf (stdout, "CreationDate: %s\n", ARecord_getCreationDate(hl));
-  fprintf (stdout, "IP-adress:     %s\n", ARecord_getIpAddress    (hl));
 
-      destroy (hl);
-    }
+    fprintf (stdout, "DataLength:   %d\n", ARecord_getDataLength  (hl) );
+    fprintf (stdout, "MimeType:   %s\n", ARecord_getMimeType  (hl) );
+    fprintf (stdout, "Url:   %s\n",        ARecord_getUrl  (hl) );
+    fprintf (stdout, "CreationDate: %s\n", ARecord_getCreationDate (hl) );
+    fprintf (stdout, "IP-adress:     %s\n", ARecord_getIpAddress    (hl) );
+
+    destroy (hl);
+  }
+
   else
     {
       /* error when parsing the WARC header line */
-     fprintf (stderr,  "error in FSM state address %p, at offset %ld in \"%s\"\n", 
+      fprintf (stderr,  "error in FSM state address %p, at offset %ld in \"%s\"\n",
                AFsmHDL_state (fsm), ftell (fin), filename);
     }
 
-  
+
   destroy (fsm);
+
   fclose  (fin);
 
   return 0;
@@ -342,11 +352,11 @@ int test7 (void)
 
 
 int test8 (void)
-{	
+{
   const char * t        = "TEST 8";
   const char * filename = "app/wdata/testarc/err5.arc";
-  void       * fin      = NIL; 
-  void       * hl       = NIL; 
+  void       * fin      = NIL;
+  void       * hl       = NIL;
   void       * fsm      = NIL;
 
   fprintf (stdout, "%s>\n", t);
@@ -354,36 +364,38 @@ int test8 (void)
   /* open a valid WARC header file */
   fin = fopen (filename, "r");
   unless (fin)
-    return (1);
+  return (1);
 
   /* init HDL FSM */
   fsm = bless (AFsmHDL, fin);
   assert (fsm);
 
   /* run the FSM for WHDLine object detection */
-  unless (AFsmHDL_run (fsm))
-    {
-      /* generate the WHDLine object from the FSM */
-      hl = AFsmHDL_transform (fsm);
-      
- 
-  fprintf (stdout, "DataLength:   %d\n", ARecord_getDataLength  (hl));
-  fprintf (stdout, "MimeType:   %s\n", ARecord_getMimeType  (hl));
-  fprintf (stdout, "Url:   %s\n",        ARecord_getUrl  (hl));
-  fprintf (stdout, "CreationDate: %s\n", ARecord_getCreationDate(hl));
-  fprintf (stdout, "IP-adress:     %s\n", ARecord_getIpAddress    (hl));
+  unless (AFsmHDL_run (fsm) )
+  {
+    /* generate the WHDLine object from the FSM */
+    hl = AFsmHDL_transform (fsm);
 
-      destroy (hl);
-    }
+
+    fprintf (stdout, "DataLength:   %d\n", ARecord_getDataLength  (hl) );
+    fprintf (stdout, "MimeType:   %s\n", ARecord_getMimeType  (hl) );
+    fprintf (stdout, "Url:   %s\n",        ARecord_getUrl  (hl) );
+    fprintf (stdout, "CreationDate: %s\n", ARecord_getCreationDate (hl) );
+    fprintf (stdout, "IP-adress:     %s\n", ARecord_getIpAddress    (hl) );
+
+    destroy (hl);
+  }
+
   else
     {
       /* error when parsing the WARC header line */
-     fprintf (stderr,  "error in FSM state address %p, at offset %ld in \"%s\"\n", 
+      fprintf (stderr,  "error in FSM state address %p, at offset %ld in \"%s\"\n",
                AFsmHDL_state (fsm), ftell (fin), filename);
     }
 
-  
+
   destroy (fsm);
+
   fclose  (fin);
 
   return 0;
@@ -391,11 +403,11 @@ int test8 (void)
 
 
 int test9 (void)
-{	
+{
   const char * t        = "TEST 9";
   const char * filename = "app/wdata/testarc/err6.arc";
-  void       * fin      = NIL; 
-  void       * hl       = NIL; 
+  void       * fin      = NIL;
+  void       * hl       = NIL;
   void       * fsm      = NIL;
 
   fprintf (stdout, "%s>\n", t);
@@ -403,46 +415,49 @@ int test9 (void)
   /* open a valid WARC header file */
   fin = fopen (filename, "r");
   unless (fin)
-    return (1);
+  return (1);
 
   /* init HDL FSM */
   fsm = bless (AFsmHDL, fin);
   assert (fsm);
 
   /* run the FSM for WHDLine object detection */
-  unless (AFsmHDL_run (fsm))
-    {
-      /* generate the WHDLine object from the FSM */
-      hl = AFsmHDL_transform (fsm);
-      
+  unless (AFsmHDL_run (fsm) )
+  {
+    /* generate the WHDLine object from the FSM */
+    hl = AFsmHDL_transform (fsm);
 
-  fprintf (stdout, "DataLength:   %d\n", ARecord_getDataLength  (hl));
-  fprintf (stdout, "MimeType:   %s\n", ARecord_getMimeType  (hl));
-  fprintf (stdout, "Url:   %s\n",        ARecord_getUrl  (hl));
-  fprintf (stdout, "CreationDate: %s\n", ARecord_getCreationDate(hl));
-  fprintf (stdout, "IP-adress:     %s\n", ARecord_getIpAddress    (hl));
 
-      destroy (hl);
-    }
+    fprintf (stdout, "DataLength:   %d\n", ARecord_getDataLength  (hl) );
+    fprintf (stdout, "MimeType:   %s\n", ARecord_getMimeType  (hl) );
+    fprintf (stdout, "Url:   %s\n",        ARecord_getUrl  (hl) );
+    fprintf (stdout, "CreationDate: %s\n", ARecord_getCreationDate (hl) );
+    fprintf (stdout, "IP-adress:     %s\n", ARecord_getIpAddress    (hl) );
+
+    destroy (hl);
+  }
+
   else
     {
       /* error when parsing the WARC header line */
-     fprintf (stderr,  "error in FSM state address %p, at offset %ld in \"%s\"\n", 
+      fprintf (stderr,  "error in FSM state address %p, at offset %ld in \"%s\"\n",
                AFsmHDL_state (fsm), ftell (fin), filename);
     }
 
-  
+
   destroy (fsm);
+
   fclose  (fin);
 
   return 0;
 }
+
 int test10 (void)
-{	
+{
   const char * t        = "TEST 10";
   const char * filename = "app/wdata/testarc/err7.arc";
-  void       * fin      = NIL; 
-  void       * hl       = NIL; 
+  void       * fin      = NIL;
+  void       * hl       = NIL;
   void       * fsm      = NIL;
 
   fprintf (stdout, "%s>\n", t);
@@ -450,36 +465,38 @@ int test10 (void)
   /* open a valid WARC header file */
   fin = fopen (filename, "r");
   unless (fin)
-    return (1);
+  return (1);
 
   /* init HDL FSM */
   fsm = bless (AFsmHDL, fin);
   assert (fsm);
 
   /* run the FSM for WHDLine object detection */
-  unless (AFsmHDL_run (fsm))
-    {
-      /* generate the WHDLine object from the FSM */
-      hl = AFsmHDL_transform (fsm);
-      
-  
-  fprintf (stdout, "DataLength:   %d\n", ARecord_getDataLength  (hl));
-  fprintf (stdout, "MimeType:   %s\n", ARecord_getMimeType  (hl));
-  fprintf (stdout, "Url:   %s\n",        ARecord_getUrl  (hl));
-  fprintf (stdout, "CreationDate: %s\n", ARecord_getCreationDate(hl));
-  fprintf (stdout, "IP-adress:     %s\n", ARecord_getIpAddress    (hl));
+  unless (AFsmHDL_run (fsm) )
+  {
+    /* generate the WHDLine object from the FSM */
+    hl = AFsmHDL_transform (fsm);
 
-      destroy (hl);
-    }
+
+    fprintf (stdout, "DataLength:   %d\n", ARecord_getDataLength  (hl) );
+    fprintf (stdout, "MimeType:   %s\n", ARecord_getMimeType  (hl) );
+    fprintf (stdout, "Url:   %s\n",        ARecord_getUrl  (hl) );
+    fprintf (stdout, "CreationDate: %s\n", ARecord_getCreationDate (hl) );
+    fprintf (stdout, "IP-adress:     %s\n", ARecord_getIpAddress    (hl) );
+
+    destroy (hl);
+  }
+
   else
     {
       /* error when parsing the WARC header line */
-     fprintf (stderr,  "error in FSM state address %p, at offset %ld in \"%s\"\n", 
+      fprintf (stderr,  "error in FSM state address %p, at offset %ld in \"%s\"\n",
                AFsmHDL_state (fsm), ftell (fin), filename);
     }
 
-  
+
   destroy (fsm);
+
   fclose  (fin);
 
   return 0;
@@ -487,11 +504,11 @@ int test10 (void)
 
 
 int test11 (void)
-{	
+{
   const char * t        = "TEST 11";
   const char * filename = "app/wdata/testarc/err8.arc";
-  void       * fin      = NIL; 
-  void       * hl       = NIL; 
+  void       * fin      = NIL;
+  void       * hl       = NIL;
   void       * fsm      = NIL;
 
 
@@ -500,48 +517,51 @@ int test11 (void)
   /* open a valid WARC header file */
   fin = fopen (filename, "r");
   unless (fin)
-    return (1);
+  return (1);
 
   /* init HDL FSM */
   fsm = bless (AFsmHDL, fin);
   assert (fsm);
 
   /* run the FSM for WHDLine object detection */
-  unless (AFsmHDL_run (fsm))
-    {
-      /* generate the WHDLine object from the FSM */
-      hl = AFsmHDL_transform (fsm);
-      
-  fprintf (stdout, "DataLength:   %d\n", ARecord_getDataLength  (hl));
-  fprintf (stdout, "MimeType:   %s\n", ARecord_getMimeType  (hl));
-  fprintf (stdout, "Url:   %s\n",        ARecord_getUrl  (hl));
-  fprintf (stdout, "CreationDate: %s\n", ARecord_getCreationDate(hl));
-  fprintf (stdout, "IP-adress:     %s\n", ARecord_getIpAddress    (hl));
+  unless (AFsmHDL_run (fsm) )
+  {
+    /* generate the WHDLine object from the FSM */
+    hl = AFsmHDL_transform (fsm);
 
-      destroy (hl);
-    }
+    fprintf (stdout, "DataLength:   %d\n", ARecord_getDataLength  (hl) );
+    fprintf (stdout, "MimeType:   %s\n", ARecord_getMimeType  (hl) );
+    fprintf (stdout, "Url:   %s\n",        ARecord_getUrl  (hl) );
+    fprintf (stdout, "CreationDate: %s\n", ARecord_getCreationDate (hl) );
+    fprintf (stdout, "IP-adress:     %s\n", ARecord_getIpAddress    (hl) );
+
+    destroy (hl);
+  }
+
   else
     {
       /* error when parsing the WARC header line */
-     fprintf (stderr,  "error in FSM state address %p, at offset %ld in \"%s\"\n", 
+      fprintf (stderr,  "error in FSM state address %p, at offset %ld in \"%s\"\n",
                AFsmHDL_state (fsm), ftell (fin), filename);
     }
 
-  
+
   destroy (fsm);
+
   fclose  (fin);
 
   return 0;
 }
 
 int main (void)
-{	
-  int (* tests [])() = { test1, test2, test3, test4, test5, 
-                       test6, test7, test8, test9, test10, test11};
+{
+  int (* tests []) () = { test1, test2, test3, test4, test5,
+                          test6, test7, test8, test9, test10, test11
+                        };
 
   warc_u32_t  i      = 0;
 
-  for(i = 0; i < 11; ++ i)
+  for (i = 0; i < 11; ++ i)
     {
       tests[i] ();
     }

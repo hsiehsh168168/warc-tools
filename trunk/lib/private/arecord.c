@@ -31,7 +31,7 @@
 #include <wport.h>
 
 /**
- * ARC default headers 
+ * ARC default headers
  */
 
 #include <wclass.h>  /* bless, destroy, cassert, struct Class */
@@ -52,26 +52,28 @@
  */
 
 #define SIGN  11
-struct ARecord 
-{
-  const void * class;
-  
-  /*@{*/
-  void       * url;          /**< The ARC url */
-  void       * ip_adress; /**< The ARC record ip adress */
-  void       * creation_date; /**< The ARC record date of creation */
-  void       * mime_type; /**< The ARC record mime type */
-  warc_u32_t   data_length; /**< The ARC record data_length */
-  warc_u64_t   asize;  /**< The size of data bloc */
-  warc_i64_t   aoffset;  /**< The offset of the data bloc in the Arc file */
-  void       * env;           /**< The pointer to user data buffer */
-  warc_bool_t (* callback) (void *, const char *, warc_u32_t); 
-                   /**< The pointer to the user call back function */
-  void       * datafile; /**< The data File descriptor */
-  FILE       * who; /**< The Arc file wich containt the record */
 
-  /*@}*/
-};
+struct ARecord
+  {
+
+    const void * class;
+
+    /*@{*/
+    void       * url;          /**< The ARC url */
+    void       * ip_adress; /**< The ARC record ip adress */
+    void       * creation_date; /**< The ARC record date of creation */
+    void       * mime_type; /**< The ARC record mime type */
+    warc_u32_t   data_length; /**< The ARC record data_length */
+    warc_u64_t   asize;  /**< The size of data bloc */
+    warc_i64_t   aoffset;  /**< The offset of the data bloc in the Arc file */
+    void       * env;           /**< The pointer to user data buffer */
+    warc_bool_t (* callback) (void *, const char *, warc_u32_t);
+    /**< The pointer to the user call back function */
+    void       * datafile; /**< The data File descriptor */
+    FILE       * who; /**< The Arc file wich containt the record */
+
+    /*@}*/
+  };
 
 
 
@@ -96,12 +98,13 @@ struct ARecord
 
 WIPUBLIC const warc_u8_t * ARecord_getUrl (const void * const _self)
 {
-	const struct ARecord * const self = _self;
 
-   /* preconditions */
-    CASSERT (self);
+  const struct ARecord * const self = _self;
 
-	return (WString_getText (URL));
+  /* preconditions */
+  CASSERT (self);
+
+  return (WString_getText (URL) );
 }
 
 /**
@@ -112,10 +115,11 @@ WIPUBLIC const warc_u8_t * ARecord_getUrl (const void * const _self)
  * Sets the ARC URL field of the ARC-record to "uri"
  */
 
-WIPUBLIC warc_bool_t ARecord_setUrl (void * const _self, 
+WIPUBLIC warc_bool_t ARecord_setUrl (void * const _self,
                                      const warc_u8_t * uri,
                                      const warc_u32_t len)
 {
+
   struct ARecord * const self = _self;
 
   /* preconditions */
@@ -123,8 +127,8 @@ WIPUBLIC warc_bool_t ARecord_setUrl (void * const _self,
   assert (uri);
 
   /* reset the text */
-  unless (WString_setText (URL, uri, len))
-    return (WARC_TRUE);
+  unless (WString_setText (URL, uri, len) )
+  return (WARC_TRUE);
 
   return (WARC_FALSE);
 }
@@ -138,12 +142,13 @@ WIPUBLIC warc_bool_t ARecord_setUrl (void * const _self,
 
 WIPUBLIC warc_u32_t ARecord_getDataLength (const void * const _self)
 {
-	const struct ARecord * const self = _self;
 
-   /* preconditions */
-    CASSERT (self);
+  const struct ARecord * const self = _self;
 
-	return (DATA_LENGTH);
+  /* preconditions */
+  CASSERT (self);
+
+  return (DATA_LENGTH);
 }
 
 /**
@@ -153,20 +158,21 @@ WIPUBLIC warc_u32_t ARecord_getDataLength (const void * const _self)
  * Sets the data length of the ARC-record
  */
 
-WIPUBLIC warc_bool_t ARecord_setDataLength (void * const _self, 
-                                            const warc_u32_t len)
+WIPUBLIC warc_bool_t ARecord_setDataLength (void * const _self,
+    const warc_u32_t len)
 {
-	struct ARecord * const self = _self;
 
-   /* preconditions */
-    CASSERT (self);
+  struct ARecord * const self = _self;
 
-    unless (len)
-      return (WARC_TRUE);
+  /* preconditions */
+  CASSERT (self);
 
-	DATA_LENGTH = len;
+  unless (len)
+  return (WARC_TRUE);
 
-    return (WARC_FALSE);
+  DATA_LENGTH = len;
+
+  return (WARC_FALSE);
 }
 
 /**
@@ -177,12 +183,13 @@ WIPUBLIC warc_bool_t ARecord_setDataLength (void * const _self,
 
 WIPUBLIC const warc_u8_t * ARecord_getCreationDate (const void * const _self)
 {
-	const struct ARecord * const self = _self;
 
-   /* preconditions */
-    CASSERT (self);
+  const struct ARecord * const self = _self;
 
-	return (WString_getText (CREATION_DATE));
+  /* preconditions */
+  CASSERT (self);
+
+  return (WString_getText (CREATION_DATE) );
 }
 
 
@@ -195,10 +202,11 @@ WIPUBLIC const warc_u8_t * ARecord_getCreationDate (const void * const _self)
  * Sets the creation date of the ARC-record
  */
 
-WIPUBLIC warc_bool_t ARecord_setCreationDate (void * const _self, 
-                                              const warc_u8_t * cd,
-                                              const warc_u32_t len)
+WIPUBLIC warc_bool_t ARecord_setCreationDate (void * const _self,
+    const warc_u8_t * cd,
+    const warc_u32_t len)
 {
+
   struct ARecord * const self = _self;
 
   /* preconditions */
@@ -206,8 +214,8 @@ WIPUBLIC warc_bool_t ARecord_setCreationDate (void * const _self,
   assert (cd);
 
   /* reset the text */
-  unless (WString_setText (CREATION_DATE, cd, len))
-    return (WARC_TRUE);
+  unless (WString_setText (CREATION_DATE, cd, len) )
+  return (WARC_TRUE);
 
   return (WARC_FALSE);
 }
@@ -221,12 +229,13 @@ WIPUBLIC warc_bool_t ARecord_setCreationDate (void * const _self,
 
 WIPUBLIC const warc_u8_t * ARecord_getMimeType (const void * const _self)
 {
-	const struct ARecord * const self = _self;
 
-   /* preconditions */
-    CASSERT (self);
+  const struct ARecord * const self = _self;
 
-	return (WString_getText (MIME_TYPE));
+  /* preconditions */
+  CASSERT (self);
+
+  return (WString_getText (MIME_TYPE) );
 }
 
 
@@ -238,10 +247,11 @@ WIPUBLIC const warc_u8_t * ARecord_getMimeType (const void * const _self)
  * Sets the ARC-record Mime type
  */
 
-WIPUBLIC warc_bool_t ARecord_setMimeType (void * const _self, 
-                                          const warc_u8_t * ct,
-                                          const warc_u32_t len)
+WIPUBLIC warc_bool_t ARecord_setMimeType (void * const _self,
+    const warc_u8_t * ct,
+    const warc_u32_t len)
 {
+
   struct ARecord * const self = _self;
 
   /* preconditions */
@@ -249,8 +259,8 @@ WIPUBLIC warc_bool_t ARecord_setMimeType (void * const _self,
   assert (ct);
 
   /* reset the text */
-  unless (WString_setText (MIME_TYPE, ct, len))
-    return (WARC_TRUE);
+  unless (WString_setText (MIME_TYPE, ct, len) )
+  return (WARC_TRUE);
 
   return (WARC_FALSE);
 }
@@ -264,12 +274,13 @@ WIPUBLIC warc_bool_t ARecord_setMimeType (void * const _self,
 
 WIPUBLIC const warc_u8_t * ARecord_getIpAddress (const void * const _self)
 {
-	const struct ARecord * const self = _self;
 
-   /* preconditions */
-    CASSERT (self);
+  const struct ARecord * const self = _self;
 
-	return (WString_getText (IP_ADRESS));
+  /* preconditions */
+  CASSERT (self);
+
+  return (WString_getText (IP_ADRESS) );
 }
 
 
@@ -281,10 +292,11 @@ WIPUBLIC const warc_u8_t * ARecord_getIpAddress (const void * const _self)
  * Sets the ARC-record IP-adress
  */
 
-WIPUBLIC warc_bool_t ARecord_setIpAddress (void * const _self, 
-                                           const warc_u8_t * ip,
-                                           const warc_u32_t len)
+WIPUBLIC warc_bool_t ARecord_setIpAddress (void * const _self,
+    const warc_u8_t * ip,
+    const warc_u32_t len)
 {
+
   struct ARecord * const self = _self;
 
   /* preconditions */
@@ -292,8 +304,8 @@ WIPUBLIC warc_bool_t ARecord_setIpAddress (void * const _self,
   assert (ip);
 
   /* reset the text */
-  unless (WString_setText (IP_ADRESS, ip, len))
-    return (WARC_TRUE);
+  unless (WString_setText (IP_ADRESS, ip, len) )
+  return (WARC_TRUE);
 
   return (WARC_FALSE);
 }
@@ -310,13 +322,14 @@ WIPUBLIC warc_bool_t ARecord_setIpAddress (void * const _self,
 
 WIPUBLIC warc_bool_t ARecord_setContentFromFile (void * _self, void * dataf)
 {
+
   struct ARecord * self  = _self;
 
   /* Preconditions */
   CASSERT (self);
 
   unless (dataf)
-    return (WARC_TRUE);
+  return (WARC_TRUE);
 
   DATAF = dataf;
   return (WARC_FALSE);
@@ -331,15 +344,16 @@ WIPUBLIC warc_bool_t ARecord_setContentFromFile (void * _self, void * dataf)
 
 WPUBLIC FILE * ARecord_getDataFile (const void * const _self)
 {
-    const struct ARecord * const self = _self;
+
+  const struct ARecord * const self = _self;
 
   /* Preconditions */
   CASSERT (self);
 
   unless (DATAF)
-    return (NIL);
-  
-  return (WTempFile_handle (DATAF));
+  return (NIL);
+
+  return (WTempFile_handle (DATAF) );
 }
 
 /**
@@ -350,12 +364,13 @@ WPUBLIC FILE * ARecord_getDataFile (const void * const _self)
 
 WIPUBLIC warc_u64_t ARecord_getDataSize (const void * const _self)
 {
-    const struct ARecord * const self = _self;
 
-    /* Preconditions */
-    CASSERT (self);
+  const struct ARecord * const self = _self;
 
-    return (ASIZE);
+  /* Preconditions */
+  CASSERT (self);
+
+  return (ASIZE);
 }
 
 /**
@@ -365,24 +380,25 @@ WIPUBLIC warc_u64_t ARecord_getDataSize (const void * const _self)
  * Arc Record Data Bloc file set size
  */
 
-WPUBLIC warc_bool_t ARecord_setContentSize (void * _self,warc_i64_t sz)
+WPUBLIC warc_bool_t ARecord_setContentSize (void * _self, warc_i64_t sz)
 {
-     struct ARecord *  self = _self;
 
-    /* Preconditions */
-    CASSERT (self);
+  struct ARecord *  self = _self;
 
-    unless (sz)
-      return (WARC_TRUE);
+  /* Preconditions */
+  CASSERT (self);
 
-    ASIZE = sz;
+  unless (sz)
+  return (WARC_TRUE);
 
-    return (WARC_FALSE);
+  ASIZE = sz;
+
+  return (WARC_FALSE);
 }
- 
+
 /**
  * @_self: ARecord object instance
- * @param[out]: True if still there is data in the record data file, False otherwise 
+ * @param[out]: True if still there is data in the record data file, False otherwise
  * Arc Record data file access function
  */
 
@@ -390,35 +406,35 @@ WIPUBLIC warc_bool_t ARecord_getContent (const void* const _self)
 {
 #define CONTENT_BUFSIZ 4096
 
-    const struct ARecord * const self   = _self;
-    char                         buff   [CONTENT_BUFSIZ];
-    warc_u32_t                   size   = 0;
-    FILE                       * handle = NIL;
-    CASSERT (self);
+  const struct ARecord * const self   = _self;
+  char                         buff   [CONTENT_BUFSIZ];
+  warc_u32_t                   size   = 0;
+  FILE                       * handle = NIL;
+  CASSERT (self);
 
-    unless (DATAF)
-      return (WARC_TRUE);
+  unless (DATAF)
+  return (WARC_TRUE);
 
-    handle = WTempFile_handle (DATAF);
+  handle = WTempFile_handle (DATAF);
 
-    while (WARC_TRUE)
-      {
-        size = w_fread(buff, 1, CONTENT_BUFSIZ, handle);
+  while (WARC_TRUE)
+    {
+      size = w_fread (buff, 1, CONTENT_BUFSIZ, handle);
 
-        if (w_ferror(handle))
-          return (WARC_TRUE);
+      if (w_ferror (handle) )
+        return (WARC_TRUE);
 
-        if (size)
-          {
-            unless (CBACK (ENV, buff, size))
-              break;
-          }
-
-        if (w_feof(handle))
+      if (size)
+        {
+          unless (CBACK (ENV, buff, size) )
           break;
-      }
+        }
 
- return (WARC_FALSE);
+      if (w_feof (handle) )
+        break;
+    }
+
+  return (WARC_FALSE);
 }
 
 
@@ -430,11 +446,12 @@ WIPUBLIC warc_bool_t ARecord_getContent (const void* const _self)
 
 WIPUBLIC warc_i64_t ARecord_getRecordOffset (const void * const _self)
 {
+
   const struct ARecord * const self = _self;
 
   /* Preconditions */
   CASSERT (self);
-  
+
   if (OFFSET >= 0)
     return (OFFSET);
 
@@ -449,19 +466,20 @@ WIPUBLIC warc_i64_t ARecord_getRecordOffset (const void * const _self)
  */
 
 WIPUBLIC warc_bool_t ARecord_setRecordOffset (void * _self,
-                                              const warc_i64_t offset)
+    const warc_i64_t offset)
 {
+
   struct ARecord * self = _self;
-  
+
   /* Preconditions */
   CASSERT (self);
-  
+
   if (offset >= 0)
     {
       OFFSET = offset;
       return (WARC_FALSE);
     }
-  
+
   return (WARC_TRUE);
 }
 
@@ -472,18 +490,19 @@ WIPUBLIC warc_bool_t ARecord_setRecordOffset (void * _self,
  * ARecord callback function setting
  */
 
-WIPUBLIC warc_bool_t ARecord_setCallback (void * _self, 
-                                          warc_bool_t (* cback) 
-                                          (void* env, const char * buff, 
-                                           warc_u32_t size))
+WIPUBLIC warc_bool_t ARecord_setCallback (void * _self,
+    warc_bool_t (* cback)
+    (void* env, const char * buff,
+     warc_u32_t size) )
 {
-    struct ARecord * self = _self;
+
+  struct ARecord * self = _self;
 
   /* Precondition */
   CASSERT (self);
 
   unless (cback)
-       return (WARC_TRUE);
+  return (WARC_TRUE);
 
   CBACK = cback;
 
@@ -499,12 +518,13 @@ WIPUBLIC warc_bool_t ARecord_setCallback (void * _self,
 
 WIPUBLIC warc_bool_t ARecord_setEnv (void * _self, void * env)
 {
-    struct ARecord * self = _self;
+
+  struct ARecord * self = _self;
 
   /* Preconditions */
   CASSERT (self);
 
- ENV = env;
+  ENV = env;
 
   return (WARC_FALSE);
 }
@@ -518,7 +538,8 @@ WIPUBLIC warc_bool_t ARecord_setEnv (void * _self, void * env)
 
 WIPUBLIC void * ARecord_fromWho (const void * const _self)
 {
-    const struct ARecord * const self = _self;
+
+  const struct ARecord * const self = _self;
 
   /* Preconditions */
   CASSERT (self);
@@ -536,38 +557,40 @@ WIPUBLIC void * ARecord_fromWho (const void * const _self)
 
 WIPUBLIC warc_bool_t ARecord_setAfile (void * _self, void * wfile)
 {
-    struct ARecord * self = _self;
+
+  struct ARecord * self = _self;
 
   /* Preconditions */
   CASSERT (self);
 
   unless (wfile)
-    return (WARC_TRUE);
- 
+  return (WARC_TRUE);
+
   WHO = wfile;
- return (WARC_FALSE);
+  return (WARC_FALSE);
 }
 
 
 /**
- * callback to extract the record content 
+ * callback to extract the record content
  */
 
-struct writingstruct 
-{
-  FILE * _tfile; 
-  warc_u32_t _wrtsize;
-};
+struct writingstruct
+  {
+    FILE * _tfile;
+    warc_u32_t _wrtsize;
+  };
 
 warc_bool_t temp_writer (void * _envstr, const char * buff, warc_u32_t size)
 {
+
   struct writingstruct * envstr   = _envstr;
   FILE                 * fout     = envstr -> _tfile;
   warc_u32_t             wrtsize  = envstr -> _wrtsize;
   warc_u32_t             realsize = size;
 
   if (w_ftell (fout) + size > wrtsize)
-     realsize = wrtsize - w_ftell (fout);
+    realsize = wrtsize - w_ftell (fout);
 
   w_fwrite (buff, realsize, 1, fout);
 
@@ -583,51 +606,55 @@ warc_bool_t temp_writer (void * _envstr, const char * buff, warc_u32_t size)
  * Arc Record passing context to Warc Record
  */
 
-WIPUBLIC warc_bool_t ARecord_transferContent (void * _self, void * wrec, 
-                                              void * arcf)
+WIPUBLIC warc_bool_t ARecord_transferContent (void * _self, void * wrec,
+    void * arcf)
 {
-    struct ARecord * self      = _self;
-    void           * objatfile = NIL; /* for temporeary file creation */
-    FILE           * fin       = NIL;
-    struct writingstruct        envstr;
+
+  struct ARecord * self      = _self;
+  void           * objatfile = NIL; /* for temporeary file creation */
+  FILE           * fin       = NIL;
+
+  struct writingstruct        envstr;
 
   /* Precondition */
   CASSERT (self);
 
-  if (WRecord_setContentSize(wrec, ARecord_getDataSize (self)))
+  if (WRecord_setContentSize (wrec, ARecord_getDataSize (self) ) )
     {
       return  (WARC_TRUE);
     }
 
   objatfile = bless (WTempFile);
+
   assert (objatfile);
 
   fin = WTempFile_handle (objatfile);
   unless (fin)
+  {
+    destroy (objatfile);
+    return  (WARC_TRUE);
+  }
+
+  envstr . _tfile = fin;
+  envstr . _wrtsize = ASIZE;
+
+  if (AFile_register (arcf, self, temp_writer, (void *) & envstr) )
     {
+      w_fprintf (fprintf (stderr , "Unable to register the extracted ArcRecord object\n") );
       destroy (objatfile);
-      return  (WARC_TRUE);
-    } 
+      return (WARC_TRUE);
+    }
 
-   envstr . _tfile = fin;
-   envstr . _wrtsize = ASIZE;
-
-  if (AFile_register(arcf, self, temp_writer, (void *) & envstr))
-   {
-     w_fprintf (fprintf (stderr ,"Unable to register the extracted ArcRecord object\n"));
-     destroy (objatfile);
-     return (WARC_TRUE);
-   }
-  
   ARecord_getContent (self);
+
   w_fseek_end (fin);
-  
-  if (WRecord_setContentFromArc (wrec, objatfile))
+
+  if (WRecord_setContentFromArc (wrec, objatfile) )
     {
       destroy (objatfile);
       return  (WARC_TRUE);
     }
-  
+
   return (WARC_FALSE);
 }
 
@@ -639,11 +666,13 @@ WIPUBLIC warc_bool_t ARecord_transferContent (void * _self, void * wrec,
  */
 
 WPRIVATE void freeARecord (void * _self)
-{	
+{
+
   struct ARecord * self = _self;
-  
+
   /* preconditions */
   CASSERT (self);
+
   if (URL)
     destroy (URL), URL = NIL;
 
@@ -657,22 +686,22 @@ WPRIVATE void freeARecord (void * _self)
     destroy (IP_ADRESS), IP_ADRESS = NIL;
 
   if (DATAF)
-     destroy (DATAF), DATAF = NIL;
+    destroy (DATAF), DATAF = NIL;
 
   if (WHO)
-     WHO = NIL;
+    WHO = NIL;
 
   if (CBACK)
-     CBACK = NIL;
+    CBACK = NIL;
 
   if (ENV)
-     ENV = NIL;
+    ENV = NIL;
 
   if (OFFSET)
-     OFFSET = -1;
+    OFFSET = -1;
 
   if (ASIZE)
-     ASIZE = 0;
+    ASIZE = 0;
 }
 
 /**
@@ -685,6 +714,7 @@ WPRIVATE void freeARecord (void * _self)
 
 WPRIVATE void * ARecord_constructor (void * const _self, va_list * app)
 {
+
   struct ARecord * const   self  = _self;
 
   const char             * url   = va_arg (* app, const char *);
@@ -699,36 +729,37 @@ WPRIVATE void * ARecord_constructor (void * const _self, va_list * app)
 
   const char             * ct    = va_arg (* app, const char *);
   const warc_u32_t         ct_l  = va_arg (* app, const warc_u32_t);
-  const warc_u32_t         dt = va_arg (* app, const warc_u32_t);
+  const warc_u32_t         dt    = va_arg (* app, const warc_u32_t);
 
 
   URL = bless (WString, url, url_l);
   unless (URL)
-    {
-      freeARecord (self);
-      return (NIL);
-    }
+  {
+    freeARecord (self);
+    return (NIL);
+  }
 
   IP_ADRESS = bless (WString, ip, ip_l);
   unless (IP_ADRESS)
-    {
-      freeARecord (self);
-      return (NIL);
-    }
+  {
+    freeARecord (self);
+    return (NIL);
+  }
 
   CREATION_DATE = bless (WString, cd, cd_l);
   unless (CREATION_DATE)
-    {
-      freeARecord (self);
-      return (NIL);
-    }
+  {
+    freeARecord (self);
+    return (NIL);
+  }
 
   MIME_TYPE = bless (WString, ct, ct_l);
   unless (MIME_TYPE)
-    {
-      freeARecord (self);
-      return (NIL);
-    }
+  {
+    freeARecord (self);
+    return (NIL);
+  }
+
   DATAF = NIL;
   DATA_LENGTH = dt;
   CBACK = NIL;
@@ -744,7 +775,7 @@ WPRIVATE void * ARecord_constructor (void * const _self, va_list * app)
  */
 
 WPRIVATE void * ARecord_destructor (void * _self)
-{	
+{
   freeARecord (_self);
 
   return (_self);
@@ -755,10 +786,11 @@ WPRIVATE void * ARecord_destructor (void * _self)
  * ARC ARecord class
  */
 
-static const struct Class _ARecord = {
-	sizeof (struct ARecord),
+static const struct Class _ARecord =
+  {
+    sizeof (struct ARecord),
     SIGN,
-	ARecord_constructor, ARecord_destructor
-};
+    ARecord_constructor, ARecord_destructor
+  };
 
 const void * ARecord = & _ARecord;

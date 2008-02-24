@@ -30,36 +30,38 @@
 
 /* to mix C and C++ */
 #ifdef __cplusplus
- extern "C" {
+extern "C"
+  {
 #endif
 
 
-/*
- * Portability header file
- */
+    /*
+     * Portability header file
+     */
 
 #include <wport.h>
 
-/*
- * C default headers
- */
+    /*
+     * C default headers
+     */
 
 #include <stdarg.h>    /* variable function argument */
 
-/*
- * WARC default headers
- */
+    /*
+     * WARC default headers
+     */
 
 #include <wclass.x>  /* WARC base class structure */
 
 
-void * bless   (const void *, ...);
-void   destroy (void *);
-void   cassert (void * const, const warc_u32_t);
+    void * bless   (const void *, ...);
+    void   destroy (void *);
+    void   cassert (void * const, const warc_u32_t);
 
 
 #ifdef __cplusplus
- }
+  }
+
 #endif
 
 

@@ -29,27 +29,28 @@
 
 /* to mix C and C++ */
 #ifdef __cplusplus
- extern "C" {
+extern "C"
+  {
 #endif
 
-/*
- * Portability insurance.
- */
+    /*
+     * Portability insurance.
+     */
 
-/*
-** ----------------------------------------------------------------------------
-** Include <limits.h> optionally
-** ----------------------------------------------------------------------------
-*/
+    /*
+    ** ----------------------------------------------------------------------------
+    ** Include <limits.h> optionally
+    ** ----------------------------------------------------------------------------
+    */
 #ifdef WARC_USE_LIMITS_H
 #  include <limits.h>
 #endif
 
-/*
-** ----------------------------------------------------------------------------
-** Determine compilation environment
-** ----------------------------------------------------------------------------
-*/
+    /*
+    ** ----------------------------------------------------------------------------
+    ** Determine compilation environment
+    ** ----------------------------------------------------------------------------
+    */
 #if defined __ECC || defined __ICC || defined __INTEL_COMPILER
 #  define WARC_COMPILER_STRING "Intel C/C++"
 #  define WARC_COMPILER_INTEL 1
@@ -57,12 +58,12 @@
 
 #if ( defined __host_mips || defined __sgi ) && !defined __GNUC__
 #  define WARC_COMPILER_STRING    "MIPSpro C/C++"
-#  define WARC_COMPILER_MIPSPRO 1 
+#  define WARC_COMPILER_MIPSPRO 1
 #endif
 
 #if defined __hpux && !defined __GNUC__
 #  define WARC_COMPILER_STRING "HP-UX CC"
-#  define WARC_COMPILER_HPCC 1 
+#  define WARC_COMPILER_HPCC 1
 #endif
 
 #if defined __GNUC__
@@ -71,7 +72,7 @@
 #endif
 
 #if defined __APPLE_CC__
-   /* we don't define the compiler string here, let it be GNU */
+    /* we don't define the compiler string here, let it be GNU */
 #  define WARC_COMPILER_APPLECC 1
 #endif
 
@@ -86,7 +87,7 @@
 #endif
 
 #if defined __SUNPRO_C
-#  define WARC_COMPILER_STRING "Sun Pro" 
+#  define WARC_COMPILER_STRING "Sun Pro"
 #  define WARC_COMPILER_SUN 1
 #endif
 
@@ -114,13 +115,13 @@
 #  define WARC_COMPILER_STRING "Unknown compiler"
 #endif
 
-/*
-** ----------------------------------------------------------------------------
-** Determine target operating system
-** ----------------------------------------------------------------------------
-*/
+    /*
+    ** ----------------------------------------------------------------------------
+    ** Determine target operating system
+    ** ----------------------------------------------------------------------------
+    */
 #if defined linux || defined __linux__
-#  define WARC_OS_LINUX 1 
+#  define WARC_OS_LINUX 1
 #  define WARC_OS_STRING "Linux"
 #endif
 
@@ -140,13 +141,13 @@
 #  define WARC_OS_STRING "MinGW"
 #endif
 
-#if defined GO32 && defined DJGPP && defined __MSDOS__ 
+#if defined GO32 && defined DJGPP && defined __MSDOS__
 #  define WARC_OS_GO32 1
 #  define WARC_OS_STRING "GO32/MS-DOS"
 #endif
 
-/* NOTE: make sure you use /bt=DOS if compiling for 32-bit DOS,
-   otherwise Watcom assumes host=target */
+    /* NOTE: make sure you use /bt=DOS if compiling for 32-bit DOS,
+       otherwise Watcom assumes host=target */
 #if defined __WATCOMC__  && defined __386__ && defined __DOS__
 #  define WARC_OS_DOS32 1
 #  define WARC_OS_STRING "DOS/32-bit"
@@ -204,7 +205,7 @@
 #endif
 
 #if defined __unix__
-#  define WARC_OS_UNIX 1 
+#  define WARC_OS_UNIX 1
 #  if !defined WARC_OS_STRING
 #     define WARC_OS_STRING "Unix-like(generic)"
 #  endif
@@ -244,11 +245,11 @@
 #  define WARC_OS_STRING "MacOS"
 #endif
 
-/*
-** -----------------------------------------------------------------------------
-** Determine target CPU
-** -----------------------------------------------------------------------------
-*/
+    /*
+    ** -----------------------------------------------------------------------------
+    ** Determine target CPU
+    ** -----------------------------------------------------------------------------
+    */
 
 #if defined GEKKO
 #  define WARC_CPU_PPC750 1
@@ -293,7 +294,7 @@
 
 #if defined __sparc__ || defined __sparc
 #  if defined __arch64__ || defined __sparcv9 || defined __sparc_v9__
-#     define WARC_CPU_SPARC64 1 
+#     define WARC_CPU_SPARC64 1
 #     define WARC_CPU_STRING "Sparc/64"
 #  else
 #     define WARC_CPU_STRING "Sparc/32"
@@ -307,7 +308,7 @@
 #endif
 
 #if defined mips || defined __mips__ || defined __MIPS__ || defined _MIPS
-#  define WARC_CPU_MIPS 1 
+#  define WARC_CPU_MIPS 1
 #  if defined _R5900
 #    define WARC_CPU_STRING "MIPS R5900 (PS2)"
 #  else
@@ -315,7 +316,7 @@
 #  endif
 #endif
 
-#if defined __ia64 || defined _M_IA64 || defined __ia64__ 
+#if defined __ia64 || defined _M_IA64 || defined __ia64__
 #  define WARC_CPU_IA64 1
 #  define WARC_CPU_STRING "IA64"
 #endif
@@ -323,7 +324,7 @@
 #if defined __X86__ || defined __i386__ || defined i386 || defined _M_IX86 || defined __386__ || defined __x86_64__
 #  define WARC_CPU_X86 1
 #  if defined __x86_64__
-#     define WARC_CPU_X86_64 1 
+#     define WARC_CPU_X86_64 1
 #  endif
 #  if defined WARC_CPU_X86_64
 #     define WARC_CPU_STRING "AMD x86-64"
@@ -347,14 +348,14 @@
 #  define WARC_CPU_STRING "Unknown" /* this is here for Doxygen's benefit */
 #endif
 
-/*
-** -----------------------------------------------------------------------------
-** Attempt to autodetect building for embedded on Sony PS2
-** -----------------------------------------------------------------------------
-*/
+    /*
+    ** -----------------------------------------------------------------------------
+    ** Attempt to autodetect building for embedded on Sony PS2
+    ** -----------------------------------------------------------------------------
+    */
 #if !defined WARC_OS_STRING
 #  if !defined FORCE_DOXYGEN
-#    define WARC_OS_EMBEDDED 1 
+#    define WARC_OS_EMBEDDED 1
 #  endif
 #  if defined _R5900
 #     define WARC_OS_STRING "Sony PS2(embedded)"
@@ -363,11 +364,11 @@
 #  endif
 #endif
 
-/*
-** ---------------------------------------------------------------------------
-** Handle cdecl, stdcall, fastcall, etc.
-** ---------------------------------------------------------------------------
-*/
+    /*
+    ** ---------------------------------------------------------------------------
+    ** Handle cdecl, stdcall, fastcall, etc.
+    ** ---------------------------------------------------------------------------
+    */
 #if defined WARC_CPU_X86 && !defined WARC_CPU_X86_64
 #  if defined __GNUC__
 #     define WARC_CDECL __attribute__((cdecl))
@@ -379,27 +380,27 @@
 #     define WARC_FASTCALL __fastcall
 #  endif
 #else
-#  define WARC_CDECL    
-#  define WARC_STDCALL  
-#  define WARC_FASTCALL 
+#  define WARC_CDECL
+#  define WARC_STDCALL
+#  define WARC_FASTCALL
 #endif
 
-/*
-** ---------------------------------------------------------------------------
-** Define WARC_IMPORTEXPORT signature based on WARC_DLL and WARC_BUILDING_LIB
-** ---------------------------------------------------------------------------
-*/
+    /*
+    ** ---------------------------------------------------------------------------
+    ** Define WARC_IMPORTEXPORT signature based on WARC_DLL and WARC_BUILDING_LIB
+    ** ---------------------------------------------------------------------------
+    */
 
-/*
-** We undefine this so that multiple inclusions will work
-*/
+    /*
+    ** We undefine this so that multiple inclusions will work
+    */
 #if defined WARC_IMPORTEXPORT
 #  undef WARC_IMPORTEXPORT
 #endif
 
 #if defined WARC_DLL
 #   if defined WARC_OS_WIN32
-#      if defined _MSC_VER 
+#      if defined _MSC_VER
 #         if ( _MSC_VER >= 800 )
 #            if defined WARC_BUILDING_LIB
 #               define WARC_IMPORTEXPORT __declspec( dllexport )
@@ -410,13 +411,13 @@
 #            if defined WARC_BUILDING_LIB
 #               define WARC_IMPORTEXPORT __export
 #            else
-#               define WARC_IMPORTEXPORT 
+#               define WARC_IMPORTEXPORT
 #            endif
 #         endif
 #      endif  /* defined _MSC_VER */
 #      if defined __BORLANDC__
 #         if ( __BORLANDC__ >= 0x500 )
-#            if defined WARC_BUILDING_LIB 
+#            if defined WARC_BUILDING_LIB
 #               define WARC_IMPORTEXPORT __declspec( dllexport )
 #            else
 #               define WARC_IMPORTEXPORT __declspec( dllimport )
@@ -425,11 +426,11 @@
 #            if defined WARC_BUILDING_LIB
 #               define WARC_IMPORTEXPORT __export
 #            else
-#               define WARC_IMPORTEXPORT 
+#               define WARC_IMPORTEXPORT
 #            endif
 #         endif
 #      endif /* defined __BORLANDC__ */
-       /* for all other compilers, we're just making a blanket assumption */
+    /* for all other compilers, we're just making a blanket assumption */
 #      if defined __GNUC__ || defined __WATCOMC__ || defined __MWERKS__
 #         if defined WARC_BUILDING_LIB
 #            define WARC_IMPORTEXPORT __declspec( dllexport )
@@ -443,42 +444,42 @@
 #   endif /* defined WARC_OS_WIN32 */
 #endif
 
-/* On pretty much everything else, we can thankfully just ignore this */
+    /* On pretty much everything else, we can thankfully just ignore this */
 #if !defined WARC_IMPORTEXPORT
 #  define WARC_IMPORTEXPORT
 #endif
 
 #if defined FORCE_DOXYGEN
-#  define WARC_DLL    
+#  define WARC_DLL
 #  define WARC_BUILDING_LIB
 #  undef WARC_DLL
 #  undef WARC_BUILDING_LIB
 #endif
 
-/*
-** ----------------------------------------------------------------------------
-** (Re)define WARC_PUBLIC_API export signature 
-** ----------------------------------------------------------------------------
-*/
+    /*
+    ** ----------------------------------------------------------------------------
+    ** (Re)define WARC_PUBLIC_API export signature
+    ** ----------------------------------------------------------------------------
+    */
 #ifdef WARC_PUBLIC_API
 #  undef WARC_PUBLIC_API
 #endif
 
 #if ( ( defined _MSC_VER ) && ( _MSC_VER < 800 ) ) || ( defined __BORLANDC__ && ( __BORLANDC__ < 0x500 ) )
-#  define WARC_PUBLIC_API(rtype) extern rtype WARC_IMPORTEXPORT 
+#  define WARC_PUBLIC_API(rtype) extern rtype WARC_IMPORTEXPORT
 #else
 #  define WARC_PUBLIC_API(rtype) extern WARC_IMPORTEXPORT rtype
 #endif
 
-/*
-** ----------------------------------------------------------------------------
-** Try to infer endianess.  Basically we just go through the CPUs we know are
-** little endian, and assume anything that isn't one of those is big endian.
-** As a sanity check, we also do this with operating systems we know are
-** little endian, such as Windows.  Some processors are bi-endian, such as 
-** the MIPS series, so we have to be careful about those.
-** ----------------------------------------------------------------------------
-*/
+    /*
+    ** ----------------------------------------------------------------------------
+    ** Try to infer endianess.  Basically we just go through the CPUs we know are
+    ** little endian, and assume anything that isn't one of those is big endian.
+    ** As a sanity check, we also do this with operating systems we know are
+    ** little endian, such as Windows.  Some processors are bi-endian, such as
+    ** the MIPS series, so we have to be careful about those.
+    ** ----------------------------------------------------------------------------
+    */
 #if defined WARC_CPU_X86 || defined WARC_CPU_AXP || defined WARC_CPU_STRONGARM || defined WARC_OS_WIN32 || defined WARC_OS_WINCE || defined __MIPSEL__
 #  define WARC_ENDIAN_STRING "little"
 #  define WARC_LITTLE_ENDIAN 1
@@ -491,46 +492,46 @@
 #  define WARC_LITTLE_ENDIAN
 #endif
 
-/*
-** ----------------------------------------------------------------------------
-** Cross-platform compile time assertion macro
-** ----------------------------------------------------------------------------
-*/
+    /*
+    ** ----------------------------------------------------------------------------
+    ** Cross-platform compile time assertion macro
+    ** ----------------------------------------------------------------------------
+    */
 #define WARC_COMPILE_TIME_ASSERT(name, x) typedef int _WARC_dummy_ ## name[(x) ? 1 : -1 ]
 
-/*
-** ----------------------------------------------------------------------------
-** 64-bit Integer
-**
-** We don't require 64-bit support, nor do we emulate its functionality, we
-** simply export it if it's available.  Since we can't count on <limits.h>
-** for 64-bit support, we ignore the WARC_USE_LIMITS_H directive.
-** ----------------------------------------------------------------------------
-*/
+    /*
+    ** ----------------------------------------------------------------------------
+    ** 64-bit Integer
+    **
+    ** We don't require 64-bit support, nor do we emulate its functionality, we
+    ** simply export it if it's available.  Since we can't count on <limits.h>
+    ** for 64-bit support, we ignore the WARC_USE_LIMITS_H directive.
+    ** ----------------------------------------------------------------------------
+    */
 #if defined ( __LP64__ ) || defined ( __powerpc64__ ) || defined WARC_CPU_SPARC64
 #  define WARC_64BIT_INTEGER 1
-typedef long warc_i64_t; 
-typedef unsigned long warc_u64_t;
+    typedef long warc_i64_t;
+    typedef unsigned long warc_u64_t;
 #  define WARC_I64( x ) ((warc_i64_t)x)
 #  define WARC_U64( x ) ((warc_u64_t)x)
 #  define WARC_I64_PRINTF_PREFIX "l"
 #elif defined _MSC_VER || defined __BORLANDC__ || defined __WATCOMC__ || ( defined __alpha && defined __DECC )
 #  define WARC_64BIT_INTEGER 1
-typedef __int64 warc_i64_t;
-typedef unsigned __int64 warc_u64_t;
+    typedef __int64 warc_i64_t;
+    typedef unsigned __int64 warc_u64_t;
 #  define WARC_I64( x ) ((warc_i64_t)x)
 #  define WARC_U64( x ) ((warc_u64_t)x)
 #  define WARC_I64_PRINTF_PREFIX "I64"
 #elif defined __GNUC__ || defined __MWERKS__ || defined __SUNPRO_C || defined __SUNPRO_CC || defined __APPLE_CC__ || defined WARC_OS_IRIX || defined _LONG_LONG || defined _CRAYC
 #  define WARC_64BIT_INTEGER 1
-typedef long long warc_i64_t;
-typedef unsigned long long warc_u64_t;
+    typedef long long warc_i64_t;
+    typedef unsigned long long warc_u64_t;
 #  define WARC_U64( x ) ((warc_u64_t)(x##LL))
 #  define WARC_I64( x ) ((warc_i64_t)(x##LL))
 #  define WARC_I64_PRINTF_PREFIX "ll"
 #endif
 
-/* hack */
+    /* hack */
 #ifdef __MINGW32__
 #undef WARC_I64
 #undef WARC_U64
@@ -541,133 +542,133 @@ typedef unsigned long long warc_u64_t;
 #endif
 
 #ifdef FORCE_DOXYGEN
-typedef long long warc_i64_t;
-typedef unsigned long warc_u64_t;
+    typedef long long warc_i64_t;
+    typedef unsigned long warc_u64_t;
 #  define WARC_64BIT_INTEGER
 #  define WARC_I64_PRINTF_PREFIX
 #  define WARC_I64(x)
 #  define WARC_U64(x)
 #endif
 
-/** Minimum value for a 64-bit signed integer */
+    /** Minimum value for a 64-bit signed integer */
 #define WARC_I64_MIN  WARC_I64(0x8000000000000000)
-/** Maximum value for a 64-bit signed integer */
+    /** Maximum value for a 64-bit signed integer */
 #define WARC_I64_MAX  WARC_I64(0x7FFFFFFFFFFFFFFF)
-/** Minimum value for a 64-bit unsigned integer */
+    /** Minimum value for a 64-bit unsigned integer */
 #define WARC_U64_MIN  WARC_U64(0)
-/** Maximum value for a 64-bit unsigned integer */
+    /** Maximum value for a 64-bit unsigned integer */
 #define WARC_U64_MAX  WARC_U64(0xFFFFFFFFFFFFFFFF)
 
-/* ----------------------------------------------------------------------------
-** Basic Sized Types
-**
-** These types are expected to be EXACTLY sized so you can use them for
-** serialization.
-** ----------------------------------------------------------------------------
-*/
-#define WARC_FALSE 0 
-#define WARC_TRUE  1 
+    /* ----------------------------------------------------------------------------
+    ** Basic Sized Types
+    **
+    ** These types are expected to be EXACTLY sized so you can use them for
+    ** serialization.
+    ** ----------------------------------------------------------------------------
+    */
+#define WARC_FALSE 0
+#define WARC_TRUE  1
 
-typedef int            warc_bool_t;
-typedef unsigned char  warc_byte_t;
+    typedef int            warc_bool_t;
+    typedef unsigned char  warc_byte_t;
 
-/* NOTE: These assume that CHAR_BIT is 8!! */
-typedef unsigned char  warc_u8_t;
-typedef signed char    warc_i8_t;
+    /* NOTE: These assume that CHAR_BIT is 8!! */
+    typedef unsigned char  warc_u8_t;
+    typedef signed char    warc_i8_t;
 
 #if defined WARC_USE_LIMITS_H
 #  if CHAR_BITS > 8
 #    error This machine uses 9-bit characters.  This is a warning, you can comment this out now.
 #  endif /* CHAR_BITS > 8 */
 
-/* 16-bit */
-#  if ( USHRT_MAX == 65535 ) 
-   typedef unsigned short warc_u16_t;
-   typedef short          warc_i16_t;
+    /* 16-bit */
+#  if ( USHRT_MAX == 65535 )
+    typedef unsigned short warc_u16_t;
+    typedef short          warc_i16_t;
 #  else
-   /* Yes, in theory there could still be a 16-bit character type and shorts are
-      32-bits in size...if you find such an architecture, let me know =P */
+    /* Yes, in theory there could still be a 16-bit character type and shorts are
+    32-bits in size...if you find such an architecture, let me know =P */
 #    error No 16-bit type found
 #  endif
 
-/* 32-bit */
+    /* 32-bit */
 #  if ( INT_MAX == 2147483647 )
-  typedef unsigned       warc_u32_t;
-  typedef int            warc_i32_t;
+    typedef unsigned       warc_u32_t;
+    typedef int            warc_i32_t;
 #  elif ( LONG_MAX == 2147483647 )
-  typedef unsigned long  warc_u32_t;
-  typedef long           warc_i32_t;
+    typedef unsigned long  warc_u32_t;
+    typedef long           warc_i32_t;
 #  else
-      error No 32-bit type found
+    error No 32 - bit type found
 #  endif
 
 #else /* WARC_USE_LIMITS_H */
 
-  typedef unsigned short warc_u16_t;
-  typedef short          warc_i16_t;
+    typedef unsigned short warc_u16_t;
+    typedef short          warc_i16_t;
 
 #  if !defined WARC_OS_PALM
-  typedef unsigned       warc_u32_t;
-  typedef int            warc_i32_t;
+    typedef unsigned       warc_u32_t;
+    typedef int            warc_i32_t;
 #  else
-  typedef unsigned long  warc_u32_t;
-  typedef long           warc_i32_t;
+    typedef unsigned long  warc_u32_t;
+    typedef long           warc_i32_t;
 #  endif
 #endif
 
-/** Minimum value for a byte */
+    /** Minimum value for a byte */
 #define WARC_BYTE_MIN    0
-/** Maximum value for an 8-bit unsigned value */
+    /** Maximum value for an 8-bit unsigned value */
 #define WARC_BYTE_MAX    255
-/** Minimum value for a byte */
+    /** Minimum value for a byte */
 #define WARC_I16_MIN     ( ( warc_i16_t ) 0x8000 )
-/** Maximum value for a 16-bit signed value */
-#define WARC_I16_MAX     ( ( warc_i16_t ) 0x7FFF ) 
-/** Minimum value for a 16-bit unsigned value */
+    /** Maximum value for a 16-bit signed value */
+#define WARC_I16_MAX     ( ( warc_i16_t ) 0x7FFF )
+    /** Minimum value for a 16-bit unsigned value */
 #define WARC_U16_MIN     0
-/** Maximum value for a 16-bit unsigned value */
+    /** Maximum value for a 16-bit unsigned value */
 #define WARC_U16_MAX     ( ( warc_u16_t ) 0xFFFF )
-/** Minimum value for a 32-bit signed value */
+    /** Minimum value for a 32-bit signed value */
 #define WARC_I32_MIN     ( ( warc_i32_t ) 0x80000000 )
-/** Maximum value for a 32-bit signed value */
+    /** Maximum value for a 32-bit signed value */
 #define WARC_I32_MAX     ( ( warc_i32_t ) 0x7FFFFFFF )
-/** Minimum value for a 32-bit unsigned value */
+    /** Minimum value for a 32-bit unsigned value */
 #define WARC_U32_MIN     0
-/** Maximum value for a 32-bit unsigned value */
+    /** Maximum value for a 32-bit unsigned value */
 #define WARC_U32_MAX     ( ( warc_u32_t ) 0xFFFFFFFF )
 
-/*
-** ----------------------------------------------------------------------------
-** Sanity checks on expected sizes
-** ----------------------------------------------------------------------------
-*/
+    /*
+    ** ----------------------------------------------------------------------------
+    ** Sanity checks on expected sizes
+    ** ----------------------------------------------------------------------------
+    */
 #if !defined FORCE_DOXYGEN
 
-WARC_COMPILE_TIME_ASSERT(warc_byte_t, sizeof(warc_byte_t) == 1);
-WARC_COMPILE_TIME_ASSERT(warc_u8_t, sizeof(warc_u8_t) == 1);
-WARC_COMPILE_TIME_ASSERT(warc_i8_t, sizeof(warc_i8_t) == 1);
-WARC_COMPILE_TIME_ASSERT(warc_u16_t, sizeof(warc_u16_t) == 2);
-WARC_COMPILE_TIME_ASSERT(warc_i16_t, sizeof(warc_i16_t) == 2);
-WARC_COMPILE_TIME_ASSERT(warc_u32_t, sizeof(warc_u32_t) == 4);
-WARC_COMPILE_TIME_ASSERT(warc_i32_t, sizeof(warc_i32_t) == 4);
+    WARC_COMPILE_TIME_ASSERT (warc_byte_t, sizeof (warc_byte_t) == 1);
+    WARC_COMPILE_TIME_ASSERT (warc_u8_t, sizeof (warc_u8_t) == 1);
+    WARC_COMPILE_TIME_ASSERT (warc_i8_t, sizeof (warc_i8_t) == 1);
+    WARC_COMPILE_TIME_ASSERT (warc_u16_t, sizeof (warc_u16_t) == 2);
+    WARC_COMPILE_TIME_ASSERT (warc_i16_t, sizeof (warc_i16_t) == 2);
+    WARC_COMPILE_TIME_ASSERT (warc_u32_t, sizeof (warc_u32_t) == 4);
+    WARC_COMPILE_TIME_ASSERT (warc_i32_t, sizeof (warc_i32_t) == 4);
 
 #if !defined WARC_NO_FLOAT
-   WARC_COMPILE_TIME_ASSERT(warc_testfloat_t, sizeof(float)==4 );
-   WARC_COMPILE_TIME_ASSERT(warc_testdouble_t, sizeof(double)==8);
+    WARC_COMPILE_TIME_ASSERT (warc_testfloat_t, sizeof (float) == 4 );
+    WARC_COMPILE_TIME_ASSERT (warc_testdouble_t, sizeof (double) == 8);
 #endif
 
 #if defined WARC_64BIT_INTEGER
-   WARC_COMPILE_TIME_ASSERT(warc_u64_t, sizeof(warc_u64_t) == 8);
-   WARC_COMPILE_TIME_ASSERT(warc_i64_t, sizeof(warc_i64_t) == 8);
+    WARC_COMPILE_TIME_ASSERT (warc_u64_t, sizeof (warc_u64_t) == 8);
+    WARC_COMPILE_TIME_ASSERT (warc_i64_t, sizeof (warc_i64_t) == 8);
 #endif
 
 #endif
 
-/*
-** ----------------------------------------------------------------------------
-** 64-bit pointer support
-** ----------------------------------------------------------------------------
-*/
+    /*
+    ** ----------------------------------------------------------------------------
+    ** 64-bit pointer support
+    ** ----------------------------------------------------------------------------
+    */
 #if defined WARC_CPU_AXP && ( defined WARC_OS_TRU64 || defined WARC_OS_LINUX )
 #  define WARC_64BIT_POINTER 1
 #endif
@@ -681,9 +682,9 @@ WARC_COMPILE_TIME_ASSERT(warc_i32_t, sizeof(warc_i32_t) == 4);
 #endif
 
 #if defined WARC_64BIT_POINTER
-   WARC_COMPILE_TIME_ASSERT( warc_64bit_pointer, sizeof( void * ) == 8 );
+    WARC_COMPILE_TIME_ASSERT ( warc_64bit_pointer, sizeof ( void * ) == 8 );
 #elif !defined FORCE_DOXYGEN
-   WARC_COMPILE_TIME_ASSERT( warc_32bit_pointer, sizeof( void * ) == 4 );
+    WARC_COMPILE_TIME_ASSERT ( warc_32bit_pointer, sizeof ( void * ) == 4 );
 #endif
 
 #if defined FORCE_DOXYGEN
@@ -701,7 +702,8 @@ WARC_COMPILE_TIME_ASSERT(warc_i32_t, sizeof(warc_i32_t) == 4);
 
 
 #ifdef __cplusplus
- }
+  }
+
 #endif
 
 #endif /* __WARC_WPORT_H__ */

@@ -32,7 +32,7 @@
 
 
 /*
- * WARC default headers 
+ * WARC default headers
  */
 
 #include <wclass.h>  /* bless, destroy, cassert, struct Class */
@@ -49,15 +49,17 @@
  */
 
 
-struct WString {
-  const void * class;
+struct WString
+  {
 
-  /*@{*/
-  warc_u8_t * text; /**< text string */
-  warc_u32_t    len;  /**< string length */
-  warc_u32_t    max;  /**< max string length */
-  /*@}*/
-};
+    const void * class;
+
+    /*@{*/
+    warc_u8_t * text; /**< text string */
+    warc_u32_t    len;  /**< string length */
+    warc_u32_t    max;  /**< max string length */
+    /*@}*/
+  };
 
 
 #define TEXT    (self -> text)
@@ -68,15 +70,15 @@ struct WString {
 
 
 #define NEXT_POWER_OF(min,p) \
-do{ \
-warc_u32_t i = 2;   \
-(p) = EXTEND_BY;    \
-while((p) <= (min)) \
-{ \
-(p) = EXTEND_BY * i; \
-i = i + 1; \
-} \
-}while(0)
+  do{ \
+      warc_u32_t i = 2;   \
+      (p) = EXTEND_BY;    \
+      while((p) <= (min)) \
+        { \
+          (p) = EXTEND_BY * i; \
+          i = i + 1; \
+        } \
+    }while(0)
 
 /**
  * @param _self WString object
@@ -88,6 +90,7 @@ i = i + 1; \
 
 WIPUBLIC warc_u32_t WString_getLength (const void * const _self)
 {
+
   const struct WString * const self = _self;
 
   /* preconditions */
@@ -106,11 +109,12 @@ WIPUBLIC warc_u32_t WString_getLength (const void * const _self)
 
 WIPUBLIC const warc_u8_t * WString_getText (const void * const _self)
 {
+
   const struct WString * const self = _self;
 
   /* preconditions */
   CASSERT (self);
-  
+
   return (TEXT);
 }
 
@@ -124,19 +128,20 @@ WIPUBLIC const warc_u8_t * WString_getText (const void * const _self)
  * Finds the first occurrence of a substring in the string text
  */
 
-WIPUBLIC warc_i32_t WString_strstr (const void * const _self, 
+WIPUBLIC warc_i32_t WString_strstr (const void * const _self,
                                     const warc_u8_t * s)
 {
+
   const struct WString * const self = _self;
   warc_u8_t        *       ptr;
 
   /* preconditions */
   CASSERT (self);
   assert (s);
-  
-  ptr = (warc_u8_t *) strstr ((const char *) TEXT, (const char *) s);
+
+  ptr = (warc_u8_t *) strstr ( (const char *) TEXT, (const char *) s);
   unless (ptr)
-    return (-1);
+  return (-1);
 
   return (ptr - TEXT);
 }
@@ -153,13 +158,14 @@ WIPUBLIC warc_i32_t WString_strstr (const void * const _self,
 
 WPUBLIC warc_bool_t WString_concat (void * const _self, const void * const b)
 {
+
   struct WString * const self = _self;
 
   /* preconditions */
   CASSERT (self);
   CASSERT (b);
 
-  return (WString_append (self, WString_getText (b), WString_getLength (b)));
+  return (WString_append (self, WString_getText (b), WString_getLength (b) ) );
 }
 
 
@@ -172,57 +178,59 @@ WPUBLIC warc_bool_t WString_concat (void * const _self, const void * const b)
  * of WString "a".
  */
 
-WPUBLIC warc_bool_t WString_append (void * const _self, 
+WPUBLIC warc_bool_t WString_append (void * const _self,
                                     const warc_u8_t * b,
                                     const warc_u32_t blen)
 {
-	struct WString * const self = _self;
-    warc_u8_t  *       text = NIL;
-	warc_u32_t             ablen;
 
-    /* preconditions */
-    CASSERT (self);
-    assert  (b);
-    
-    ablen = LEN + blen;
-    text  = TEXT;
+  struct WString * const self = _self;
+  warc_u8_t  *       text = NIL;
+  warc_u32_t             ablen;
 
-    /* re-allocate only if necessary */
-    if (ablen >= MAX)
+  /* preconditions */
+  CASSERT (self);
+  assert  (b);
+
+  ablen = LEN + blen;
+  text  = TEXT;
+
+  /* re-allocate only if necessary */
+
+  if (ablen >= MAX)
+    {
+      warc_u32_t max;
+
+      NEXT_POWER_OF (ablen, max);
+
+      /* allocate new text */
+      TEXT = wmalloc (max * sizeof (char) );
+      unless (TEXT)
       {
-        warc_u32_t max;
-
-        NEXT_POWER_OF(ablen, max);
-
-        /* allocate new text */
-        TEXT = wmalloc (max * sizeof (char));
-        unless (TEXT)
-          {
-            TEXT = text;
-            return (WARC_TRUE);
-          }
-
-        /* reset the max string length */
-        MAX = max;
-
-        /* copy the old string text */
-        /* w_strncpy (TEXT, text, LEN); */
-        w_strncpy (TEXT, text, LEN);
-
-        /* free old text */
-        wfree (text);
+        TEXT = text;
+        return (WARC_TRUE);
       }
 
-    /* append the "b" string one */
-    w_strncpy (TEXT + LEN, b, blen);
+      /* reset the max string length */
+      MAX = max;
 
-    /* set the end of string */
-    TEXT [ ablen ] = '\0';
+      /* copy the old string text */
+      /* w_strncpy (TEXT, text, LEN); */
+      w_strncpy (TEXT, text, LEN);
 
-    /* set the new string length */
-    LEN = ablen;
+      /* free old text */
+      wfree (text);
+    }
 
-    return (WARC_FALSE);
+  /* append the "b" string one */
+  w_strncpy (TEXT + LEN, b, blen);
+
+  /* set the end of string */
+  TEXT [ ablen ] = '\0';
+
+  /* set the new string length */
+  LEN = ablen;
+
+  return (WARC_FALSE);
 }
 
 
@@ -236,49 +244,52 @@ WPUBLIC warc_bool_t WString_append (void * const _self,
  * Sets a new text string
  */
 
-WPUBLIC warc_bool_t WString_setText (void * const _self, 
+WPUBLIC warc_bool_t WString_setText (void * const _self,
                                      const warc_u8_t * text,
                                      const warc_u32_t len)
 {
-	struct WString * const self = _self;
-	
-    /* preconditions */
-    CASSERT (self);
-    assert (text);
-    
-    /* re-allocate only if necessary */
-    if (len >= MAX)
-      {
-        warc_u8_t * nt   = NIL;
-        warc_u32_t      max;
 
-        NEXT_POWER_OF(len, max);
+  struct WString * const self = _self;
 
-        /* allocate new text */
-        nt = wmalloc (max * sizeof (char));
-        unless (nt)
-          return (WARC_TRUE);
+  /* preconditions */
+  CASSERT (self);
+  assert (text);
 
-        /* release previous text */
-        if (TEXT)
-          wfree(TEXT);
+  /* re-allocate only if necessary */
 
-        TEXT = nt;
+  if (len >= MAX)
+    {
+      warc_u8_t * nt   = NIL;
+      warc_u32_t      max;
 
-        /* reset the max string length */
-        MAX = max;
-      }
+      NEXT_POWER_OF (len, max);
 
-    /* make the string copy (only "len" bytes) */
-    w_strncpy (TEXT, text, len);
-    
-    /* set the end of string */
-    TEXT [ len ] = '\0';
+      /* allocate new text */
+      nt = wmalloc (max * sizeof (char) );
+      unless (nt)
+      return (WARC_TRUE);
 
-    /* set the new string length */
-    LEN = len;
+      /* release previous text */
 
-    return (WARC_FALSE);
+      if (TEXT)
+        wfree (TEXT);
+
+      TEXT = nt;
+
+      /* reset the max string length */
+      MAX = max;
+    }
+
+  /* make the string copy (only "len" bytes) */
+  w_strncpy (TEXT, text, len);
+
+  /* set the end of string */
+  TEXT [ len ] = '\0';
+
+  /* set the new string length */
+  LEN = len;
+
+  return (WARC_FALSE);
 }
 
 
@@ -295,23 +306,24 @@ WPUBLIC warc_bool_t WString_setText (void * const _self,
 
 WPRIVATE void * WString_constructor (void * _self, va_list * app)
 {
+
   struct WString      * const self = _self;
-  const warc_u8_t * text = va_arg(* app, const warc_u8_t *);
-  const warc_u32_t      len  = va_arg(* app, const warc_u32_t);
-  
+  const warc_u8_t * text = va_arg (* app, const warc_u8_t *);
+  const warc_u32_t      len  = va_arg (* app, const warc_u32_t);
+
   /* preconditions */
   assert (text);
 
   /* compute maximum string length */
-  NEXT_POWER_OF(len, MAX);
+  NEXT_POWER_OF (len, MAX);
 
   /* allocate memory */
-  TEXT = wmalloc (MAX * sizeof (char));
+  TEXT = wmalloc (MAX * sizeof (char) );
   unless (TEXT)
-    {
-      destroy (self);
-      return (NIL);
-    }
+  {
+    destroy (self);
+    return (NIL);
+  }
 
   w_strncpy (TEXT, text, len);
 
@@ -331,18 +343,20 @@ WPRIVATE void * WString_constructor (void * _self, va_list * app)
  */
 
 WPRIVATE void * WString_destructor (void * _self)
-{	
+{
+
   struct WString * self = _self;
 
   /* preconditions */
   CASSERT (self);
-  
+
   if (TEXT)
     wfree (TEXT), TEXT = NIL;
 
   MAX = 0;
+
   LEN = 0;
-  
+
   return (self);
 }
 
@@ -351,10 +365,11 @@ WPRIVATE void * WString_destructor (void * _self)
  * WARC WString class
  */
 
-static const struct Class _WString = {
-	sizeof(struct WString),
-	SIGN,
-	WString_constructor, WString_destructor
-};
+static const struct Class _WString =
+  {
+    sizeof (struct WString),
+    SIGN,
+    WString_constructor, WString_destructor
+  };
 
 const void * WString = & _WString;

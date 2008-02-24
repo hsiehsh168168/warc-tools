@@ -33,11 +33,11 @@
 #include <wgzip.h>       /* WGzip */
 
 struct CallbackEnv
-{
-  FILE     * out;
-  warc_u32_t crlf;
-  warc_u64_t usize;
-};
+  {
+    FILE     * out;
+    warc_u32_t crlf;
+    warc_u64_t usize;
+  };
 
 /* this callback uncompressing the entire WARC file */
 warc_u32_t callback1_warc (const warc_u8_t * buffer, const warc_u32_t nbr, void * env)
@@ -45,7 +45,8 @@ warc_u32_t callback1_warc (const warc_u8_t * buffer, const warc_u32_t nbr, void 
   FILE * out = (FILE *) env;
 
   /* copy the uncompressed 'nbr' bytes to out */
-  if (fwrite (buffer, 1, nbr, out) != nbr || ferror (out))
+
+  if (fwrite (buffer, 1, nbr, out) != nbr || ferror (out) )
     return (Z_STOP_DECODING); /* return this value to stop the uncompression */
 
   return (Z_CONTINUE_DECODING);
@@ -56,18 +57,28 @@ warc_u32_t callback1_warc (const warc_u8_t * buffer, const warc_u32_t nbr, void 
 /* this callback stop uncompressing when it find a double CRLF in a WARC file */
 warc_u32_t callback2_warc (const warc_u8_t * buffer, const warc_u32_t nbr, void * _env)
 {
+
   struct CallbackEnv * env  = (struct CallbackEnv *) _env;
   warc_u32_t           i    = 0;
 
   switch (env -> crlf)
     {
-    case 0 : goto CR1;
-    case 1 : goto LF1;
-    case 2 : goto CR2;
-    case 3 : goto LF2;
+
+      case 0 :
+        goto CR1;
+
+      case 1 :
+        goto LF1;
+
+      case 2 :
+        goto CR2;
+
+      case 3 :
+        goto LF2;
     }
 
- CR1:
+CR1:
+
   while (i < nbr) /* search the first CR */
     {
       if (buffer [i] == '\r')
@@ -76,12 +87,14 @@ warc_u32_t callback2_warc (const warc_u8_t * buffer, const warc_u32_t nbr, void 
           ++ i;
           goto LF1;
         }
+
       ++ i;
     }
 
   goto CONTINUE;
-  
- LF1:
+
+LF1:
+
   if (i < nbr)
     {
       if (buffer [i] == '\n')
@@ -90,16 +103,18 @@ warc_u32_t callback2_warc (const warc_u8_t * buffer, const warc_u32_t nbr, void 
           i++;
           goto CR2;
         }
+
       else
         {
           env -> crlf = 0;
           goto CONTINUE;
         }
     }
+
   else
     goto CONTINUE;
 
- CR2:
+CR2:
   if (i < nbr)
     {
       if (buffer [i] == '\r')
@@ -108,41 +123,47 @@ warc_u32_t callback2_warc (const warc_u8_t * buffer, const warc_u32_t nbr, void 
           ++ i;
           goto LF2;
         }
+
       else
         {
           env -> crlf = 0;
           goto CONTINUE;
         }
     }
+
   else
     goto CONTINUE;
-  
- LF2:
-  if (i < nbr) 
+
+LF2:
+  if (i < nbr)
     {
       if (buffer [i] == '\n')
         {
           goto STOP;
         }
+
       else
         {
           env -> crlf = 0;
           goto CONTINUE;
         }
     }
+
   else
     goto CONTINUE;
 
- STOP:
+STOP:
 
   /* we've found a double CRLF (stop uncompressing)  */
   env -> usize += i + 1;
+
   fwrite (buffer, 1, i + 1, env -> out);
+
   return (Z_STOP_DECODING);
 
- CONTINUE:
+CONTINUE:
   /* copy the uncompressed 'nbr' bytes to out */
-  if (fwrite (buffer, 1, nbr, env -> out) != nbr || ferror (env -> out))
+  if (fwrite (buffer, 1, nbr, env -> out) != nbr || ferror (env -> out) )
     return (Z_STOP_DECODING);
 
   return (Z_CONTINUE_DECODING);
@@ -152,16 +173,22 @@ warc_u32_t callback2_warc (const warc_u8_t * buffer, const warc_u32_t nbr, void 
 /* this callback stop uncompressing when it finds 1 CRLF or 1 LF in ARC file */
 warc_u32_t callback3_arc (const warc_u8_t * buffer, const warc_u32_t nbr, void * _env)
 {
+
   struct CallbackEnv * env  = (struct CallbackEnv *) _env;
   warc_u32_t           i    = 0;
 
   switch (env -> crlf)
     {
-    case 0 : goto CR_OR_LF;
-    case 1 : goto LF1;
+
+      case 0 :
+        goto CR_OR_LF;
+
+      case 1 :
+        goto LF1;
     }
 
- CR_OR_LF:
+CR_OR_LF:
+
   while (i < nbr) /* search the first CR */
     {
       if (buffer [i] == '\r')
@@ -180,33 +207,38 @@ warc_u32_t callback3_arc (const warc_u8_t * buffer, const warc_u32_t nbr, void *
     }
 
   goto CONTINUE;
-  
- LF1:
-  if (i < nbr) 
+
+LF1:
+
+  if (i < nbr)
     {
       if (buffer [i] == '\n')
         {
           goto STOP;
         }
+
       else
         {
           env -> crlf = 0;
           goto CONTINUE;
         }
     }
+
   else
     goto CONTINUE;
 
- STOP:
+STOP:
 
   /* we've found a double CRLF (stop uncompressing)  */
   env -> usize += i + 1;
+
   fwrite (buffer, 1, i + 1, env -> out);
+
   return (Z_STOP_DECODING);
 
- CONTINUE:
+CONTINUE:
   /* copy the uncompressed 'nbr' bytes to out */
-  if (fwrite (buffer, 1, nbr, env -> out) != nbr || ferror (env -> out))
+  if (fwrite (buffer, 1, nbr, env -> out) != nbr || ferror (env -> out) )
     return (Z_STOP_DECODING);
 
   return (Z_CONTINUE_DECODING);
@@ -214,34 +246,34 @@ warc_u32_t callback3_arc (const warc_u8_t * buffer, const warc_u32_t nbr, void *
 
 
 FILE * openReading (const char * fin)
-{	
+{
   FILE * in;
-  unless (in = fopen(fin, "r+b"))
-    {
-      fprintf(stdout, "error: cannot open file \"%s\" for reading\n", 
-              fin);
-      return NIL;
-    }
+  unless (in = fopen (fin, "r+b") )
+  {
+    fprintf (stdout, "error: cannot open file \"%s\" for reading\n",
+             fin);
+    return NIL;
+  }
 
   return in;
 }
 
 FILE * openWriting (const char * fout)
-{	
+{
   FILE * out;
-  unless (out = fopen(fout, "w+b"))
-    {
-      fprintf(stdout, "error: cannot open file \"%s\" for binary writing\n", 
-              fout);
-      return NIL;
-    }
+  unless (out = fopen (fout, "w+b") )
+  {
+    fprintf (stdout, "error: cannot open file \"%s\" for binary writing\n",
+             fout);
+    return NIL;
+  }
 
   return out;
 }
 
 
 int test1 (const char * fin)
-{	
+{
   const char * t     = "TEST 1";
   const char * fout  = "uncompressed1";
   FILE       * in    = NIL;
@@ -265,11 +297,11 @@ int test1 (const char * fin)
   assert (out);
 
   /* uncompress file from offset 0 using the callback with env = fout */
-  ret = WGzip_uncompress (g, in, 0, & usize, & csize, 
+  ret = WGzip_uncompress (g, in, 0, & usize, & csize,
                           callback1_warc, (void *) out);
   assert (! ret);
   fprintf (stdout,
-           "uncompressed \"%s\" to \"%s\" [usize: %llu][csize: %llu]\n", 
+           "uncompressed \"%s\" to \"%s\" [usize: %llu][csize: %llu]\n",
            fin, fout, (unsigned long long) usize, (unsigned long long) csize);
 
   fclose (out);
@@ -282,7 +314,7 @@ int test1 (const char * fin)
 
 
 int test2 (const char * fin)
-{	
+{
   const char * t     = "TEST 2";
   const char * fout  = "uncompressed2";
   FILE       * in    = NIL;
@@ -291,6 +323,7 @@ int test2 (const char * fin)
   warc_i32_t   ret   = 0;
   warc_u64_t   usize = 0;   /* uncompressed file size */
   warc_u64_t   csize = 0;   /* compressed file size */
+
   struct CallbackEnv cenv;
 
   fprintf (stdout, "%s>\n", t);
@@ -311,12 +344,12 @@ int test2 (const char * fin)
   cenv . usize = 0;
 
   /* uncompress file from offset 0 using the callback with env = fout */
-  ret = WGzip_uncompress (g, in, 0, & usize, & csize, 
+  ret = WGzip_uncompress (g, in, 0, & usize, & csize,
                           callback2_warc, (void *) & cenv);
   assert (! ret);
   fprintf (stdout,
-           "uncompressed \"%s\" to \"%s\" [usize: %llu][csize: %llu]\n", 
-           fin, fout, 
+           "uncompressed \"%s\" to \"%s\" [usize: %llu][csize: %llu]\n",
+           fin, fout,
            (unsigned long long) cenv . usize, (unsigned long long) csize);
 
   fclose (out);
@@ -330,7 +363,7 @@ int test2 (const char * fin)
 
 
 int test3 (const char * fin)
-{	
+{
   const char * t      = "TEST 3";
   const char * fout   = "uncompressed3";
   FILE       * in     = NIL;
@@ -340,6 +373,7 @@ int test3 (const char * fin)
   warc_u64_t   usize  = 0;   /* uncompressed file size */
   warc_u64_t   csize  = 0;   /* compressed file size */
   warc_u64_t   offset = 0;   /* WARC record offset */
+
   struct CallbackEnv cenv;
 
 
@@ -364,15 +398,16 @@ int test3 (const char * fin)
   offset = 0;
 
   /* loop over all records */
+
   while (WARC_TRUE)
     {
       /* uncompress file from offset 0 using the callback with env = fout */
-      ret = WGzip_uncompress (g, in, offset, & usize, & csize, 
+      ret = WGzip_uncompress (g, in, offset, & usize, & csize,
                               callback3_arc, (void *) & cenv);
       assert (! ret);
       fprintf (stdout,
-               "uncompressed \"%s\" to \"%s\" [usize: %llu][csize: %llu]\n", 
-               fin, fout, 
+               "uncompressed \"%s\" to \"%s\" [usize: %llu][csize: %llu]\n",
+               fin, fout,
                (unsigned long long) cenv . usize, (unsigned long long) csize);
 
       /* goto to the next record */
@@ -380,6 +415,7 @@ int test3 (const char * fin)
     }
 
   fclose (out);
+
   fclose (in);
 
   destroy (g);
@@ -389,7 +425,7 @@ int test3 (const char * fin)
 
 
 int test4 (const char * fin)
-{	
+{
   const char * t      = "TEST 4";
   const char * fout   = "uncompressed4";
   FILE       * in     = NIL;
@@ -412,36 +448,39 @@ int test4 (const char * fin)
   out = openWriting (fout);
   assert (out);
 
- /* first record at offset 0 */
+  /* first record at offset 0 */
   offset = 0;
 
   /* loop over all records */
+
   while (WARC_TRUE)
     {
-      ret = WGzip_uncompress (g, in, offset, & usize, & csize, 
+      ret = WGzip_uncompress (g, in, offset, & usize, & csize,
                               callback1_warc, (void *) out);
+
       if (ret)
         break;
 
       fprintf (stdout,
-               "uncompressed \"%s\" to \"%s\" [usize: %llu][csize: %llu]\n", 
-               fin, fout, 
+               "uncompressed \"%s\" to \"%s\" [usize: %llu][csize: %llu]\n",
+               fin, fout,
                (unsigned long long) usize, (unsigned long long) csize);
-      
+
       /* goto to the next record */
       offset += csize;
     }
-  
+
   fclose (out);
+
   fclose (in);
-  
+
   destroy (g);
 
   return 0;
 }
 
 int test5 (const char * fin)
-{	
+{
   const char * t     = "TEST 5";
   FILE       * in    = NIL;
   void       * g     = NIL; /* WGzip object */
@@ -459,9 +498,9 @@ int test5 (const char * fin)
   /* check the validity of GZIP file from offset 0 */
   ret = WGzip_check (g, in, 0);
   unless (ret)
-    w_fprintf(fprintf (stdout, "\"%s\" is a valid GZIP file\n", fin));
+  w_fprintf (fprintf (stdout, "\"%s\" is a valid GZIP file\n", fin) );
   else
-    w_fprintf (fprintf(stdout, "\"%s\" is an invalid GZIP file\n", fin));
+    w_fprintf (fprintf (stdout, "\"%s\" is an invalid GZIP file\n", fin) );
 
   fclose (in);
 
@@ -472,7 +511,7 @@ int test5 (const char * fin)
 
 
 int main (int argc, char ** argv)
-{	
+{
   if (argc != 3)
     {
       fprintf (stderr, "Gzip file uncompressor\n");
@@ -485,10 +524,10 @@ int main (int argc, char ** argv)
 
   /* uncomment to try a spesific test */
 
-/*   test1 (argv [1]); */
-/*   test2 (argv [1]); */
-/*   test3 (argv [2]); */
-/*   test4 (argv [1]); */
+  /*   test1 (argv [1]); */
+  /*   test2 (argv [1]); */
+  /*   test3 (argv [2]); */
+  /*   test4 (argv [1]); */
   test5 (argv [1]);
 
   return 0;

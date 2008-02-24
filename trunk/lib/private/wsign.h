@@ -30,13 +30,14 @@
 
 /* to mix C and C++ */
 #ifdef __cplusplus
- extern "C" {
+extern "C"
+  {
 #endif
 
 
-/*
- * Portability header file
- */
+    /*
+     * Portability header file
+     */
 
 #include <wport.h>
 
@@ -46,7 +47,8 @@
 
 
 #ifdef __cplusplus
- }
+  }
+
 #endif
 
 #endif /* __WARC_SIGN_H__ */

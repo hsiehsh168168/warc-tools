@@ -29,55 +29,58 @@
 
 /* to mix C and C++ */
 #ifdef __cplusplus
- extern "C" {
+extern "C"
+  {
 #endif
 
 
-/**
- * Portability header file
- */
+    /**
+     * Portability header file
+     */
 
 #include <wport.h>
 
 
 #include <stdio.h> /* for FILE */
 
-extern const void * WGzip;
+    extern const void * WGzip;
 
-/* compression levels */
-typedef enum {WARC_GZIP_DEFAULT_COMPRESSION = 0,
-              WARC_GZIP_NO_COMPRESSION,
-              WARC_GZIP_BEST_SPEED,
-              WARC_GZIP_BEST_COMPRESSION} warc_gzlevel_t;
+    /* compression levels */
+    typedef enum {WARC_GZIP_DEFAULT_COMPRESSION = 0,
+                  WARC_GZIP_NO_COMPRESSION,
+                  WARC_GZIP_BEST_SPEED,
+                  WARC_GZIP_BEST_COMPRESSION
+                 } warc_gzlevel_t;
 
-/* uncompression flags control */
-enum {Z_CONTINUE_DECODING = 0};
-enum {Z_STOP_DECODING = 111};
+    /* uncompression flags control */
+    enum {Z_CONTINUE_DECODING = 0};
+    enum {Z_STOP_DECODING = 111};
 
 
 
-extern warc_i32_t WGzip_compress   (const void * const,
-                                    FILE *, FILE *, 
-                                    const warc_gzlevel_t,
-                                    warc_u64_t *);
+    extern warc_i32_t WGzip_compress   (const void * const,
+                                          FILE *, FILE *,
+                                          const warc_gzlevel_t,
+                                          warc_u64_t *);
 
-extern warc_u32_t WGzip_uncompress (const void * const,
-                                    FILE *, warc_u64_t,
-                                    warc_u64_t *,
-                                    warc_u64_t *,
-                                    warc_u32_t (*) (const warc_u8_t *, 
-                                                    const warc_u32_t,
-                                                    void *),
-                                    void *);
-extern warc_bool_t WGzip_check     (const void *,  FILE *, warc_u64_t);
+    extern warc_u32_t WGzip_uncompress (const void * const,
+                                          FILE *, warc_u64_t,
+                                          warc_u64_t *,
+                                          warc_u64_t *,
+                                          warc_u32_t (*) (const warc_u8_t *,
+                                                          const warc_u32_t,
+                                                          void *),
+                                          void *);
+    extern warc_bool_t WGzip_check     (const void *,  FILE *, warc_u64_t);
 
-extern warc_bool_t WGzip_analyzeHeader (const void *,  FILE *, 
-                                        warc_u64_t, warc_u64_t *,
-                                        warc_u64_t *);
+    extern warc_bool_t WGzip_analyzeHeader (const void *,  FILE *,
+                                              warc_u64_t, warc_u64_t *,
+                                              warc_u64_t *);
 
 
 #ifdef __cplusplus
- }
+  }
+
 #endif
 
 

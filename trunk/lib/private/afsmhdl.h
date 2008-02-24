@@ -29,26 +29,28 @@
 
 /* to mix C and C++ */
 #ifdef __cplusplus
- extern "C" {
+extern "C"
+  {
 #endif
 
-/*
- * Portability header file
- */
+    /*
+     * Portability header file
+     */
 
 
 #include <wport.h>
 
 
-extern const void * AFsmHDL;
+    extern const void * AFsmHDL;
 
 
-extern warc_bool_t  AFsmHDL_run       (void * const);
-extern void *       AFsmHDL_transform (const void * const);
-extern const void * AFsmHDL_state     (const void * const);
+    extern warc_bool_t  AFsmHDL_run       (void * const);
+    extern void *       AFsmHDL_transform (const void * const);
+    extern const void * AFsmHDL_state     (const void * const);
 
 #ifdef __cplusplus
- }
+  }
+
 #endif
 
 #endif /* __AFSM_HDL_H__ */

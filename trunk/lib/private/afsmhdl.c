@@ -31,7 +31,7 @@
 #include <wport.h>
 
 /**
- * WARC default headers 
+ * WARC default headers
  */
 
 #include <wclass.h>   /* bless, destroy, cassert, struct Class */
@@ -55,30 +55,31 @@
 #define SIGN 10
 
 typedef struct
-{
-  void       * url;           /* WString */
-  void       * ip_adress;     /* WString */
-  void       * creation_date; /* WString */
-  void       * mime_type;     /* WString */
-  void       * data_length;   /* WString */
+  {
+    void       * url;           /* WString */
+    void       * ip_adress;     /* WString */
+    void       * creation_date; /* WString */
+    void       * mime_type;     /* WString */
+    void       * data_length;   /* WString */
 
-  FILE           * fin;       /* file handle to read from */
-  Transition     * state;     /* transition state */
-  warc_bool_t    err;         /* parsing error flag */
-  warc_u8_t  c;             /* current char in "fin"*/
-} HDLState;
-
-
+    FILE           * fin;       /* file handle to read from */
+    Transition     * state;     /* transition state */
+    warc_bool_t    err;         /* parsing error flag */
+    warc_u8_t  c;             /* current char in "fin"*/
+  } HDLState;
 
 
-struct AFsmHDL 
-{ 
-  const void * class;
-  
-  /*@{*/
-  HDLState * hdls; /**< HDLState */
-  /*@}*/
-};
+
+
+struct AFsmHDL
+  {
+
+    const void * class;
+
+    /*@{*/
+    HDLState * hdls; /**< HDLState */
+    /*@}*/
+  };
 
 
 #define    HDLS            (self -> hdls)
@@ -99,25 +100,25 @@ struct AFsmHDL
 
 /* prototypes of all events in the FSM (defined below) */
 warc_bool_t AFsmHDL_isSpace (void *),    AFsmHDL_isText    (void *),
-            AFsmHDL_isInteger (void *),  AFsmHDL_isLF      (void *),
-            AFsmHDL_isUnknown (void *);
+AFsmHDL_isInteger (void *),  AFsmHDL_isLF      (void *),
+AFsmHDL_isUnknown (void *);
 
 /* prototypes of all actions in the FSM (defined below) */
-void AFsmHDL_setDataLength  (void *), AFsmHDL_setIpAdress       (void *), 
-     AFsmHDL_setUrl         (void *), AFsmHDL_setCreationDate   (void *), 
-     AFsmHDL_setMimeType    (void *), AFsmHDL_pushBack          (void *),
-     AFsmHDL_checkRecordType(void *), AFsmHDL_raiseError        (void *),
-     AFsmHDL_checkIpAdress  (void *), AFsmHDL_raiseErrorDlength (void *),  
-     AFsmHDL_raiseErrorCrDate     (void *)                              ;
+void AFsmHDL_setDataLength  (void *), AFsmHDL_setIpAdress       (void *),
+AFsmHDL_setUrl         (void *), AFsmHDL_setCreationDate   (void *),
+AFsmHDL_setMimeType    (void *), AFsmHDL_pushBack          (void *),
+AFsmHDL_checkRecordType (void *), AFsmHDL_raiseError        (void *),
+AFsmHDL_checkIpAdress  (void *), AFsmHDL_raiseErrorDlength (void *),
+AFsmHDL_raiseErrorCrDate     (void *)                              ;
 
 /* AFsmHDL_checkMimeType (void *), */
 /* AFsmHDL_checkUrl       (void *), */
 
 
 /* prototypes of all states in the FSM (defined below) */
-State WANT_ARCHDL_URL,             WANT_ARCHDL_URL_SP,       WANT_ARCHDL_IP_ADRESS,       WANT_ARCHDL_IP_SP,   
-      WANT_ARCHDL_CREATION_DATE,   WANT_ARCHDL_CREATION_SP,  WANT_ARCHDL_MIME_TYPE,       WANT_ARCHDL_MIME_SP,
-      WANT_ARCHDL_DATA_LENGTH,     WANT_ARCHDL_LF;
+State WANT_ARCHDL_URL,             WANT_ARCHDL_URL_SP,       WANT_ARCHDL_IP_ADRESS,       WANT_ARCHDL_IP_SP,
+WANT_ARCHDL_CREATION_DATE,   WANT_ARCHDL_CREATION_SP,  WANT_ARCHDL_MIME_TYPE,       WANT_ARCHDL_MIME_SP,
+WANT_ARCHDL_DATA_LENGTH,     WANT_ARCHDL_LF;
 
 
 
@@ -130,7 +131,7 @@ WIPRIVATE void AFsmHDL_rewind (void * _hs, warc_u32_t n)
   const HDLState * const hs = _hs;
 
   assert (hs);
-  
+
   w_fseek_from_here (hs -> fin, - n);
 }
 
@@ -140,149 +141,149 @@ WIPRIVATE void AFsmHDL_rewind (void * _hs, warc_u32_t n)
 
 /*
 
-@@@@@@@@   @@@@@@   @@@@@@@@@@   
-@@@@@@@@  @@@@@@@   @@@@@@@@@@@  
-@@!       !@@       @@! @@! @@!  
-!@!       !@!       !@! !@! !@!  
-@!!!:!    !!@@!!    @!! !!@ @!@  
-!!!!!:     !!@!!!   !@!   ! !@!  
-!!:            !:!  !!:     !!:  
-:!:           !:!   :!:     :!:  
- ::       :::: ::   :::     ::   
- :        :: : :     :      :    
-                                 
-                                                          
- @@@@@@   @@@@@@@   @@@@@@   @@@@@@@  @@@@@@@@   @@@@@@   
-@@@@@@@   @@@@@@@  @@@@@@@@  @@@@@@@  @@@@@@@@  @@@@@@@   
-!@@         @@!    @@!  @@@    @@!    @@!       !@@       
-!@!         !@!    !@!  @!@    !@!    !@!       !@!       
-!!@@!!      @!!    @!@!@!@!    @!!    @!!!:!    !!@@!!    
- !!@!!!     !!!    !!!@!!!!    !!!    !!!!!:     !!@!!!   
-     !:!    !!:    !!:  !!!    !!:    !!:            !:!  
-    !:!     :!:    :!:  !:!    :!:    :!:           !:!   
-:::: ::      ::    ::   :::     ::     :: ::::  :::: ::   
-:: : :       :      :   : :     :     : :: ::   :: : :    
+@@@@@@@@   @@@@@@   @@@@@@@@@@
+@@@@@@@@  @@@@@@@   @@@@@@@@@@@
+@@!       !@@       @@! @@! @@!
+!@!       !@!       !@! !@! !@!
+@!!!:!    !!@@!!    @!! !!@ @!@
+!!!!!:     !!@!!!   !@!   ! !@!
+!!:            !:!  !!:     !!:
+:!:           !:!   :!:     :!:
+ ::       :::: ::   :::     ::
+ :        :: : :     :      :
+
+
+ @@@@@@   @@@@@@@   @@@@@@   @@@@@@@  @@@@@@@@   @@@@@@
+@@@@@@@   @@@@@@@  @@@@@@@@  @@@@@@@  @@@@@@@@  @@@@@@@
+!@@         @@!    @@!  @@@    @@!    @@!       !@@
+!@!         !@!    !@!  @!@    !@!    !@!       !@!
+!!@@!!      @!!    @!@!@!@!    @!!    @!!!:!    !!@@!!
+ !!@!!!     !!!    !!!@!!!!    !!!    !!!!!:     !!@!!!
+     !:!    !!:    !!:  !!!    !!:    !!:            !:!
+    !:!     :!:    :!:  !:!    :!:    :!:           !:!
+:::: ::      ::    ::   :::     ::     :: ::::  :::: ::
+:: : :       :      :   : :     :     : :: ::   :: : :
 
 */
 
 
 
-State WANT_ARCHDL_URL = 
-  {
-    /* TEST_EVENT             ACTION                   NEXT_STATE */
+State WANT_ARCHDL_URL =
+{
+  /* TEST_EVENT             ACTION                   NEXT_STATE */
 
-    {AFsmHDL_isText,          AFsmHDL_setUrl,          WANT_ARCHDL_URL},
-    {AFsmHDL_isSpace,         NIL,                     WANT_ARCHDL_URL_SP  },
-    {AFsmHDL_isUnknown,       AFsmHDL_raiseError,      NIL             }
-  };
+  {AFsmHDL_isText,          AFsmHDL_setUrl,          WANT_ARCHDL_URL},
+  {AFsmHDL_isSpace,         NIL,                     WANT_ARCHDL_URL_SP  },
+  {AFsmHDL_isUnknown,       AFsmHDL_raiseError,      NIL             }
+};
 State WANT_ARCHDL_URL_SP =
-  {
-    /* TEST_EVENT             ACTION                      NEXT_STATE */
+{
+  /* TEST_EVENT             ACTION                      NEXT_STATE */
 
-    {AFsmHDL_isSpace,         NIL,                        WANT_ARCHDL_URL_SP},
-    {AFsmHDL_isText,          AFsmHDL_setIpAdress,        WANT_ARCHDL_IP_ADRESS},
-    {AFsmHDL_isUnknown,       AFsmHDL_raiseError,         NIL}
-  };
+  {AFsmHDL_isSpace,         NIL,                        WANT_ARCHDL_URL_SP},
+  {AFsmHDL_isText,          AFsmHDL_setIpAdress,        WANT_ARCHDL_IP_ADRESS},
+  {AFsmHDL_isUnknown,       AFsmHDL_raiseError,         NIL}
+};
 State WANT_ARCHDL_IP_ADRESS =
-  {
-    /* TEST_EVENT             ACTION                       NEXT_STATE */
+{
+  /* TEST_EVENT             ACTION                       NEXT_STATE */
 
-    {AFsmHDL_isText,          AFsmHDL_setIpAdress,          WANT_ARCHDL_IP_ADRESS},
-    {AFsmHDL_isSpace,         AFsmHDL_checkIpAdress,        WANT_ARCHDL_IP_SP},
-    {AFsmHDL_isUnknown,       AFsmHDL_raiseError,           NIL}
-  };
-  
-   
- 
+  {AFsmHDL_isText,          AFsmHDL_setIpAdress,          WANT_ARCHDL_IP_ADRESS},
+  {AFsmHDL_isSpace,         AFsmHDL_checkIpAdress,        WANT_ARCHDL_IP_SP},
+  {AFsmHDL_isUnknown,       AFsmHDL_raiseError,           NIL}
+};
+
+
+
 
 State WANT_ARCHDL_IP_SP =
-  {
-    /* TEST_EVENT             ACTION                         NEXT_STATE */
+{
+  /* TEST_EVENT             ACTION                         NEXT_STATE */
 
-    {AFsmHDL_isSpace,         NIL,                           WANT_ARCHDL_IP_SP},
-    {AFsmHDL_isInteger,       AFsmHDL_setCreationDate,       WANT_ARCHDL_CREATION_DATE},
-    {AFsmHDL_isUnknown,       AFsmHDL_raiseErrorCrDate,      NIL}
-  };
+  {AFsmHDL_isSpace,         NIL,                           WANT_ARCHDL_IP_SP},
+  {AFsmHDL_isInteger,       AFsmHDL_setCreationDate,       WANT_ARCHDL_CREATION_DATE},
+  {AFsmHDL_isUnknown,       AFsmHDL_raiseErrorCrDate,      NIL}
+};
 
 State WANT_ARCHDL_CREATION_DATE =
-  {
-    /* TEST_EVENT             ACTION                       NEXT_STATE */
+{
+  /* TEST_EVENT             ACTION                       NEXT_STATE */
 
-    {AFsmHDL_isInteger,       AFsmHDL_setCreationDate,     WANT_ARCHDL_CREATION_DATE},
-    {AFsmHDL_isSpace,         NIL,                         WANT_ARCHDL_CREATION_SP},
-    {AFsmHDL_isUnknown,       AFsmHDL_raiseErrorCrDate,    NIL}
-  };
+  {AFsmHDL_isInteger,       AFsmHDL_setCreationDate,     WANT_ARCHDL_CREATION_DATE},
+  {AFsmHDL_isSpace,         NIL,                         WANT_ARCHDL_CREATION_SP},
+  {AFsmHDL_isUnknown,       AFsmHDL_raiseErrorCrDate,    NIL}
+};
 
 State WANT_ARCHDL_CREATION_SP =
-  {
-    /* TEST_EVENT             ACTION                   NEXT_STATE */
+{
+  /* TEST_EVENT             ACTION                   NEXT_STATE */
 
-    {AFsmHDL_isSpace,         NIL,                     WANT_ARCHDL_CREATION_SP},
-    {AFsmHDL_isText,          AFsmHDL_setMimeType,     WANT_ARCHDL_MIME_TYPE},
-    {AFsmHDL_isUnknown,       AFsmHDL_raiseError,      NIL}
-  };
+  {AFsmHDL_isSpace,         NIL,                     WANT_ARCHDL_CREATION_SP},
+  {AFsmHDL_isText,          AFsmHDL_setMimeType,     WANT_ARCHDL_MIME_TYPE},
+  {AFsmHDL_isUnknown,       AFsmHDL_raiseError,      NIL}
+};
 
 
 State WANT_ARCHDL_MIME_TYPE =
-  {
-    /* TEST_EVENT             ACTION                 NEXT_STATE */
+{
+  /* TEST_EVENT             ACTION                 NEXT_STATE */
 
-    {AFsmHDL_isText,          AFsmHDL_setMimeType,   WANT_ARCHDL_MIME_TYPE},
-    {AFsmHDL_isSpace,         NIL,                   WANT_ARCHDL_MIME_SP},
-    {AFsmHDL_isUnknown,       AFsmHDL_raiseError,    NIL}
-  };
-State WANT_ARCHDL_MIME_SP = 
-  {
-    /* TEST_EVENT             ACTION                       NEXT_STATE */
+  {AFsmHDL_isText,          AFsmHDL_setMimeType,   WANT_ARCHDL_MIME_TYPE},
+  {AFsmHDL_isSpace,         NIL,                   WANT_ARCHDL_MIME_SP},
+  {AFsmHDL_isUnknown,       AFsmHDL_raiseError,    NIL}
+};
+State WANT_ARCHDL_MIME_SP =
+{
+  /* TEST_EVENT             ACTION                       NEXT_STATE */
 
-    {AFsmHDL_isSpace,         NIL,                         WANT_ARCHDL_MIME_SP},
-    {AFsmHDL_isInteger,       AFsmHDL_setDataLength,       WANT_ARCHDL_DATA_LENGTH},
-    {AFsmHDL_isUnknown,       AFsmHDL_raiseErrorDlength,   NIL}
-  };
+  {AFsmHDL_isSpace,         NIL,                         WANT_ARCHDL_MIME_SP},
+  {AFsmHDL_isInteger,       AFsmHDL_setDataLength,       WANT_ARCHDL_DATA_LENGTH},
+  {AFsmHDL_isUnknown,       AFsmHDL_raiseErrorDlength,   NIL}
+};
 
 State WANT_ARCHDL_DATA_LENGTH =
-  {
-    /* TEST_EVENT             ACTION                     NEXT_STATE */
+{
+  /* TEST_EVENT             ACTION                     NEXT_STATE */
 
-    {AFsmHDL_isLF,            AFsmHDL_pushBack,          WANT_ARCHDL_LF},
-    {AFsmHDL_isInteger,       AFsmHDL_setDataLength,     WANT_ARCHDL_DATA_LENGTH},
-    {AFsmHDL_isUnknown,       AFsmHDL_raiseErrorDlength, NIL}
-  };
+  {AFsmHDL_isLF,            AFsmHDL_pushBack,          WANT_ARCHDL_LF},
+  {AFsmHDL_isInteger,       AFsmHDL_setDataLength,     WANT_ARCHDL_DATA_LENGTH},
+  {AFsmHDL_isUnknown,       AFsmHDL_raiseErrorDlength, NIL}
+};
 State WANT_ARCHDL_LF =
-  {
-    /* TEST_EVENT             ACTION                   NEXT_STATE */
+{
+  /* TEST_EVENT             ACTION                   NEXT_STATE */
 
-    {AFsmHDL_isLF,            NIL,                     NIL},
-    {AFsmHDL_isUnknown,       AFsmHDL_raiseError,      NIL}
-  };
+  {AFsmHDL_isLF,            NIL,                     NIL},
+  {AFsmHDL_isUnknown,       AFsmHDL_raiseError,      NIL}
+};
 
 
 
 
 /*
 
-@@@@@@@@   @@@@@@   @@@@@@@@@@   
-@@@@@@@@  @@@@@@@   @@@@@@@@@@@  
-@@!       !@@       @@! @@! @@!  
-!@!       !@!       !@! !@! !@!  
-@!!!:!    !!@@!!    @!! !!@ @!@  
-!!!!!:     !!@!!!   !@!   ! !@!  
-!!:            !:!  !!:     !!:  
-:!:           !:!   :!:     :!:  
- ::       :::: ::   :::     ::   
- :        :: : :     :      :    
-                                 
-                                                           
-@@@@@@@@  @@@  @@@  @@@@@@@@  @@@  @@@  @@@@@@@   @@@@@@   
-@@@@@@@@  @@@  @@@  @@@@@@@@  @@@@ @@@  @@@@@@@  @@@@@@@   
-@@!       @@!  @@@  @@!       @@!@!@@@    @@!    !@@       
-!@!       !@!  @!@  !@!       !@!!@!@!    !@!    !@!       
-@!!!:!    @!@  !@!  @!!!:!    @!@ !!@!    @!!    !!@@!!    
-!!!!!:    !@!  !!!  !!!!!:    !@!  !!!    !!!     !!@!!!   
-!!:       :!:  !!:  !!:       !!:  !!!    !!:         !:!  
-:!:        ::!!:!   :!:       :!:  !:!    :!:        !:!   
- :: ::::    ::::     :: ::::   ::   ::     ::    :::: ::   
-: :: ::      :      : :: ::   ::    :      :     :: : :    
+@@@@@@@@   @@@@@@   @@@@@@@@@@
+@@@@@@@@  @@@@@@@   @@@@@@@@@@@
+@@!       !@@       @@! @@! @@!
+!@!       !@!       !@! !@! !@!
+@!!!:!    !!@@!!    @!! !!@ @!@
+!!!!!:     !!@!!!   !@!   ! !@!
+!!:            !:!  !!:     !!:
+:!:           !:!   :!:     :!:
+ ::       :::: ::   :::     ::
+ :        :: : :     :      :
+
+
+@@@@@@@@  @@@  @@@  @@@@@@@@  @@@  @@@  @@@@@@@   @@@@@@
+@@@@@@@@  @@@  @@@  @@@@@@@@  @@@@ @@@  @@@@@@@  @@@@@@@
+@@!       @@!  @@@  @@!       @@!@!@@@    @@!    !@@
+!@!       !@!  @!@  !@!       !@!!@!@!    !@!    !@!
+@!!!:!    @!@  !@!  @!!!:!    @!@ !!@!    @!!    !!@@!!
+!!!!!:    !@!  !!!  !!!!!:    !@!  !!!    !!!     !!@!!!
+!!:       :!:  !!:  !!:       !!:  !!!    !!:         !:!
+:!:        ::!!:!   :!:       :!:  !:!    :!:        !:!
+ :: ::::    ::::     :: ::::   ::   ::     ::    :::: ::
+: :: ::      :      : :: ::   ::    :      :     :: : :
 
  */
 
@@ -293,28 +294,28 @@ warc_bool_t AFsmHDL_isSpace (void * _hs)
 
   assert (hs);
 
-  return ((hs -> c == ' ')  || (hs -> c == '\t') ||
-          (hs -> c == '\r') || (hs -> c == '\n'));
+  return ( (hs -> c == ' ')  || (hs -> c == '\t') ||
+           (hs -> c == '\r') || (hs -> c == '\n') );
 }
 
 
-warc_bool_t AFsmHDL_isText (void * _hs) 
+warc_bool_t AFsmHDL_isText (void * _hs)
 {
   const HDLState * const hs = _hs;
 
   assert (hs);
 
-  return ((hs -> c != ' ')  && (hs -> c != '\t') &&
-          (hs -> c != '\r') && (hs -> c != '\n'));
+  return ( (hs -> c != ' ')  && (hs -> c != '\t') &&
+           (hs -> c != '\r') && (hs -> c != '\n') );
 }
 
 warc_bool_t AFsmHDL_isInteger (void * _hs)
 {
   const HDLState * const hs = _hs;
-  
+
   assert (hs);
 
-  return ((hs -> c >= 48) && (hs -> c <= 57));
+  return ( (hs -> c >= 48) && (hs -> c <= 57) );
 }
 
 
@@ -341,32 +342,32 @@ warc_bool_t AFsmHDL_isUnknown (void * _hs)
 
 /*
 
-@@@@@@@@   @@@@@@   @@@@@@@@@@   
-@@@@@@@@  @@@@@@@   @@@@@@@@@@@  
-@@!       !@@       @@! @@! @@!  
-!@!       !@!       !@! !@! !@!  
-@!!!:!    !!@@!!    @!! !!@ @!@  
-!!!!!:     !!@!!!   !@!   ! !@!  
-!!:            !:!  !!:     !!:  
-:!:           !:!   :!:     :!:  
- ::       :::: ::   :::     ::   
- :        :: : :     :      :    
-                                 
-                                                                
- @@@@@@    @@@@@@@  @@@@@@@  @@@   @@@@@@   @@@  @@@   @@@@@@   
-@@@@@@@@  @@@@@@@@  @@@@@@@  @@@  @@@@@@@@  @@@@ @@@  @@@@@@@   
-@@!  @@@  !@@         @@!    @@!  @@!  @@@  @@!@!@@@  !@@       
-!@!  @!@  !@!         !@!    !@!  !@!  @!@  !@!!@!@!  !@!       
-@!@!@!@!  !@!         @!!    !!@  @!@  !@!  @!@ !!@!  !!@@!!    
-!!!@!!!!  !!!         !!!    !!!  !@!  !!!  !@!  !!!   !!@!!!   
-!!:  !!!  :!!         !!:    !!:  !!:  !!!  !!:  !!!       !:!  
-:!:  !:!  :!:         :!:    :!:  :!:  !:!  :!:  !:!      !:!   
-::   :::   ::: :::     ::     ::  ::::: ::   ::   ::  :::: ::   
- :   : :   :: :: :     :     :     : :  :   ::    :   :: : :    
+@@@@@@@@   @@@@@@   @@@@@@@@@@
+@@@@@@@@  @@@@@@@   @@@@@@@@@@@
+@@!       !@@       @@! @@! @@!
+!@!       !@!       !@! !@! !@!
+@!!!:!    !!@@!!    @!! !!@ @!@
+!!!!!:     !!@!!!   !@!   ! !@!
+!!:            !:!  !!:     !!:
+:!:           !:!   :!:     :!:
+ ::       :::: ::   :::     ::
+ :        :: : :     :      :
+
+
+ @@@@@@    @@@@@@@  @@@@@@@  @@@   @@@@@@   @@@  @@@   @@@@@@
+@@@@@@@@  @@@@@@@@  @@@@@@@  @@@  @@@@@@@@  @@@@ @@@  @@@@@@@
+@@!  @@@  !@@         @@!    @@!  @@!  @@@  @@!@!@@@  !@@
+!@!  @!@  !@!         !@!    !@!  !@!  @!@  !@!!@!@!  !@!
+@!@!@!@!  !@!         @!!    !!@  @!@  !@!  @!@ !!@!  !!@@!!
+!!!@!!!!  !!!         !!!    !!!  !@!  !!!  !@!  !!!   !!@!!!
+!!:  !!!  :!!         !!:    !!:  !!:  !!!  !!:  !!!       !:!
+:!:  !:!  :!:         :!:    :!:  :!:  !:!  :!:  !:!      !:!
+::   :::   ::: :::     ::     ::  ::::: ::   ::   ::  :::: ::
+ :   : :   :: :: :     :     :     : :  :   ::    :   :: : :
 
 */
 
- 
+
 
 
 
@@ -388,11 +389,11 @@ void AFsmHDL_setDataLength (void * _hs)
 /* void AFsmHDL_checkUrl  (void * _hs) */
 /* { */
 /*   HDLState * const hs  = _hs; */
-  
+
 /*   warc_i32_t        i; */
 /*   assert (hs); */
 /*   i= WString_strstr(hs->url,"://"); */
-  
+
 /*  /\* if unknown uri, stop parsing *\/ */
 /*  if (i == -1) */
 /*    { */
@@ -408,7 +409,7 @@ void AFsmHDL_setDataLength (void * _hs)
 /* void   AFsmHDL_checkMimeType (void * _hs) */
 /* { */
 /*   HDLState * const hs  = _hs; */
-  
+
 /*   warc_i32_t i; */
 /*   assert (hs); */
 /*   i= WString_strstr(hs->mime_type,"/"); */
@@ -429,89 +430,93 @@ WPRIVATE warc_i32_t stroccur (const warc_u8_t * str, unsigned char c)
   warc_u32_t counter = 0;
   warc_u32_t index   = 0;
 
-  while (index < w_strlen (str))
-    { 
-      if(c == str [index])
+  while (index < w_strlen (str) )
+    {
+      if (c == str [index])
         {
           ++ counter;
-          
+
           if (c == str [index + 1])
             return -1;
         }
-      
+
       ++ index;
     }
 
- return counter;
+  return counter;
 }
 
 void   AFsmHDL_checkIpAdress (void * _hs)
 {
- HDLState            * const hs  = _hs;
- const warc_u8_t * strtompon;
- warc_u32_t        index;
- warc_i32_t        Error       = 0;
- warc_i32_t        Digit_Count = 1;
- warc_u32_t        len;
+  HDLState            * const hs  = _hs;
+  const warc_u8_t * strtompon;
+  warc_u32_t        index;
+  warc_i32_t        Error       = 0;
+  warc_i32_t        Digit_Count = 1;
+  warc_u32_t        len;
 
- assert (hs);
- 
- strtompon = WString_getText (hs -> ip_adress);
- 
- if(! isdigit(strtompon[0]))
-   {  
-     Error =1;
-   }
+  assert (hs);
 
- if(! isdigit (strtompon [w_strlen (strtompon) - 1]) 
-    && Error !=1)
-   {
-     Error = 1;
-   }
- 
- if (Error != 1 && stroccur (strtompon, '.') != 3)
-   {
-     Error= 1;
-   }
- 
- if (Error != 1)
-   {
-     len = w_strlen (strtompon);
-     for(index = 1; index < len; ++ index)
-       {      
-         if (strtompon [index] != '.')
-           {
-             
-             if (! isdigit (strtompon [index]))
-               {
-                 
-                 Error=1;
-                 break;
-               }
-             
-             if(isdigit (strtompon [index]))
-               {
-                 Digit_Count ++;
-                 if (Digit_Count == 4)
-                   {
-                     Error = 1;
-                     break;
-                   }
-               }
-           }  
-         if (strtompon [index] == '.')
-           {
+  strtompon = WString_getText (hs -> ip_adress);
+
+  if (! isdigit (strtompon[0]) )
+    {
+      Error = 1;
+    }
+
+  if (! isdigit (strtompon [w_strlen (strtompon) - 1])
+          && Error != 1)
+    {
+      Error = 1;
+    }
+
+  if (Error != 1 && stroccur (strtompon, '.') != 3)
+    {
+      Error = 1;
+    }
+
+  if (Error != 1)
+    {
+      len = w_strlen (strtompon);
+
+      for (index = 1; index < len; ++ index)
+        {
+          if (strtompon [index] != '.')
+            {
+
+              if (! isdigit (strtompon [index]) )
+                {
+
+                  Error = 1;
+                  break;
+                }
+
+              if (isdigit (strtompon [index]) )
+                {
+                  Digit_Count ++;
+
+                  if (Digit_Count == 4)
+                    {
+                      Error = 1;
+                      break;
+                    }
+                }
+            }
+
+          if (strtompon [index] == '.')
+            {
               Digit_Count = 0;
-           }
-       }
-   }
- if (Error == 1)   
+            }
+        }
+    }
+
+  if (Error == 1)
     {
       /* rewind the stream */
       AFsmHDL_rewind (hs, WString_getLength (hs -> ip_adress) + 1);
-      
+
       /* raise the flag errore */
-      WarcDebugMsg("exepting a valid IP address");
+      WarcDebugMsg ("exepting a valid IP address");
       hs -> err = WARC_TRUE;
     }
 }
@@ -531,7 +536,7 @@ void AFsmHDL_setCreationDate (void * _hs)
 
   assert (hs);
 
-  WString_append (hs -> creation_date, & (hs -> c), 1);  
+  WString_append (hs -> creation_date, & (hs -> c), 1);
 }
 
 void AFsmHDL_setMimeType (void * _hs)
@@ -571,23 +576,25 @@ void AFsmHDL_raiseError (void * _hs)
   /* raise "on" the error flag */
   hs -> err = WARC_TRUE;
 }
+
 void AFsmHDL_raiseErrorDlength (void * _hs)
 {
   HDLState * const hs  = _hs;
 
   assert (hs);
-   w_ungetc (hs -> c, hs -> fin);
-   WarcDebugMsg("exepting a valid data length");
+  w_ungetc (hs -> c, hs -> fin);
+  WarcDebugMsg ("exepting a valid data length");
   /* raise "on" the error flag */
   hs -> err = WARC_TRUE;
 }
+
 void  AFsmHDL_raiseErrorCrDate (void * _hs)
 {
   HDLState * const hs  = _hs;
 
   assert (hs);
-   w_ungetc (hs -> c, hs -> fin);
-   WarcDebugMsg("exepting a valid creation date");
+  w_ungetc (hs -> c, hs -> fin);
+  WarcDebugMsg ("exepting a valid creation date");
   /* raise "on" the error flag */
   hs -> err = WARC_TRUE;
 }
@@ -595,16 +602,16 @@ void  AFsmHDL_raiseErrorCrDate (void * _hs)
 
 /*
 
-@@@@@@@@   @@@@@@   @@@@@@@@@@       @@@@@@   @@@@@@@   @@@  
-@@@@@@@@  @@@@@@@   @@@@@@@@@@@     @@@@@@@@  @@@@@@@@  @@@  
-@@!       !@@       @@! @@! @@!     @@!  @@@  @@!  @@@  @@!  
-!@!       !@!       !@! !@! !@!     !@!  @!@  !@!  @!@  !@!  
-@!!!:!    !!@@!!    @!! !!@ @!@     @!@!@!@!  @!@@!@!   !!@  
-!!!!!:     !!@!!!   !@!   ! !@!     !!!@!!!!  !!@!!!    !!!  
-!!:            !:!  !!:     !!:     !!:  !!!  !!:       !!:  
-:!:           !:!   :!:     :!:     :!:  !:!  :!:       :!:  
- ::       :::: ::   :::     ::      ::   :::   ::        ::  
- :        :: : :     :      :        :   : :   :        :    
+@@@@@@@@   @@@@@@   @@@@@@@@@@       @@@@@@   @@@@@@@   @@@
+@@@@@@@@  @@@@@@@   @@@@@@@@@@@     @@@@@@@@  @@@@@@@@  @@@
+@@!       !@@       @@! @@! @@!     @@!  @@@  @@!  @@@  @@!
+!@!       !@!       !@! !@! !@!     !@!  @!@  !@!  @!@  !@!
+@!!!:!    !!@@!!    @!! !!@ @!@     @!@!@!@!  @!@@!@!   !!@
+!!!!!:     !!@!!!   !@!   ! !@!     !!!@!!!!  !!@!!!    !!!
+!!:            !:!  !!:     !!:     !!:  !!!  !!:       !!:
+:!:           !:!   :!:     :!:     :!:  !:!  :!:       :!:
+ ::       :::: ::   :::     ::      ::   :::   ::        ::
+ :        :: : :     :      :        :   : :   :        :
 
 */
 
@@ -618,6 +625,7 @@ void  AFsmHDL_raiseErrorCrDate (void * _hs)
 
 WIPUBLIC const void * AFsmHDL_state (const void * const _self)
 {
+
   const struct AFsmHDL * const self    = _self;
 
   /* preconditions */
@@ -630,13 +638,14 @@ WIPUBLIC const void * AFsmHDL_state (const void * const _self)
 /**
  * @_self: AFsmHDL object
  * @param[out]: warc_bool_t
- * Runs the FSM to detect a WARC header line. Returns a warc_bool_t FSM 
- * detection succeeds or not. 
+ * Runs the FSM to detect a WARC header line. Returns a warc_bool_t FSM
+ * detection succeeds or not.
  * FSM scheduler for WHDLine detection
  */
 
 WPUBLIC warc_bool_t AFsmHDL_run (void * const _self)
 {
+
   struct AFsmHDL * const self = _self;
   char                   c;
 
@@ -653,29 +662,30 @@ WPUBLIC warc_bool_t AFsmHDL_run (void * const _self)
       c = w_fgetc (FIN);
 
       /* EOF or "read error" ? */
-      if (! w_feof (FIN) && ! w_ferror (FIN))
+
+      if (! w_feof (FIN) && ! w_ferror (FIN) )
         CAR = c;
       else
         return (WARC_TRUE);
 
       /* check all events in the current state */
-      for (tp = STATE; tp -> thisEvent (HDLS) == WARC_FALSE; ++ tp) 
+      for (tp = STATE; tp -> thisEvent (HDLS) == WARC_FALSE; ++ tp)
         /* empty body */ ;
 
       /* call the action corresponding to the event */
       if (tp -> action != NIL)
         tp -> action (HDLS);
-      
+
       /* move to the new state if no error */
       /* don't forget to advance the "id" state number */
       unless (ERROR_FLAG)
-        STATE = tp -> newState;
+      STATE = tp -> newState;
       else
         break;
-}
+    }
 
   /* STATE != NIL means "error", otherwise "success" */
-  return (STATE != NIL); 
+  return (STATE != NIL);
 }
 
 
@@ -695,17 +705,17 @@ WPUBLIC void * AFsmHDL_transform (const void * const _self)
   /* preconditions */
   CASSERT (self);
 
-  return (bless (ARecord, 
-            makeC (URL), 
-            makeC (IP_ADRESS),
-            makeC (CREATION_DATE),
-            makeC (MIME_TYPE),
-           (warc_u32_t) atoi ((const char *) WString_getText (DATA_LENGTH))));
-                 
-                  
-               
-                 
-      
+  return (bless (ARecord,
+                 makeC (URL),
+                 makeC (IP_ADRESS),
+                 makeC (CREATION_DATE),
+                 makeC (MIME_TYPE),
+                 (warc_u32_t) atoi ( (const char *) WString_getText (DATA_LENGTH) ) ) );
+
+
+
+
+
 }
 
 
@@ -725,8 +735,8 @@ WPRIVATE void * AFsmHDL_constructor (void * _self, va_list * app)
 
   struct AFsmHDL * const self = _self;
   FILE           *       fin  = va_arg (* app, FILE *);
-  
-  HDLS = wmalloc (sizeof (HDLState));
+
+  HDLS = wmalloc (sizeof (HDLState) );
   assert (HDLS);
 
   FIN   = fin;              /* read from this readable stream */
@@ -734,22 +744,22 @@ WPRIVATE void * AFsmHDL_constructor (void * _self, va_list * app)
   ERROR_FLAG = WARC_FALSE;       /* no error when starting */
 
 
-  DATA_LENGTH = bless (WString, makeS ((warc_u8_t *) ""));
+  DATA_LENGTH = bless (WString, makeS ( (warc_u8_t *) "") );
   assert (DATA_LENGTH);
 
 
-  URL = bless (WString, makeS ((warc_u8_t *) ""));
+  URL = bless (WString, makeS ( (warc_u8_t *) "") );
   assert (URL);
 
-  CREATION_DATE = bless (WString, makeS ((warc_u8_t *) ""));
+  CREATION_DATE = bless (WString, makeS ( (warc_u8_t *) "") );
   assert (CREATION_DATE);
 
-  MIME_TYPE = bless (WString, makeS ((warc_u8_t *) ""));
+  MIME_TYPE = bless (WString, makeS ( (warc_u8_t *) "") );
   assert (MIME_TYPE);
 
-  IP_ADRESS = bless (WString, makeS ((warc_u8_t *) ""));
+  IP_ADRESS = bless (WString, makeS ( (warc_u8_t *) "") );
   assert (IP_ADRESS);
-  
+
   return (self);
 }
 
@@ -760,7 +770,8 @@ WPRIVATE void * AFsmHDL_constructor (void * _self, va_list * app)
  */
 
 WPRIVATE void * AFsmHDL_destructor (void * _self)
-{	
+{
+
   struct AFsmHDL  * const self = _self;
 
   /* preconditions */
@@ -783,7 +794,7 @@ WPRIVATE void * AFsmHDL_destructor (void * _self)
     destroy (MIME_TYPE), MIME_TYPE = NIL;
 
   if (IP_ADRESS)
-    destroy (IP_ADRESS), IP_ADRESS= NIL;
+    destroy (IP_ADRESS), IP_ADRESS = NIL;
 
   wfree (HDLS), HDLS = NIL;
 
@@ -795,10 +806,11 @@ WPRIVATE void * AFsmHDL_destructor (void * _self)
  * WARC AFsmHDL class
  */
 
-static const struct Class _AFsmHDL = {
-	sizeof(struct AFsmHDL),
-	SIGN,
-	AFsmHDL_constructor, AFsmHDL_destructor
-};
+static const struct Class _AFsmHDL =
+  {
+    sizeof (struct AFsmHDL),
+    SIGN,
+    AFsmHDL_constructor, AFsmHDL_destructor
+  };
 
 const void * AFsmHDL = & _AFsmHDL;

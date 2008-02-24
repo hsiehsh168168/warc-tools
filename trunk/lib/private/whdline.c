@@ -32,7 +32,7 @@
 
 
 /*
- * WARC default headers 
+ * WARC default headers
  */
 
 #include <wclass.h>   /* bless, destroy, cassert, struct Class */
@@ -54,20 +54,21 @@
  */
 
 
-struct WHDLine 
-{
-  const void * class;
-  
-  /*@{*/
-  void       * warc_id; /**< The WARC version */
-  warc_u32_t   data_length; /**< The WARC record data length */
-  warc_rec_t   record_type; /**< The WARC record type */
-  void       * subject_uri; /**< The WARC record subject uri */
-  void       * creation_date; /**< The WARC record date of creation */
-  void       * content_type; /**< The WARC record content type */
-  void       * record_id; /**< The WARC record id */
-  /*@}*/
-};
+struct WHDLine
+  {
+
+    const void * class;
+
+    /*@{*/
+    void       * warc_id; /**< The WARC version */
+    warc_u32_t   data_length; /**< The WARC record data length */
+    warc_rec_t   record_type; /**< The WARC record type */
+    void       * subject_uri; /**< The WARC record subject uri */
+    void       * creation_date; /**< The WARC record date of creation */
+    void       * content_type; /**< The WARC record content type */
+    void       * record_id; /**< The WARC record id */
+    /*@}*/
+  };
 
 
 #define    WARC_ID         (self -> warc_id)
@@ -89,12 +90,13 @@ struct WHDLine
 
 WIPUBLIC const warc_u8_t * WHDLine_getWarcId (const void * const _self)
 {
-	const struct WHDLine * const self = _self;
 
-   /* preconditions */
-    CASSERT (self);
+  const struct WHDLine * const self = _self;
 
-	return (WString_getText (WARC_ID));
+  /* preconditions */
+  CASSERT (self);
+
+  return (WString_getText (WARC_ID) );
 }
 
 
@@ -109,12 +111,13 @@ WIPUBLIC const warc_u8_t * WHDLine_getWarcId (const void * const _self)
 
 WIPUBLIC warc_u32_t WHDLine_getWarcIdLen (const void * const _self)
 {
-	const struct WHDLine * const self = _self;
 
-   /* preconditions */
-    CASSERT (self);
+  const struct WHDLine * const self = _self;
 
-	return (WString_getLength (WARC_ID));
+  /* preconditions */
+  CASSERT (self);
+
+  return (WString_getLength (WARC_ID) );
 }
 
 
@@ -128,23 +131,25 @@ WIPUBLIC warc_u32_t WHDLine_getWarcIdLen (const void * const _self)
  * Sets the WARC id field of the WARC-record to "wid"
  */
 
-WIPUBLIC warc_bool_t WHDLine_setWarcId (void * const _self, 
+WIPUBLIC warc_bool_t WHDLine_setWarcId (void * const _self,
                                         const warc_u8_t * wid,
                                         const warc_u32_t len)
 {
+
   struct WHDLine * const self = _self;
-  
+
   /* preconditions */
   CASSERT (self);
   assert  (wid);
 
-  if (w_strcmp (wid, (warc_u8_t *) WARC_VERSION))
-     return (WARC_TRUE);  
-  /* reset the text */
-   
-  if (WString_setText (WARC_ID, wid, len))
+  if (w_strcmp (wid, (warc_u8_t *) WARC_VERSION) )
     return (WARC_TRUE);
-    
+
+  /* reset the text */
+
+  if (WString_setText (WARC_ID, wid, len) )
+    return (WARC_TRUE);
+
   return (WARC_FALSE);
 }
 
@@ -159,12 +164,13 @@ WIPUBLIC warc_bool_t WHDLine_setWarcId (void * const _self,
 
 WIPUBLIC warc_u32_t WHDLine_getDataLength (const void * const _self)
 {
-	const struct WHDLine * const self = _self;
 
-   /* preconditions */
-    CASSERT (self);
+  const struct WHDLine * const self = _self;
 
-	return (DATA_LENGTH);
+  /* preconditions */
+  CASSERT (self);
+
+  return (DATA_LENGTH);
 }
 
 /**
@@ -178,15 +184,16 @@ WIPUBLIC warc_u32_t WHDLine_getDataLength (const void * const _self)
 
 WIPUBLIC warc_bool_t WHDLine_setDataLength (void * const _self, const warc_u32_t len)
 {
-	struct WHDLine * const self = _self;
 
-   /* preconditions */
-    CASSERT (self);
+  struct WHDLine * const self = _self;
 
-	unless (len)
-          return (WARC_TRUE);
+  /* preconditions */
+  CASSERT (self);
 
-    DATA_LENGTH = len;
+  unless (len)
+  return (WARC_TRUE);
+
+  DATA_LENGTH = len;
   return (WARC_FALSE);
 
 }
@@ -202,12 +209,13 @@ WIPUBLIC warc_bool_t WHDLine_setDataLength (void * const _self, const warc_u32_t
 
 WIPUBLIC warc_rec_t WHDLine_getRecordType (const void * const _self)
 {
-	const struct WHDLine * const self = _self;
 
-   /* preconditions */
-    CASSERT (self);
+  const struct WHDLine * const self = _self;
 
-	return (RECORD_TYPE);
+  /* preconditions */
+  CASSERT (self);
+
+  return (RECORD_TYPE);
 }
 
 
@@ -221,17 +229,19 @@ WIPUBLIC warc_rec_t WHDLine_getRecordType (const void * const _self)
  */
 
 WIPUBLIC warc_bool_t WHDLine_setRecordType (void * const _self,
-                                            const warc_rec_t t)
+    const warc_rec_t t)
 {
-	struct WHDLine * const self = _self;
 
-   /* preconditions */
-    CASSERT (self);
+  struct WHDLine * const self = _self;
 
-    if (t > RESOURCE_RECORD)
-       return (WARC_TRUE);
-    
-    RECORD_TYPE = t;
+  /* preconditions */
+  CASSERT (self);
+
+  if (t > RESOURCE_RECORD)
+    return (WARC_TRUE);
+
+  RECORD_TYPE = t;
+
   return (WARC_FALSE);
 }
 
@@ -241,18 +251,19 @@ WIPUBLIC warc_bool_t WHDLine_setRecordType (void * const _self,
  *
  * @return WARC-record subject URI string
  *
- * Returns a constant string which represent the 
+ * Returns a constant string which represent the
  * subject URI of the WARC-record
  */
 
 WIPUBLIC const warc_u8_t * WHDLine_getSubjectUri (const void * const _self)
 {
+
   const struct WHDLine * const self = _self;
-  
+
   /* preconditions */
   CASSERT (self);
 
-  return (WString_getText (SUBJECT_URI));
+  return (WString_getText (SUBJECT_URI) );
 }
 
 /**
@@ -266,12 +277,13 @@ WIPUBLIC const warc_u8_t * WHDLine_getSubjectUri (const void * const _self)
 
 WIPUBLIC warc_u32_t WHDLine_getSubjectUriLen (const void * const _self)
 {
+
   const struct WHDLine * const self = _self;
-  
+
   /* preconditions */
   CASSERT (self);
 
-  return (WString_getLength (SUBJECT_URI));
+  return (WString_getLength (SUBJECT_URI) );
 }
 
 
@@ -285,20 +297,22 @@ WIPUBLIC warc_u32_t WHDLine_getSubjectUriLen (const void * const _self)
  * Sets the subject URI of the WARC-record
  */
 
-WIPUBLIC warc_bool_t WHDLine_setSubjectUri (void * const _self, 
-                                            const warc_u8_t * suri,
-                                            const warc_u32_t len)
+WIPUBLIC warc_bool_t WHDLine_setSubjectUri (void * const _self,
+    const warc_u8_t * suri,
+    const warc_u32_t len)
 {
+
   struct WHDLine * const self = _self;
   /* preconditions */
   CASSERT (self);
   assert (suri);
 
-/*   unless (w_strcasestr(suri,"://")) */
-/*     return (WARC_TRUE);  */
+  /*   unless (w_strcasestr(suri,"://")) */
+  /*     return (WARC_TRUE);  */
 
   /* reset the text */
-  if (WString_setText (SUBJECT_URI, suri, len))
+
+  if (WString_setText (SUBJECT_URI, suri, len) )
     return (WARC_TRUE);
 
   return (WARC_FALSE);
@@ -315,12 +329,13 @@ WIPUBLIC warc_bool_t WHDLine_setSubjectUri (void * const _self,
 
 WIPUBLIC const warc_u8_t * WHDLine_getCreationDate (const void * const _self)
 {
-	const struct WHDLine * const self = _self;
 
-   /* preconditions */
-    CASSERT (self);
+  const struct WHDLine * const self = _self;
 
-	return (WString_getText (CREATION_DATE));
+  /* preconditions */
+  CASSERT (self);
+
+  return (WString_getText (CREATION_DATE) );
 }
 
 
@@ -335,12 +350,13 @@ WIPUBLIC const warc_u8_t * WHDLine_getCreationDate (const void * const _self)
 
 WIPUBLIC warc_u32_t WHDLine_getCreationDateLen (const void * const _self)
 {
-	const struct WHDLine * const self = _self;
 
-   /* preconditions */
-    CASSERT (self);
+  const struct WHDLine * const self = _self;
 
-	return (WString_getLength (CREATION_DATE));
+  /* preconditions */
+  CASSERT (self);
+
+  return (WString_getLength (CREATION_DATE) );
 }
 
 
@@ -356,25 +372,27 @@ WIPUBLIC warc_u32_t WHDLine_getCreationDateLen (const void * const _self)
  */
 
 
-WIPUBLIC warc_bool_t WHDLine_setCreationDate (void * const _self, 
-                                              const warc_u8_t * cd,
-                                              const warc_u32_t len)
+WIPUBLIC warc_bool_t WHDLine_setCreationDate (void * const _self,
+    const warc_u8_t * cd,
+    const warc_u32_t len)
 {
+
   struct WHDLine * const self = _self;
-  warc_u32_t i=0;
- 
+  warc_u32_t i = 0;
+
   /* preconditions */
   CASSERT (self);
   assert (cd);
 
-  for(i=0;i<len;i++)
-   {
-     unless(isdigit(cd[i]))
+  for (i = 0;i < len;i++)
+    {
+      unless (isdigit (cd[i]) )
       return (WARC_TRUE);
     }
 
   /* reset the text */
-  if (WString_setText (CREATION_DATE, cd, len))
+
+  if (WString_setText (CREATION_DATE, cd, len) )
     return (WARC_TRUE);
 
   return (WARC_FALSE);
@@ -391,12 +409,13 @@ WIPUBLIC warc_bool_t WHDLine_setCreationDate (void * const _self,
 
 WIPUBLIC const warc_u8_t * WHDLine_getContentType (const void * const _self)
 {
-	const struct WHDLine * const self = _self;
 
-   /* preconditions */
-    CASSERT (self);
+  const struct WHDLine * const self = _self;
 
-	return (WString_getText (CONTENT_TYPE));
+  /* preconditions */
+  CASSERT (self);
+
+  return (WString_getText (CONTENT_TYPE) );
 }
 
 
@@ -412,12 +431,13 @@ WIPUBLIC const warc_u8_t * WHDLine_getContentType (const void * const _self)
 
 WIPUBLIC warc_u32_t WHDLine_getContentTypeLen (const void * const _self)
 {
-	const struct WHDLine * const self = _self;
 
-   /* preconditions */
-    CASSERT (self);
+  const struct WHDLine * const self = _self;
 
-	return (WString_getLength (CONTENT_TYPE));
+  /* preconditions */
+  CASSERT (self);
+
+  return (WString_getLength (CONTENT_TYPE) );
 }
 
 
@@ -431,20 +451,22 @@ WIPUBLIC warc_u32_t WHDLine_getContentTypeLen (const void * const _self)
  * Sets the WARC-record's content type
  */
 
-WIPUBLIC warc_bool_t WHDLine_setContentType (void * const _self, 
-                                             unsigned const char * ct,
-                                             const warc_u32_t len)
+WIPUBLIC warc_bool_t WHDLine_setContentType (void * const _self,
+    unsigned const char * ct,
+    const warc_u32_t len)
 {
+
   struct WHDLine * const self = _self;
   /* preconditions */
   CASSERT (self);
   assert (ct);
 
- /*  unless (w_strcasestr(ct,"/")) */
-/*     return (WARC_TRUE); */
+  /*  unless (w_strcasestr(ct,"/")) */
+  /*     return (WARC_TRUE); */
 
   /* reset the text */
-  if (WString_setText (CONTENT_TYPE, ct, len))
+
+  if (WString_setText (CONTENT_TYPE, ct, len) )
     return (WARC_TRUE);
 
   return (WARC_FALSE);
@@ -461,12 +483,13 @@ WIPUBLIC warc_bool_t WHDLine_setContentType (void * const _self,
 
 WIPUBLIC const warc_u8_t * WHDLine_getRecordId (const void * const _self)
 {
-	const struct WHDLine * const self = _self;
 
-   /* preconditions */
-    CASSERT (self);
+  const struct WHDLine * const self = _self;
 
-	return (WString_getText (RECORD_ID));
+  /* preconditions */
+  CASSERT (self);
+
+  return (WString_getText (RECORD_ID) );
 }
 
 
@@ -481,12 +504,13 @@ WIPUBLIC const warc_u8_t * WHDLine_getRecordId (const void * const _self)
 
 WIPUBLIC warc_u32_t WHDLine_getRecordIdLen (const void * const _self)
 {
-	const struct WHDLine * const self = _self;
 
-   /* preconditions */
-    CASSERT (self);
+  const struct WHDLine * const self = _self;
 
-	return (WString_getLength (RECORD_ID));
+  /* preconditions */
+  CASSERT (self);
+
+  return (WString_getLength (RECORD_ID) );
 }
 
 
@@ -500,21 +524,23 @@ WIPUBLIC warc_u32_t WHDLine_getRecordIdLen (const void * const _self)
  * Sets the WARC-record id
  */
 
-WPUBLIC warc_bool_t WHDLine_setRecordId (void * const _self, 
-                                         const warc_u8_t * rid,
-                                         const warc_u32_t len)
+WPUBLIC warc_bool_t WHDLine_setRecordId (void * const _self,
+    const warc_u8_t * rid,
+    const warc_u32_t len)
 {
+
   struct WHDLine * const self = _self;
 
   /* preconditions */
   CASSERT (self);
   assert (rid);
 
-/*   unless(w_strcasestr(rid,"://")) */
-/*     return (WARC_TRUE); */
+  /*   unless(w_strcasestr(rid,"://")) */
+  /*     return (WARC_TRUE); */
 
   /* reset the text */
-  if (WString_setText (RECORD_ID, rid, len))
+
+  if (WString_setText (RECORD_ID, rid, len) )
     return (WARC_TRUE);
 
   return (WARC_FALSE);
@@ -530,9 +556,10 @@ WPUBLIC warc_bool_t WHDLine_setRecordId (void * const _self,
  */
 
 WPRIVATE void freeWHDLine (void * _self)
-{	
+{
+
   struct WHDLine * self = _self;
-  
+
   /* preconditions */
   CASSERT (self);
 
@@ -571,6 +598,7 @@ WPRIVATE void freeWHDLine (void * _self)
 
 WPRIVATE void * WHDLine_constructor (void * const _self, va_list * app)
 {
+
   struct WHDLine * const   self  = _self;
 
   const char             * wid   = va_arg (* app, const char *);
@@ -595,10 +623,10 @@ WPRIVATE void * WHDLine_constructor (void * const _self, va_list * app)
 
   WARC_ID = bless (WString, wid, wid_l);
   unless (WARC_ID)
-    {
-      freeWHDLine (self);
-      return (NIL);
-    }
+  {
+    freeWHDLine (self);
+    return (NIL);
+  }
 
   DATA_LENGTH = dl;
 
@@ -606,32 +634,32 @@ WPRIVATE void * WHDLine_constructor (void * const _self, va_list * app)
 
   SUBJECT_URI = bless (WString, su, su_l);
   unless (SUBJECT_URI)
-    {
-      freeWHDLine (self);
-      return (NIL);
-    }
+  {
+    freeWHDLine (self);
+    return (NIL);
+  }
 
   CREATION_DATE = bless (WString, cd, cd_l);
   unless (CREATION_DATE)
-    {
-      freeWHDLine (self);
-      return (NIL);
-    }
+  {
+    freeWHDLine (self);
+    return (NIL);
+  }
 
   CONTENT_TYPE = bless (WString, ct, ct_l);
   unless (CONTENT_TYPE)
-    {
-      freeWHDLine (self);
-      return (NIL);
-    }
+  {
+    freeWHDLine (self);
+    return (NIL);
+  }
 
 
   RECORD_ID = bless (WString, rid, rid_l);
   unless (RECORD_ID)
-    {
-      freeWHDLine (self);
-      return (NIL);
-    }
+  {
+    freeWHDLine (self);
+    return (NIL);
+  }
 
   return self;
 }
@@ -646,7 +674,7 @@ WPRIVATE void * WHDLine_constructor (void * const _self, va_list * app)
  */
 
 WPRIVATE void * WHDLine_destructor (void * _self)
-{	
+{
   freeWHDLine (_self);
 
   return (_self);
@@ -657,10 +685,11 @@ WPRIVATE void * WHDLine_destructor (void * _self)
  * WARC WDLine class
  */
 
-static const struct Class _WHDLine = {
-	sizeof (struct WHDLine),
+static const struct Class _WHDLine =
+  {
+    sizeof (struct WHDLine),
     SIGN,
-	WHDLine_constructor, WHDLine_destructor
-};
+    WHDLine_constructor, WHDLine_destructor
+  };
 
 const void * WHDLine = & _WHDLine;

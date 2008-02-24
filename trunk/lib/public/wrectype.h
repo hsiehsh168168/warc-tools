@@ -30,33 +30,35 @@
 
 /* to mix C and C++ */
 #ifdef __cplusplus
- extern "C" {
+extern "C"
+  {
 #endif
 
 
-/**
- * Portability header file
- */
+    /**
+     * Portability header file
+     */
 
 #include <wport.h>
 
 
-typedef enum 
-  {
-    UNKNOWN_RECORD = 0,
-    WARCINFO_RECORD,
-    RESPONSE_RECORD,
-    REQUEST_RECORD,
-    METADATA_RECORD,
-    REVISIT_RECORD,
-    CONVERSION_RECORD,
-    CONTINUATION_RECORD,
-    RESOURCE_RECORD
-  } warc_rec_t;
+    typedef enum
+    {
+      UNKNOWN_RECORD = 0,
+      WARCINFO_RECORD,
+      RESPONSE_RECORD,
+      REQUEST_RECORD,
+      METADATA_RECORD,
+      REVISIT_RECORD,
+      CONVERSION_RECORD,
+      CONTINUATION_RECORD,
+      RESOURCE_RECORD
+    } warc_rec_t;
 
 
 #ifdef __cplusplus
- }
+  }
+
 #endif
 
 #endif /* __WARC_RECORD_TYPE_H__ */

@@ -32,7 +32,7 @@
 
 
 /*
- * WARC default headers 
+ * WARC default headers
  */
 
 
@@ -50,16 +50,18 @@
  * WARC WGetOpt internal structure
  */
 
-struct WGetOpt {
-  const void * class;
+struct WGetOpt
+  {
 
-  /*@{*/
-  void       * flags;
-  char       * optarg;
-  warc_i32_t   optind;
-  warc_i32_t   sp;
-  /*@}*/
-};
+    const void * class;
+
+    /*@{*/
+    void       * flags;
+    char       * optarg;
+    warc_i32_t   optind;
+    warc_i32_t   sp;
+    /*@}*/
+  };
 
 
 #define FLAGS    (self -> flags)
@@ -76,9 +78,9 @@ struct WGetOpt {
 /* 	(void) write(2, errbuf, 2);} */
 
 #define ERR(s, c)	if(opterr){\
-	fprintf (stderr, "%s", s);\
-	fprintf (stderr, "%c\n", c);\
-	fprintf (stderr, "-- ");}
+      fprintf (stderr, "%s", s);\
+      fprintf (stderr, "%c\n", c);\
+      fprintf (stderr, "-- ");}
 
 
 /**
@@ -89,8 +91,9 @@ struct WGetOpt {
 
 WIPUBLIC char * WGetOpt_argument (const void * const _self)
 {
+
   const struct WGetOpt * const self = _self;
-      
+
   /* preconditions */
   CASSERT (self);
 
@@ -106,9 +109,10 @@ WIPUBLIC char * WGetOpt_argument (const void * const _self)
 
 WIPUBLIC warc_i32_t WGetOpt_indice (const void * const _self)
 {
+
   const struct WGetOpt * const self = _self;
 
-    
+
   /* preconditions */
   CASSERT (self);
 
@@ -125,16 +129,17 @@ WIPUBLIC warc_i32_t WGetOpt_indice (const void * const _self)
  * Parse the arguments against the pattern
  */
 
-WPUBLIC warc_i32_t WGetOpt_parse (void * const _self, warc_i32_t argc, 
+WPUBLIC warc_i32_t WGetOpt_parse (void * const _self, warc_i32_t argc,
                                   const char ** argv)
 {
+
   struct WGetOpt * const self = _self;
-  
+
   const warc_u8_t * cp     = NIL;
   warc_i32_t            c      = 0;
   warc_i32_t	        opterr = 1;
   warc_i32_t	        optopt = 0;
-    
+
   /* preconditions */
   CASSERT (self);
   assert (argc > 1);
@@ -143,61 +148,66 @@ WPUBLIC warc_i32_t WGetOpt_parse (void * const _self, warc_i32_t argc,
   if (SP == 1)
     {
       if (OPTIND >= argc ||
-          argv [OPTIND][0] != '-' || argv [OPTIND][1] == '\0')
+              argv [OPTIND][0] != '-' || argv [OPTIND][1] == '\0')
         {
           return (-1);
         }
-      
-      else if (w_strcmp ((warc_u8_t *) argv [OPTIND], (warc_u8_t *) "--") == 0) 
+
+      else if (w_strcmp ( (warc_u8_t *) argv [OPTIND], (warc_u8_t *) "--") == 0)
         {
           ++ OPTIND;
           return (-1);
         }
     }
-  
+
   optopt = c = argv [OPTIND][SP];
 
-  if (c == ':' || (cp = w_index (WString_getText (FLAGS), c)) == 0) 
+  if (c == ':' || (cp = w_index (WString_getText (FLAGS), c) ) == 0)
     {
-      ERR("illegal option -- ", c);
-      if (argv [OPTIND][++ SP] == '\0') 
+      ERR ("illegal option -- ", c);
+
+      if (argv [OPTIND][++ SP] == '\0')
         {
           ++ OPTIND;
           SP = 1;
         }
-      
+
       return ('?');
     }
-  
-  if (* ++ cp == ':') 
+
+  if (* ++ cp == ':')
     {
       if (argv [OPTIND][SP + 1] != '\0')
         {
           OPTARG = (char *) (& argv [OPTIND ++][SP+1]);
         }
-      else if (++ OPTIND >= argc) 
+
+      else if (++ OPTIND >= argc)
         {
-          ERR("option requires an argument -- ", c);
+          ERR ("option requires an argument -- ", c);
           SP = 1;
 
           return ('?');
-        } 
+        }
+
       else
         OPTARG = (char *) (argv [OPTIND ++]);
-      
+
       SP = 1;
-    } 
-  else 
+    }
+
+  else
     {
-      if (argv [OPTIND][++ SP] == '\0') 
+      if (argv [OPTIND][++ SP] == '\0')
         {
           SP = 1;
           ++ OPTIND;
         }
+
       OPTARG = 0;
     }
-  
-  return(c);
+
+  return (c);
 }
 
 
@@ -214,20 +224,21 @@ WPUBLIC warc_i32_t WGetOpt_parse (void * const _self, warc_i32_t argc,
 
 WPRIVATE void * WGetOpt_constructor (void * _self, va_list * app)
 {
+
   struct WGetOpt     * const self = _self;
 
-  const char         * text = va_arg(* app, const char *);
-  const warc_u32_t     len  = va_arg(* app, const warc_u32_t);
-  
+  const char         * text = va_arg (* app, const char *);
+  const warc_u32_t     len  = va_arg (* app, const warc_u32_t);
+
   /* preconditions */
   assert (text);
 
   FLAGS = bless (WString, text, len);
   unless (FLAGS)
-    {
-      destroy (self);
-      return (NIL);
-    }
+  {
+    destroy (self);
+    return (NIL);
+  }
 
   OPTIND = 1;
   OPTARG = 0;
@@ -246,17 +257,20 @@ WPRIVATE void * WGetOpt_constructor (void * _self, va_list * app)
  */
 
 WPRIVATE void * WGetOpt_destructor (void * _self)
-{	
+{
+
   struct WGetOpt * self = _self;
 
   /* preconditions */
   CASSERT (self);
- 
+
   if (FLAGS)
     destroy (FLAGS), FLAGS = NIL;
 
   OPTIND = 1;
+
   OPTARG = 0;
+
   SP     = 1;
 
   return (self);
@@ -267,10 +281,11 @@ WPRIVATE void * WGetOpt_destructor (void * _self)
  * WARC WGetOpt class
  */
 
-static const struct Class _WGetOpt = {
-	sizeof(struct WGetOpt),
-	SIGN,
-	WGetOpt_constructor, WGetOpt_destructor
-};
+static const struct Class _WGetOpt =
+  {
+    sizeof (struct WGetOpt),
+    SIGN,
+    WGetOpt_constructor, WGetOpt_destructor
+  };
 
 const void * WGetOpt = & _WGetOpt;

@@ -29,36 +29,39 @@
 
 /* to mix C and C++ */
 #ifdef __cplusplus
- extern "C" {
+extern "C"
+  {
 #endif
 
 
-/**
- * Portability header file
- */
+    /**
+     * Portability header file
+     */
 
 #include <wport.h>
 
 
 
-extern const void * AFile;
+    extern const void * AFile;
 
-typedef enum {ARC_FILE_UNCOMPRESSED = 0,
-              ARC_FILE_COMPRESSED_GZIP} afile_comp_t;
+    typedef enum {ARC_FILE_UNCOMPRESSED = 0,
+                  ARC_FILE_COMPRESSED_GZIP
+                 } afile_comp_t;
 
-extern void *          AFile_nextRecord     (void *);
-extern warc_u64_t      AFile_getContentSize (const void * const);
-extern warc_bool_t     AFile_hasMoreRecords (const void * const);
-extern warc_bool_t     AFile_seek           (void *, const warc_u64_t);
-extern warc_bool_t     AFile_register       (void *, void *,
-                                             warc_bool_t (*) 
-                                             (void*, const char *, 
-                                              const warc_u32_t),
-                                             void *);
+    extern void *          AFile_nextRecord     (void *);
+    extern warc_u64_t      AFile_getContentSize (const void * const);
+    extern warc_bool_t     AFile_hasMoreRecords (const void * const);
+    extern warc_bool_t     AFile_seek           (void *, const warc_u64_t);
+    extern warc_bool_t     AFile_register       (void *, void *,
+          warc_bool_t (*)
+          (void*, const char *,
+           const warc_u32_t),
+          void *);
 
 
 #ifdef __cplusplus
- }
+  }
+
 #endif
 
 

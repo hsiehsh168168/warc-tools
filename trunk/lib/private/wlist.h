@@ -29,31 +29,33 @@
 
 /* to mix C and C++ */
 #ifdef __cplusplus
- extern "C" {
+extern "C"
+  {
 #endif
 
 
-/**
- * Portability header file
- */
+    /**
+     * Portability header file
+     */
 
 #include <wport.h>
 
 
-extern const void * WList;
+    extern const void * WList;
 
-extern warc_bool_t      WList_push    (void * const, void * const);
-extern void *       WList_pop     (void * const);
-extern void *       WList_shift   (void * const);
-extern warc_bool_t      WList_unshift (void * const, void * const);
-extern warc_u32_t   WList_size    (const void * const);
-extern const void * WList_get     (const void * const, const warc_u32_t);
-extern void       * WList_remove  (void * const, const warc_u32_t);
-extern void       * WList_set     (void * const, const warc_u32_t,
-                                   void * const);
+    extern warc_bool_t      WList_push    (void * const, void * const);
+    extern void *       WList_pop     (void * const);
+    extern void *       WList_shift   (void * const);
+    extern warc_bool_t      WList_unshift (void * const, void * const);
+    extern warc_u32_t   WList_size    (const void * const);
+    extern const void * WList_get     (const void * const, const warc_u32_t);
+    extern void       * WList_remove  (void * const, const warc_u32_t);
+    extern void       * WList_set     (void * const, const warc_u32_t,
+                                         void * const);
 
 #ifdef __cplusplus
- }
+  }
+
 #endif
 
 

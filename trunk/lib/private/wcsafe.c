@@ -31,7 +31,7 @@
 #include <wport.h>
 
 /*
- * C default headers 
+ * C default headers
  */
 
 #include <stddef.h>
@@ -42,14 +42,14 @@
 #include <wcsafe.h>
 
 
-WPUBLIC ptrdiff_t w_strncpy (warc_u8_t * dst0, 
-                             const warc_u8_t * src0, size_t size) 
+WPUBLIC ptrdiff_t w_strncpy (warc_u8_t * dst0,
+                             const warc_u8_t * src0, size_t size)
 {
 #define INIT_BITS	3
 #define INIT_SIZE	(1UL << (INIT_BITS))	/* must be power of two	*/
 #define INIT_MASK	((INIT_SIZE) - 1)
 
-  if (size) 
+  if (size)
     {
       register size_t          n   = (size + INIT_MASK) / INIT_SIZE;
       register warc_u8_t * dst = dst0;
@@ -57,23 +57,45 @@ WPUBLIC ptrdiff_t w_strncpy (warc_u8_t * dst0,
 
       * (dst + size) = '\0';
 
-      switch (size & INIT_MASK) {
-       case 0:    do { if (!(*dst++ = *src++)) break;
-       case 7:         if (!(*dst++ = *src++)) break;
-       case 6:         if (!(*dst++ = *src++)) break;
-       case 5:         if (!(*dst++ = *src++)) break;
-       case 4:         if (!(*dst++ = *src++)) break;
-       case 3:         if (!(*dst++ = *src++)) break;
-       case 2:         if (!(*dst++ = *src++)) break;
-       case 1:         if (!(*dst++ = *src++)) break;
-       } while (--n > 0);
-      }
+      switch (size & INIT_MASK)
+        {
 
-      return ((ptrdiff_t) (dst - dst0 - 1));
+          case 0:
+
+            do
+              {
+                if (! (*dst++ = *src++) ) break;
+
+              case 7:
+                if (! (*dst++ = *src++) ) break;
+
+              case 6:
+                if (! (*dst++ = *src++) ) break;
+
+              case 5:
+                if (! (*dst++ = *src++) ) break;
+
+              case 4:
+                if (! (*dst++ = *src++) ) break;
+
+              case 3:
+                if (! (*dst++ = *src++) ) break;
+
+              case 2:
+                if (! (*dst++ = *src++) ) break;
+
+              case 1:
+                if (! (*dst++ = *src++) ) break;
+              }
+
+            while (--n > 0);
+        }
+
+      return ( (ptrdiff_t) (dst - dst0 - 1) );
     }
 
   return (0);
-} 
+}
 
 
 
@@ -93,93 +115,119 @@ WPUBLIC ptrdiff_t w_strncpy (warc_u8_t * dst0,
 /* Port to WARC.
  * 2008 Feb 12	voidptrptr, Hanzo Archive Limited		*/
 
-WPUBLIC warc_u8_t * w_strcasestr (const warc_u8_t * phaystack, 
-                                      const warc_u8_t * pneedle)
+WPUBLIC warc_u8_t * w_strcasestr (const warc_u8_t * phaystack,
+                                  const warc_u8_t * pneedle)
 {
   register const warc_u8_t * haystack, * needle;
   register unsigned bl, bu, cl, cu;
-  
+
   haystack = (const warc_u8_t *) phaystack;
   needle   = (const warc_u8_t *) pneedle;
-  
+
   bl = tolower (* needle);
+
   if (bl != '\0')
     {
       bu = _toupper (bl);
       haystack--;				/* possible ANSI violation */
+
       do
         {
           cl = *++haystack;
+
           if (cl == '\0')
             goto ret0;
         }
-      while ((cl != bl) && (cl != bu));
-      
+
+      while ( (cl != bl) && (cl != bu) );
+
       cl = tolower (*++needle);
+
       if (cl == '\0')
         goto foundneedle;
+
       cu = _toupper (cl);
+
       ++needle;
+
       goto jin;
-      
+
       for (;;)
         {
           register unsigned a;
           register const warc_u8_t *rhaystack, *rneedle;
-          
+
           do
             {
               a = *++haystack;
-              if (a == '\0')
-                goto ret0;
-              if ((a == bl) || (a == bu))
-                break;
-              a = *++haystack;
+
               if (a == '\0')
                 goto ret0;
 
-            shloop:
+              if ( (a == bl) || (a == bu) )
+                break;
+
+              a = *++haystack;
+
+              if (a == '\0')
+                goto ret0;
+
+shloop:
               ;
             }
-          while ((a != bl) && (a != bu));
-          
-        jin:	 
+
+          while ( (a != bl) && (a != bu) );
+
+jin:
           a = *++haystack;
+
           if (a == '\0')
             goto ret0;
-          
-          if ((a != cl) && (a != cu))
+
+          if ( (a != cl) && (a != cu) )
             goto shloop;
-          
+
           rhaystack = haystack-- + 1;
+
           rneedle = needle;
+
           a = tolower (*rneedle);
-          
+
           if (tolower (*rhaystack) == (int) a)
             do
               {
                 if (a == '\0')
                   goto foundneedle;
+
                 ++rhaystack;
+
                 a = tolower (*++needle);
+
                 if (tolower (*rhaystack) != (int) a)
                   break;
+
                 if (a == '\0')
                   goto foundneedle;
+
                 ++rhaystack;
+
                 a = tolower (*++needle);
               }
+
             while (tolower (*rhaystack) == (int) a);
-          
+
           needle = rneedle;		/* took the register-poor approach */
-          
+
           if (a == '\0')
             break;
         }
     }
- foundneedle:
+
+foundneedle:
+
   return (warc_u8_t *) haystack;
- ret0:
+
+ret0:
   return 0;
 }
 
@@ -202,24 +250,24 @@ WPUBLIC const warc_u8_t * w_index (const warc_u8_t * s, int c)
 
 WPUBLIC warc_i32_t w_strcmp (const warc_u8_t * s1, const warc_u8_t * s2)
 {
-  while (*s1 && (*s1 == *s2)) 
+  while (*s1 && (*s1 == *s2) )
     {
       s1++;
       s2++;
     }
-  
-  return ((warc_u8_t) *s1 - (warc_u8_t) *s2);
+
+  return ( (warc_u8_t) *s1 - (warc_u8_t) *s2);
 }
 
 
 WPUBLIC warc_u32_t w_strlen (const warc_u8_t * s)
 {
   register const warc_u8_t * pos = s;
-  
-  while (* pos) 
+
+  while (* pos)
     {
       ++ pos;
     }
-  
+
   return (pos - s);
 }

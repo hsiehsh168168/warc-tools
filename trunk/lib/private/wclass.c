@@ -59,20 +59,23 @@
 
 WPUBLIC void * bless (const void * _class, ...)
 {
+
   const struct Class * class = _class;
   void * p = wcalloc (1, class -> size);
-  
-  assert(p);
+
+  assert (p);
+
   * (const struct Class **) p = class;
-  
+
   if (class -> constructor)
-    {	
+    {
       va_list ap;
-      va_start(ap, _class);
-      p = class -> constructor(p, & ap);
-      va_end(ap);
+      va_start (ap, _class);
+
+      p = class -> constructor (p, & ap);
+      va_end (ap);
     }
-  
+
   return (p);
 }
 
@@ -89,14 +92,15 @@ WPUBLIC void * bless (const void * _class, ...)
 
 WIPUBLIC void destroy (void * self)
 {
+
   const struct Class ** cp = self;
-  
+
   if (self && * cp && (* cp) -> destructor)
     {
-      self = (* cp) -> destructor(self);
+      self = (* cp) -> destructor (self);
     }
-  
-  wfree(self);
+
+  wfree (self);
 }
 
 
@@ -113,10 +117,12 @@ WIPUBLIC void destroy (void * self)
 
 WIPUBLIC void cassert (void * const self, const warc_u32_t sign)
 {
+
   const struct Class ** cp = self;
 
   assert (self);
   assert (* cp);
+
   if (sign != (* cp) -> sign)
     abort ();
 }
