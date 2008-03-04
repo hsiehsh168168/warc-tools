@@ -96,3 +96,17 @@ SRS 33-36, 37-38
 where:
  * -d: run the wserver as a daemon
  * -r: WARCs repository base path
+
+== mkwarc ==
+
+Wraps the given input file or files into a WARC file with one "resource" entry per input file.
+
+`mkwarc [-c] -i <file1> [<file2> [<file3>...]]`
+
+where:
+ * -i: Input file(s) (required)
+ * -c: Compress the WARC files (default no)
+ * -m: Optional MIME type of file (default application/octet-stream)
+ * -u: Optional URL of file (default file:://<filename>)
+
+[I'm not sure how you would supply multiple URLs if there were multiple files. Perhaps the answer is to restrict this command to wrapping a single file into WARC< and to then implement the warcappend command above to let users build up larger WARC files.]
