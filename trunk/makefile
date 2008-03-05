@@ -322,7 +322,7 @@ $(APP)/warcvalidator: $(warcvalidator);  $(CC) $(CFLAGS) -o $@ $(warcvalidator)
 # freshing
 ##############
 
-tclean:		;   rm -f compress* uncompress*
+tclean:		;   rm -f compress* uncompress* *.core
 
 clean:		tclean
 			rm -f $t $(obj) *.o *~ *.a *.so *.log \
