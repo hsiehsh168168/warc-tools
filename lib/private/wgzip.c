@@ -462,10 +462,12 @@ WGzip_skip_header (FILE * source, struct GzipMeta * meta)
         return (Z_READING_ERROR);
     }
 
-  meta -> gzip_header_size = GZIP_STATIC_HEADER_SIZE;
+   meta -> gzip_header_size = GZIP_STATIC_HEADER_SIZE;
 
   if (ID1 != * (p + OFF_ID1) || ID2 != * (p + OFF_ID2) || CM != * (p + OFF_CM) )
-    return (Z_HEADER_ERROR);
+    {
+      return (Z_HEADER_ERROR);
+    }
 
   flg = p[OFF_FLG];
 
@@ -617,8 +619,9 @@ WGzip_decode (const void * _self,  FILE * source, warc_u64_t offset,
             }
 
           if (ret == Z_STREAM_END)
-            goto STREAM_END;
-
+            {
+              goto STREAM_END;
+            }
 
         }
 

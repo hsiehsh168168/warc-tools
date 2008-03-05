@@ -1,5 +1,5 @@
-warc/0.9  22764             resource filedesc://BnF-elec2007-20070524113301-00040-heritrix1.arc 20070524113301 text/plain uuid:877D5525F83927689B9DDB4956CC8A7AE9ED68DA15B312D4
-IpAddress:0.0.0.0
+warc/0.9  22762             resource filedesc://BnF-elec2007-20070524113301-00040-heritrix1.arc 20070524113301 text/plain filedesc://BnF-elec2007-20070524113301-00040-heritrix1.arc
+Ip:0.0.0.0
 
 1 1 InternetArchive
 URL IP-address Archive-date Content-type Archive-length

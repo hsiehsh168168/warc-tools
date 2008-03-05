@@ -64,7 +64,7 @@ int test2 (void)
   fprintf (stderr, "%s>\n", t);
 
   WAnvl_setKey   (a, makeS ("CCCC") );
-  WAnvl_setValue (a, makeS ("DDDD") );
+  WAnvl_setValue (a, makeS ("1234") );
 
   fprintf (stdout, "key  : %s\n", WAnvl_getKey   (a) );
   fprintf (stdout, "value: %s\n", WAnvl_getValue (a) );

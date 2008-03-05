@@ -245,6 +245,20 @@ CONTINUE:
 }
 
 
+/* this is a callback for uncompressing the entire ARC record */
+warc_u32_t callback4_arc (const warc_u8_t * buffer,
+                          const warc_u32_t nbr, void * env)
+{
+  FILE * out = (FILE *) env;
+  
+  /* copy the uncompressed 'nbr' bytes to out */
+  if (w_fwrite (buffer, 1, nbr, out) != nbr || w_ferror (out) )
+    return (Z_STOP_DECODING); /* return this value to stop the uncompression */
+  
+  return (Z_CONTINUE_DECODING);
+}
+
+
 FILE * openReading (const char * fin)
 {
   FILE * in;
@@ -374,9 +388,6 @@ int test3 (const char * fin)
   warc_u64_t   csize  = 0;   /* compressed file size */
   warc_u64_t   offset = 0;   /* WARC record offset */
 
-  struct CallbackEnv cenv;
-
-
   fprintf (stdout, "%s>\n", t);
 
   /* empty string */
@@ -389,11 +400,7 @@ int test3 (const char * fin)
   out = openWriting (fout);
   assert (out);
 
-  /* set the environment variable */
-  cenv . out   = out;
-  cenv . crlf  = 0;
-  cenv . usize = 0;
-
+ 
   /* first record at offset 0 */
   offset = 0;
 
@@ -403,12 +410,14 @@ int test3 (const char * fin)
     {
       /* uncompress file from offset 0 using the callback with env = fout */
       ret = WGzip_uncompress (g, in, offset, & usize, & csize,
-                              callback3_arc, (void *) & cenv);
-      assert (! ret);
+                              callback4_arc, (void *) out);
+      if (ret)
+        break;
+
       fprintf (stdout,
                "uncompressed \"%s\" to \"%s\" [usize: %llu][csize: %llu]\n",
                fin, fout,
-               (unsigned long long) cenv . usize, (unsigned long long) csize);
+               (unsigned long long) usize, (unsigned long long) csize);
 
       /* goto to the next record */
       offset += csize;
@@ -512,23 +521,20 @@ int test5 (const char * fin)
 
 int main (int argc, char ** argv)
 {
-  if (argc != 3)
-    {
-      fprintf (stderr, "Gzip file uncompressor\n");
-      fprintf (stderr, "Usage  : %s file\n", argv [0]);
-      fprintf (stderr, "Example: %s app/wdata/testwfile/file2.warc.gz app/wdata/testarc/test.arc.gz\n",
-               argv [0]);
-      fprintf (stderr, "         ls uncompressed*\n");
-      return (1);
-    }
+  const char * f1 = "app/wdata/testwfile/file.warc.gz";
+ /*  const char * f2 = "app/wdata/testarc/test.arc.gz"; */
+  const char * f2 = "../data/test1.arc.gz";
+
+  UNUSED (argc);
+  UNUSED (argv);
 
   /* uncomment to try a spesific test */
-
-  /*   test1 (argv [1]); */
-  /*   test2 (argv [1]); */
-  /*   test3 (argv [2]); */
-  /*   test4 (argv [1]); */
-  test5 (argv [1]);
+  test1 (f1);
+  test2 (f1);
+  test3 (f2);
+  test4 (f1);
+  test5 (f1);
+  test5 (f2);
 
   return 0;
 }

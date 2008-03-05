@@ -1,7 +1,7 @@
 Requirements
 -------------
 
-WARC is a standalone library with no requirements but GCC. Doxygen is optional and only needed to generate technical documentation. (http://www.stack.nl/~dimitri/doxygen).
+WARC is a standalone library with no requirements but GCC.
 
 The library was tested in x86 and PPC on both 32 bits and 64 bits architectures.
 
@@ -61,8 +61,74 @@ Get a fresh copy of the library from subversion:
 
 Compile the library with:
 
-   make
+  $ make
 
-or use gmake on FreeBSD, NetBSD or OpenBSD:
+or use "gmake" on FreeBSD, NetBSD or OpenBSD:
 
-   gmake
+  $ gmake
+
+
+
+Optional
+---------
+
+The following UNIX commands are used in the "makefile" to build "optional 
+stuffs" (see below) and need to be present in your system (adjust your PATH 
+environment variable if necessary):
+
+- cat
+- find
+- gzip
+- mkdir
+- rm
+- cp
+- tar
+
+
+* To start unit tests, type:
+
+  $ make test
+
+* To build a tarball version of the library, type:
+
+  $ make tgz
+
+* To build RPM and DEB package, you need to install the following
+softwares first:
+
+- dpkg: http://en.wikipedia.org/wiki/Dpkg
+- alien: http://kitenet.net/~joey/code/alien/
+
+Thus, to build a DEP package type (as a mortal user):
+
+ $ make deb
+
+or, to build an RPM package type (as root):
+
+ # make rpm
+
+* To build the technical documentation, you need to install "Doxygen" from:
+  http://www.stack.nl/~dimitri/doxygen
+
+Then, build it with:
+
+ $ make doc
+
+* You need a "bash shell" to be able to use the following scripts:
+app/arc2warc.sh
+app/warcvalidator.sh
+
+* To compute LOC statistics, you need to install "c_count" from:
+  http://www.chris-lott.org/resources/cmetrics/
+
+Then, type:
+
+  $ ./misc/statistic.sh .
+
+* To beautify C code, you need to install "astyle" from:
+  http://sourceforge.net/projects/astyle/
+
+Then, type:
+ 
+  $ ./misc/beautifier.sh .
+

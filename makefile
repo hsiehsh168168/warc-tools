@@ -27,11 +27,15 @@
 
 UNAME_S  := $(shell uname -s 2>/dev/null || echo unknown)
 UNAME_O  := $(shell uname -o 2>/dev/null || echo unknown)
+VERSION  := $(shell cat version)
+NAME     = warc-tools
+PROJECT  = $(NAME)-$(VERSION)
 
 APP      = app
 TST      = utest
 DOC      = doc
 LIB      = lib
+MISC     = misc
 PUBLIC   = $(LIB)/public
 PRIVATE  = $(LIB)/private
 PLUGIN   = $(PRIVATE)/plugin
@@ -143,11 +147,16 @@ h   += $(GZIP)/crc32.h $(GZIP)/deflate.h $(GZIP)/inffast.h \
 	  $(GZIP)/wgzipbit.h $(GZIP)/wos.h $(GZIP)/zconf.h $(GZIP)/zlib.h \
 	  $(GZIP)/zutil.h $(GZIP)/trees.h $(PUBLIC)/wgzip.h
 h	   += $(TIGER)/tiger.h
-t	= $(TST)/string $(TST)/list   $(TST)/anvl \
+
+u	= $(TST)/string $(TST)/list   $(TST)/anvl \
 	  $(TST)/record $(TST)/object $(TST)/hdline \
 	  $(TST)/gzip   $(TST)/gunzip $(TST)/file \
-	  $(TST)/arcrecord $(TST)/arcfile $(TST)/a2w $(TST)/uuid $(TST)/getopt
-t  += $(APP)/arc2warc $(APP)/warcdump $(APP)/warcfilter $(APP)/warcvalidator
+	  $(TST)/arcrecord $(TST)/arcfile $(TST)/a2w \
+	  $(TST)/uuid $(TST)/getopt
+t  += $(u)
+
+a  = $(APP)/arc2warc $(APP)/warcdump $(APP)/warcfilter $(APP)/warcvalidator
+t  += $(a)
 
 
 ###############
@@ -163,10 +172,45 @@ gzlib = $(GZIP)/adler32.o $(GZIP)/crc32.o $(GZIP)/deflate.o \
 		$(PRIVATE)/wgzip.o $(PRIVATE)/wendian.o
 
 all:  		$t
+
 static:		$(libwarc)	; ar cvr libwarc.a $(libwarc); ranlib libwarc.a
+
+source:	static $(a)
+		rm -rf $(PROJECT)
+		mkdir -p $(PROJECT)/usr/local/bin
+		mkdir -p $(PROJECT)/usr/local/include
+		mkdir -p $(PROJECT)/usr/local/lib
+		cp -f $(a) $(PROJECT)/usr/local/bin
+		cp -f $(APP)/*.sh $(PROJECT)/usr/local/bin
+		find $(LIB) -name "*.h" -type "f" -exec cp -f '{}' $(PROJECT)/usr/local/include \;
+		find $(LIB) -name "*.x" -type "f" -exec cp -f '{}' $(PROJECT)/usr/local/include \;
+		mv libwarc.a $(PROJECT)/usr/local/lib
+
+tgz:	source
+		rm -f $(PROJECT).tar.gz
+		tar cvf $(PROJECT).tar warc-tools-$(VERSION)
+		gzip -9 $(PROJECT).tar
+		rm -rf $(PROJECT)
+
+deb:	source
+		rm -f $(PROJECT).deb
+		cp -rf $(MISC)/DEBIAN $(PROJECT)/
+		dpkg-deb --build  $(PROJECT)
+		rm -rf $(PROJECT)
+
+rpm:	deb
+		rm -f $(PROJECT).rpm
+		alien -r $(PROJECT).deb
+		rm -f $(PROJECT).deb
+
+test:	$(u)
+		@$(TST)/test.sh $(u)
+
+doc:        ;   doxygen ./doc/warcdoc
 
 .c.o:
 	  	${CC} ${CFLAGS} -o $@ -c $<
+
 
 
 ##################
@@ -278,13 +322,14 @@ $(APP)/warcvalidator: $(warcvalidator);  $(CC) $(CFLAGS) -o $@ $(warcvalidator)
 # freshing
 ##############
 
-clean:		;   rm -f $t $(obj) *.o *~ *.a *.so *.log \
+tclean:		;   rm -f compress* uncompress*
+
+clean:		tclean
+			rm -f $t $(obj) *.o *~ *.a *.so *.log \
 	            $(PUBLIC)/*~ $(PRIVATE)/*~ $(PLUGIN)/*~ $(GZIP)/*~ \
 		    $(APP)/*~ $(APP)/*.exe $(TST)/*~ $(TST)/*.exe $(DOC)/*~ \
 			$(WIN32DEP)/*~ $(TIGER)/*~ semantic.cache depend \
-			*.gz compress* uncompress*
-			rm -rf $(DOC)/html
+			*.gz misc/*~ $(MISC)/DEBIAN/*~
+			rm -rf $(DOC)/html warc-tools*
 
-doc:        ;   doxygen ./doc/warcdoc
-
-.PHONY: all static clean doc
+.PHONY: all static clean tclean doc source tgz rpm deb
