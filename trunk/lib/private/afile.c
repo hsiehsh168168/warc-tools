@@ -85,7 +85,7 @@ struct AFile
 
 
 
-/* this is a callback for uncompressing the entire ARC file */
+/* this is a callback for uncompressing the entire ARC record */
 WPRIVATE warc_u32_t arecover (const warc_u8_t * buffer,
                               const warc_u32_t nbr, void * env)
 {

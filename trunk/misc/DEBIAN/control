@@ -1,0 +1,16 @@
+Package: warc-tools
+Version: 0.17
+Section: libs
+Priority: optional
+Architecture: all
+Depends: bash
+Maintainer: ineodev <jobs@ineodev.com>
+Installed-Size: 1844
+Description: Warc is a tool used in  web archiving
+ This package provide many tools that concern the warc file format : 
+ Warc file parser, Arc file converter to Warc file and more tools.
+ 
+ This packge contains also a Warc librairy to use for developpement
+
+
+

@@ -339,25 +339,17 @@ int test7 (const char * unused)
 
 int main (int argc, char ** argv)
 {
-  int (* tests []) (const char *) = { test5, test6, test7 };
-
-  /*   int (* tests [])(const char *) = { test1, test2, test3, test4 }; */
-
+  const char * f = "app/wdata/testwfile/warcfile.warc";
+  int (* tests []) (const char *) = { test1, test2, test3, test4,
+                                      test5, test6, test7 };
   warc_u32_t  i = 0;
 
-  if (argc != 2)
-    {
-      fprintf (stderr, "Gzip file compressor\n");
-      fprintf (stderr, "Usage  : %s file\n", argv [0]);
-      fprintf (stderr, "Example: %s app/wdata/testwfile/warcfile.warc\n",
-               argv [0]);
-      fprintf (stderr, "         ls *.zip\n");
-      return (1);
-    }
+  UNUSED (argc);
+  UNUSED (argv);
 
   for (i = 0; i < ARRAY_LEN (tests); ++ i)
     {
-      tests [i] (argv [1]);
+      tests [i] (f);
     }
 
   return 0;
