@@ -76,6 +76,7 @@ The following UNIX commands are used in the "makefile" to build "optional
 stuffs" (see below) and need to be present in your system (adjust your PATH 
 environment variable if necessary):
 
+- echo
 - cat
 - find
 - gzip
