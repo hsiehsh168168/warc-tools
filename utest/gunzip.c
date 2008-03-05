@@ -522,9 +522,8 @@ int test5 (const char * fin)
 int main (int argc, char ** argv)
 {
   const char * f1 = "app/wdata/testwfile/file.warc.gz";
- /*  const char * f2 = "app/wdata/testarc/test.arc.gz"; */
-  const char * f2 = "../data/test1.arc.gz";
-
+  const char * f2 = "app/wdata/testarc/test.arc.gz";
+ 
   UNUSED (argc);
   UNUSED (argv);
 
