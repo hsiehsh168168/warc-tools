@@ -39,17 +39,31 @@ echo "# Starting unit tests for warc-tools #" >&2
 echo "######################################" >&2
 echo
 
-
-for i in $@;
+i=0
+j=0
+for t in $@;
 do
-    ($i >/dev/null 2>&1)
-
-    if [ $? = 0 ]; then 
-        echo "+ do test: $i [OK]"
-    else 
-        echo "- do test: $i [NOK]"
+    if [ "$t" = "utest/object" ]; then
+        trap "Normal behaviour for this special unit test" ABRT INT TERM EXIT
+        $t >/dev/null 2>&1
+        trap - ABRT INT TERM EXIT
+    else
+        $t >/dev/null 2>&1
     fi
 
+    if [ $? = 0 ]; then 
+        let "i=$i + 1"
+        echo "+ do test: $t [OK]"
+    else 
+        let "j=$j + 1"
+        echo "- do test: $t [NOK]"
+    fi
 done
+
+let "a=$i + $j"
+
+echo
+echo "$a tests: $i passed   $j failed"
+echo
 
 exit 0
