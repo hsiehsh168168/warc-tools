@@ -76,6 +76,7 @@ The following UNIX commands are used in the "makefile" to build "optional
 stuffs" (see below) and need to be present in your system (adjust your PATH 
 environment variable if necessary):
 
+- bash shell
 - echo
 - cat
 - find
@@ -94,17 +95,17 @@ environment variable if necessary):
 
   $ make tgz
 
-* To build RPM and DEB package, you need to install the following
+* To build an RPM or DEB package, you need to install the following
 softwares first:
 
-- dpkg: http://en.wikipedia.org/wiki/Dpkg
+- dpkg:  http://en.wikipedia.org/wiki/Dpkg
 - alien: http://kitenet.net/~joey/code/alien/
 
-Thus, to build a DEP package type (as a mortal user):
+For a DEP package type (as a mortal user):
 
  $ make deb
 
-or, to build an RPM package type (as root):
+For an RPM package type (as root):
 
  # make rpm
 
@@ -116,6 +117,7 @@ Then, build it with:
  $ make doc
 
 * You need a "bash shell" to be able to use the following scripts:
+
 app/arc2warc.sh
 app/warcvalidator.sh
 
@@ -132,4 +134,14 @@ Then, type:
 Then, type:
  
   $ ./misc/beautifier.sh .
+
+
+* The library is compiled with debbuging symbols by default.
+You can disable this feature by commenting the "makefile" line:
+
+DFLAG     = -g
+
+like this:
+
+#DFLAG     = -g
 
