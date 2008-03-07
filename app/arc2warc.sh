@@ -30,8 +30,8 @@ usage () {
     echo "Convert all ARC files in a directory to WARC files"
     echo "Usage: $0 <-d dirname> [-b agzip] [-c wgzip] [-v] [-h]"  >&2
     echo "       -d     : directory name containing ARC files"  >&2
-    echo "       -b     : ARC files are compressed (default yes)"  >&2
-    echo "       -c     : WARC files will be compressed (default yes)"  >&2
+    echo "       -b     : assume all ARC files are GZIP compressed (default yes)"  >&2
+    echo "       -c     : WARC files will be GZIP compressed (default yes)"  >&2
     echo "       -h     : print this help message"  >&2
     echo "       -v     : output version information and exit"  >&2
     exit 1
