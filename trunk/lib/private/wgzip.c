@@ -50,13 +50,17 @@
 #endif
 #include <wgzipbit.h>
 
-#define OUT_BUFFER_SIZE  65536
-#define IN_BUFFER_SIZE   16384
+
+#ifndef WARC_GZIP_IN_BUFFER_SIZE
+#define WARC_GZIP_IN_BUFFER_SIZE   32768 /* 16384 */
+#endif
+
+#ifndef WARC_GZIP_OUT_BUFFER_SIZE
+#define WARC_GZIP_OUT_BUFFER_SIZE  65536
+#endif
 
 
 
-
-#define SIGN 8
 
 
 /**
@@ -77,6 +81,8 @@ struct GzipMeta
 /**
  * WARC WGzip class internal
  */
+
+#define SIGN 8
 
 struct WGzip
   {
@@ -119,8 +125,8 @@ WPUBLIC warc_i32_t WGzip_compress (const void * const _self,
 
   const struct WGzip * const self = _self;
 
-  warc_u8_t in  [IN_BUFFER_SIZE];
-  warc_u8_t out [IN_BUFFER_SIZE];
+  warc_u8_t in  [WARC_GZIP_IN_BUFFER_SIZE];
+  warc_u8_t out [WARC_GZIP_IN_BUFFER_SIZE];
   z_stream   strm;
   warc_i32_t ret;
   warc_u32_t space = EXTRA_GZIP_HEADER;
@@ -204,7 +210,7 @@ WPUBLIC warc_i32_t WGzip_compress (const void * const _self,
   /* compress until end of file */
   do
     {
-      strm.avail_in = w_fread (in, 1, IN_BUFFER_SIZE, source);
+      strm.avail_in = w_fread (in, 1, WARC_GZIP_IN_BUFFER_SIZE, source);
 
       if (w_ferror (source) )
         {
@@ -221,13 +227,13 @@ WPUBLIC warc_i32_t WGzip_compress (const void * const _self,
 
       do
         {
-          strm.avail_out = IN_BUFFER_SIZE;
+          strm.avail_out = WARC_GZIP_IN_BUFFER_SIZE;
           strm.next_out  = out;
 
           ret = deflate (& strm, flush);    /* no bad return value */
           assert (Z_STREAM_ERROR != ret);   /* state not clobbered */
 
-          have = IN_BUFFER_SIZE - strm.avail_out;
+          have = WARC_GZIP_IN_BUFFER_SIZE - strm.avail_out;
 
           /* how many bytes were compressed */
           * csize += have;
@@ -529,8 +535,8 @@ WGzip_decode (const void * _self,  FILE * source, warc_u64_t offset,
   warc_u32_t          have   = 0;
   warc_i32_t          ret    = 0;
   z_stream            strm;
-  warc_u8_t           in     [IN_BUFFER_SIZE];
-  warc_u8_t           out    [OUT_BUFFER_SIZE];
+  warc_u8_t           in     [WARC_GZIP_IN_BUFFER_SIZE];
+  warc_u8_t           out    [WARC_GZIP_OUT_BUFFER_SIZE];
 
   /* seek to the correct record offset */
   /*   if (0 != fseek (source, offset, SEEK_SET)) */
@@ -568,7 +574,7 @@ WGzip_decode (const void * _self,  FILE * source, warc_u64_t offset,
     {
       warc_u32_t av_in;
 
-      strm.avail_in = w_fread (in, 1, IN_BUFFER_SIZE, source);
+      strm.avail_in = w_fread (in, 1, WARC_GZIP_IN_BUFFER_SIZE, source);
 
       if (w_ferror (source) || 0 == strm.avail_in)
         {
@@ -647,7 +653,6 @@ STREAM_END:
       w_fseek_from_start (source, offset + meta -> csize);
       WGzip_adjustRecord (source, meta);
     }
-
 
 END:
 

@@ -118,7 +118,7 @@ WFsmHDL_setRecordType   (void *), WFsmHDL_setSubjectUri  (void *),
 WFsmHDL_setCreationDate (void *), WFsmHDL_setContentType (void *),
 WFsmHDL_setRecordId     (void *), WFsmHDL_pushBack       (void *),
 WFsmHDL_checkRecordType (void *), WFsmHDL_raiseError     (void *),
-WFsmHDL_checkWarcID     (void *),
+WFsmHDL_checkCreationDate (void*), WFsmHDL_checkWarcID     (void *),
 WFsmHDL_raiseErrorDlength (void *),  WFsmHDL_raiseErrorCrDate (void *);
 
 /* WFsmHDL_checkContentType (void *), */
@@ -288,7 +288,7 @@ State WANT_HDL_CREATION_DATE =
   /* TEST_EVENT             ACTION                   NEXT_STATE */
 
   {WFsmHDL_isInteger,       WFsmHDL_setCreationDate,  WANT_HDL_CREATION_DATE},
-  {WFsmHDL_isSpace,         NIL,                      WANT_HDL_CREATION_SP  },
+  {WFsmHDL_isSpace,         WFsmHDL_checkCreationDate,WANT_HDL_CREATION_SP  },
   {WFsmHDL_isUnknown,       WFsmHDL_raiseErrorCrDate, NIL}
 };
 
@@ -497,6 +497,50 @@ void WFsmHDL_setRecordType (void * _hs)
   assert (hs);
 
   WString_append (hs -> record_type, & (hs -> c), 1);
+}
+
+
+void WFsmHDL_checkCreationDate (void * _hs)
+{
+  HDLState            * const hs  = _hs;
+  const warc_u8_t     *       strtompon;
+  warc_u32_t                  len;
+
+  assert (hs);
+
+  len       = WString_getLength (hs -> creation_date);
+  strtompon = WString_getText (hs -> creation_date);
+
+  if (len != 14)
+    {
+      w_fprintf(fprintf (stderr, "error> found creation date: %s\n", (char *) strtompon));
+
+      /* raise the flag error */
+      WarcDebugMsg ("expecting a valid creation date with 14 digits");
+      hs -> err = WARC_TRUE;
+
+      /* rewind the stream */
+      WFsmHDL_rewind (hs, WString_getLength (hs -> creation_date) + 1);
+    }
+  else
+    {
+      while (len)
+        {
+          len --;
+          if (! isdigit (strtompon[len]))
+            {
+              w_fprintf(fprintf (stderr, "error> found creation date: %s\n", (char *) strtompon));
+
+              /* raise the flag error */
+              WarcDebugMsg ("expecting a valid creation date: not digit character");
+              hs -> err = WARC_TRUE;
+              
+              /* rewind the stream */
+              WFsmHDL_rewind (hs, WString_getLength (hs -> creation_date) + 1);
+              break;
+            }
+        }
+    }
 }
 
 void WFsmHDL_checkRecordType (void * _hs)
