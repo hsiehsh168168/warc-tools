@@ -108,8 +108,8 @@ void AFsmHDL_setDataLength  (void *), AFsmHDL_setIpAdress       (void *),
 AFsmHDL_setUrl         (void *), AFsmHDL_setCreationDate   (void *),
 AFsmHDL_setMimeType    (void *), AFsmHDL_pushBack          (void *),
 AFsmHDL_checkRecordType (void *), AFsmHDL_raiseError        (void *),
-AFsmHDL_checkIpAdress  (void *), AFsmHDL_raiseErrorDlength (void *),
-AFsmHDL_raiseErrorCrDate     (void *)                              ;
+AFsmHDL_checkIpAddress  (void *), AFsmHDL_raiseErrorDlength (void *),
+  AFsmHDL_raiseErrorCrDate     (void *), AFsmHDL_checkCreationDate (void *);
 
 /* AFsmHDL_checkMimeType (void *), */
 /* AFsmHDL_checkUrl       (void *), */
@@ -189,7 +189,7 @@ State WANT_ARCHDL_IP_ADRESS =
   /* TEST_EVENT             ACTION                       NEXT_STATE */
 
   {AFsmHDL_isText,          AFsmHDL_setIpAdress,          WANT_ARCHDL_IP_ADRESS},
-  {AFsmHDL_isSpace,         AFsmHDL_checkIpAdress,        WANT_ARCHDL_IP_SP},
+  {AFsmHDL_isSpace,         AFsmHDL_checkIpAddress,        WANT_ARCHDL_IP_SP},
   {AFsmHDL_isUnknown,       AFsmHDL_raiseError,           NIL}
 };
 
@@ -210,7 +210,7 @@ State WANT_ARCHDL_CREATION_DATE =
   /* TEST_EVENT             ACTION                       NEXT_STATE */
 
   {AFsmHDL_isInteger,       AFsmHDL_setCreationDate,     WANT_ARCHDL_CREATION_DATE},
-  {AFsmHDL_isSpace,         NIL,                         WANT_ARCHDL_CREATION_SP},
+  {AFsmHDL_isSpace,         AFsmHDL_checkCreationDate,   WANT_ARCHDL_CREATION_SP},
   {AFsmHDL_isUnknown,       AFsmHDL_raiseErrorCrDate,    NIL}
 };
 
@@ -401,7 +401,7 @@ void AFsmHDL_setDataLength (void * _hs)
 /*      AFsmHDL_rewind (hs, WString_getLength (hs -> url) + 1); */
 
 /*      /\* raise the flag errore *\/ */
-/*      WarcDebugMsg("exepting a valid URL"); */
+/*      WarcDebugMsg("expecting a valid URL"); */
 /*      hs -> err = WARC_TRUE; */
 /*    } */
 /* } */
@@ -420,106 +420,221 @@ void AFsmHDL_setDataLength (void * _hs)
 /*      AFsmHDL_rewind (hs, WString_getLength (hs -> mime_type) + 1); */
 
 /*      /\* raise the flag errore *\/ */
-/*      WarcDebugMsg("exepting a valid MimeType"); */
+/*      WarcDebugMsg("expecting a valid MimeType"); */
 /*      hs -> err = WARC_TRUE; */
 /*    } */
 /* } */
 
-WPRIVATE warc_i32_t stroccur (const warc_u8_t * str, unsigned char c)
-{
-  warc_u32_t counter = 0;
-  warc_u32_t index   = 0;
 
-  while (index < w_strlen (str) )
-    {
-      if (c == str [index])
-        {
-          ++ counter;
 
-          if (c == str [index + 1])
-            return -1;
-        }
-
-      ++ index;
-    }
-
-  return counter;
-}
-
-void   AFsmHDL_checkIpAdress (void * _hs)
+void AFsmHDL_checkCreationDate (void * _hs)
 {
   HDLState            * const hs  = _hs;
-  const warc_u8_t * strtompon;
-  warc_u32_t        index;
-  warc_i32_t        Error       = 0;
-  warc_i32_t        Digit_Count = 1;
-  warc_u32_t        len;
+  const warc_u8_t     *       strtompon;
+  warc_u32_t                  len;
 
   assert (hs);
 
-  strtompon = WString_getText (hs -> ip_adress);
+  len       = WString_getLength (hs -> creation_date);
+  strtompon = WString_getText (hs -> creation_date);
 
-  if (! isdigit (strtompon[0]) )
+ /*  printf(">>> CREATION DATE: %s %u\n",  WString_getText (hs -> creation_date), len); */
+
+  if (len != 14)
     {
-      Error = 1;
+      w_fprintf(fprintf (stderr, "error> found creation date: %s\n", (char *) strtompon));
+
+      /* raise the flag error */
+      WarcDebugMsg ("expecting a valid creation date with 14 digits");
+      hs -> err = WARC_TRUE;
+
+      /* rewind the stream */
+      AFsmHDL_rewind (hs, WString_getLength (hs -> creation_date) + 1);
     }
-
-  if (! isdigit (strtompon [w_strlen (strtompon) - 1])
-          && Error != 1)
+  else
     {
-      Error = 1;
-    }
 
-  if (Error != 1 && stroccur (strtompon, '.') != 3)
-    {
-      Error = 1;
-    }
-
-  if (Error != 1)
-    {
-      len = w_strlen (strtompon);
-
-      for (index = 1; index < len; ++ index)
+      while (len)
         {
-          if (strtompon [index] != '.')
+          len --;
+          if (! isdigit (strtompon[len]))
             {
+              w_fprintf(fprintf (stderr, "error> found creation date: %s\n", (char *) strtompon));
 
-              if (! isdigit (strtompon [index]) )
-                {
-
-                  Error = 1;
-                  break;
-                }
-
-              if (isdigit (strtompon [index]) )
-                {
-                  Digit_Count ++;
-
-                  if (Digit_Count == 4)
-                    {
-                      Error = 1;
-                      break;
-                    }
-                }
-            }
-
-          if (strtompon [index] == '.')
-            {
-              Digit_Count = 0;
+              /* raise the flag error */
+              WarcDebugMsg ("expecting a valid creation date: not digit character");
+              hs -> err = WARC_TRUE;
+              
+              /* rewind the stream */
+              AFsmHDL_rewind (hs, WString_getLength (hs -> creation_date) + 1);
+              break;
             }
         }
     }
-
-  if (Error == 1)
-    {
-      /* rewind the stream */
-      AFsmHDL_rewind (hs, WString_getLength (hs -> ip_adress) + 1);
-
-      /* raise the flag errore */
-      WarcDebugMsg ("exepting a valid IP address");
-      hs -> err = WARC_TRUE;
-    }
 }
+
+
+
+
+void AFsmHDL_checkIpAddress (void * _hs)
+{
+#define PORTMAX 65535 /* or whatever appropriate */
+
+  HDLState        * const hs  = _hs;
+  const warc_u8_t * ipadd     = NIL;
+  warc_u32_t   rc;
+  warc_u32_t   b1, b2, b3, b4, port = 0;
+  warc_u8_t    c;
+
+  assert (hs);
+
+  ipadd = WString_getText (hs -> ip_adress);
+
+  rc = sscanf ((const char *) ipadd, "%3u.%3u.%3u.%3u:%u%c",
+               & b1, & b2, & b3, & b4, & port, & c);
+
+  if (rc != 4 && rc != 5) 
+    {
+      w_fprintf(fprintf (stderr, "error> found IP address: %s\n", (char *) ipadd));
+      /* raise the flag error */
+      WarcDebugMsg ("expecting a valid IP address: accept only IPv4 adresses");
+      hs -> err = WARC_TRUE;
+      
+      /* rewind the stream */
+      AFsmHDL_rewind (hs, WString_getLength (hs -> creation_date) + 1);
+      return;
+    }
+  
+  
+  if ((b1 | b2 | b3 | b4) > 255 || port > PORTMAX)
+    {
+      w_fprintf(fprintf (stderr, "error> found IP address: %s\n", (char *) ipadd));
+      /* raise the flag error */
+      WarcDebugMsg ("expecting a valid IP address: IP range greater than 255 or port number greater than" PORTMAX);
+      hs -> err = WARC_TRUE;
+      
+      /* rewind the stream */
+      AFsmHDL_rewind (hs, WString_getLength (hs -> creation_date) + 1);
+      return;
+    }
+  
+  if (strspn ((const char *) ipadd, "0123456789.:") < WString_getLength (hs -> creation_date))
+    {
+      w_fprintf(fprintf (stderr, "error> found IP address: %s\n", (char *) ipadd));
+      /* raise the flag error */
+      WarcDebugMsg ("expecting a valid IP address: only \"0123456789.:\" are valid");
+      hs -> err = WARC_TRUE;
+      
+      /* rewind the stream */
+      AFsmHDL_rewind (hs, WString_getLength (hs -> creation_date) + 1);
+      return;
+    }
+
+  /* Valid IP address */
+}
+
+
+/* WPRIVATE warc_i32_t stroccur (const warc_u8_t * str, unsigned char c) */
+/* { */
+/*   warc_u32_t counter = 0; */
+/*   warc_u32_t index   = 0; */
+
+/*   while (index < w_strlen (str) ) */
+/*     { */
+/*       if (c == str [index]) */
+/*         { */
+/*           ++ counter; */
+
+/*           if (c == str [index + 1]) */
+/*             return -1; */
+/*         } */
+
+/*       ++ index; */
+/*     } */
+
+/*   return counter; */
+/* } */
+
+/* void   AFsmHDL_checkIpAddress (void * _hs) */
+/* { */
+/*   HDLState            * const hs  = _hs; */
+/*   const warc_u8_t * strtompon; */
+/*   warc_u32_t        index; */
+/*   warc_i32_t        Error       = 0; */
+/*   warc_i32_t        Digit_Count = 1; */
+/*   warc_u32_t        len; */
+
+/*   assert (hs); */
+
+/*   strtompon = WString_getText (hs -> ip_adress); */
+
+/*   if (! isdigit (strtompon[0]) ) */
+/*     { */
+/*       Error = 1; */
+/*     } */
+
+/*   if (! isdigit (strtompon [w_strlen (strtompon) - 1]) */
+/*           && Error != 1) */
+/*     { */
+/*       Error = 1; */
+/*     } */
+
+/*   if (Error != 1 && stroccur (strtompon, '.') != 3) */
+/*     { */
+/*       Error = 1; */
+/*     } */
+
+/*   if (Error != 1) */
+/*     { */
+/*       len = w_strlen (strtompon); */
+
+/*       for (index = 1; index < len; ++ index) */
+/*         { */
+/*           if (strtompon [index] != '.') */
+/*             { */
+
+/*               if (! isdigit (strtompon [index]) ) */
+/*                 { */
+
+/*                   Error = 1; */
+/*                   break; */
+/*                 } */
+
+/*               if (isdigit (strtompon [index]) ) */
+/*                 { */
+/*                   Digit_Count ++; */
+
+/*                   if (Digit_Count == 4) */
+/*                     { */
+/*                       Error = 1; */
+/*                       break; */
+/*                     } */
+/*                 } */
+/*             } */
+
+/*           if (strtompon [index] == '.') */
+/*             { */
+/*               Digit_Count = 0; */
+/*             } */
+/*         } */
+/*     } */
+
+/*   if (Error == 1) */
+/*     { */
+/*       char buf [20]; */
+
+/*       /\* rewind the stream *\/ */
+/*       AFsmHDL_rewind (hs, WString_getLength (hs -> ip_adress) + 1); */
+
+/*       fread (buf, sizeof(char), 19, hs -> fin); */
+/*       buf [19] = '\0'; */
+/*       printf (">>> invalid IP address: %s\n", buf); */
+
+/*       /\* raise the flag error *\/ */
+/*       WarcDebugMsg ("expecting a valid IP address"); */
+/*       hs -> err = WARC_TRUE; */
+/*     } */
+/* } */
 
 void AFsmHDL_setUrl (void * _hs)
 {
@@ -583,7 +698,7 @@ void AFsmHDL_raiseErrorDlength (void * _hs)
 
   assert (hs);
   w_ungetc (hs -> c, hs -> fin);
-  WarcDebugMsg ("exepting a valid data length");
+  WarcDebugMsg ("expecting a valid data length");
   /* raise "on" the error flag */
   hs -> err = WARC_TRUE;
 }
@@ -591,10 +706,16 @@ void AFsmHDL_raiseErrorDlength (void * _hs)
 void  AFsmHDL_raiseErrorCrDate (void * _hs)
 {
   HDLState * const hs  = _hs;
+/*   char buf [14]; */
 
   assert (hs);
   w_ungetc (hs -> c, hs -> fin);
-  WarcDebugMsg ("exepting a valid creation date");
+
+/*   fread (buf, sizeof(char), 13, hs -> fin); */
+/*   buf [13] = '\0'; */
+/*   printf (">>> invalid date : %s\n", buf); */
+
+  WarcDebugMsg ("expecting a valid creation date");
   /* raise "on" the error flag */
   hs -> err = WARC_TRUE;
 }

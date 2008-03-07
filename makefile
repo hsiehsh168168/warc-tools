@@ -57,13 +57,16 @@ DFLAG     = -g
 
 CFLAGS    = -Wall -W -Wunused -ansi -pedantic -Werror -Wno-long-long \
 			-Wunused-function -std=gnu89 $(OPT)
-CFLAGS += $(DFLAG)
+
 #CFLAGS  += -Wunreachable-code 
 #CFLAGS  += -NDEBUG
 #CFLAGS  += -Wconversion -Wtraditional -Wmissing-prototypes -Wshadow
 
-# uncomment the line below to compile with large file settings (i.e. 64 bits offsets)
+# comment the line below to compile without large file support (i.e. 64 bits offsets)
 CFLAGS  += -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGE_FILES
+
+# comment the line below to compile without debugging symbols
+CFLAGS += $(DFLAG)
 
 # uncomment the line below to compile with optimization enabled
 #CFLAGS += -O3 -march=i686 -pipe
@@ -73,6 +76,10 @@ CFLAGS  += -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGE_FILES
 
 # uncomment the line below to disable all printing via "w_fprintf"
 #CFLAGS += -Dw_fprintf=""
+
+# uncomment the lines below to allocate bigger (or lesser) buffer for Gzip compression (or uncompression)
+#CFLAGS += -DWARC_GZIP_IN_BUFFER_SIZE=32768
+#CFLAGS += -DWARC_GZIP_OUT_BUFFER_SIZE=65536
 
 # GCC extra flags
 GCC_EXTRA = -Wextra
