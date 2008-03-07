@@ -114,9 +114,9 @@ int main (int argc, const char ** argv)
       fprintf (stderr, "Usage: %s -a <file.arc> [-b] -f <file.warc> [-c]\n",
                argv [0]);
       fprintf (stderr, "\t-a    : valid ARC file name\n");
-      fprintf (stderr, "\t[-b]  : GZIP compressed ARC (default true)\n");
+      fprintf (stderr, "\t[-b]  : assume ARC file is GZIP compressed (default yes)\n");
       fprintf (stderr, "\t-f    : valid WARC file name\n");
-      fprintf (stderr, "\t[-c]  : GZIP compressed WARC (default true)\n");
+      fprintf (stderr, "\t[-c]  : WARC file will be GZIP compressed (default yes)\n");
       return (2);
     }
 
