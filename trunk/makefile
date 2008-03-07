@@ -220,7 +220,7 @@ rpm:	deb
 		alien -r $(PROJECT).deb
 		rm -f $(PROJECT).deb
 
-test_all:	;	$(TST)/test.sh $(u)
+test_all:	;	@$(TST)/test.sh $(u)
 test:   $(u) test_all tclean
 
 doc:        ;   doxygen ./doc/warcdoc
