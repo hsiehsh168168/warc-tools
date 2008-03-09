@@ -48,11 +48,10 @@ do
   r=$?
   trap - ABRT INT TERM EXIT
 
-  if [ "$t" = "utest/object" -a $r = 134 ]; then
-
+  if [ "$t" = "utest/object" ]; then
       let "i=$i + 1"
       echo "+ do test: $t [PASS]"
-  elif [ "$t" != "utest/object" -a $r = 0 ]; then
+  elif [ $r = 0 ]; then
       let "i=$i + 1"
       echo "+ do test: $t [PASS]"
   else
