@@ -53,7 +53,7 @@ int main (int argc, const char ** argv)
   warc_i32_t       c       = 0;
   warc_u8_t      * flags   = (warc_u8_t *) "cvf:";
   char           * fname   = NIL;
-  wfile_comp_t     cmode   = WARC_FILE_COMPRESSED_GZIP;
+  wfile_comp_t     cmode   = WARC_FILE_UNCOMPRESSED;
   warc_bool_t      verbose = WARC_FALSE;
 
   if (argc < 2 || argc > 5)
@@ -61,8 +61,8 @@ int main (int argc, const char ** argv)
       fprintf (stderr, "Check WARC file consistency\n");
       fprintf (stderr, "Usage: %s -f <file.warc> [-c] [-v]\n", argv [0]);
       fprintf (stderr, "\t-f    : valid WARC file name\n");
-      fprintf (stderr, "\t[-c]  : GZIP compressed WARC (default true)\n");
-      fprintf (stderr, "\t[-v]  : verbose mode (default false)\n");
+      fprintf (stderr, "\t[-c]  : assume GZIP compressed WARC (default no)\n");
+      fprintf (stderr, "\t[-v]  : verbose mode (default no)\n");
       return (2);
     }
 
@@ -87,7 +87,7 @@ int main (int argc, const char ** argv)
             break;
 
           case 'c' :
-            cmode = WARC_FILE_UNCOMPRESSED;
+            cmode = WARC_FILE_COMPRESSED_GZIP;
 
             break;
 

@@ -139,7 +139,7 @@ b	+= $(TIGER)/tiger.c
 c	= $(b) \
 	  $(TST)/string.c        $(TST)/list.c        $(TST)/hdline.c \
 	  $(TST)/anvl.c          $(TST)/record.c      $(TST)/file.c  \
-	  $(TST)/arcrecord.c     $(TST)/gzip.c        $(TST)/gunzip.c \
+	  $(TST)/arcrecord.c     $(TST)/warcgzip.c    $(TST)/warcgunzip.c \
 	  $(TST)/arcfile.c       $(TST)/a2w.c         $(TST)/uuid.c \
 	  $(TST)/getopt.c        $(TST)/object.c
 c	+= $(APP)/arc2warc.c     $(APP)/warcdump.c    $(APP)/warcfilter.c \
@@ -162,7 +162,7 @@ h	+= $(TIGER)/tiger.h
 
 u	= $(TST)/string          $(TST)/list          $(TST)/anvl \
 	  $(TST)/record          $(TST)/uuid          $(TST)/hdline \
-	  $(TST)/gzip            $(TST)/gunzip        $(TST)/file \
+	  $(TST)/warcgzip        $(TST)/warcgunzip    $(TST)/file \
 	  $(TST)/arcrecord       $(TST)/arcfile       $(TST)/a2w \
 	  $(TST)/getopt          $(TST)/object
 
@@ -251,10 +251,10 @@ record	= $(PRIVATE)/wclass.o    $(PRIVATE)/wstring.o   $(PRIVATE)/wlist.o \
 	      $(PRIVATE)/wfsmhdl.o   $(PRIVATE)/wfsmanvl.o  $(PRIVATE)/wcsafe.o \
 		  ${MKTEMP}.o            $(TST)/record.o
 
-gzip	= $(PRIVATE)/wclass.o    $(gzlib)               $(TST)/gzip.o \
+warcgzip  = $(PRIVATE)/wclass.o    $(gzlib)               $(TST)/warcgzip.o \
 		  $(PRIVATE)/wcsafe.o
 
-gunzip	= $(PRIVATE)/wclass.o    $(gzlib)               $(TST)/gunzip.o \
+warcgunzip= $(PRIVATE)/wclass.o    $(gzlib)               $(TST)/warcgunzip.o \
 		  $(PRIVATE)/wcsafe.o
 
 object	= $(PRIVATE)/wclass.o    $(PRIVATE)/wstring.o   $(PRIVATE)/wlist.o \
@@ -300,8 +300,8 @@ $(TST)/string:	  $(string);     $(CC) $(CFLAGS)   -o $@ $(string)
 $(TST)/list:	  $(list);       $(CC) $(CFLAGS)   -o $@ $(list)
 $(TST)/hdline:	  $(hdline);     $(CC) $(CFLAGS)   -o $@ $(hdline)
 $(TST)/record:	  $(record);     $(CC) $(CFLAGS)   -o $@ $(record)
-$(TST)/gzip:	  $(gzip);       $(CC) $(CFLAGS)   -o $@ $(gzip)
-$(TST)/gunzip:	  $(gunzip);     $(CC) $(CFLAGS)   -o $@ $(gunzip)
+$(TST)/warcgzip:  $(warcgzip);   $(CC) $(CFLAGS)   -o $@ $(warcgzip)
+$(TST)/warcgunzip:$(warcgunzip); $(CC) $(CFLAGS)   -o $@ $(warcgunzip)
 $(TST)/anvl:	  $(anvl);       $(CC) $(CFLAGS)   -o $@ $(anvl)
 $(TST)/object:	  $(object);     $(CC) $(CFLAGS)   -o $@ $(object)
 $(TST)/file:      $(file);       $(CC) $(CFLAGS)   -o $@ $(file)
