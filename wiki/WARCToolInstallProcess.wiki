@@ -50,10 +50,12 @@ The library was tested in x86 and PPC on both 32 bits and 64 bits architectures.
     # gunzip libiconv-1.11-sol10-sparc-local.gz
     # gunzip gcc-3.4.6-sol10-sparc-local.gz
     # gunzip make-3.81-sol10-sparc-local.gz
+    # gunzip binutils-2.17-sol10-sparc-local.gz
 
-    # pkgadd -d libiconv-1.11-sol10-sparc-local.gz
-    # pkgadd -d gcc-3.4.6-sol10-sparc-local.gz
-    # pkgadd -d make-3.81-sol10-sparc-local.gz
+    # pkgadd -d libiconv-1.11-sol10-sparc-local
+    # pkgadd -d gcc-3.4.6-sol10-sparc-local
+    # pkgadd -d make-3.81-sol10-sparc-local
+    # pkgadd -d binutils-2.17-sol10-sparc-local
 
     # export PATH=$PATH:/usr/local/bin
     }}}
@@ -79,3 +81,5 @@ or use _gmake_ on FreeBSD, NetBSD or OpenBSD:
    {{{
    gmake
    }}}
+
+= see doc/install for more information =
