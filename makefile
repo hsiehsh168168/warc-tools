@@ -29,8 +29,7 @@ UNAME_S  := $(shell uname -s 2>/dev/null || echo unknown)
 UNAME_O  := $(shell uname -o 2>/dev/null || echo unknown)
 
 VERSION  := $(shell cat version)
-NAME     = warc-tools
-PROJECT  = $(NAME)-$(VERSION)
+
 
 APP      = app
 TST      = utest
@@ -46,11 +45,24 @@ OSDEP    = $(PRIVATE)/os
 WIN32DEP = $(OSDEP)/win32
 HEADERS  = -I. -I$(PRIVATE) -I$(PUBLIC) -I$(GZIP) -I$(TIGER)
 
+MAJOR     = 0
+MINOR     = 17
+RELEASE   = 80
+LIBSUFFIX = so
+LIBNAME   = libwarc
+SONAME	  =,$(LIBNAME).$(LIBSUFFIX).$(MAJOR)
+SHAREDNAME=$(LIBNAME).$(LIBSUFFIX).$(MAJOR).$(MINOR).$(RELEASE)
+
+NAME     = warc-tools
+PROJECT  = $(NAME)-$(MAJOR).$(MINOR)
+
+
 ###############
 # flags
 ###############
 
 MAKE	  = make
+RANLIB	  = ranlib
 
 GCC       = gcc
 CC	  	  = $(GCC) $(HEADERS)
@@ -89,11 +101,13 @@ GCC_EXTRA = -Wextra
 # OS dependant functions (for portability issue)
 MKTEMP = $(PRIVATE)/wmktmp
 
-# compile WARC as a xshared library
+# compile WARC as a sshared library
+SHARED_OS	 = shared_unix
 ifeq ($(W_SHARED),on)
-	CFLAGS    += -fPIC
+	S_CFLAGS    += -fPIC -DPIC
 endif
 
+# adapt makefile to OS
 ifeq ($(UNAME_S),Linux)
 	CFLAGS    += -pedantic-errors
 endif
@@ -109,9 +123,14 @@ ifeq ($(UNAME_S),NetBSD)
 	MAKE       = gmake
 endif
 ifeq ($(UNAME_S),Darwin)
-	CFLAGS += -pedantic
+	CFLAGS 		+= -pedantic
+	LIBSUFFIX    = dylib
+	INSTALLNAME	 = $(LIBNAME).$(MAJOR).$(LIBSUFFIX)
+	SHAREDNAME	 = $(LIBNAME).$(MAJOR).$(MINOR).$(RELEASE).$(LIBSUFFIX)
+	SHARED_OS	 = shared_osx
 endif
 ifeq ($(UNAME_S),SunOS)
+	SONAME	  =
 endif
 ifneq ($(findstring MINGW,$(UNAME_S)),)
 	MKTEMP   = $(WIN32DEP)/wmktmp
@@ -198,14 +217,26 @@ gzlib   = $(GZIP)/adler32.o  $(GZIP)/crc32.o      $(GZIP)/deflate.o \
 
 all:  	$t
 
-static:	$(libwarc)	; ar cvr libwarc.a $(libwarc); ranlib libwarc.a
+static:	$(libwarc)	; ar cvr $(LIBNAME).a $(libwarc); $(RANLIB) $(LIBNAME).a
 
-make_shared: clean $(libwarc)
-		$(CC) -shared -Wl,-soname,libwarc.so.$(VERSION).1 \
-		      -o libwarc.so.$(VERSION).1 $(libwarc)
+# http://rute.2038bug.com/node26.html.gz (Unix, Unix-like)
+shared_unix: clean $(libwarc)
+		$(CC) -shared -lc -Wl,-soname$(SONAME) \
+		      -o $(SHAREDNAME) $(libwarc)
+		ln -sf $(SHAREDNAME)  $(LIBNAME).$(LIBSUFFIX).$(MAJOR) && \
+		ln -sf $(SHAREDNAME)  $(LIBNAME).$(LIBSUFFIX)
 
-shared: 
-		@$(MAKE) W_SHARED="on" make_shared
+# http://www.finkproject.org/doc/porting/shared.php (MacOS X)
+shared_osx: clean $(libwarc)
+		$(CC) -dynamiclib -install_name $(INSTALLNAME) \
+		-compatibility_version $(MAJOR).$(MINOR) \
+		-current_version $(MAJOR).$(MINOR).$(RELEASE) \
+		-o $(SHAREDNAME) $(libwarc)
+		ln -sf $(SHAREDNAME)  $(LIBNAME).$(MAJOR).$(LIBSUFFIX) && \
+		ln -sf $(SHAREDNAME)  $(LIBNAME).$(LIBSUFFIX)
+
+shared:
+		@$(MAKE) W_SHARED="on" $(SHARED_OS)
 
 source:	shared static $(a)
 		rm -rf $(PROJECT)
@@ -216,15 +247,13 @@ source:	shared static $(a)
 		cp -f $(APP)/*.sh $(PROJECT)/usr/local/bin
 		find $(LIB) -name "*.h" -type "f" -exec cp -f '{}' $(PROJECT)/usr/local/include \;
 		find $(LIB) -name "*.x" -type "f" -exec cp -f '{}' $(PROJECT)/usr/local/include \;
-		mv libwarc.a               $(PROJECT)/usr/local/lib
-		mv libwarc.so.$(VERSION).1 $(PROJECT)/usr/local/lib
-		cd $(PROJECT)/usr/local/lib && \
-		ln -sf libwarc.so.$(VERSION).1  libwarc.so && \
-		ln -sf libwarc.so.$(VERSION).1  libwarc.so.$(VERSION)
+		mv $(LIBNAME).a              $(PROJECT)/usr/local/lib
+		mv $(LIBNAME).*$(LIBSUFFIX)* $(PROJECT)/usr/local/lib
+
 
 tgz:	source
 		rm -f $(PROJECT).tar.gz
-		tar cvf $(PROJECT).tar warc-tools-$(VERSION)
+		tar cvf $(PROJECT).tar $(PROJECT)
 		gzip -9 $(PROJECT).tar
 		rm -rf $(PROJECT)
 
@@ -386,7 +415,7 @@ clean:		tclean
 				   $(APP)/*.exe   $(TST)/*~         $(TST)/*.exe \
                    $(DOC)/*~      $(WIN32DEP)/*~    $(TIGER)/*~ \
 			       $(MISC)/*~     $(MISC)/DEBIAN/*~ $(PRIVATE)/*~ \
-				   semantic.cache depend
+				   semantic.cache depend            *.dylib*
 			@rm -rf $(DOC)/html    warc-tools*
 
 .PHONY: all static clean tclean doc source tgz rpm deb
