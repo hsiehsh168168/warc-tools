@@ -43,21 +43,22 @@ i=0
 j=0
 for t in $@;
 do
-    if [ "$t" = "utest/object" ]; then
-        trap "Normal behaviour for this special unit test" ABRT INT TERM EXIT
-        $t >/dev/null 2>&1
-        trap - ABRT INT TERM EXIT
-    else
-        $t >/dev/null 2>&1
-    fi
+  trap - ABRT INT TERM EXIT
+  $t >/dev/null 2>&1
+  r=$?
+  trap - ABRT INT TERM EXIT
 
-    if [ $? = 0 ]; then 
-        let "i=$i + 1"
-        echo "+ do test: $t [OK]"
-    else 
-        let "j=$j + 1"
-        echo "- do test: $t [NOK]"
-    fi
+  if [ "$t" = "utest/object" -a $r = 134 ]; then
+
+      let "i=$i + 1"
+      echo "+ do test: $t [PASS]"
+  elif [ "$t" != "utest/object" -a $r = 0 ]; then
+      let "i=$i + 1"
+      echo "+ do test: $t [PASS]"
+  else
+      let "j=$j + 1"
+      echo "- do test: $t [FAIL]"
+  fi 
 done
 
 let "a=$i + $j"
@@ -67,3 +68,6 @@ echo "$a tests: $i passed   $j failed"
 echo
 
 exit 0
+
+
+ 
