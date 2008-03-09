@@ -89,15 +89,16 @@ GCC_EXTRA = -Wextra
 # OS dependant functions (for portability issue)
 MKTEMP = $(PRIVATE)/wmktmp
 
-# compile shared library
+# compile WARC as a xshared library
 ifeq ($(W_SHARED),on)
-	CFLAGS  += -Os
+	CFLAGS    += -fPIC
 endif
 
 ifeq ($(UNAME_S),Linux)
-	CFLAGS  += -pedantic-errors
+	CFLAGS    += -pedantic-errors
 endif
 ifeq ($(UNAME_S),FreeBSD)
+	MAKE       = gmake
 endif
 ifeq ($(UNAME_S),OpenBSD)
 	MAKE       = gmake
@@ -105,6 +106,7 @@ ifeq ($(UNAME_S),OpenBSD)
 	GCC_EXTRA  = 
 endif
 ifeq ($(UNAME_S),NetBSD)
+	MAKE       = gmake
 endif
 ifeq ($(UNAME_S),Darwin)
 	CFLAGS += -pedantic
@@ -198,13 +200,14 @@ all:  	$t
 
 static:	$(libwarc)	; ar cvr libwarc.a $(libwarc); ranlib libwarc.a
 
-make_shared:
-		 @$(MAKE) W_SHARED="on"
+make_shared: clean $(libwarc)
+		$(CC) -shared -Wl,-soname,libwarc.so.$(VERSION).1 \
+		      -o libwarc.so.$(VERSION).1 $(libwarc)
 
-shared:
-		@$(MAKE) make_shared
+shared: 
+		@$(MAKE) W_SHARED="on" make_shared
 
-source:	static $(a)
+source:	shared static $(a)
 		rm -rf $(PROJECT)
 		mkdir -p $(PROJECT)/usr/local/bin
 		mkdir -p $(PROJECT)/usr/local/include
@@ -213,7 +216,11 @@ source:	static $(a)
 		cp -f $(APP)/*.sh $(PROJECT)/usr/local/bin
 		find $(LIB) -name "*.h" -type "f" -exec cp -f '{}' $(PROJECT)/usr/local/include \;
 		find $(LIB) -name "*.x" -type "f" -exec cp -f '{}' $(PROJECT)/usr/local/include \;
-		mv libwarc.a $(PROJECT)/usr/local/lib
+		mv libwarc.a               $(PROJECT)/usr/local/lib
+		mv libwarc.so.$(VERSION).1 $(PROJECT)/usr/local/lib
+		cd $(PROJECT)/usr/local/lib && \
+		ln -sf libwarc.so.$(VERSION).1  libwarc.so && \
+		ln -sf libwarc.so.$(VERSION).1  libwarc.so.$(VERSION)
 
 tgz:	source
 		rm -f $(PROJECT).tar.gz
@@ -372,8 +379,8 @@ $(APP)/warcvalidator: $(warcvalidator);  $(CC) $(CFLAGS) -o $@ $(warcvalidator)
 tclean:		;   @rm -f compress* uncompress* *.core
 
 clean:		tclean
-			@rm -f  $t             $(obj)            *.o \
-			       *~             *.a               *.so \
+			@rm -f $t             $(obj)            *.o \
+			       *~             *.a               *.so* \
 			       *.log          *.gz              $(PUBLIC)/*~ \
 			       $(PLUGIN)/*~   $(GZIP)/*~        $(APP)/*~ \
 				   $(APP)/*.exe   $(TST)/*~         $(TST)/*.exe \
