@@ -91,6 +91,14 @@ environment variable if necessary):
 
   $ make test
 
+* To generate static library, type:
+
+  $ make static
+
+* To generate shared library, type:
+
+  $ make shared
+
 * To build a tarball version of the library, type:
 
   $ make tgz
