@@ -50,6 +50,8 @@ HEADERS  = -I. -I$(PRIVATE) -I$(PUBLIC) -I$(GZIP) -I$(TIGER)
 # flags
 ###############
 
+MAKE	  = make
+
 GCC       = gcc
 CC	  	  = $(GCC) $(HEADERS)
 
@@ -87,7 +89,10 @@ GCC_EXTRA = -Wextra
 # OS dependant functions (for portability issue)
 MKTEMP = $(PRIVATE)/wmktmp
 
-
+# compile shared library
+ifeq ($(W_SHARED),on)
+	CFLAGS  += -Os
+endif
 
 ifeq ($(UNAME_S),Linux)
 	CFLAGS  += -pedantic-errors
@@ -95,6 +100,7 @@ endif
 ifeq ($(UNAME_S),FreeBSD)
 endif
 ifeq ($(UNAME_S),OpenBSD)
+	MAKE       = gmake
 	CFLAGS    += -DWINLINE=""
 	GCC_EXTRA  = 
 endif
@@ -182,15 +188,21 @@ t  += $(a)
 
 libwarc = $(b:.c=.o)
 obj     = $(libwarc) $(c:.c=.o)
-gzlib = $(GZIP)/adler32.o  $(GZIP)/crc32.o    $(GZIP)/deflate.o \
-		$(GZIP)/infback.o  $(GZIP)/inffast.o  $(GZIP)/inflate.o \
-	  	$(GZIP)/inftrees.o $(GZIP)/uncompr.o  $(GZIP)/wgzipbit.o \
-	  	$(GZIP)/zutil.o    $(GZIP)/compress.o $(GZIP)/trees.o \
-		$(PRIVATE)/wgzip.o $(PRIVATE)/wendian.o
+gzlib   = $(GZIP)/adler32.o  $(GZIP)/crc32.o      $(GZIP)/deflate.o \
+		  $(GZIP)/infback.o  $(GZIP)/inffast.o    $(GZIP)/inflate.o \
+	  	  $(GZIP)/inftrees.o $(GZIP)/uncompr.o    $(GZIP)/wgzipbit.o \
+	  	  $(GZIP)/zutil.o    $(GZIP)/compress.o   $(GZIP)/trees.o \
+		  $(PRIVATE)/wgzip.o $(PRIVATE)/wendian.o
 
-all:  		$t
+all:  	$t
 
-static:		$(libwarc)	; ar cvr libwarc.a $(libwarc); ranlib libwarc.a
+static:	$(libwarc)	; ar cvr libwarc.a $(libwarc); ranlib libwarc.a
+
+make_shared:
+		 @$(MAKE) W_SHARED="on"
+
+shared:
+		@$(MAKE) make_shared
 
 source:	static $(a)
 		rm -rf $(PROJECT)

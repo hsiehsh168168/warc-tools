@@ -224,7 +224,7 @@ WIPUBLIC warc_u32_t WAnvl_getValueLen (const void * const _self)
 WPRIVATE warc_bool_t WAnvl_validUTF8 (void * const _self,
                                       const warc_u8_t * text)
 {
-  warc_u32_t        nb;
+  warc_u32_t        nb = 0;
   const warc_u8_t * c;
 
   UNUSED (_self);
