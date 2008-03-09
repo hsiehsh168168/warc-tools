@@ -102,9 +102,9 @@ GCC_EXTRA = -Wextra
 MKTEMP = $(PRIVATE)/wmktmp
 
 # compile WARC as a sshared library
-SHARED_OS	 = shared_unix
+SHARED_OS = shared_unix
 ifeq ($(W_SHARED),on)
-	S_CFLAGS    += -fPIC -DPIC
+	S_CFLAGS = -fPIC -DPIC
 endif
 
 # adapt makefile to OS
@@ -124,27 +124,38 @@ ifeq ($(UNAME_S),NetBSD)
 endif
 ifeq ($(UNAME_S),Darwin)
 	CFLAGS 		+= -pedantic
+	SHARED_OS	 = shared_osx
 	LIBSUFFIX    = dylib
 	INSTALLNAME	 = $(LIBNAME).$(MAJOR).$(LIBSUFFIX)
 	SHAREDNAME	 = $(LIBNAME).$(MAJOR).$(MINOR).$(RELEASE).$(LIBSUFFIX)
-	SHARED_OS	 = shared_osx
+	S_CFLAGS     =
 endif
 ifeq ($(UNAME_S),SunOS)
 	SONAME	  =
 endif
 ifneq ($(findstring MINGW,$(UNAME_S)),)
-	MKTEMP   = $(WIN32DEP)/wmktmp
-	HEADERS := $(HEADERS) -I$(WIN32DEP)
+	MKTEMP     = $(WIN32DEP)/wmktmp
+	HEADERS   := $(HEADERS) -I$(WIN32DEP)
+	SHARED_OS  = shared_mingw
+	LIBSUFFIX  = dll
+	SHAREDNAME = $(LIBNAME).$(LIBSUFFIX)
+	S_CFLAGS   = -DBUILD_DLL
 endif
 ifneq ($(findstring CYGWIN,$(UNAME_S)),)
-	MKTEMP = $(WIN32DEP)/wmktmp
-	HEADERS := $(HEADERS) -I$(WIN32DEP)
+	MKTEMP     = $(WIN32DEP)/wmktmp
+	HEADERS   := $(HEADERS) -I$(WIN32DEP)
+	SHARED_OS  = shared_cygwin
+	LIBSUFFIX  = dll
+	SHAREDNAME = cyg$(LIBNAME).$(LIBSUFFIX)
+	S_CFLAGS   = 
 endif
 
 
 # post OS flags processing
 
 CFLAGS += $(GCC_EXTRA)
+CFLAGS += $(S_CFLAGS)
+
 
 ###############
 # sources
@@ -221,10 +232,10 @@ static:	$(libwarc)	; ar cvr $(LIBNAME).a $(libwarc); $(RANLIB) $(LIBNAME).a
 
 # http://rute.2038bug.com/node26.html.gz (Unix, Unix-like)
 shared_unix: clean $(libwarc)
-		$(CC) -shared -lc -Wl,-soname$(SONAME) \
-		      -o $(SHAREDNAME) $(libwarc)
+		$(CC) -shared -Wl,-soname$(SONAME) -o $(SHAREDNAME) $(libwarc)
 		ln -sf $(SHAREDNAME)  $(LIBNAME).$(LIBSUFFIX).$(MAJOR) && \
 		ln -sf $(SHAREDNAME)  $(LIBNAME).$(LIBSUFFIX)
+
 
 # http://www.finkproject.org/doc/porting/shared.php (MacOS X)
 shared_osx: clean $(libwarc)
@@ -235,8 +246,23 @@ shared_osx: clean $(libwarc)
 		ln -sf $(SHAREDNAME)  $(LIBNAME).$(MAJOR).$(LIBSUFFIX) && \
 		ln -sf $(SHAREDNAME)  $(LIBNAME).$(LIBSUFFIX)
 
+#http://www.emmestech.com/software/cygwin/pexports-0.43/moron2.html
+# http://mingw.org/docs.shtml
+shared_mingw: clean $(libwarc)
+		$(CC) -shared -o $(SHAREDNAME) $(libwarc) \
+		-Wl,--out-implib,$(LIBNAME)dll.a
+
+# http://www.cygwin.com/cygwin-ug-net/dll.html
+shared_cygwin: clean $(libwarc)
+		$(CC) -shared -o $(SHAREDNAME) $(libwarc) \
+		-Wl,--out-implib,$(LIBNAME)dll.a \
+		-Wl,--export-all-symbols \
+		-Wl,--enable-auto-import \
+		-Wl,--no-whole-archive
+
 shared:
-		@$(MAKE) W_SHARED="on" $(SHARED_OS)
+		@$(MAKE) W_SHARED=on $(SHARED_OS)
+
 
 source:	shared static $(a)
 		rm -rf $(PROJECT)
@@ -248,7 +274,7 @@ source:	shared static $(a)
 		find $(LIB) -name "*.h" -type "f" -exec cp -f '{}' $(PROJECT)/usr/local/include \;
 		find $(LIB) -name "*.x" -type "f" -exec cp -f '{}' $(PROJECT)/usr/local/include \;
 		mv $(LIBNAME).a              $(PROJECT)/usr/local/lib
-		mv $(LIBNAME).*$(LIBSUFFIX)* $(PROJECT)/usr/local/lib
+		mv *$(LIBNAME)*$(LIBSUFFIX)* $(PROJECT)/usr/local/lib
 
 
 tgz:	source
@@ -415,7 +441,8 @@ clean:		tclean
 				   $(APP)/*.exe   $(TST)/*~         $(TST)/*.exe \
                    $(DOC)/*~      $(WIN32DEP)/*~    $(TIGER)/*~ \
 			       $(MISC)/*~     $(MISC)/DEBIAN/*~ $(PRIVATE)/*~ \
-				   semantic.cache depend            *.dylib*
+				   semantic.cache depend            *.dylib* \
+				   *.bak		  *.stackdump*
 			@rm -rf $(DOC)/html    warc-tools*
 
 .PHONY: all static clean tclean doc source tgz rpm deb
