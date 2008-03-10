@@ -142,7 +142,6 @@ ifneq ($(findstring MINGW,$(UNAME_S)),)
 	S_CFLAGS   = -DBUILD_DLL
 endif
 ifneq ($(findstring CYGWIN,$(UNAME_S)),)
-	MKTEMP     = $(WIN32DEP)/wmktmp
 	HEADERS   := $(HEADERS) -I$(WIN32DEP)
 	SHARED_OS  = shared_cygwin
 	LIBSUFFIX  = dll
@@ -447,7 +446,7 @@ clean:		tclean
                    $(DOC)/*~      $(WIN32DEP)/*~    $(TIGER)/*~ \
 			       $(MISC)/*~     $(MISC)/DEBIAN/*~ $(PRIVATE)/*~ \
 				   semantic.cache depend            *.dylib* \
-				   *.bak		  *.stackdump*
+				   *.bak		  *.stackdump*		*core*
 			@rm -rf $(DOC)/html    warc-tools*
 
 .PHONY: all static clean tclean doc source tgz rpm deb
