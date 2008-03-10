@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 # -------------------------------------------------------------------  #
 # Copyright (c) 2007-2008 Hanzo Archives Limited.                      #
@@ -49,18 +49,18 @@ do
   trap - ABRT INT TERM EXIT
 
   if [ "$t" = "utest/object" ]; then
-      let "i=$i + 1"
+      i=$((i+1))
       echo "+ do test: $t [PASS]"
   elif [ $r = 0 ]; then
-      let "i=$i + 1"
+      i=$((i+1))
       echo "+ do test: $t [PASS]"
   else
-      let "j=$j + 1"
+      j=$((j+1))
       echo "- do test: $t [FAIL]"
   fi 
 done
 
-let "a=$i + $j"
+a=$((i+j))
 
 echo
 echo "$a tests: $i passed   $j failed"
