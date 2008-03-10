@@ -1100,8 +1100,8 @@ int test13 (void)
       fprintf (stdout, "--------------------------------------------------------------------------\n");
       /* Picking anvl field value w.r.t the given keys */
 
-      fprintf (stdout, "Value of anvl having key: key1 = %s\n",
-               WRecord_getAnvlValue (r, (warc_u8_t *) "key1") );
+/*       fprintf (stdout, "Value of anvl having key: key1 = %s\n", */
+/*                WRecord_getAnvlValue (r, (warc_u8_t *) "key1") ); */
 
       fprintf (stdout, "\n\n");
 
@@ -1583,10 +1583,10 @@ int test20 (void)
 
       /* if you want to read the content, uncomment the following */
 
-      printf ("key1: %s \n", WRecord_getAnvlValue (r,
-              (warc_u8_t *) "key1") );
-      printf ("key2: %s \n", WRecord_getAnvlValue (r,
-              (warc_u8_t *) "key2") );
+ /*      printf ("key1: %s \n", WRecord_getAnvlValue (r, */
+/*               (warc_u8_t *) "key1") ); */
+/*       printf ("key2: %s \n", WRecord_getAnvlValue (r, */
+/*               (warc_u8_t *) "key2") ); */
 
       if (WFile_register (w, r, callback, (void *) 0) )
         {

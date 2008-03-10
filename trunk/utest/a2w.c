@@ -158,7 +158,7 @@ int test2 (void)
       /* Picking anvl field value w.r.t the given keys */
 
       fprintf (stdout, "Value of anvl having key: IpAddress = %s\n",
-               WRecord_getAnvlValue (r, (warc_u8_t *) "IpAddress") );
+               WRecord_getAnvlValue (r, (warc_u8_t *) "Ip") );
 
       fprintf (stdout, "\n\n");
 
@@ -293,7 +293,7 @@ int test4 (void)
       /* Picking anvl field value w.r.t the given keys */
 
       fprintf (stdout, "Value of anvl having key: IpAddress = %s\n",
-               WRecord_getAnvlValue (r, (warc_u8_t *) "IpAddress") );
+               WRecord_getAnvlValue (r, (warc_u8_t *) "Ip") );
 
       fprintf (stdout, "\n\n");
 
