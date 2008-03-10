@@ -2,7 +2,7 @@
 
 = Requirements =
 
-WARC is a standalone library with no requirements but GCC.
+WARC is a self-contained library with no requirements but GCC.
 Doxygen is optional and only needed to generate technical documentation.
 (http://www.stack.nl/~dimitri/doxygen).
 
