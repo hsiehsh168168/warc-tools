@@ -92,10 +92,10 @@ struct WHash
  *
  * Pointer comparison between 2 objects "a" and "b"
  */
-WIPRIVATE warc_bool_t WHash_defaultCmp (const void * a, const void * b)
-{
-  return (a == b);
-}
+/* WIPRIVATE warc_bool_t WHash_defaultCmp (const void * a, const void * b) */
+/* { */
+/*   return (a == b); */
+/* } */
 
 
 /**
