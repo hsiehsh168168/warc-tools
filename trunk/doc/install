@@ -1,7 +1,7 @@
 Requirements
 -------------
 
-WARC is a standalone library with no requirements but GCC.
+WARC is a self-contained library with no requirements but GCC.
 
 The library was tested in x86 and PPC on both 32 bits and 64 bits architectures.
 
