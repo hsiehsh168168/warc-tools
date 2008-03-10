@@ -38,7 +38,7 @@
 #include <wclass.h>  /* bless, destroy, cassert, struct Class */
 #include <wsign.h>   /* CASSET macro */
 #include <wanvl.h>   /* for class's prototypes */
-#include <wstring.h> /* for class's prototypes */
+#include <wstring.h> /* WString */
 #include "wmisc.h"   /* warc_bool_t ... */
 #include <wcsafe.h>
 
@@ -304,8 +304,6 @@ WPRIVATE void * WAnvl_constructor (void * _self, va_list * app)
   const warc_u32_t     klen  = va_arg (* app, const warc_u32_t);
   const warc_u8_t    * value = va_arg (* app, const warc_u8_t *);
   const warc_u32_t     vlen  = va_arg (* app, const warc_u32_t);
-
-  UNUSED (app);
 
   /* preconditions */
   assert (key);

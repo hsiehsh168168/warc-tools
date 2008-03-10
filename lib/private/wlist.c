@@ -37,6 +37,7 @@
 #include <wclass.h>  /* bless, destroy, cassert, struct Class */
 #include <wsign.h>   /* CASSET macro */
 #include <wlist.h>   /* for class's prototypes */
+#include <wlist.x>
 #include <wmem.h>    /* wmalloc, wfree */
 #include "wmisc.h"   /* warc_bool_t ... */
 #include <wcsafe.h>
@@ -274,6 +275,70 @@ WIPUBLIC warc_u32_t WList_size (const void * const _self)
   return (CNT);
 }
 
+WPUBLIC const void * WList_getObjectFromNode (const void * const _self,
+                                               void * _node)
+  {
+    const struct WList * const self = _self;
+    struct WLNode            * node = _node;
+
+    /* empty list */
+    CASSERT (self);
+    assert (node);
+    unless (CNT)
+      return (NIL);
+
+    return (node -> object);
+  }
+
+WPUBLIC void * WList_nextNode (const void * const _self,
+                                void * _node)
+  {
+    const struct WList * const self = _self;
+    struct WLNode            * node = _node;
+
+    /* empty list */
+    CASSERT (self);
+    assert (node);
+    unless (CNT)
+      return (NIL);
+
+    return (node -> next);
+  }
+
+WPUBLIC void * WList_firstNode (const void * const _self)
+  {
+    const struct WList * const self = _self;
+
+    /* empty list */
+    CASSERT (self);
+    unless (CNT)
+      return (NIL);
+
+    return (DUMMY -> next);
+  }
+
+WPUBLIC void * WList_deleteNode (void * const _self, void * _node)
+  {
+    struct WList * const self = _self;
+    struct WLNode            * n    = _node;
+    void                     * o    = NIL;
+
+    /* empty list */
+    CASSERT (self);
+    assert (n);
+    unless (CNT)
+      return (NIL);
+
+    /* return the object and free its node */
+    o                 = n -> object;
+    n -> next -> prev = n -> prev;
+    n -> prev -> next = n -> next;
+    DELETE_LNODE (n);
+    
+    -- CNT;
+
+    return (o);
+  }
 
 /**
  * @param _self a WList object
@@ -296,7 +361,7 @@ WPRIVATE struct WLNode * gotoIndex (const void * const _self,
 
     /* empty list */
     unless (CNT)
-    return (NIL);
+      return (NIL);
 
     if (index > CNT)
       return (NIL);
