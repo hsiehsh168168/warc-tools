@@ -29,7 +29,7 @@
 usage () {
 
     echo "Check if all WARC files in a directory are valid"
-    echo "Usage: $0 <-d dirname> [-c wgzip] [-v] [-h]"  >&2
+    echo "Usage: $0 <-d dirname> [-c] [-v] [-h]"  >&2
     echo "       -d     : directory name containing ARC files"  >&2
     echo "       -c     : assume that all WARC files are GZIP compressed (default no)"  >&2
     echo "       -h     : print this help message"  >&2
@@ -72,6 +72,7 @@ fi
 
 for wf in `find $dn -name "*.warc*" -type "f"`;
 do
+
   $wvalid -f $wf $ccomp &>/dev/null
   if [ $? -eq 0 ]; then
       echo "valid $wf"

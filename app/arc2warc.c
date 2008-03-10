@@ -100,12 +100,12 @@ int main (int argc, const char ** argv)
   void           * w        = NIL; /* a WARC file object */
   void           * u        = NIL; /* a UUID object */
   char           * aname    = NIL;
-  afile_comp_t     amode    = ARC_FILE_COMPRESSED_GZIP;
+  afile_comp_t     amode    = ARC_FILE_UNCOMPRESSED;
   warc_bool_t      b        = WARC_FALSE;
   warc_i32_t       c        = 0;
   warc_u8_t      * flags    = (warc_u8_t *) "bca:f:";
   char           * fname    = NIL;
-  wfile_comp_t     cmode    = WARC_FILE_COMPRESSED_GZIP;
+  wfile_comp_t     cmode    = WARC_FILE_UNCOMPRESSED;
 
 
   if (argc < 5 || argc > 7)
@@ -114,9 +114,9 @@ int main (int argc, const char ** argv)
       fprintf (stderr, "Usage: %s -a <file.arc> [-b] -f <file.warc> [-c]\n",
                argv [0]);
       fprintf (stderr, "\t-a    : valid ARC file name\n");
-      fprintf (stderr, "\t[-b]  : assume ARC file is GZIP compressed (default yes)\n");
+      fprintf (stderr, "\t[-b]  : assume ARC file is GZIP compressed (default no)\n");
       fprintf (stderr, "\t-f    : valid WARC file name\n");
-      fprintf (stderr, "\t[-c]  : WARC file will be GZIP compressed (default yes)\n");
+      fprintf (stderr, "\t[-c]  : WARC file will be GZIP compressed (default no)\n");
       return (2);
     }
 
@@ -139,7 +139,7 @@ int main (int argc, const char ** argv)
             break;
 
           case 'c' :
-            cmode = WARC_FILE_UNCOMPRESSED;
+            cmode = WARC_FILE_COMPRESSED_GZIP;
 
             break;
 
@@ -150,7 +150,7 @@ int main (int argc, const char ** argv)
             break;
 
           case 'b' :
-            amode = WARC_FILE_UNCOMPRESSED;
+            amode = ARC_FILE_COMPRESSED_GZIP;
 
             break;
 
