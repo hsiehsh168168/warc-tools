@@ -1,4 +1,5 @@
-#!/bin/sh
+#!/usr/bin/env bash
+
 
 # -------------------------------------------------------------------  #
 # Copyright (c) 2007-2008 Hanzo Archives Limited.                      #
