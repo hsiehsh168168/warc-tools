@@ -24,8 +24,8 @@
 /*     http://code.google.com/p/warc-tools/                            */
 /* ------------------------------------------------------------------- */
 
-#ifndef	__WARC_H__
-#define	__WARC_H__
+#ifndef	__WARC_WLIST_X__
+#define	__WARC_WLIST_X__
 
 /* to mix C and C++ */
 #ifdef __cplusplus
@@ -34,27 +34,21 @@ extern "C"
 #endif
 
 
+    /**
+     * Portability header file
+     */
 
-#include <wport.h>       /* portability issues */
-#include <wmisc.h>       /* NIL, ARRAY_LEN ... */
-#include <wcsafe.h>      /* C safe functions */
-#include <wclass.h>      /* bless, destroy */
-#include <wstring.h>     /* WString */
-#include <wlist.h>       /* WList */
-#include <wrecord.h>     /* WRecord */
-#include <wanvl.h>       /* WAnvl */
-#include <wfile.h>       /* WFile */
-#include <wuuid.h>       /* WUUID */
-#include <wgetopt.h>     /* WGetOpt */
-#include <whash.h>       /* WHash */
-#include <wversion.h>    /* WARC_VERSION */
-#include <wrectype.h>    /* WRecord types (i.e. resource, revisit ...) */
+#include <wport.h>
 
-
+    extern const void * WList_getObjectFromNode (const void * const, void *);
+    extern void * WList_nextNode   (const void * const, void *);
+    extern void * WList_firstNode  (const void * const);
+    extern void * WList_deleteNode (void * const, void *);
 
 #ifdef __cplusplus
   }
 
 #endif
 
-#endif /* __WARC_H__ */
+
+#endif /* __WARC_WLIST_X__ */

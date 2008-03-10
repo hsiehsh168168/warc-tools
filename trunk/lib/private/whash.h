@@ -24,8 +24,8 @@
 /*     http://code.google.com/p/warc-tools/                            */
 /* ------------------------------------------------------------------- */
 
-#ifndef	__WARC_H__
-#define	__WARC_H__
+#ifndef	__WARC_HASH_H__
+#define	__WARC_HASH_H__
 
 /* to mix C and C++ */
 #ifdef __cplusplus
@@ -33,28 +33,26 @@ extern "C"
   {
 #endif
 
+    /**
+     * Portability header file
+     */
+
+#include <wport.h>
 
 
-#include <wport.h>       /* portability issues */
-#include <wmisc.h>       /* NIL, ARRAY_LEN ... */
-#include <wcsafe.h>      /* C safe functions */
-#include <wclass.h>      /* bless, destroy */
-#include <wstring.h>     /* WString */
-#include <wlist.h>       /* WList */
-#include <wrecord.h>     /* WRecord */
-#include <wanvl.h>       /* WAnvl */
-#include <wfile.h>       /* WFile */
-#include <wuuid.h>       /* WUUID */
-#include <wgetopt.h>     /* WGetOpt */
-#include <whash.h>       /* WHash */
-#include <wversion.h>    /* WARC_VERSION */
-#include <wrectype.h>    /* WRecord types (i.e. resource, revisit ...) */
+extern const void * WHash;
 
+extern warc_bool_t WHash_insert (const void * const, const void *, 
+                                 warc_u32_t, void *);
 
+extern const void * WHash_get   (const void * const, const void *, warc_u32_t);
+
+extern void *       WHash_delete (const void * const, const void *, 
+                                  warc_u32_t);
 
 #ifdef __cplusplus
   }
 
 #endif
 
-#endif /* __WARC_H__ */
+#endif /* __WARC_HASH_H__ */

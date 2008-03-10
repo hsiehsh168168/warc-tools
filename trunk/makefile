@@ -171,7 +171,7 @@ b	+= $(GZIP)/adler32.c     $(GZIP)/crc32.c      $(GZIP)/deflate.c \
 	  $(GZIP)/infback.c      $(GZIP)/inffast.c    $(GZIP)/inflate.c \
 	  $(GZIP)/inftrees.c     $(GZIP)/uncompr.c    $(GZIP)/wgzipbit.c \
 	  $(GZIP)/zutil.c        $(GZIP)/compress.c   $(GZIP)/trees.c \
-	  $(PRIVATE)/wgzip.c
+	  $(PRIVATE)/wgzip.c     $(PRIVATE)/whash.c   $(PRIVATE)/wkv.c
 b	+= $(TIGER)/tiger.c
 
 c	= $(b) \
@@ -179,7 +179,7 @@ c	= $(b) \
 	  $(TST)/anvl.c          $(TST)/record.c      $(TST)/file.c  \
 	  $(TST)/arcrecord.c     $(TST)/warcgzip.c    $(TST)/warcgunzip.c \
 	  $(TST)/arcfile.c       $(TST)/a2w.c         $(TST)/uuid.c \
-	  $(TST)/getopt.c        $(TST)/object.c
+	  $(TST)/getopt.c        $(TST)/object.c      $(TST)/hash.c
 c	+= $(APP)/arc2warc.c     $(APP)/warcdump.c    $(APP)/warcfilter.c \
 	   $(APP)/warcvalidator.c
 
@@ -190,7 +190,7 @@ h	= $(PUBLIC)/wclass.h     $(PUBLIC)/warc.h     $(PRIVATE)/wstring.h \
 	  $(PRIVATE)/fsm.h       $(PRIVATE)/wfsmhdl.h $(PRIVATE)/fsmanvl.h \
 	  $(PRIVATE)/wcsafe.h    $(PRIVATE)/afsmhdl.h $(PRIVATE)/arecord.h \
 	  $(PRIVATE)/afile.h     $(PRIVATE)/wmktmp.h  $(PRIVATE)/arecord.h \
-	  $(PRIVATE)/wendian.h 
+	  $(PRIVATE)/wendian.h   $(PRIVATE)/whash.h   $(PRIVATE)/wkv.h
 h   += $(GZIP)/crc32.h       $(GZIP)/deflate.h    $(GZIP)/inffast.h \
 	  $(GZIP)/inffixed.h     $(GZIP)/inflate.h    $(GZIP)/inftrees.h \
 	  $(GZIP)/wgzipbit.h     $(GZIP)/wos.h        $(GZIP)/zconf.h \
@@ -202,7 +202,7 @@ u	= $(TST)/string          $(TST)/list          $(TST)/anvl \
 	  $(TST)/record          $(TST)/uuid          $(TST)/hdline \
 	  $(TST)/warcgzip        $(TST)/warcgunzip    $(TST)/file \
 	  $(TST)/arcrecord       $(TST)/arcfile       $(TST)/a2w \
-	  $(TST)/getopt          $(TST)/object
+	  $(TST)/getopt          $(TST)/hash		  $(TST)/object
 
 t  += $(u)
 
@@ -365,6 +365,9 @@ uuid	= $(PRIVATE)/wclass.o    $(PRIVATE)/wuuid.o     $(PRIVATE)/wcsafe.o \
 getopt	= $(PRIVATE)/wclass.o    $(PRIVATE)/wgetopt.o   $(PRIVATE)/wcsafe.o \
 		 $(PRIVATE)/wstring.o    $(TST)/getopt.o
 
+hash	= $(PRIVATE)/wclass.o    $(PRIVATE)/whash.o   	$(PRIVATE)/wcsafe.o \
+		  $(PRIVATE)/wlist.o	 $(PRIVATE)/wstring.o   $(PRIVATE)/wkv.o \
+		  $(TST)/hash.o
 
 ##################
 # unit tests deps
@@ -384,6 +387,8 @@ $(TST)/a2w:       $(a2w);        $(CC) $(CFLAGS)   -o $@ $(a2w)
 $(TST)/arcfile:   $(arcfile);    $(CC) $(CFLAGS)   -o $@ $(arcfile)
 $(TST)/uuid:	  $(uuid);       $(CC) $(CFLAGS)   -o $@ $(uuid)
 $(TST)/getopt:	  $(getopt);     $(CC) $(CFLAGS)   -o $@ $(getopt)
+$(TST)/hash:	  $(hash);       $(CC) $(CFLAGS)   -o $@ $(hash)
+
 
 ####################
 # applications deps
