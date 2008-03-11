@@ -140,6 +140,7 @@ ifneq ($(findstring MINGW,$(UNAME_S)),)
 	LIBSUFFIX  = dll
 	SHAREDNAME = $(LIBNAME).$(LIBSUFFIX)
 	S_CFLAGS   = -DBUILD_DLL
+	BASH	   = sh
 endif
 ifneq ($(findstring CYGWIN,$(UNAME_S)),)
 	HEADERS   := $(HEADERS) -I$(WIN32DEP)
@@ -293,7 +294,7 @@ rpm:	deb
 		alien -r $(PROJECT).deb
 		rm -f $(PROJECT).deb
 
-test_all:	;	@$(TST)/test.sh $(u)
+test_all:	;	@$(BASH) $(TST)/test.sh $(u)
 test:   $(u) test_all tclean
 
 doc:        ;   doxygen ./doc/warcdoc
