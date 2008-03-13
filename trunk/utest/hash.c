@@ -44,41 +44,46 @@ int test1 (void)
   const void * v = NIL;
 
   fprintf (stdout, "%s>\n", t);
-  
+
   h = bless (WHash, 101);
   assert (h);
 
-  s = makeWString("arc");
+  s = makeWString ("arc");
   assert (s);
   WHash_insert (h, WString_getText (s), WString_getLength (s), s);
 
-  s = makeWString("warc");
+  s = makeWString ("warc");
   assert (s);
   WHash_insert (h, WString_getText (s), WString_getLength (s), s);
 
-  s = makeWString("iipc");
+  s = makeWString ("iipc");
   assert (s);
   WHash_insert (h, WString_getText (s), WString_getLength (s), s);
 
-  
+
   k = "warc";
-  v = WHash_get (h, makeS(k));
+  v = WHash_get (h, makeS (k) );
+
   if (v)
-    fprintf (stdout, "found key: %s\n", WString_getText (v));
+    fprintf (stdout, "found key: %s\n", WString_getText (v) );
   else
     fprintf (stdout, "no key   : %s\n", k);
 
   k = "arc";
-  v = WHash_get (h, makeS(k));
+
+  v = WHash_get (h, makeS (k) );
+
   if (v)
-    fprintf (stdout, "found key: %s\n", WString_getText (v));
+    fprintf (stdout, "found key: %s\n", WString_getText (v) );
   else
     fprintf (stdout, "no key   : %s\n", k);
-  
+
   k = "ziipc";
-  v = WHash_get (h, makeS(k));
+
+  v = WHash_get (h, makeS (k) );
+
   if (v)
-    fprintf (stdout, "found key: %s\n", WString_getText (v));
+    fprintf (stdout, "found key: %s\n", WString_getText (v) );
   else
     fprintf (stdout, "no key   : %s\n", k);
 
@@ -99,38 +104,45 @@ int test2 (void)
   const void * v = NIL;
 
   fprintf (stdout, "%s>\n", t);
-  
+
   h = bless (WHash, 101);
   assert (h);
 
-  s = makeWString("arc");
+  s = makeWString ("arc");
   assert (s);
   WHash_insert (h, WString_getText (s), WString_getLength (s), s);
 
-  s = makeWString("warc");
+  s = makeWString ("warc");
   assert (s);
   WHash_insert (h, WString_getText (s), WString_getLength (s), s);
 
   k = "warc";
-  v = WHash_get (h, makeS(k));
+  v = WHash_get (h, makeS (k) );
+
   if (v)
-    fprintf (stdout, "found key: %s\n", WString_getText (v));
+    fprintf (stdout, "found key: %s\n", WString_getText (v) );
   else
     fprintf (stdout, "no key   : %s\n", k);
 
   k = "arc";
-  v = WHash_get (h, makeS(k));
+
+  v = WHash_get (h, makeS (k) );
+
   if (v)
-    fprintf (stdout, "found key: %s\n", WString_getText (v));
+    fprintf (stdout, "found key: %s\n", WString_getText (v) );
   else
     fprintf (stdout, "no key   : %s\n", k);
 
   k = "warc";
-  s = WHash_delete (h, makeS(k));
+
+  s = WHash_delete (h, makeS (k) );
+
   destroy (s); /* need to explicitly free the deleted object */
-  v = WHash_get (h, makeS(k));
+
+  v = WHash_get (h, makeS (k) );
+
   if (v)
-    fprintf (stdout, "foudn key: %s\n", WString_getText (v));
+    fprintf (stdout, "foudn key: %s\n", WString_getText (v) );
   else
     fprintf (stdout, "no key   : %s\n", k);
 
@@ -152,33 +164,36 @@ int test3 (void)
 
 
   fprintf (stdout, "%s>\n", t);
-  
+
   h = bless (WHash, 101);
   assert (h);
 
-  s = makeWString("arc");
+  s = makeWString ("arc");
   assert (s);
   k = 1;
-  WHash_insert (h, makeI(k), s);
+  WHash_insert (h, makeI (k), s);
 
-  s = makeWString("iipc");
+  s = makeWString ("iipc");
   assert (s);
   k = 2;
-  WHash_insert (h, makeI(k), s);
+  WHash_insert (h, makeI (k), s);
 
 
   k = 1;
-  v = WHash_get (h, makeI(k));
+  v = WHash_get (h, makeI (k) );
+
   if (v)
-    fprintf (stdout, "found key: %s\n", WString_getText (v));
+    fprintf (stdout, "found key: %s\n", WString_getText (v) );
   else
     fprintf (stdout, "no key   : %u\n", k);
 
 
   k = 7777;
-  v = WHash_get (h, makeI(k));
+
+  v = WHash_get (h, makeI (k) );
+
   if (v)
-    fprintf (stdout, "found key: %s\n", WString_getText (v));
+    fprintf (stdout, "found key: %s\n", WString_getText (v) );
   else
     fprintf (stdout, "no key   : %u\n", k);
 
@@ -197,11 +212,11 @@ int test4 (void)
   void       * s = NIL;
 
   fprintf (stdout, "%s>\n", t);
-  
+
   h = bless (WHash, 101);
   assert (h);
 
-  s = makeWString("arc");
+  s = makeWString ("arc");
   assert (s);
   WHash_insert (h, WString_getText (s), WString_getLength (s), s);
   WHash_insert (h, WString_getText (s), WString_getLength (s), s);

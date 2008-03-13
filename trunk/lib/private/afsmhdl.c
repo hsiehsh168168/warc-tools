@@ -109,7 +109,7 @@ AFsmHDL_setUrl         (void *), AFsmHDL_setCreationDate   (void *),
 AFsmHDL_setMimeType    (void *), AFsmHDL_pushBack          (void *),
 AFsmHDL_checkRecordType (void *), AFsmHDL_raiseError        (void *),
 AFsmHDL_checkIpAddress  (void *), AFsmHDL_raiseErrorDlength (void *),
-  AFsmHDL_raiseErrorCrDate     (void *), AFsmHDL_checkCreationDate (void *);
+AFsmHDL_raiseErrorCrDate     (void *), AFsmHDL_checkCreationDate (void *);
 
 /* AFsmHDL_checkMimeType (void *), */
 /* AFsmHDL_checkUrl       (void *), */
@@ -438,11 +438,11 @@ void AFsmHDL_checkCreationDate (void * _hs)
   len       = WString_getLength (hs -> creation_date);
   strtompon = WString_getText (hs -> creation_date);
 
- /*  printf(">>> CREATION DATE: %s %u\n",  WString_getText (hs -> creation_date), len); */
+  /*  printf(">>> CREATION DATE: %s %u\n",  WString_getText (hs -> creation_date), len); */
 
   if (len != 14)
     {
-      w_fprintf(fprintf (stderr, "error> found creation date: %s\n", (char *) strtompon));
+      w_fprintf (fprintf (stderr, "error> found creation date: %s\n", (char *) strtompon) );
 
       /* raise the flag error */
       WarcDebugMsg ("expecting a valid creation date with 14 digits");
@@ -451,20 +451,22 @@ void AFsmHDL_checkCreationDate (void * _hs)
       /* rewind the stream */
       AFsmHDL_rewind (hs, WString_getLength (hs -> creation_date) + 1);
     }
+
   else
     {
 
       while (len)
         {
           len --;
-          if (! isdigit (strtompon[len]))
+
+          if (! isdigit (strtompon[len]) )
             {
-              w_fprintf(fprintf (stderr, "error> found creation date: %s\n", (char *) strtompon));
+              w_fprintf (fprintf (stderr, "error> found creation date: %s\n", (char *) strtompon) );
 
               /* raise the flag error */
               WarcDebugMsg ("expecting a valid creation date: not digit character");
               hs -> err = WARC_TRUE;
-              
+
               /* rewind the stream */
               AFsmHDL_rewind (hs, WString_getLength (hs -> creation_date) + 1);
               break;
@@ -490,41 +492,41 @@ void AFsmHDL_checkIpAddress (void * _hs)
 
   ipadd = WString_getText (hs -> ip_adress);
 
-  rc = sscanf ((const char *) ipadd, "%3u.%3u.%3u.%3u:%u%c",
-               & b1, & b2, & b3, & b4, & port, & c);
+  rc = sscanf ( (const char *) ipadd, "%3u.%3u.%3u.%3u:%u%c",
+                & b1, & b2, & b3, & b4, & port, & c);
 
-  if (rc != 4 && rc != 5) 
+  if (rc != 4 && rc != 5)
     {
-      w_fprintf(fprintf (stderr, "error> found IP address: %s\n", (char *) ipadd));
+      w_fprintf (fprintf (stderr, "error> found IP address: %s\n", (char *) ipadd) );
       /* raise the flag error */
       WarcDebugMsg ("expecting a valid IP address: accept only IPv4 adresses");
       hs -> err = WARC_TRUE;
-      
+
       /* rewind the stream */
       AFsmHDL_rewind (hs, WString_getLength (hs -> creation_date) + 1);
       return;
     }
-  
-  
-  if ((b1 | b2 | b3 | b4) > 255 || port > PORTMAX)
+
+
+  if ( (b1 | b2 | b3 | b4) > 255 || port > PORTMAX)
     {
-      w_fprintf(fprintf (stderr, "error> found IP address: %s\n", (char *) ipadd));
+      w_fprintf (fprintf (stderr, "error> found IP address: %s\n", (char *) ipadd) );
       /* raise the flag error */
       WarcDebugMsg ("expecting a valid IP address: IP range greater than 255 or port number greater than" PORTMAX);
       hs -> err = WARC_TRUE;
-      
+
       /* rewind the stream */
       AFsmHDL_rewind (hs, WString_getLength (hs -> creation_date) + 1);
       return;
     }
-  
-  if (strspn ((const char *) ipadd, "0123456789.:") < WString_getLength (hs -> creation_date))
+
+  if (strspn ( (const char *) ipadd, "0123456789.:") < WString_getLength (hs -> creation_date) )
     {
-      w_fprintf(fprintf (stderr, "error> found IP address: %s\n", (char *) ipadd));
+      w_fprintf (fprintf (stderr, "error> found IP address: %s\n", (char *) ipadd) );
       /* raise the flag error */
       WarcDebugMsg ("expecting a valid IP address: only \"0123456789.:\" are valid");
       hs -> err = WARC_TRUE;
-      
+
       /* rewind the stream */
       AFsmHDL_rewind (hs, WString_getLength (hs -> creation_date) + 1);
       return;
@@ -706,14 +708,14 @@ void AFsmHDL_raiseErrorDlength (void * _hs)
 void  AFsmHDL_raiseErrorCrDate (void * _hs)
 {
   HDLState * const hs  = _hs;
-/*   char buf [14]; */
+  /*   char buf [14]; */
 
   assert (hs);
   w_ungetc (hs -> c, hs -> fin);
 
-/*   fread (buf, sizeof(char), 13, hs -> fin); */
-/*   buf [13] = '\0'; */
-/*   printf (">>> invalid date : %s\n", buf); */
+  /*   fread (buf, sizeof(char), 13, hs -> fin); */
+  /*   buf [13] = '\0'; */
+  /*   printf (">>> invalid date : %s\n", buf); */
 
   WarcDebugMsg ("expecting a valid creation date");
   /* raise "on" the error flag */

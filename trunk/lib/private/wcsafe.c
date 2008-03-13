@@ -288,9 +288,9 @@ WPUBLIC warc_u32_t w_strlen (const warc_u8_t * s)
 
 #define IS_POWER_OF_2 \
   if (arg == 0) \
-	return 0; \
+    return 0; \
   while ((arg & 1) == 0) \
-	arg >>= 1; \
+    arg >>= 1; \
   return (arg == 1)
 
 WPUBLIC warc_u32_t roundToPowerOfTwoUInt (warc_u32_t arg)
@@ -309,14 +309,14 @@ WPUBLIC warc_bool_t isPowerOfTwoUInt (warc_u32_t arg)
 
 WPUBLIC warc_u32_t computeHash (const char * _str, warc_u32_t len)
 {
-   char       * str  = (char *) _str;
-   warc_u32_t   hash = 5381;
-   warc_u32_t   i    = 0;
+  char       * str  = (char *) _str;
+  warc_u32_t   hash = 5381;
+  warc_u32_t   i    = 0;
 
-   for (i = 0; i < len; ++ str, ++ i)
-   {
-      hash = ((hash << 5) + hash) + (*str);
-   }
+  for (i = 0; i < len; ++ str, ++ i)
+    {
+      hash = ( (hash << 5) + hash) + (*str);
+    }
 
-   return (hash & 0x7FFFFFFF);
+  return (hash & 0x7FFFFFFF);
 }

@@ -40,15 +40,15 @@ extern "C"
 #include <wport.h>
 
 
-extern const void * WHash;
+    extern const void * WHash;
 
-extern warc_bool_t WHash_insert (const void * const, const void *, 
-                                 warc_u32_t, void *);
+    extern warc_bool_t WHash_insert (const void * const, const void *,
+                                       warc_u32_t, void *);
 
-extern const void * WHash_get   (const void * const, const void *, warc_u32_t);
+    extern const void * WHash_get   (const void * const, const void *, warc_u32_t);
 
-extern void *       WHash_delete (const void * const, const void *, 
-                                  warc_u32_t);
+    extern void *       WHash_delete (const void * const, const void *,
+                                        warc_u32_t);
 
 #ifdef __cplusplus
   }
