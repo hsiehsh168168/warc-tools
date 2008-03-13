@@ -341,7 +341,8 @@ int main (int argc, char ** argv)
 {
   const char * f = "app/wdata/testwfile/warcfile.warc";
   int (* tests []) (const char *) = { test1, test2, test3, test4,
-                                      test5, test6, test7 };
+                                      test5, test6, test7
+                                    };
   warc_u32_t  i = 0;
 
   UNUSED (argc);

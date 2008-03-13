@@ -468,7 +468,7 @@ WGzip_skip_header (FILE * source, struct GzipMeta * meta)
         return (Z_READING_ERROR);
     }
 
-   meta -> gzip_header_size = GZIP_STATIC_HEADER_SIZE;
+  meta -> gzip_header_size = GZIP_STATIC_HEADER_SIZE;
 
   if (ID1 != * (p + OFF_ID1) || ID2 != * (p + OFF_ID2) || CM != * (p + OFF_CM) )
     {
@@ -478,6 +478,7 @@ WGzip_skip_header (FILE * source, struct GzipMeta * meta)
   flg = p[OFF_FLG];
 
   /* test extra flags existance */
+
   if (flg != 0)
     {
       /* maybe skip the extra field */

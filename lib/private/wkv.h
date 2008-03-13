@@ -40,7 +40,7 @@ extern "C"
 #include <wport.h>
 
 
-extern const void * WKV;
+    extern const void * WKV;
 
     extern warc_u32_t   WKV_key   (const void * const);
 

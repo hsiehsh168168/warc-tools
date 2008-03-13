@@ -250,11 +250,12 @@ warc_u32_t callback4_arc (const warc_u8_t * buffer,
                           const warc_u32_t nbr, void * env)
 {
   FILE * out = (FILE *) env;
-  
+
   /* copy the uncompressed 'nbr' bytes to out */
+
   if (w_fwrite (buffer, 1, nbr, out) != nbr || w_ferror (out) )
     return (Z_STOP_DECODING); /* return this value to stop the uncompression */
-  
+
   return (Z_CONTINUE_DECODING);
 }
 
@@ -400,7 +401,7 @@ int test3 (const char * fin)
   out = openWriting (fout);
   assert (out);
 
- 
+
   /* first record at offset 0 */
   offset = 0;
 
@@ -411,6 +412,7 @@ int test3 (const char * fin)
       /* uncompress file from offset 0 using the callback with env = fout */
       ret = WGzip_uncompress (g, in, offset, & usize, & csize,
                               callback4_arc, (void *) out);
+
       if (ret)
         break;
 
@@ -523,7 +525,7 @@ int main (int argc, char ** argv)
 {
   const char * f1 = "app/wdata/testwfile/file.warc.gz";
   const char * f2 = "app/wdata/testarc/test.arc.gz";
- 
+
   UNUSED (argc);
   UNUSED (argv);
 

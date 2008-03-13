@@ -79,7 +79,7 @@ extern "C"
      */
 
 #ifndef w_fopen_rb
-#define w_fopen_rb(s) fopen ((s), "r+b")
+#define w_fopen_rb(s) fopen ((s), "rb")
 #endif
 
     /**
@@ -87,7 +87,7 @@ extern "C"
      */
 
 #ifndef w_fopen_ab
-#define w_fopen_ab(s) fopen ((s), "a+b")
+#define w_fopen_ab(s) fopen ((s), "ab")
 #endif
 
     /**
@@ -96,7 +96,7 @@ extern "C"
 
 
 #ifndef w_fopen_wb
-#define w_fopen_wb(s) fopen ((s), "w+b")
+#define w_fopen_wb(s) fopen ((s), "wb")
 #endif
 
     /**
@@ -301,9 +301,9 @@ extern "C"
 
 
     extern ptrdiff_t  w_strncpy         (warc_u8_t *, const warc_u8_t *,
-                                         size_t);
+                                           size_t);
     extern warc_u8_t * w_strcasestr     (const warc_u8_t *,
-                                         const warc_u8_t *);
+                                           const warc_u8_t *);
     extern const warc_u8_t * w_index    (const warc_u8_t *, int);
     extern warc_i32_t  w_strcmp         (const warc_u8_t *, const warc_u8_t *);
     extern warc_u32_t  w_strlen         (const warc_u8_t *);

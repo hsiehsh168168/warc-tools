@@ -54,7 +54,7 @@ struct WKV
 
     const void * class;
 
-    /*@{*/    
+    /*@{*/
     warc_u32_t      hkey; /* hash key */
     void          * value; /* value object */
     /*@}*/
@@ -74,6 +74,7 @@ struct WKV
 
 WIPUBLIC const void * WKV_value (const void * const _self)
 {
+
   const struct WKV * const self   = _self;
 
   /* preconditions */
@@ -86,13 +87,14 @@ WIPUBLIC const void * WKV_value (const void * const _self)
 /**
  * @param _self WKV object
  *
- * @return hash key 
+ * @return hash key
  *
  * Returns the WKV hash of the value object
  */
 
 WIPUBLIC warc_u32_t WKV_key (const void * const _self)
 {
+
   const struct WKV * const self   = _self;
 
   /* preconditions */
@@ -116,6 +118,7 @@ WIPUBLIC warc_u32_t WKV_key (const void * const _self)
 
 WPRIVATE void * WKV_constructor (void * _self, va_list * app)
 {
+
   struct WKV * const self  = _self;
 
   warc_u32_t hkey  = va_arg (* app, warc_u32_t);
@@ -139,11 +142,12 @@ WPRIVATE void * WKV_constructor (void * _self, va_list * app)
 
 WPRIVATE void * WKV_destructor (void * _self)
 {
+
   struct WKV  * const self = _self;
 
   /* preconditions */
   CASSERT (self);
-  
+
   if (VALUE)
     destroy (VALUE), VALUE = NIL;
 

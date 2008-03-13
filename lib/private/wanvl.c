@@ -229,25 +229,26 @@ WPRIVATE warc_bool_t WAnvl_validUTF8 (void * const _self,
 
   UNUSED (_self);
 
-  for (c = text;  *c;  c += (nb + 1)) 
-    { 
-      if      (!(*c & 0x80)) nb = 0; 
-      else if ( (*c & 0xc0) == 0x80) return (WARC_TRUE); 
-      else if ( (*c & 0xe0) == 0xc0) nb = 1; 
-      else if ( (*c & 0xf0) == 0xe0) nb = 2; 
-      else if ( (*c & 0xf8) == 0xf0) nb = 3; 
-      else if ( (*c & 0xfc) == 0xf8) nb = 4; 
-      else if ( (*c & 0xfe) == 0xfc) nb = 5; 
+  for (c = text;  *c;  c += (nb + 1) )
+    {
+      if      (! (*c & 0x80) ) nb = 0;
+      else if ( (*c & 0xc0) == 0x80) return (WARC_TRUE);
+      else if ( (*c & 0xe0) == 0xc0) nb = 1;
+      else if ( (*c & 0xf0) == 0xe0) nb = 2;
+      else if ( (*c & 0xf8) == 0xf0) nb = 3;
+      else if ( (*c & 0xfc) == 0xf8) nb = 4;
+      else if ( (*c & 0xfe) == 0xfc) nb = 5;
 
-      while (nb > 0) 
+      while (nb > 0)
         {
           -- nb;
-          if ( (* (c + nb) & 0xc0) != 0x80) 
-            return (WARC_TRUE); 
-        }  
+
+          if ( (* (c + nb) & 0xc0) != 0x80)
+            return (WARC_TRUE);
+        }
     }
-   
-  return (WARC_FALSE); 
+
+  return (WARC_FALSE);
 }
 
 

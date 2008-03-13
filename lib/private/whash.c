@@ -65,7 +65,7 @@ struct WHash
     void          * map; /**< Hash buckets array */
     warc_u32_t      size;  /* Hashtable size */
     warc_u32_t      hmask; /* Hashtable mask */
-/*     hcomp_t         cmp; /\* Comparison function *\/ */
+    /*     hcomp_t         cmp; /\* Comparison function *\/ */
 
     /*@}*/
   };
@@ -75,7 +75,7 @@ struct WHash
 #define SIZE          (self -> size)
 #define HMASK         (self -> hmask)
 /* #define CMP           (self -> cmp) */
-#define BUCKET(index) (((int **) MAP) [ (index) ]) 
+#define BUCKET(index) (((int **) MAP) [ (index) ])
 
 /* some global macros for hashing */
 #define INIT_BITS	 10
@@ -111,10 +111,11 @@ struct WHash
 WIPUBLIC const void * WHash_get (const void * const _self,
                                  const void * key, warc_u32_t len)
 {
+
   const struct WHash * const self   = _self;
   void               *       bucket = NIL;
   const void         *       obj    = NIL;
-/*   const void         *       value  = NIL; */
+  /*   const void         *       value  = NIL; */
   void               *       node   = NIL;
   warc_u32_t                 hkey;
   warc_u32_t                 hkeyobj;
@@ -122,22 +123,25 @@ WIPUBLIC const void * WHash_get (const void * const _self,
 
   /* preconditions */
   CASSERT (self);
+
   if (key == NIL || len  == 0)
     {
       return (NIL);
     }
 
-  hkey   = computeHash ((const char *) key, len);
+  hkey   = computeHash ( (const char *) key, len);
+
   index  = hkey & HMASK;
 
   bucket = BUCKET (index);
   unless (bucket) /* no object found */
-    {
-      return (NIL);
-    }
+  {
+    return (NIL);
+  }
 
   /* here the bucket must exist */
   node = WList_firstNode (bucket);
+
   while (node)
     {
       obj     = WList_getObjectFromNode (bucket, node);
@@ -145,7 +149,7 @@ WIPUBLIC const void * WHash_get (const void * const _self,
 
       if (hkey == hkeyobj)
         {
-          return (WKV_value (obj));
+          return (WKV_value (obj) );
         }
 
       node = WList_nextNode (bucket, node);
@@ -169,6 +173,7 @@ WIPUBLIC warc_bool_t WHash_insert (const void * const _self,
                                    const void * key, warc_u32_t len,
                                    void * value)
 {
+
   const struct WHash * const self   = _self;
   void               *       bucket = NIL;
   void               *       obj    = NIL;
@@ -176,46 +181,49 @@ WIPUBLIC warc_bool_t WHash_insert (const void * const _self,
   warc_u32_t                 index;
 
   /* test if the KEY already exists */
-  if (WHash_get (self, key, len))
+
+  if (WHash_get (self, key, len) )
     {
-      w_fprintf(fprintf(stderr, "WHash error - key already exists\n" ));
+      w_fprintf (fprintf (stderr, "WHash error - key already exists\n" ) );
       return (WARC_TRUE);
     }
 
   /* preconditions */
   CASSERT (self);
+
   if (key == NIL || len  == 0)
     {
       return (WARC_TRUE);
     }
 
-  hkey  = computeHash ((const char *) key, len);
+  hkey  = computeHash ( (const char *) key, len);
+
   index = hkey & HMASK;
 
   /* create the bucket if it doesn't exist */
   bucket = BUCKET (index);
   unless (bucket)
+  {
+    bucket = bless (WList);
+    unless (bucket)
     {
-      bucket = bless (WList);
-      unless (bucket)
-        {
-          w_fprintf(fprintf(stderr, "WHash error - unable to create a new bucket\n" ));
-          return (WARC_TRUE);
-        }
-
-      BUCKET(index) = bucket;
-    }
-
-  
-  /* here the bucket must exist */
-  obj = bless (WKV, hkey, value);
-  unless (obj)
-    {
-      w_fprintf(fprintf(stderr, "WHash error - unable to create a new WKV object\n" ));
+      w_fprintf (fprintf (stderr, "WHash error - unable to create a new bucket\n" ) );
       return (WARC_TRUE);
     }
 
-  if(WList_unshift (bucket, obj))
+    BUCKET (index) = bucket;
+  }
+
+
+  /* here the bucket must exist */
+  obj = bless (WKV, hkey, value);
+  unless (obj)
+  {
+    w_fprintf (fprintf (stderr, "WHash error - unable to create a new WKV object\n" ) );
+    return (WARC_TRUE);
+  }
+
+  if (WList_unshift (bucket, obj) )
     {
       return (WARC_FALSE);
     }
@@ -240,6 +248,7 @@ WIPUBLIC warc_bool_t WHash_insert (const void * const _self,
 WIPUBLIC void * WHash_delete (const void * const _self,
                               const void * key, warc_u32_t len)
 {
+
   const struct WHash * const self   = _self;
   void               *       bucket = NIL;
   const void         *       obj    = NIL;
@@ -250,22 +259,25 @@ WIPUBLIC void * WHash_delete (const void * const _self,
 
   /* preconditions */
   CASSERT (self);
+
   if (key == NIL || len  == 0)
     {
       return (NIL);
     }
 
-  hkey   = computeHash ((const char *) key, len);
+  hkey   = computeHash ( (const char *) key, len);
+
   index  = hkey & HMASK;
 
   bucket = BUCKET (index);
   unless (bucket) /* no object found */
-    {
-      return (NIL);
-    }
+  {
+    return (NIL);
+  }
 
   /* here the bucket must exist */
   node = WList_firstNode (bucket);
+
   while (node)
     {
       obj     = WList_getObjectFromNode (bucket, node);
@@ -273,7 +285,7 @@ WIPUBLIC void * WHash_delete (const void * const _self,
 
       if (hkey == hkeyobj)
         {
-          return (WList_deleteNode (bucket, node));
+          return (WList_deleteNode (bucket, node) );
         }
 
       node = WList_nextNode (bucket, node);
@@ -297,9 +309,10 @@ WIPUBLIC void * WHash_delete (const void * const _self,
 
 WPRIVATE void * WHash_constructor (void * _self, va_list * app)
 {
+
   struct WHash * const self  = _self;
   const warc_u32_t     max   = va_arg (* app, const warc_u32_t);
-/*   hcomp_t              cmp   = va_arg (* app, hcomp_t); */
+  /*   hcomp_t              cmp   = va_arg (* app, hcomp_t); */
   warc_u32_t          i;
 
   /* preconditions */
@@ -312,37 +325,40 @@ WPRIVATE void * WHash_constructor (void * _self, va_list * app)
   if (max > MINIMUM_SIZE)
     {
       SIZE = 2 * max; /* double the max size */
-      
+
       /* round it to a power of two */
-      unless (isPowerOfTwoUInt (SIZE))
-        SIZE = roundToPowerOfTwoUInt (SIZE);
-      
+      unless (isPowerOfTwoUInt (SIZE) )
+      SIZE = roundToPowerOfTwoUInt (SIZE);
+
       HMASK = SIZE - 1;
     }
+
   else
     {
       /* use default value of 1024 buckets */
       SIZE  = INIT_SIZE;
       HMASK = INIT_MASK;
     }
-  
-  MAP = wmalloc (SIZE * sizeof(void *));
+
+  MAP = wmalloc (SIZE * sizeof (void *) );
+
   unless (MAP)
-    {
-      destroy (self);
-      return (NIL);
-    }
-  
+  {
+    destroy (self);
+    return (NIL);
+  }
+
   /* empty all buckets */
   i = 0;
-  while( i < SIZE ) 
+
+  while ( i < SIZE )
     {
-      ((warc_u32_t **) MAP) [ i ] = NIL;
+      ( (warc_u32_t **) MAP) [ i ] = NIL;
       ++ i;
     }
 
   /* set comparison function */
-/*   CMP = cmp ? cmp : WHash_defaultCmp; */
+  /*   CMP = cmp ? cmp : WHash_defaultCmp; */
 
   return (self);
 }
@@ -356,28 +372,30 @@ WPRIVATE void * WHash_constructor (void * _self, va_list * app)
 
 WPRIVATE void * WHash_destructor (void * _self)
 {
+
   struct WHash  * const self = _self;
-  void          * bucket     = NIL; 
+  void          * bucket     = NIL;
   warc_u32_t      i          = 0;
 
 
   /* preconditions */
   CASSERT (self);
 
-  
+
   /* free all buckets */
-  while( i < SIZE )
+
+  while ( i < SIZE )
     {
-      if( NIL != (bucket = BUCKET(i)) ) 
-        destroy (bucket), BUCKET(i) = NIL;
-      
+      if ( NIL != (bucket = BUCKET (i) ) )
+        destroy (bucket), BUCKET (i) = NIL;
+
       ++ i;
     }
-  
+
   if (MAP)
     wfree (MAP), MAP = NIL;
 
-/*   CMP = NIL; */
+  /*   CMP = NIL; */
 
   return (self);
 }
