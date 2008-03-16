@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-
 # -------------------------------------------------------------------  #
 # Copyright (c) 2007-2008 Hanzo Archives Limited.                      #
 #                                                                      #
@@ -82,7 +81,10 @@ fi
 
 for i in `find $dn -name "*.arc*" -type "f"`;
 do
-  wf=`echo "$i" | sed -e "s|arc\(.*\)$|warc\1|"`
+  dn=`dirname $i`
+  bn=`basename $i`
+  wf=`echo "$bn" | sed -e "s|arc\(.*\)$|warc\1|"`
+  wf="$dn/$wf"
 
   echo "converting $i -> $wf"
 

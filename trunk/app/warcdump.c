@@ -46,7 +46,7 @@ int main (int argc, const char ** argv)
   warc_u8_t      * flags   = (warc_u8_t *) "vcf:";
   char           * fname   = NIL;
   warc_bool_t      amode   = WARC_FALSE;
-  wfile_comp_t     cmode   = WARC_FILE_COMPRESSED_GZIP;
+  wfile_comp_t     cmode   = WARC_FILE_UNCOMPRESSED;
   warc_u32_t       ret     = 0;
 
 
@@ -55,17 +55,15 @@ int main (int argc, const char ** argv)
       fprintf (stderr, "Dump a WARC file\n");
       fprintf (stderr, "Usage: %s -f <file.warc> [-c] [-v]\n", argv [0]);
       fprintf (stderr, "\t-f    : valid WARC file name\n");
-      fprintf (stderr, "\t[-c]  : GZIP compressed WARC (default true)\n");
+      fprintf (stderr, "\t[-c]  : GZIP compressed WARC (default no)\n");
       fprintf (stderr, "\t[-v]  : dump ANVL (default false)\n");
       return (2);
     }
 
 
-  p = bless (WGetOpt, makeS (flags) );
-
-  assert (p);
-
   /* parse command line parameters */
+  p = bless (WGetOpt, makeS (flags) );
+  assert (p);
 
   while ( (c = WGetOpt_parse (p, argc, argv) ) != -1)
     {
@@ -80,7 +78,7 @@ int main (int argc, const char ** argv)
             break;
 
           case 'c' :
-            cmode = WARC_FILE_UNCOMPRESSED;
+            cmode = WARC_FILE_COMPRESSED_GZIP;
 
             break;
 
@@ -96,8 +94,8 @@ int main (int argc, const char ** argv)
         }
     }
 
-  unless (fname)
 
+  unless (fname)
   {
     fprintf (stderr, "missing WARC file name. Use -f option\n");
     destroy (p);
