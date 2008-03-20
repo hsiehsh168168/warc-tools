@@ -280,10 +280,10 @@ RET:
   if (ret == Z_OK)
     {
       warc_u8_t  buf [EXTRA_GZIP_HEADER];
-      warc_u16_t    xlen = GZIP_STATIC_HEADER_SIZE;
-      warc_u64_t    ecsize;
-      warc_u64_t    eucsize;
-      warc_u8_t flg;
+      warc_u16_t xlen  = GZIP_STATIC_HEADER_SIZE;
+      warc_u64_t ecsize;
+      warc_u64_t eucsize;
+      warc_u8_t  flg;
 
       /* adjust the compressed size */
       (* csize) += EXTRA_GZIP_HEADER;
@@ -307,13 +307,16 @@ RET:
       buf [0] = (xlen & 255);
       buf [1] = (xlen >> 8) & 255;
 
-      /* set SL (i.e. 0x73, 0x6C). See WARC spec annex B.6 */
+      /* set SL (i.e. 0x73, 0x6C). See WARC spec annexe B.6 */
       buf [2] = 0x73; /* S */
       buf [3] = 0x6C; /* L */
 
-      /* convert based endianness */
-      ecsize  = warc_i32ToEndian (* csize);
-      eucsize = warc_i32ToEndian (ucsize);
+      /* convertion based endianness */
+      ecsize  = * csize;
+      eucsize = ucsize;
+/*       ecsize  = warc_i32ToEndian (* csize); */
+/*       eucsize = warc_i32ToEndian (ucsize); */
+
 
       /* set compressed line */
       buf [4] = (ecsize & 255);
@@ -321,14 +324,13 @@ RET:
       buf [6] = (ecsize >> 16) & 255;
       buf [7] = (ecsize >> 24) & 255;
 
-
       /* set uncompressed line */
       buf [8]  = (eucsize & 255);
       buf [9]  = (eucsize >> 8) & 255;
       buf [10] = (eucsize >> 16) & 255;
       buf [11] = (eucsize >> 24) & 255;
 
-      w_fwrite (buf, 1, 12, dest);
+      w_fwrite (buf, 1, EXTRA_GZIP_HEADER, dest);
     }
 
   /* zero fill the GzipMeta structure  */
@@ -359,17 +361,18 @@ WGzip_getCompUncompSize (FILE * source, struct GzipMeta * meta,
       csize  += (buf[3] << 8);
       csize  += (buf[4] << 16);
       csize  += (buf[5] << 24);
-      csize   = warc_i32ToEndian (csize);
+/*       printf("+++ csize: %llu\n", csize); */
+/*      csize   = warc_i32ToEndian (csize); */
 
       ucsize  = buf[6];
       ucsize += (buf[7] << 8);
       ucsize += (buf[8] << 16);
       ucsize += (buf[9] << 24);
-      ucsize  = warc_i32ToEndian (ucsize);
+/*       printf("+++ ucsize: %llu\n", ucsize); */
+/*       ucsize  = warc_i32ToEndian (ucsize); */
 
       meta -> ocsize  = csize;
       meta -> oucsize = ucsize;
-
     }
 
   else /* skip XLEN bytes */
@@ -767,8 +770,10 @@ WGzip_analyzeHeader (const void * _self,  FILE * source,
     return (WARC_TRUE);
 
   (* usize) = META -> oucsize;
-
   (* csize) = META -> ocsize;
+
+/*   printf(">>> csize: %llu\n", *csize); */
+/*   printf(">>> usize: %llu\n", *usize); */
 
   /* zero fill the GzipMeta structure  */
   memset (META, 0, sizeof (struct GzipMeta) );
