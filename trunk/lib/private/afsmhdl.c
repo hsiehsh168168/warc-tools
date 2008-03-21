@@ -78,11 +78,15 @@ struct AFsmHDL
 
     /*@{*/
     HDLState * hdls; /**< HDLState */
+    void     * dname; /**< working directory name */
+
     /*@}*/
   };
 
 
 #define    HDLS            (self -> hdls)
+#define    WORKING_DIR     (self -> dname)
+
 
 #define    FIN             (HDLS -> fin)
 #define    STATE           (HDLS -> state)
@@ -100,8 +104,8 @@ struct AFsmHDL
 
 /* prototypes of all events in the FSM (defined below) */
 warc_bool_t AFsmHDL_isSpace (void *),    AFsmHDL_isText    (void *),
-AFsmHDL_isInteger (void *),  AFsmHDL_isLF      (void *),
-AFsmHDL_isUnknown (void *);
+AFsmHDL_isInteger (void *),  AFsmHDL_isCR      (void *),
+AFsmHDL_isLF      (void *),  AFsmHDL_isUnknown (void *);
 
 /* prototypes of all actions in the FSM (defined below) */
 void AFsmHDL_setDataLength  (void *), AFsmHDL_setIpAdress       (void *),
@@ -245,16 +249,20 @@ State WANT_ARCHDL_DATA_LENGTH =
 {
   /* TEST_EVENT             ACTION                     NEXT_STATE */
 
+  {AFsmHDL_isCR,            NIL,                       WANT_ARCHDL_LF},
   {AFsmHDL_isLF,            AFsmHDL_pushBack,          WANT_ARCHDL_LF},
   {AFsmHDL_isInteger,       AFsmHDL_setDataLength,     WANT_ARCHDL_DATA_LENGTH},
   {AFsmHDL_isUnknown,       AFsmHDL_raiseErrorDlength, NIL}
 };
+
+
 State WANT_ARCHDL_LF =
 {
   /* TEST_EVENT             ACTION                   NEXT_STATE */
 
   {AFsmHDL_isLF,            NIL,                     NIL},
-  {AFsmHDL_isUnknown,       AFsmHDL_raiseError,      NIL}
+  {AFsmHDL_isUnknown,       NIL,                     NIL}
+/*   {AFsmHDL_isUnknown,       AFsmHDL_raiseError,      NIL} */
 };
 
 
@@ -319,7 +327,14 @@ warc_bool_t AFsmHDL_isInteger (void * _hs)
 }
 
 
+warc_bool_t  AFsmHDL_isCR (void * _hs)
+{
+  const HDLState * const hs = _hs;
 
+  assert (hs);
+
+  return (hs -> c == '\r');
+}
 
 warc_bool_t  AFsmHDL_isLF (void * _hs)
 {
@@ -697,9 +712,17 @@ void AFsmHDL_raiseError (void * _hs)
 void AFsmHDL_raiseErrorDlength (void * _hs)
 {
   HDLState * const hs  = _hs;
+#define buf_size 30
+  char buf [buf_size];
 
   assert (hs);
+
   w_ungetc (hs -> c, hs -> fin);
+
+  fread (buf, sizeof(char), buf_size-1, hs -> fin);
+  buf [buf_size-1] = '\0';
+  printf (">>> invalid data length: %s\n", buf);
+
   WarcDebugMsg ("expecting a valid data length");
   /* raise "on" the error flag */
   hs -> err = WARC_TRUE;
@@ -833,11 +856,8 @@ WPUBLIC void * AFsmHDL_transform (const void * const _self)
                  makeC (IP_ADRESS),
                  makeC (CREATION_DATE),
                  makeC (MIME_TYPE),
-                 (warc_u32_t) atoi ( (const char *) WString_getText (DATA_LENGTH) ) ) );
-
-
-
-
+                 (warc_u32_t) atoi ( (const char *) WString_getText (DATA_LENGTH)),
+                 WORKING_DIR ) );
 
 }
 
@@ -856,8 +876,9 @@ WPRIVATE void * AFsmHDL_constructor (void * _self, va_list * app)
 {
 #define makeS(s) (s), w_strlen((s))
 
-  struct AFsmHDL * const self = _self;
-  FILE           *       fin  = va_arg (* app, FILE *);
+  struct AFsmHDL * const self  = _self;
+  FILE           *       fin   = va_arg (* app, FILE *);
+  void           *       wdir  = va_arg (* app, void *);
 
   HDLS = wmalloc (sizeof (HDLState) );
   assert (HDLS);
@@ -882,6 +903,8 @@ WPRIVATE void * AFsmHDL_constructor (void * _self, va_list * app)
 
   IP_ADRESS = bless (WString, makeS ( (warc_u8_t *) "") );
   assert (IP_ADRESS);
+
+  WORKING_DIR = wdir;
 
   return (self);
 }
