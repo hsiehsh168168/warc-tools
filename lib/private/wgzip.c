@@ -331,6 +331,8 @@ RET:
       buf [11] = (eucsize >> 24) & 255;
 
       w_fwrite (buf, 1, EXTRA_GZIP_HEADER, dest);
+
+      w_fseek_end (dest);
     }
 
   /* zero fill the GzipMeta structure  */
