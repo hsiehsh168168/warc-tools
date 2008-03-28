@@ -21,7 +21,7 @@ if ! type "$ccount" &>/dev/null; then
     exit 1
 fi
 
-cf=`find $1 -name "*.c" -o -name "*.h" -o -name "*.x" | grep -v "plugin/gzip" | grep -v "app/wdata" | grep -v "doc" | grep -v "license" | wc -l`
+cf=`find $1 -name "*.c" -o -name "*.h" -o -name "*.x" | grep -v "plugin/" | grep -v "app/wdata" | grep -v "doc" | grep -v "license" | wc -l`
 
 echo " ------------------------------------------------"
 echo "|                  SMARTLIB                      |"
@@ -34,4 +34,4 @@ echo
 echo " LINES    STATEMENTS          FILENAME"
 echo
 
-$ccount `find $1 -name "*.c" -o -name "*.h" -o -name "*.x" | grep -v "plugin/gzip" | sed -r "s|./|  |"`
+$ccount `find $1 -name "*.c" -o -name "*.h" -o -name "*.x" | grep -v "plugin/" | sed -e "s|./|  |"`
