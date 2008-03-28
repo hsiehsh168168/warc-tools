@@ -1620,7 +1620,7 @@ WFile_storeRecordGzipComressed (void * _self,
   struct WFile * self = _self;
 
   warc_u8_t      strData [20];
-  warc_u32_t     i       = 0;
+/*   warc_u32_t     i       = 0; */
   void         * gzobj   = NIL;
   warc_u64_t     csize   = 0;    /* the size of the compressed data */
   FILE         * crec    = NIL;  /* to store the compressed record */
@@ -1667,21 +1667,23 @@ WFile_storeRecordGzipComressed (void * _self,
   WFile_writeDataBloc (wtfile, bloc, WRecord_getDataSize (wrec) );
 
   /* writing final double CRLF */
-  i = 0x0D;
+/*   i = 0x0D; */
 
-  w_fwrite (& i, 1, 1, wtfile);
+/*   w_fwrite (& i, 1, 1, wtfile); */
 
-  i = 0x0A;
+/*   i = 0x0A; */
 
-  w_fwrite (& i, 1, 1, wtfile);
+/*   w_fwrite (& i, 1, 1, wtfile); */
 
-  i = 0x0D;
+/*   i = 0x0D; */
 
-  w_fwrite (& i, 1, 1, wtfile);
+/*   w_fwrite (& i, 1, 1, wtfile); */
 
-  i = 0x0A;
+/*   i = 0x0A; */
 
-  w_fwrite (& i, 1, 1, wtfile);
+/*   w_fwrite (& i, 1, 1, wtfile); */
+
+  w_fwrite ("\r\n\r\n", 4, 1, wtfile); 
 
   /* Creating the temporary file that will hold the
      compressed record */
@@ -1753,7 +1755,7 @@ WFile_storeRecordUncompressed (void* _self, const void * wrec,
   struct WFile * self = _self;
 
   warc_u8_t      strData [20];
-  warc_u32_t     i    = 0;
+/*   warc_u32_t     i    = 0; */
 
   /* testing if the record writing will not overload the Warc File */
 
@@ -1780,21 +1782,23 @@ WFile_storeRecordUncompressed (void* _self, const void * wrec,
   WFile_writeDataBloc (FH, bloc, WRecord_getDataSize (wrec) );
 
   /* writing final double CRLF */
-  i = 0x0D;
+ /*  i = 0x0D; */
 
-  w_fwrite (& i, 1, 1, FH);
+/*   w_fwrite (& i, 1, 1, FH); */
 
-  i = 0x0A;
+/*   i = 0x0A; */
 
-  w_fwrite (& i, 1, 1, FH);
+/*   w_fwrite (& i, 1, 1, FH); */
 
-  i = 0x0D;
+/*   i = 0x0D; */
 
-  w_fwrite (& i, 1, 1, FH);
+/*   w_fwrite (& i, 1, 1, FH); */
 
-  i = 0x0A;
+/*   i = 0x0A; */
 
-  w_fwrite (& i, 1, 1, FH);
+/*   w_fwrite (& i, 1, 1, FH); */
+
+  w_fwrite ("\r\n\r\n", 4, 1, FH);
 
   /* destroying the temporary file */
   destroy (objwtfile);
