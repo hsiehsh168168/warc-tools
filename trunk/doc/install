@@ -106,6 +106,14 @@ environment variable if necessary):
 
   $ make tgz
 
+* To install the library, as "root" type:
+
+  # make install
+
+* To de-install the library, as "root" type:
+
+  # make deinstall
+
 * To build an RPM or DEB package, you need to install the following
 softwares first:
 
