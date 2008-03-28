@@ -279,9 +279,30 @@ source:	shared static $(a)
 
 tgz:	source
 		rm -f $(PROJECT).tar.gz
-		tar cvf $(PROJECT).tar $(PROJECT)
+		cd $(PROJECT) && tar cvf ../$(PROJECT).tar *
 		gzip -9 $(PROJECT).tar
 		rm -rf $(PROJECT)
+
+install:tgz
+		@echo
+		@echo "------------------------------------------------------------"
+		@echo "Install \"WARC-Tools\"."
+		@echo "YOU MUST BE \"root\"."
+		@echo "------------------------------------------------------------"
+		tar xzvf $(PROJECT).tar.gz -C /
+
+deinstall:tgz
+		@echo
+		@echo "------------------------------------------------------------"
+		@echo "De-install \"WARC-Tools\"."
+		@echo "YOU MUST BE \"root\"."
+		@echo "------------------------------------------------------------"
+		for i in $(shell tar tzf $(PROJECT).tar.gz); do \
+			j="/$$i"; \
+			if [ -f "$$j" ]; then \
+				rm -f $$j; \
+			fi; \
+		done
 
 deb:	source
 		rm -f $(PROJECT).deb
