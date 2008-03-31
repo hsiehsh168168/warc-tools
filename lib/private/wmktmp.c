@@ -38,6 +38,7 @@
 #include <wsign.h>   /* CASSET macro */
 #include <wmem.h>    /* wmalloc, wfree */
 #include <wmisc.h>   /* unless, ... */
+#include <wmem.h>    /* wmalloc, wfree */
 #include <wmktmp.h>  /* default class */
 #include <wcsafe.h>
 
@@ -65,7 +66,7 @@ struct WTempFile
 
 
 /**
- * @param tmps  a temporary structure
+ * @param _self  a temporary object
  *
  * @return file handle descriptor, NIL otherwise
  *
@@ -84,6 +85,26 @@ WIPUBLIC FILE * WTempFile_handle  (const void * const _self)
 
 
 /**
+ * @param _self  a temporary object
+ *
+ * @return void
+ *
+ * Seek to offset 0
+ */
+
+WIPUBLIC void WTempFile_reset (const void * const _self)
+{
+
+  const struct WTempFile * const self = _self;
+
+  assert (self);
+
+  w_fflush (HANDLE);
+  w_ftruncate(w_fileno (HANDLE), 0);
+  w_fseek_start (HANDLE);
+}
+
+/**
  * WTempFile_constructor - create a new WTempFile object instance
  *
  * @param _self WTempFile class object
@@ -98,31 +119,49 @@ WPRIVATE void * WTempFile_constructor (void * _self, va_list * app)
 {
 #define  TEMPLATE_NAME  "w17XXXXXX"
 
-  struct WTempFile * const self = _self;
-  char                     template [] = TEMPLATE_NAME;
-  warc_i32_t               wfd;
-  mode_t                   old_mode;
+  struct WTempFile * const self        = _self;
 
-  UNUSED (app);
+  warc_u8_t        * template = NIL;
+  const warc_u8_t  * dir      = va_arg (* app, const warc_u8_t *);
+  const warc_u32_t   dirlen   = va_arg (* app, const warc_u32_t);
+  warc_i32_t         tempsize;
+  warc_i32_t         wfd;
+  mode_t             old_mode;
+
+
+  tempsize = w_strlen((const warc_u8_t *) TEMPLATE_NAME);
+  template = wmalloc (sizeof (char) * (dirlen + tempsize + 1));
+  unless (template)
+    {
+      destroy (self);
+      return (NIL);
+    }
+
+  w_strncpy(template, dir, dirlen);
+  w_strncpy(template + dirlen, (const warc_u8_t *) TEMPLATE_NAME, tempsize);
+  template [dirlen + tempsize] = '\0';
 
   /* create file with restrictive permissions */
   old_mode = umask (077);
 
-  if ( (wfd = mkstemp (template) ) < 0)
+  if ( (wfd = mkstemp ((char *) template) ) < 0)
     {
+      wfree   (template);
       destroy (self);
-      return (NIL);
+      return  (NIL);
     }
 
   umask (old_mode);
 
-  if ( (HANDLE = fdopen (wfd, "w+b") ) == NIL || unlink (template) < 0)
+  if ( (HANDLE = w_fdopen_wb (wfd) ) == NIL || unlink ((char *) template) < 0)
     {
-      close (wfd);
+      close   (wfd);
+      wfree   (template);
       destroy (self);
-      return (NIL);
+      return  (NIL);
     }
 
+  wfree (template);
   return (self);
 }
 

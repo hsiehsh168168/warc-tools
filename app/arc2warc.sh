@@ -28,10 +28,11 @@
 usage () {
     echo
     echo "Convert all ARC files in a directory to WARC files"
-    echo "Usage: $0 <-d dirname> [-b] [-c] [-v] [-h]"  >&2
+    echo "Usage: $0 <-d dirname> [-b] [-c] [-t <working_dir>] [-v] [-h]"  >&2
     echo "       -d     : directory name containing ARC files"  >&2
     echo "       -b     : assume all ARC files are GZIP compressed (default no)"  >&2
     echo "       -c     : WARC files will be GZIP compressed (default no)"  >&2
+    echo "       -t     : temporary working directory (default \".\")"  >&2
     echo "       -h     : print this help message"  >&2
     echo "       -v     : output version information and exit"  >&2
     exit 1
@@ -40,10 +41,11 @@ usage () {
 # default settings
 version="0.17"
 
-while getopts hvbcd: o
+while getopts hvbcd:t: o
 do
   case "$o" in
     d)   dn=$OPTARG ;;
+    t)   wdir=$OPTARG ;;
     b)   acomp="-b" ;;
     c)   ccomp="-c" ;;
     h)   usage ;;
@@ -69,6 +71,9 @@ else
     usage
 fi 
 
+if [ -z "$wdir" ]; then
+    wdir="."
+fi
 
 orig_dir=$(pwd)
 cd ${0%/*}/..
@@ -93,7 +98,7 @@ do
       continue
   fi
 
-  $a2w -a $i $acomp -f $wf $ccomp &>/dev/null
+  $a2w -a $i $acomp -f $wf $ccomp -t $wdir &>/dev/null
   if [ $? -ne 0 ]; then
       echo ">> error when converting \"$i\"" >&2
       exit 2

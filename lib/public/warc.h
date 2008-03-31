@@ -47,6 +47,8 @@ extern "C"
 #include <wuuid.h>       /* WUUID */
 #include <wgetopt.h>     /* WGetOpt */
 #include <whash.h>       /* WHash */
+#include <wserver.h>     /* WServer */
+#include <wclient.h>     /* WClient */
 #include <wversion.h>    /* WARC_VERSION */
 #include <wrectype.h>    /* WRecord types (i.e. resource, revisit ...) */
 

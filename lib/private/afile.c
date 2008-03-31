@@ -61,6 +61,8 @@ struct AFile
 
     /*@{*/
     void * fname; /**< WString containing AFile File name*/
+    void * dname; /**< working directory name */
+    void * tempfile; /**< temporary file object */
     FILE * fh; /**< The file handle */
     afile_comp_t compressed; /**< indicates if the record is compressed */
     warc_u64_t fsize; /**< Arc file size */
@@ -69,12 +71,13 @@ struct AFile
   };
 
 
-#define FNAME   (self -> fname)
-#define FH      (self -> fh)
-#define COMP    (self -> compressed)
-#define FSIZE   (self -> fsize)
-#define SBLOC   (self -> sbloc)
-
+#define FNAME         (self -> fname)
+#define WORKING_DIR   (self -> dname)
+#define TEMP_FILE     (self -> tempfile)
+#define FH            (self -> fh)
+#define COMP          (self -> compressed)
+#define FSIZE         (self -> fsize)
+#define SBLOC         (self -> sbloc)
 
 
 
@@ -172,7 +175,7 @@ WPUBLIC void * AFile_nextRecord ( void * _self)
   warc_u64_t   usize    = 0; /* uncompressed data size */
   warc_u64_t   csize    = 0; /* compressed data size */
   warc_u32_t   ret      = 0;
-  void       * objrectfile = NIL;
+/*   void       * objrectfile = NIL; */
   FILE       * rectfile = NIL; /* to uncompress the ARecord */
   warc_u64_t   offset   = 0;
 
@@ -184,14 +187,18 @@ WPUBLIC void * AFile_nextRecord ( void * _self)
 
   if (COMP == ARC_FILE_COMPRESSED_GZIP)
     {
-      objrectfile = bless (WTempFile);
-      unless (objrectfile)
-      {
-        WarcDebugMsg ("unable to create temporary space");
-        return (NIL);
-      }
+      WTempFile_reset (TEMP_FILE);
 
-      rectfile = WTempFile_handle (objrectfile);
+/*       objrectfile = bless (WTempFile, WString_getText(WORKING_DIR),  */
+/*                            WString_getLength(WORKING_DIR)); */
+
+/*       unless (objrectfile) */
+/*       { */
+/*         WarcDebugMsg ("unable to create temporary space"); */
+/*         return (NIL); */
+/*       } */
+
+      rectfile = WTempFile_handle (TEMP_FILE);
 
       gzobj = bless (WGzip);
       offset = w_ftell (FH);
@@ -201,7 +208,7 @@ WPUBLIC void * AFile_nextRecord ( void * _self)
       if (ret)
         {
           WarcDebugMsg ("unable to uncompress the gzipped record");
-          destroy (objrectfile);
+/*           destroy (objrectfile); */
           destroy (gzobj);
           return (NIL);
         }
@@ -211,13 +218,13 @@ WPUBLIC void * AFile_nextRecord ( void * _self)
       w_fseek_from_start (FH, offset);
       destroy (gzobj);
       w_fseek_start (rectfile);
-      arcfsm = bless (AFsmHDL, rectfile);
+      arcfsm = bless (AFsmHDL, rectfile, WORKING_DIR);
 
       if (AFsmHDL_run (arcfsm) )
         {
 
           destroy (arcfsm);
-          destroy (objrectfile);
+/*           destroy (objrectfile); */
           return (NIL);
         }
 
@@ -229,7 +236,7 @@ WPUBLIC void * AFile_nextRecord ( void * _self)
         {
           destroy (arec);
           destroy (arcfsm);
-          destroy (objrectfile);
+/*           destroy (objrectfile); */
           return (NIL);
         }
 
@@ -237,7 +244,7 @@ WPUBLIC void * AFile_nextRecord ( void * _self)
         {
           destroy (arec);
           destroy (arcfsm);
-          destroy (objrectfile);
+/*           destroy (objrectfile); */
           return (NIL);
         }
 
@@ -245,27 +252,26 @@ WPUBLIC void * AFile_nextRecord ( void * _self)
         {
           destroy (arec);
           destroy (arcfsm);
-          destroy (objrectfile);
+/*           destroy (objrectfile); */
           return (NIL);
         }
 
 
-      if (ARecord_setContentFromFile (arec, objrectfile) )
+      if (ARecord_setContentFromFile (arec, TEMP_FILE) )
         {
           destroy (arec);
-          destroy (objrectfile);
+/*           destroy (objrectfile); */
           return (NIL);
         }
 
       destroy (arcfsm);
 
       return (arec);
-
     }
 
   else if (COMP == ARC_FILE_UNCOMPRESSED)
     {
-      arcfsm = bless (AFsmHDL, FH);
+      arcfsm = bless (AFsmHDL, FH, WORKING_DIR);
 
       if (AFsmHDL_run (arcfsm) )
         {
@@ -401,7 +407,7 @@ WPUBLIC warc_bool_t AFile_register (void* _self, void * arec,
 {
 
   struct AFile * self      = _self;
-  void         * objatfile = NIL;
+/*   void         * objatfile = NIL; */
   FILE         * atfile    = NIL;  /* the temporary file
                                       which will hold the record bloc */
   warc_i64_t     acurrent  = -1;   /* to return to the current postion
@@ -446,14 +452,15 @@ WPUBLIC warc_bool_t AFile_register (void* _self, void * arec,
 
   else if (COMP == ARC_FILE_UNCOMPRESSED)
     {
-      objatfile = bless (WTempFile);
-      unless (objatfile)
-      {
-        WarcDebugMsg ("unable to create temporary space");
-        return (WARC_TRUE);
-      }
+      WTempFile_reset (TEMP_FILE);
+/*       objatfile = bless (WTempFile, WString_getText(WORKING_DIR), WString_getLength(WORKING_DIR)); */
+/*       unless (objatfile) */
+/*       { */
+/*         WarcDebugMsg ("unable to create temporary space"); */
+/*         return (WARC_TRUE); */
+/*       } */
 
-      atfile = WTempFile_handle (objatfile);
+      atfile = WTempFile_handle (TEMP_FILE);
 
       size = ARecord_getDataSize (arec);
 
@@ -462,7 +469,7 @@ WPUBLIC warc_bool_t AFile_register (void* _self, void * arec,
 
       if (AFile_fillTempFile (self, atfile, size) )
         {
-          destroy (objatfile);
+/*           destroy (objatfile); */
           w_fseek_from_start (FH, acurrent);
           return (WARC_TRUE);
         }
@@ -471,9 +478,9 @@ WPUBLIC warc_bool_t AFile_register (void* _self, void * arec,
 
       w_fseek_from_start (FH, acurrent);
 
-      if (ARecord_setContentFromFile (arec, objatfile) )
+      if (ARecord_setContentFromFile (arec, TEMP_FILE) )
         {
-          destroy (objatfile);
+/*           destroy (objatfile); */
           w_fseek_from_start (FH, acurrent);
           return (WARC_TRUE);
         }
@@ -505,9 +512,22 @@ WPRIVATE void * AFile_constructor (void * _self, va_list * app)
   struct AFile         * const self = _self;
   const char           * fname      = va_arg (* app, const char *);
   const afile_comp_t     compressed = va_arg (* app, const afile_comp_t);
+  const char           * dname      = va_arg (* app, const char *);
+  warc_u32_t             dname_len  = w_strlen ((warc_u8_t *) dname);
 
   FNAME = bless (WString, fname, w_strlen ( (warc_u8_t *) fname) );
-  assert (FNAME);
+  unless (FNAME)
+    {
+      destroy (self);
+      return (NIL);
+    }
+  
+  WORKING_DIR = bless (WString, dname, dname_len);
+  unless (WORKING_DIR)
+    {
+      destroy (self);
+      return (NIL);
+    }
 
   FH = w_fopen_rb (fname);
   unless (FH)
@@ -522,6 +542,15 @@ WPRIVATE void * AFile_constructor (void * _self, va_list * app)
     destroy (self);
     return (NIL);
   }
+
+  TEMP_FILE = bless (WTempFile, dname, dname_len);
+  unless (TEMP_FILE)
+    {
+      WarcDebugMsg ("unable to create temporary space");
+      destroy (self);
+      return (NIL);
+    }
+
 
   COMP  = compressed ;
   SBLOC = 0;
@@ -581,6 +610,12 @@ WPRIVATE void * AFile_destructor (void * _self)
 
   if (FNAME)
     destroy (FNAME), FNAME = NIL;
+
+  if (WORKING_DIR)
+    destroy (WORKING_DIR), WORKING_DIR = NIL;
+
+  if (TEMP_FILE)
+    destroy (TEMP_FILE), TEMP_FILE = NIL;
 
   COMP =  0;
 

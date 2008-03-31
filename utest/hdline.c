@@ -43,7 +43,7 @@ int test1 (void)
   void       * hl = bless (WHDLine,
                            makeS (WARC_VERSION),
                            12,
-                           WARCINFO_RECORD,
+                           WARC_INFO_RECORD,
                            makeS ("http://www.w3c.org"),
                            makeS ("12172007"),
                            makeS ("warcproject/testheaderline"),
@@ -73,7 +73,7 @@ int test2 (void)
   void       * hl = bless (WHDLine,
                            makeS (WARC_VERSION),
                            12,
-                           WARCINFO_RECORD,
+                           WARC_INFO_RECORD,
                            makeS ("http://www.w3c.org"),
                            makeS ("12172007"),
                            makeS ("warcproject/testheaderline"),
@@ -85,7 +85,7 @@ int test2 (void)
 
   WHDLine_setWarcId       (hl, makeS ("warc/1.0") );
   WHDLine_setDataLength   (hl, 15);
-  WHDLine_setRecordType   (hl, CONTINUATION_RECORD);
+  WHDLine_setRecordType   (hl, WARC_CONTINUATION_RECORD);
   WHDLine_setSubjectUri   (hl, makeS ("http://www.iso.net") );
   WHDLine_setCreationDate (hl, makeS ("01012999") );
   WHDLine_setContentType  (hl, makeS ("application/xpdf") );

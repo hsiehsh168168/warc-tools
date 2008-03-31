@@ -97,8 +97,8 @@ int test1 (const char * fin)
   out = openWriting (fout);
   assert (out);
 
-
   ret = WGzip_compress (g, in, out, WARC_GZIP_NO_COMPRESSION, & csize);
+
   assert (!ret);
   fprintf (stderr, "\"%s\" compressed to \"%s\" [size: %llu] [mode: %s]\n",
            fin, fout, (unsigned long long) csize,
@@ -134,8 +134,8 @@ int test2 (const char * fin)
   out = openWriting (fout);
   assert (out);
 
-
   ret = WGzip_compress (g, in, out, WARC_GZIP_DEFAULT_COMPRESSION, & csize);
+
   assert (! ret);
   fprintf (stdout, "\"%s\" compressed to \"%s\" [size: %llu] [mode: %s]\n",
            fin, fout, (unsigned long long) csize,
@@ -340,6 +340,8 @@ int test7 (const char * unused)
 int main (int argc, char ** argv)
 {
   const char * f = "app/wdata/testwfile/warcfile.warc";
+
+
   int (* tests []) (const char *) = { test1, test2, test3, test4,
                                       test5, test6, test7
                                     };

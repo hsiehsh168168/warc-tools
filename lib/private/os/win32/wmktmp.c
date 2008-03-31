@@ -40,6 +40,7 @@
 #include <wsign.h>   /* CASSET macro */
 #include <wmem.h>    /* wmalloc, wfree */
 #include <wmisc.h>   /* unless, ... */
+#include <wmem.h>    /* wmalloc, wfree */
 #include <wstring.h> /* WString */
 #include <wmktmp.h>  /* default class */
 
@@ -68,7 +69,7 @@ struct WTempFile
 
 
 /**
- * @param tmps  a temporary structure
+ * @param _self a temporary object
  *
  * @return file handle descriptor, NIL otherwise
  *
@@ -83,6 +84,28 @@ WIPUBLIC FILE * WTempFile_handle  (const void * const _self)
   assert (self);
 
   return (HANDLE);
+}
+
+
+
+/**
+ * @param _self  a temporary object
+ *
+ * @return void
+ *
+ * Seek to offset 0
+ */
+
+WIPUBLIC void WTempFile_reset (const void * const _self)
+{
+
+  const struct WTempFile * const self = _self;
+
+  assert (self);
+
+  w_fflush (HANDLE);
+  w_ftruncate(w_fileno (HANDLE), 0);
+  w_fseek_start (HANDLE);
 }
 
 
@@ -101,31 +124,50 @@ WPRIVATE void * WTempFile_constructor (void * _self, va_list * app)
 {
 #define  TEMPLATE_NAME  "w17XXXXXX"
 
-  struct WTempFile * const self = _self;
-  char                     template [] = TEMPLATE_NAME;
+  struct WTempFile * const self  = _self;
+  warc_u8_t        * template    = NIL;
+  const warc_u8_t  * dir         = va_arg (* app, const warc_u8_t *);
+  const warc_u32_t   dirlen      = va_arg (* app, const warc_u32_t);
+  warc_i32_t         tempsize;
 
-  UNUSED (app);
 
-  if (mktemp (template) == NIL)
+  tempsize = w_strlen((const warc_u8_t *) TEMPLATE_NAME);
+  template = wmalloc (sizeof (char) * (dirlen + tempsize + 1));
+  unless (template)
     {
       destroy (self);
       return (NIL);
     }
 
-  TEMPLATE = bless (WString, template, 9);
+  w_strncpy(template, dir, dirlen);
+  w_strncpy(template + dirlen, (const warc_u8_t *) TEMPLATE_NAME, tempsize);
+  tempsize += dirlen;
+  template [tempsize] = '\0';
 
+  if (mktemp ((char *) template) == NIL)
+    {
+      wfree   (template);
+      destroy (self);
+      return (NIL);
+    }
+
+  TEMPLATE = bless (WString, template, tempsize);
   unless (TEMPLATE)
   {
+    wfree   (template);
     destroy (self);
-    return (NIL);
+    return  (NIL);
   }
 
-  HANDLE = w_fopen_wb (template);
+  HANDLE = w_fopen_wb ((char *) template);
   unless (HANDLE)
   {
+    wfree   (template);
     destroy (self);
-    return (NIL);
+    return  (NIL);
   }
+
+  wfree (template);
 
   return (self);
 }

@@ -36,8 +36,9 @@
 
 #define WARC_MAX_SIZE 629145600
 
-#define makeS(s) ((warc_u8_t *) s), w_strlen((warc_u8_t *) (s))
-#define makeU(s) (const warc_u8_t *) (s), (warc_u64_t) w_strlen((warc_u8_t *) (s))
+#define uS(s)  ((warc_u8_t *) (s))
+#define makeS(s) uS(s), w_strlen (uS(s))
+#define makeU(s) (const warc_u8_t *) (s), (warc_u64_t) w_strlen(uS(s))
 
 /* useful macros to simplify releasing objects */
 #define free_p \
@@ -103,20 +104,22 @@ int main (int argc, const char ** argv)
   afile_comp_t     amode    = ARC_FILE_UNCOMPRESSED;
   warc_bool_t      b        = WARC_FALSE;
   warc_i32_t       c        = 0;
-  warc_u8_t      * flags    = (warc_u8_t *) "bca:f:";
+  warc_u8_t      * flags    = uS ("bca:f:t:");
   char           * fname    = NIL;
+  char           * wdir     = ".";
   wfile_comp_t     cmode    = WARC_FILE_UNCOMPRESSED;
 
 
-  if (argc < 5 || argc > 7)
+  if (argc < 5 || argc > 9)
     {
       fprintf (stderr, "ARC to WARC convertor\n");
-      fprintf (stderr, "Usage: %s -a <file.arc> [-b] -f <file.warc> [-c]\n",
+      fprintf (stderr, "Usage: %s -a <file.arc> [-b] -f <file.warc> [-c] [-t <working_dir>]\n",
                argv [0]);
       fprintf (stderr, "\t-a    : valid ARC file name\n");
       fprintf (stderr, "\t[-b]  : assume ARC file is GZIP compressed (default no)\n");
       fprintf (stderr, "\t-f    : valid WARC file name\n");
       fprintf (stderr, "\t[-c]  : WARC file will be GZIP compressed (default no)\n");
+      fprintf (stderr, "\t[-t]  : temporary working directory (default \".\")\n");
       return (2);
     }
 
@@ -130,7 +133,6 @@ int main (int argc, const char ** argv)
     {
       switch (c)
         {
-
           case 'f' :
 
             if (w_index (flags, c) [1] == ':')
@@ -154,6 +156,13 @@ int main (int argc, const char ** argv)
 
             break;
 
+          case 't' :
+
+            if (w_index (flags, c) [1] == ':')
+              wdir = WGetOpt_argument (p);
+
+            break;
+
           case '?' :  /* illegal option or missing argument */
             destroy (p);
 
@@ -162,7 +171,6 @@ int main (int argc, const char ** argv)
     }
 
   unless (aname)
-
   {
     fprintf (stderr, "missing ARC file name. Use -a option\n");
     destroy (p);
@@ -178,7 +186,7 @@ int main (int argc, const char ** argv)
 
 
   /* open an existing ARC file */
-  a = bless (AFile, aname, amode);
+  a = bless (AFile, aname, amode, wdir);
   unless (a)
   {
     fprintf (stderr, "unable to create the Arc object\n");
@@ -186,7 +194,8 @@ int main (int argc, const char ** argv)
   }
 
   /* open or create a WARC file */
-  w = bless (WFile, fname, WARC_MAX_SIZE, WARC_FILE_WRITER, cmode);
+  w = bless (WFile, fname, WARC_MAX_SIZE, 
+             WARC_FILE_WRITER, cmode, wdir);
   unless (w)
   {
     fprintf (stderr, "unable to create the Warc object\n");
@@ -235,7 +244,7 @@ int main (int argc, const char ** argv)
         free_err (7);
 
       /* set the record tyep */
-      b = WRecord_setRecordType  (wr, RESOURCE_RECORD);
+      b = WRecord_setRecordType  (wr, WARC_RESOURCE_RECORD);
 
       if (b)
         free_err (8);

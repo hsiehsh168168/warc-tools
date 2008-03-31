@@ -134,7 +134,7 @@ WPUBLIC warc_i32_t WGzip_compress (const void * const _self,
   warc_u32_t flush;
   warc_u32_t level;
 
-  warc_u64_t offset = 0;
+  warc_u64_t offset;
   warc_u64_t ucsize = 0;
 
   /* preconditions */
@@ -142,11 +142,13 @@ WPUBLIC warc_i32_t WGzip_compress (const void * const _self,
   assert  (source);
   assert  (dest);
 
+  /* get actual offset from "dest" */
+  offset = (warc_u64_t) w_ftell (dest);
+
   /* compute "source" file size */
-  w_file_size_from_offset (source, ucsize, offset);
+  w_file_size_from_offset (source, ucsize, w_ftell (source));
 
   /* create extra space in GZIP header */
-
   while (space)
     {
       if (w_fwrite (" ", 1, 1, dest) != 1 || w_ferror (dest) )
@@ -157,7 +159,6 @@ WPUBLIC warc_i32_t WGzip_compress (const void * const _self,
 
       -- space;
     }
-
 
   /* ensure that the compressed file is in binary mode */
   SET_BINARY_MODE (dest);
@@ -175,7 +176,6 @@ WPUBLIC warc_i32_t WGzip_compress (const void * const _self,
   /* map between user compression level and Zlib one */
   switch (_level)
     {
-
       case WARC_GZIP_DEFAULT_COMPRESSION:
         level = Z_DEFAULT_COMPRESSION;
         break;
@@ -289,19 +289,24 @@ RET:
       (* csize) += EXTRA_GZIP_HEADER;
 
       /* move the GZIP header to the front of file */
-      w_fseek_from_start (dest, EXTRA_GZIP_HEADER);
+/*       w_fseek_from_start (dest, EXTRA_GZIP_HEADER); */
+      w_fseek_from_start (dest, offset + EXTRA_GZIP_HEADER);
       w_fread (buf, 1, GZIP_STATIC_HEADER_SIZE, dest);
 
-      w_fseek_start (dest);
+/*       w_fseek_start (dest); */
+      w_fseek_from_start (dest, offset);
       w_fwrite (buf, 1, GZIP_STATIC_HEADER_SIZE, dest);
 
       /* set the EXTRA field */
       flg = buf[OFF_FLG] | FLG_FEXTRA;
-      w_fseek_from_start (dest, OFF_FLG);
+
+/*       w_fseek_from_start (dest, OFF_FLG); */
+      w_fseek_from_start (dest, offset + OFF_FLG);
       w_fwrite (& flg, 1, 1, dest);
 
       /* goto the EXTRA field land */
-      w_fseek_from_start (dest, GZIP_STATIC_HEADER_SIZE);
+/*       w_fseek_from_start (dest, GZIP_STATIC_HEADER_SIZE); */
+      w_fseek_from_start (dest, offset + GZIP_STATIC_HEADER_SIZE);
 
       /* set XLEN in bytes */
       buf [0] = (xlen & 255);
@@ -332,6 +337,7 @@ RET:
 
       w_fwrite (buf, 1, EXTRA_GZIP_HEADER, dest);
 
+      /* move to the EOF */
       w_fseek_end (dest);
     }
 
