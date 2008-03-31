@@ -44,7 +44,7 @@ extern "C"
 
     extern const void * WString;
 
-    extern const warc_u8_t * WString_getText   (const void * const);
+    extern const warc_u8_t     * WString_getText   (const void * const);
     extern       warc_u32_t      WString_getLength (const void * const);
     extern       warc_bool_t     WString_setText   (void * const,
           const warc_u8_t *,

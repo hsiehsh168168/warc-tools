@@ -237,7 +237,7 @@ WIPUBLIC warc_bool_t WHDLine_setRecordType (void * const _self,
   /* preconditions */
   CASSERT (self);
 
-  if (t > RESOURCE_RECORD)
+  if (t > WARC_RESOURCE_RECORD)
     return (WARC_TRUE);
 
   RECORD_TYPE = t;
@@ -568,7 +568,7 @@ WPRIVATE void freeWHDLine (void * _self)
 
   DATA_LENGTH = 0;
 
-  RECORD_TYPE = UNKNOWN_RECORD;
+  RECORD_TYPE = WARC_UNKNOWN_RECORD;
 
   if (SUBJECT_URI)
     destroy (SUBJECT_URI), SUBJECT_URI = NIL;

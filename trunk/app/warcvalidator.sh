@@ -29,9 +29,10 @@
 usage () {
 
     echo "Check if all WARC files in a directory are valid"
-    echo "Usage: $0 <-d dirname> [-c] [-v] [-h]"  >&2
+    echo "Usage: $0 <-d dirname> [-c] [-t <working_dir>] [-v] [-h]"  >&2
     echo "       -d     : directory name containing ARC files"  >&2
     echo "       -c     : assume that all WARC files are GZIP compressed (default no)"  >&2
+    echo "       -t     : temporary working directory (default \".\")"  >&2
     echo "       -h     : print this help message"  >&2
     echo "       -v     : output version information and exit"  >&2
     exit 1
@@ -44,6 +45,7 @@ while getopts hvcd: o
 do
   case "$o" in
     d)   dn=$OPTARG ;;
+    t)   wdir=$OPTARG ;;
     c)   ccomp="-c" ;;
     h)   usage ;;
     v)   echo "$0 v$version"; exit 0 ;;
@@ -61,6 +63,11 @@ if [ ! -d "$dn" ]; then
     usage
 fi
 
+if [ -z "$wdir" ]; then
+    wdir="."
+fi
+
+
 orig_dir=$(pwd)
 cd ${0%/*}/..
 wvalid="`pwd`/app/warcvalidator"
@@ -73,7 +80,7 @@ fi
 for wf in `find $dn -name "*.warc*" -type "f"`;
 do
 
-  $wvalid -f $wf $ccomp &>/dev/null
+  $wvalid -f $wf $ccomp -t $wdir &>/dev/null
   if [ $? -eq 0 ]; then
       echo "valid $wf"
   else

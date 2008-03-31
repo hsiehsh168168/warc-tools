@@ -62,7 +62,8 @@ extern "C"
     extern warc_bool_t WRecord_setWFileOffset (void * , warc_i64_t);
     extern warc_bool_t WRecord_setUncompressedSize (void * , warc_u64_t);
     extern warc_bool_t WRecord_setCompressedSize (void * , warc_u64_t);
-
+    extern warc_bool_t WRecord_makeDataFile      (void *, const warc_u8_t *, 
+                                                 const warc_u32_t);
 
 #ifdef __cplusplus
   }

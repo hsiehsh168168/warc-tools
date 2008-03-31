@@ -77,7 +77,7 @@ warc_u32_t warc_i32ToEndian (warc_u32_t i)
     c4 = (i >> 24) & 255;
 
     i = ( (warc_i32_t) c1 << 24) + ( (warc_i32_t) c2 << 16) +
-        ( (warc_i32_t) c3 << 8)   + (warc_i32_t) c4;
+        ( (warc_i32_t) c3 << 8)  + (warc_i32_t) c4;
   }
 
   return (i);

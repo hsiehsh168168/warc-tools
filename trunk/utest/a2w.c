@@ -42,10 +42,9 @@ int test1 (void)
 {
   const char  * t = "TEST 1: converting an uncompressed  Arc which contain a single record File to the Warc format";
 
-  void  * a = bless (AFile, "./app/wdata/arc2warc/file.arc", WARC_FILE_UNCOMPRESSED);
+  void  * a = bless (AFile, "./app/wdata/arc2warc/file.arc", ARC_FILE_UNCOMPRESSED, ".");
   void  * w = bless (WFile, "./app/wdata/arc2warc/file.warc",
-                     WARC_MAX_SIZE, WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED);
-
+                     WARC_MAX_SIZE, WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED, ".");
 
 
   fprintf (stdout, "%s\n", t);
@@ -79,7 +78,7 @@ int test1 (void)
 
       WRecord_setSubjectUri (wr, makeS (ARecord_getUrl (ar) ) );
 
-      WRecord_setRecordType (wr, RESOURCE_RECORD);
+      WRecord_setRecordType (wr, WARC_RESOURCE_RECORD);
 
       WRecord_setCreationDate (wr, makeS (ARecord_getCreationDate (ar) ) );
 
@@ -131,7 +130,7 @@ int test2 (void)
 
   fprintf (stdout, "%s>\n", t);
 
-  w = bless (WFile, "./app/wdata/arc2warc/file.warc", 660, WARC_FILE_READER, WARC_FILE_UNCOMPRESSED);
+  w = bless (WFile, "./app/wdata/arc2warc/file.warc", 660, WARC_FILE_READER, WARC_FILE_UNCOMPRESSED, ".");
   assert (w);
 
   while (WFile_hasMoreRecords (w) )
@@ -174,9 +173,9 @@ int test3 (void)
 {
   const char  * t = "TEST 3: converting a uncomprssed Arc File Which contains several records to the Warc format";
 
-  void  * a = bless (AFile, "./app/wdata/arc2warc/mrec.arc", WARC_FILE_UNCOMPRESSED);
+  void  * a = bless (AFile, "./app/wdata/arc2warc/mrec.arc", ARC_FILE_UNCOMPRESSED, ".");
   void  * w = bless (WFile, "./app/wdata/arc2warc/mrec.warc",
-                     WARC_MAX_SIZE, WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED);
+                     WARC_MAX_SIZE, WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED, ".");
 
 
 
@@ -190,7 +189,6 @@ int test3 (void)
     {
       void * ar   = AFile_nextRecord (a);
       void * wr   = NIL;
-
 
       unless (ar)
       {
@@ -212,7 +210,7 @@ int test3 (void)
 
       WRecord_setSubjectUri (wr, makeS (ARecord_getUrl (ar) ) );
 
-      WRecord_setRecordType (wr, RESOURCE_RECORD);
+      WRecord_setRecordType (wr, WARC_RESOURCE_RECORD);
 
       WRecord_setCreationDate (wr, makeS (ARecord_getCreationDate (ar) ) );
 
@@ -266,7 +264,7 @@ int test4 (void)
 
   fprintf (stdout, "%s>\n", t);
 
-  w = bless (WFile, "./app/wdata/arc2warc/mrec.warc", WARC_MAX_SIZE, WARC_FILE_READER, WARC_FILE_UNCOMPRESSED);
+  w = bless (WFile, "./app/wdata/arc2warc/mrec.warc", WARC_MAX_SIZE, WARC_FILE_READER, WARC_FILE_UNCOMPRESSED, ".");
   assert (w);
 
   while (WFile_hasMoreRecords (w) )
@@ -310,9 +308,9 @@ int test5 (void)
 {
   const char  * t = "TEST 5: converting an Arc File Which contains several records to the Warc format";
 
-  void  * a = bless (AFile, "./app/wdata/arc2warc/test1.arc", WARC_FILE_UNCOMPRESSED);
+  void  * a = bless (AFile, "./app/wdata/arc2warc/test1.arc", ARC_FILE_UNCOMPRESSED, ".");
   void  * w = bless (WFile, "./app/wdata/arc2warc/test1.warc",
-                     WARC_MAX_SIZE, WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED);
+                     WARC_MAX_SIZE, WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED, ".");
 
 
 
@@ -349,7 +347,7 @@ int test5 (void)
 
       WRecord_setSubjectUri (wr, makeS (ARecord_getUrl (ar) ) );
 
-      WRecord_setRecordType (wr, RESOURCE_RECORD);
+      WRecord_setRecordType (wr, WARC_RESOURCE_RECORD);
 
       WRecord_setCreationDate (wr, makeS (ARecord_getCreationDate (ar) ) );
 
@@ -401,7 +399,7 @@ int test6 (void)
 
   fprintf (stdout, "%s>\n", t);
 
-  w = bless (WFile, "./app/wdata/arc2warc/test1.warc", WARC_MAX_SIZE, WARC_FILE_READER, WARC_FILE_UNCOMPRESSED);
+  w = bless (WFile, "./app/wdata/arc2warc/test1.warc", WARC_MAX_SIZE, WARC_FILE_READER, WARC_FILE_UNCOMPRESSED, ".");
   assert (w);
 
   while (WFile_hasMoreRecords (w) )
@@ -446,9 +444,9 @@ int test7 (void)
 {
   const char  * t = "TEST 7: converting a corrupted  Arc File in the second record to the Warc format";
 
-  void  * a = bless (AFile, "./app/wdata/arc2warc/err1.arc", WARC_FILE_UNCOMPRESSED);
+  void  * a = bless (AFile, "./app/wdata/arc2warc/err1.arc", WARC_FILE_UNCOMPRESSED, ".");
   void  * w = bless (WFile, "./app/wdata/arc2warc/err1.warc",
-                     WARC_MAX_SIZE, WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED);
+                     WARC_MAX_SIZE, WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED, ".");
 
 
 
@@ -485,7 +483,7 @@ int test7 (void)
 
       WRecord_setSubjectUri (wr, makeS (ARecord_getUrl (ar) ) );
 
-      WRecord_setRecordType (wr, RESOURCE_RECORD);
+      WRecord_setRecordType (wr, WARC_RESOURCE_RECORD);
 
       WRecord_setCreationDate (wr, makeS (ARecord_getCreationDate (ar) ) );
 
@@ -534,9 +532,9 @@ int test8 (void)
 {
   const char  * t = "TEST 8: converting a corrupted Arc File in the first to the Warc format";
 
-  void  * a = bless (AFile, "./app/wdata/arc2warc/err2.arc", WARC_FILE_UNCOMPRESSED);
+  void  * a = bless (AFile, "./app/wdata/arc2warc/err2.arc", ARC_FILE_UNCOMPRESSED, ".");
   void  * w = bless (WFile, "./app/wdata/arc2warc/err2.warc",
-                     WARC_MAX_SIZE, WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED);
+                     WARC_MAX_SIZE, WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED, ".");
 
 
 
@@ -571,7 +569,7 @@ int test8 (void)
 
       WRecord_setSubjectUri (wr, makeS (ARecord_getUrl (ar) ) );
 
-      WRecord_setRecordType (wr, RESOURCE_RECORD);
+      WRecord_setRecordType (wr, WARC_RESOURCE_RECORD);
 
       WRecord_setCreationDate (wr, makeS (ARecord_getCreationDate (ar) ) );
 
@@ -621,9 +619,9 @@ int test9 (void)
 {
   const char  * t = "TEST 9: converting a  Arc File wich contains several records to the Warc format";
 
-  void  * a = bless (AFile, "./app/wdata/arc2warc/test2.arc", WARC_FILE_UNCOMPRESSED);
+  void  * a = bless (AFile, "./app/wdata/arc2warc/test2.arc", ARC_FILE_UNCOMPRESSED, ".");
   void  * w = bless (WFile, "./app/wdata/arc2warc/test2.warc",
-                     WARC_MAX_SIZE, WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED);
+                     WARC_MAX_SIZE, WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED, ".");
 
 
 
@@ -659,7 +657,7 @@ int test9 (void)
 
       WRecord_setSubjectUri (wr, makeS (ARecord_getUrl (ar) ) );
 
-      WRecord_setRecordType (wr, RESOURCE_RECORD);
+      WRecord_setRecordType (wr, WARC_RESOURCE_RECORD);
 
       WRecord_setCreationDate (wr, makeS (ARecord_getCreationDate (ar) ) );
 
@@ -711,7 +709,7 @@ int test10 (void)
 
   fprintf (stdout, "%s>\n", t);
 
-  w = bless (WFile, "./app/wdata/arc2warc/test2.warc", 660, WARC_FILE_READER, WARC_FILE_UNCOMPRESSED);
+  w = bless (WFile, "./app/wdata/arc2warc/test2.warc", 660, WARC_FILE_READER, WARC_FILE_UNCOMPRESSED, ".");
   assert (w);
 
   while (WFile_hasMoreRecords (w) )
@@ -735,11 +733,9 @@ int test11 (void)
 {
   const char  * t = "TEST 11: converting a compressed Arc File wich contains a single record to the Warc format";
 
-  void  * a = bless (AFile, "./app/wdata/arc2warc/file.arc.gz", WARC_FILE_COMPRESSED_GZIP);
-  void  * w = bless (WFile, "./app/wdata/arc2warc/file.warc.gz",
-                     WARC_MAX_SIZE, WARC_FILE_WRITER, WARC_FILE_COMPRESSED_GZIP);
-
-
+  void  * a = bless (AFile, "./app/wdata/arc2warc/file.arc.gz", ARC_FILE_COMPRESSED_GZIP, ".");
+  void  * w = bless (WFile, "file.warc.gz",
+                     WARC_MAX_SIZE, WARC_FILE_WRITER, WARC_FILE_COMPRESSED_GZIP, ".");
 
 
   fprintf (stdout, "%s\n", t);
@@ -773,7 +769,7 @@ int test11 (void)
 
       WRecord_setSubjectUri (wr, makeS (ARecord_getUrl (ar) ) );
 
-      WRecord_setRecordType (wr, RESOURCE_RECORD);
+      WRecord_setRecordType (wr, WARC_RESOURCE_RECORD);
 
       WRecord_setCreationDate (wr, makeS (ARecord_getCreationDate (ar) ) );
 
@@ -830,7 +826,7 @@ int test12 (void)
 
   fprintf (stdout, "%s>\n", t);
 
-  w = bless (WFile, "./app/wdata/arc2warc/file.warc.gz", 660, WARC_FILE_READER, WARC_FILE_COMPRESSED_GZIP);
+  w = bless (WFile, "file.warc.gz", 660, WARC_FILE_READER, WARC_FILE_COMPRESSED_GZIP, ".");
   assert (w);
 
   while (WFile_hasMoreRecords (w) )
@@ -874,9 +870,9 @@ int test13 (void)
 {
   const char  * t = "TEST 13: converting a compressed Arc File wich contains several record to the Warc format";
 
-  void  * a = bless (AFile, "./app/wdata/arc2warc/sfile.arc.gz", WARC_FILE_COMPRESSED_GZIP);
-  void  * w = bless (WFile, "./app/wdata/arc2warc/sfile.warc.gz",
-                     WARC_MAX_SIZE, WARC_FILE_WRITER, WARC_FILE_COMPRESSED_GZIP);
+  void  * a = bless (AFile, "./app/wdata/arc2warc/sfile.arc.gz", ARC_FILE_COMPRESSED_GZIP, ".");
+  void  * w = bless (WFile, "sfile.warc.gz",
+                     WARC_MAX_SIZE, WARC_FILE_WRITER, WARC_FILE_COMPRESSED_GZIP, ".");
 
 
 
@@ -911,7 +907,7 @@ int test13 (void)
 
       WRecord_setSubjectUri (wr, makeS (ARecord_getUrl (ar) ) );
 
-      WRecord_setRecordType (wr, RESOURCE_RECORD);
+      WRecord_setRecordType (wr, WARC_RESOURCE_RECORD);
 
       WRecord_setCreationDate (wr, makeS (ARecord_getCreationDate (ar) ) );
 
@@ -961,7 +957,7 @@ int test14 (void)
 
   fprintf (stdout, "%s>\n", t);
 
-  w = bless (WFile, "./app/wdata/arc2warc/sfile.warc.gz", 660, WARC_FILE_READER, WARC_FILE_COMPRESSED_GZIP);
+  w = bless (WFile, "sfile.warc.gz", 660, WARC_FILE_READER, WARC_FILE_COMPRESSED_GZIP, ".");
   assert (w);
 
   while (WFile_hasMoreRecords (w) )
@@ -1004,9 +1000,9 @@ int test15 (void)
 {
   const char  * t = "TEST 15: converting a corrupted Arc File at the second record to the Warc format";
 
-  void  * a = bless (AFile, "./app/wdata/arc2warc/mfile.arc.gz", WARC_FILE_COMPRESSED_GZIP);
-  void  * w = bless (WFile, "./app/wdata/arc2warc/mfile.warc.gz",
-                     WARC_MAX_SIZE, WARC_FILE_WRITER, WARC_FILE_COMPRESSED_GZIP);
+  void  * a = bless (AFile, "./app/wdata/arc2warc/mfile.arc.gz", ARC_FILE_COMPRESSED_GZIP, ".");
+  void  * w = bless (WFile, "mfile.warc.gz",
+                     WARC_MAX_SIZE, WARC_FILE_WRITER, WARC_FILE_COMPRESSED_GZIP, ".");
 
 
 
@@ -1041,7 +1037,7 @@ int test15 (void)
 
       WRecord_setSubjectUri (wr, makeS (ARecord_getUrl (ar) ) );
 
-      WRecord_setRecordType (wr, RESOURCE_RECORD);
+      WRecord_setRecordType (wr, WARC_RESOURCE_RECORD);
 
       WRecord_setCreationDate (wr, makeS (ARecord_getCreationDate (ar) ) );
 
@@ -1092,7 +1088,7 @@ int test16 (void)
 
   fprintf (stdout, "%s>\n", t);
 
-  w = bless (WFile, "./app/wdata/arc2warc/mfile.warc.gz", 660, WARC_FILE_READER, WARC_FILE_COMPRESSED_GZIP);
+  w = bless (WFile, "mfile.warc.gz", 660, WARC_FILE_READER, WARC_FILE_COMPRESSED_GZIP, ".");
   assert (w);
 
   while (WFile_hasMoreRecords (w) )
@@ -1136,9 +1132,9 @@ int test17 (void)
 {
   const char  * t = "TEST 17: converting a corrupted Arc File in the first record to the Warc format";
 
-  void  * a = bless (AFile, "./app/wdata/arc2warc/mmfile.arc.gz", WARC_FILE_COMPRESSED_GZIP);
-  void  * w = bless (WFile, "./app/wdata/arc2warc/mmfile.warc.gz",
-                     WARC_MAX_SIZE, WARC_FILE_WRITER, WARC_FILE_COMPRESSED_GZIP);
+  void  * a = bless (AFile, "./app/wdata/arc2warc/mmfile.arc.gz", ARC_FILE_COMPRESSED_GZIP, ".");
+  void  * w = bless (WFile, "mmfile.warc.gz",
+                     WARC_MAX_SIZE, WARC_FILE_WRITER, WARC_FILE_COMPRESSED_GZIP, ".");
 
 
 
@@ -1174,7 +1170,7 @@ int test17 (void)
 
       WRecord_setSubjectUri (wr, makeS (ARecord_getUrl (ar) ) );
 
-      WRecord_setRecordType (wr, RESOURCE_RECORD);
+      WRecord_setRecordType (wr, WARC_RESOURCE_RECORD);
 
       WRecord_setCreationDate (wr, makeS (ARecord_getCreationDate (ar) ) );
 
@@ -1220,7 +1216,7 @@ int test17 (void)
 
 int main (void)
 {
-  int (* tests [] ) () = { test1, test2, test3, test4, test5, test6, test7, test8, test11, test12, test13, test14, test15, test16, test17  };
+  int (* tests [] ) () = { test1, test2, test3, test4, test5, test6, test7, test8, test11, test12, test13, test14, test15, test16, test17};
 
 
   warc_u32_t  i      = 0;

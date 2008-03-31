@@ -139,7 +139,7 @@ WIPUBLIC warc_i32_t WString_strstr (const void * const _self,
   CASSERT (self);
   assert (s);
 
-  ptr = (warc_u8_t *) strstr ( (const char *) TEXT, (const char *) s);
+  ptr = (warc_u8_t *) w_strstr (TEXT, s);
   unless (ptr)
   return (-1);
 

@@ -30,5 +30,8 @@ This directory contains PLUGINS supported by WARC.
 List of actually supported plugins:
  
 * GZIP compression/uncompression
+* Tiger algorithm
+* Apache mod_warc
+* Eventlib
 
 

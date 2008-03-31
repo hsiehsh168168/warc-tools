@@ -140,23 +140,23 @@ WPRIVATE warc_rec_t WFsmHDL_getRecordTypeNumber (const warc_u8_t * rectype)
   assert (rectype);
 
   if      (! w_strcmp (rectype, (warc_u8_t *) "warcinfo") )
-    return (WARCINFO_RECORD);
+    return (WARC_INFO_RECORD);
   else if (! w_strcmp (rectype, (warc_u8_t *) "response") )
-    return (RESPONSE_RECORD);
+    return (WARC_RESPONSE_RECORD);
   else if (! w_strcmp (rectype, (warc_u8_t *) "request") )
-    return (REQUEST_RECORD);
+    return (WARC_REQUEST_RECORD);
   else if (! w_strcmp (rectype, (warc_u8_t *) "metadata") )
-    return (METADATA_RECORD);
+    return (WARC_METADATA_RECORD);
   else if (! w_strcmp (rectype, (warc_u8_t *) "revisit") )
-    return (REVISIT_RECORD);
+    return (WARC_REVISIT_RECORD);
   else if (! w_strcmp (rectype, (warc_u8_t *) "conversion") )
-    return (CONVERSION_RECORD);
+    return (WARC_CONVERSION_RECORD);
   else if (! w_strcmp (rectype, (warc_u8_t *) "continuation") )
-    return (CONTINUATION_RECORD);
+    return (WARC_CONTINUATION_RECORD);
   else if (! w_strcmp (rectype, (warc_u8_t *) "resource") )
-    return (RESOURCE_RECORD);
+    return (WARC_RESOURCE_RECORD);
 
-  return (UNKNOWN_RECORD);
+  return (WARC_UNKNOWN_RECORD);
 }
 
 
@@ -556,7 +556,7 @@ void WFsmHDL_checkRecordType (void * _hs)
 
   /* if unknown WARC record type, stop parsing */
 
-  if (t == UNKNOWN_RECORD)
+  if (t == WARC_UNKNOWN_RECORD)
     {
       /* rewind the stream */
       WFsmHDL_rewind (hs, WString_getLength (hs -> record_type) + 1);
@@ -577,12 +577,12 @@ void WFsmHDL_checkWarcID  (void * _hs)
   strtompon = WString_getText (hs -> warc_id);
 
   /* if unknown WARC record type, stop parsing */
-
   if (w_strcmp (strtompon, (warc_u8_t *) WARC_VERSION) )
     {
       /* rewind the stream */
       WFsmHDL_rewind (hs, WString_getLength (hs -> warc_id) + 1);
 
+      w_fprintf(fprintf(stderr, "Getting WARC ID: %s\n", strtompon));
       /* raise the flag errore */
       WarcDebugMsg ("expecting a valid WARC ID");
       hs -> err = WARC_TRUE;
@@ -715,7 +715,7 @@ void WFsmHDL_raiseErrorDlength (void * _hs)
 
   assert (hs);
   w_ungetc (hs -> c, hs -> fin);
-  WarcDebugMsg ("exepting a valid dataLength");
+  WarcDebugMsg ("expecting a valid dataLength");
   /* raise "on" the error flag */
   hs -> err = WARC_TRUE;
 }

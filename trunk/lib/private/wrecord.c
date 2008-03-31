@@ -751,7 +751,7 @@ WIPUBLIC warc_bool_t WRecord_setContentFromFileName (void * _self,
 
   dfile = w_fopen_rb (file);
   unless (dfile)
-  return (WARC_TRUE);
+    return (WARC_TRUE);
 
   EDATAF = dfile;
 
@@ -782,9 +782,33 @@ WIPUBLIC warc_bool_t WRecord_setContentFromFileHandle (void * _self,
   assert (! DATAF);
 
   unless (dataf)
-  return (WARC_TRUE);
+    return (WARC_TRUE);
 
   DATAF = dataf;
+
+  return (WARC_FALSE);
+}
+
+
+/**
+ * @param _self: WRecord object insance
+ * @param dir; the directory where the temporary file must be created
+ * @param dirlen: the length of the dir string 
+ *
+ * @return False if succeeds, True otherwise
+ *
+ * Create a tremporary file for the record to hold data bloc
+ */
+
+WPUBLIC warc_bool_t WRecord_makeDataFile (void * _self, const warc_u8_t * dir, const warc_u32_t dirlen)
+{
+    struct WRecord * self = _self;
+
+  /* Preconditions */
+  DATAF = bless (WTempFile, dir, dirlen);
+
+  unless (DATAF)
+    return (WARC_TRUE);
 
   return (WARC_FALSE);
 }
@@ -798,7 +822,7 @@ WIPUBLIC warc_bool_t WRecord_setContentFromFileHandle (void * _self,
  * Warc Record Extern Data File descriptor provider
  */
 
-WPUBLIC FILE * WRecord_getDataFile (const void * const _self)
+WPUBLIC void * WRecord_getDataFile (const void * const _self)
 {
 
   const struct WRecord * const self = _self;
@@ -807,7 +831,7 @@ WPUBLIC FILE * WRecord_getDataFile (const void * const _self)
   CASSERT (self);
   assert (DATAF);
 
-  return (WTempFile_handle (DATAF) );
+  return (DATAF);
 }
 
 
@@ -1192,7 +1216,7 @@ WPRIVATE void * WRecord_constructor (void * _self, va_list * app)
   UNUSED (app);
 
   /* create a WHDLine object */
-  HDL = bless (WHDLine, "", 0, 0, UNKNOWN_RECORD, "", 0, "", 0, "", 0, "", 0);
+  HDL = bless (WHDLine, "", 0, 0, WARC_UNKNOWN_RECORD, "", 0, "", 0, "", 0, "", 0);
   assert (HDL);
 
   /* create a WAnvl object */
@@ -1237,8 +1261,8 @@ WPRIVATE void * WRecord_destructor (void * _self)
   if (HDL)
     destroy (HDL), HDL = NIL;
 
-  if (DATAF)
-    destroy (DATAF), DATAF = NIL;
+  if (DATAF) 
+     destroy (DATAF), DATAF = NIL; 
 
   if (ACONT)
     destroy (ACONT), ACONT = NIL, EDATAF = NIL;

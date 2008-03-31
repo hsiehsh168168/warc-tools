@@ -52,7 +52,7 @@ int test1 (void)
       WRecord_setCreationDate (r, makeS ("12172007") );
       WRecord_setContentType  (r, makeS ("warcproject/testheaderline") );
       WRecord_setRecordId     (r, makeS ("id://warc-x584jz39") );
-      WRecord_setRecordType   (r, WARCINFO_RECORD);
+      WRecord_setRecordType   (r, WARC_INFO_RECORD);
 
       fprintf (stdout, "WarcId: %-20s\n",       WRecord_getWarcId      (r) );
       fprintf (stdout, "DataLength: %-20d\n",   WRecord_getDataLength  (r) );

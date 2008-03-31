@@ -50,17 +50,15 @@
 #include <wmktmp.h>   /* WTempFile */
 #include <wgzip.h>    /* WGzip */
 #include <wversion.h> /* WARC_VERSION */
-#include <wcsafe.h>
+#include <wcsafe.h>   /* w_fprintf ... */
 
-
-
-#define SIGN 6
 
 
 /**
  * WARC WFile class internal
  */
 
+#define SIGN 6
 
 struct WFile
   {
@@ -69,6 +67,9 @@ struct WFile
 
     /*@{*/
     void * fname; /**< WString containing WarcFile name*/
+    void * dname; /**< working directory name */
+    void * tempfile; /**< temporary file object */
+/*    void * tempfile2; **< temporary file object */
     FILE * fh;    /**< file handle */
     wfile_mode_t mode;  /**< Warc object access mode*/
     wfile_comp_t compressed; /**< indicates if the record is compressed */
@@ -78,12 +79,15 @@ struct WFile
   };
 
 
-#define FNAME    (self -> fname)
-#define FH       (self -> fh)
-#define MODE     (self -> mode)
-#define MAXSIZE  (self -> maxsize)
-#define COMP     (self -> compressed)
-#define FSIZE    (self -> fsize)
+#define FNAME         (self -> fname)
+#define WORKING_DIR   (self -> dname)
+#define TEMP_FILE     (self -> tempfile)
+/* #define TEMP_FILE2    (self -> tempfile2) */
+#define FH            (self -> fh)
+#define MODE          (self -> mode)
+#define MAXSIZE       (self -> maxsize)
+#define COMP          (self -> compressed)
+#define FSIZE         (self -> fsize)
 
 
 /* Header line field separator definition */
@@ -362,17 +366,16 @@ WPRIVATE warc_bool_t WFile_checkEndCRLF (FILE *f)
  */
 
 
-WPRIVATE void * WFile_nextRecordGzipCompressedFast (void * _self,
-    void * objrectfile,
-    FILE * rectfile,
-    void * gzobj,
-    warc_i64_t offset,
-    warc_u64_t usize,
-    warc_u64_t csize
-                                                   )
+WPRIVATE void * 
+WFile_nextRecordGzipCompressedFast (void * _self,
+                                    /*     void * objrectfile, */
+/*                                     FILE * rectfile, */
+                                    void * gzobj,
+                                    warc_i64_t offset,
+                                    warc_u64_t usize,
+                                    warc_u64_t csize)
 {
-
-  struct WFile  * self = _self;
+  struct WFile  * self     = _self;
 
   void 		    * wobject  = NIL; /* to recover the WRecord Object */
   warc_u32_t      wdatal   = 0;   /* to recover the Record dataLength */
@@ -385,16 +388,21 @@ WPRIVATE void * WFile_nextRecordGzipCompressedFast (void * _self,
   void          * oldlanvl = NIL; /* for destruction of old value*/
   void          * hfsm     = NIL; /* Header Line automatum */
   void          * afsm     = NIL; /* Anvl Field automatum */
-  warc_u64_t      husize    = 0;   /* uncompressed data size */
+  FILE          * rectfile = NIL;
+  warc_u64_t      husize   = 0;   /* uncompressed data size */
   warc_u64_t      hcsize   = 0;   /* compressed data size stored in header */
   warc_u32_t      ret      = 0;
   warc_bool_t     more     = WARC_TRUE;
 
   struct CallbackEnv cbenv;
 
+  rectfile = WTempFile_handle (TEMP_FILE);
+
   cbenv . out   = rectfile;
   cbenv . crlf  = 0;
   cbenv . usize = 0;
+
+
 
   wobject = bless (WRecord);
   assert (wobject);
@@ -402,7 +410,7 @@ WPRIVATE void * WFile_nextRecordGzipCompressedFast (void * _self,
   if (WRecord_setWFileOffset (wobject, offset) )
     {
       destroy (wobject);
-      destroy (objrectfile);
+/*       destroy (objrectfile); */
       destroy (gzobj);
       return (NIL);
     }
@@ -410,7 +418,7 @@ WPRIVATE void * WFile_nextRecordGzipCompressedFast (void * _self,
   if (WRecord_setCompressedSize (wobject, csize) )
     {
       destroy (wobject);
-      destroy (objrectfile);
+/*       destroy (objrectfile); */
       destroy (gzobj);
       return (NIL);
     }
@@ -418,7 +426,7 @@ WPRIVATE void * WFile_nextRecordGzipCompressedFast (void * _self,
   if (WRecord_setUncompressedSize (wobject, usize) )
     {
       destroy (wobject);
-      destroy (objrectfile);
+/*       destroy (objrectfile); */
       destroy (gzobj);
       return (NIL);
     }
@@ -427,28 +435,25 @@ WPRIVATE void * WFile_nextRecordGzipCompressedFast (void * _self,
 
   if (WRecord_setWoffset (wobject, w_ftell (FH) ) )
     {
-      destroy (objrectfile);
+/*       destroy (objrectfile); */
       destroy (wobject);
       return (NIL);
     }
 
   ret = WGzip_uncompress (gzobj, FH, w_ftell (FH), & husize, & hcsize,
-
                           getHeader, (void *) & cbenv);
-
   if (ret)
     {
       WarcDebugMsg ("unable to read gzipped record");
-      destroy (objrectfile);
+/*       destroy (objrectfile); */
       destroy (gzobj);
       destroy (wobject);
       return (NIL);
     }
-
-
   destroy (gzobj);
 
   offset += csize;
+
   w_fseek_start (rectfile);
   w_fseek_from_start (FH, offset);
 
@@ -460,19 +465,17 @@ WPRIVATE void * WFile_nextRecordGzipCompressedFast (void * _self,
     /* generate the WHDLine object from the FSM */
     hdl = WFsmHDL_transform (hfsm);
   }
-
   else
     {
       /* error when parsing the WARC header line */
-      w_fprintf (fprintf (stderr , "error in FSM state address %p,\n",
-                          WFsmHDL_state (hfsm) ) );
-
-      destroy (objrectfile);
+      w_fprintf (fprintf (stderr , __FILE__ " (line %d) error in FSM state address %p\n",
+                          __LINE__, WFsmHDL_state (hfsm) ) );
+      
+      /*       destroy (objrectfile); */
       destroy (hfsm);
       destroy (wobject);
       return (NIL);
     }
-
   destroy (hfsm);
 
   lanvl = bless (WList);
@@ -493,18 +496,17 @@ WPRIVATE void * WFile_nextRecordGzipCompressedFast (void * _self,
         else
           more = WARC_FALSE;
       }
-
       else
         {
           /* error when parsing the WARC header line */
-          w_fprintf (fprintf (stderr , "error in FSM state address %p\n",
-                              WFsmANVL_state (afsm) ) );
+          w_fprintf (fprintf (stderr , __FILE__ " (line %d) error in FSM state address %p\n",
+                              __LINE__, WFsmANVL_state (afsm) ) );
 
-          destroy (objrectfile);
+/*           destroy (objrectfile); */
           destroy (lanvl);
           destroy (hdl);
           destroy (afsm);
-          destroy  (wobject);
+          destroy (wobject);
           return  (NIL);
         }
 
@@ -518,7 +520,7 @@ WPRIVATE void * WFile_nextRecordGzipCompressedFast (void * _self,
 
   wdatal = WHDLine_getDataLength (hdl);
 
-  destroy (objrectfile);
+/*   destroy (objrectfile); */
 
   WRecord_setCHeaderPresence (wobject, WARC_TRUE);
 
@@ -534,7 +536,7 @@ WPRIVATE void * WFile_nextRecordGzipCompressedFast (void * _self,
 
   if (WRecord_setContentSize (wobject, datasize) )
     {
-      destroy (objrectfile);
+/*       destroy (objrectfile); */
       destroy (wobject);
       return (NIL);
     }
@@ -544,7 +546,7 @@ WPRIVATE void * WFile_nextRecordGzipCompressedFast (void * _self,
 
   if (WRecord_setWfile (wobject, self) )
     {
-      destroy (objrectfile);
+/*       destroy (objrectfile); */
       destroy (wobject);
       return (NIL);
     }
@@ -588,14 +590,7 @@ WPRIVATE void * WFile_nextRecordGzipCompressed (void * _self)
   warc_bool_t     more     = WARC_TRUE;
 
 
-  objrectfile = bless (WTempFile);
-  unless (objrectfile)
-  {
-    WarcDebugMsg ("unable to create temporary space");
-    return (NIL);
-  }
-
-  rectfile = WTempFile_handle (objrectfile);
+  WTempFile_reset (TEMP_FILE);
 
   gzobj = bless (WGzip);
   offset = w_ftell (FH);
@@ -607,8 +602,18 @@ WPRIVATE void * WFile_nextRecordGzipCompressed (void * _self)
   w_fseek_from_start (FH, offset);
 
   unless (ret)
-  return (WFile_nextRecordGzipCompressedFast (self, objrectfile,
-          rectfile, gzobj, offset, usize, csize) );
+  return (WFile_nextRecordGzipCompressedFast (self, 
+          gzobj, offset, usize, csize) );
+
+   objrectfile = bless (WTempFile, WString_getText(WORKING_DIR), WString_getLength(WORKING_DIR));
+   unless (objrectfile) 
+   { 
+     WarcDebugMsg ("unable to create temporary space"); 
+     return (NIL); 
+   } 
+
+  rectfile = WTempFile_handle (TEMP_FILE);
+
 
   wobject = bless (WRecord);
   assert (wobject);
@@ -617,39 +622,35 @@ WPRIVATE void * WFile_nextRecordGzipCompressed (void * _self)
     {
       destroy (wobject);
       destroy (gzobj);
-      destroy (objrectfile);
+      destroy (objrectfile); 
       return (NIL);
     }
 
   ret = WGzip_uncompress (gzobj, FH, w_ftell (FH), & usize, & csize,
-
                           wrecover, (void *) rectfile);
+  if (ret)
+    {
+      WarcDebugMsg ("unable to read gzipped record");
+      destroy (objrectfile); 
+      destroy (gzobj);
+      destroy (wobject);
+      return (NIL);
+    }
 
   if (WRecord_setCompressedSize (wobject, csize) )
     {
       destroy (wobject);
       destroy (gzobj);
-      destroy (objrectfile);
+      destroy (objrectfile); 
       return (NIL);
     }
 
 
-  if ( WRecord_setUncompressedSize (wobject, usize) )
+  if (WRecord_setUncompressedSize (wobject, usize))
     {
       destroy (wobject);
       destroy (gzobj);
-      destroy (objrectfile);
-      return (NIL);
-    }
-
-
-
-  if (ret)
-    {
-      WarcDebugMsg ("unable to read gzipped record");
-      destroy (objrectfile);
-      destroy (gzobj);
-      destroy (wobject);
+      destroy (objrectfile); 
       return (NIL);
     }
 
@@ -663,19 +664,18 @@ WPRIVATE void * WFile_nextRecordGzipCompressed (void * _self)
   hfsm = bless (WFsmHDL, rectfile);
   assert (hfsm);
 
-  unless (WFsmHDL_run (hfsm) )
+  unless (WFsmHDL_run (hfsm))
   {
     /* generate the WHDLine object from the FSM */
     hdl = WFsmHDL_transform (hfsm);
   }
-
   else
     {
       /* error when parsing the WARC header line */
-      w_fprintf (fprintf (stderr , "error in FSM state address %p,\n",
-                          WFsmHDL_state (hfsm) ) );
-
-      destroy (objrectfile);
+      w_fprintf (fprintf (stderr , __FILE__ " (line %d) error in FSM state address %p\n",
+                          __LINE__, WFsmHDL_state (hfsm) ) );
+      
+      destroy (objrectfile); 
       destroy (hfsm);
       destroy (wobject);
       return (NIL);
@@ -705,8 +705,8 @@ WPRIVATE void * WFile_nextRecordGzipCompressed (void * _self)
       else
         {
           /* error when parsing the WARC header line */
-          w_fprintf (fprintf (stderr , "error in FSM state address %p\n",
-                              WFsmANVL_state (afsm) ) );
+          w_fprintf (fprintf (stderr , __FILE__ " (line %d) error in FSM state address %p\n",
+                              __LINE__,  WFsmANVL_state (afsm) ) );
 
           destroy (objrectfile);
           destroy (lanvl);
@@ -717,14 +717,11 @@ WPRIVATE void * WFile_nextRecordGzipCompressed (void * _self)
         }
 
       destroy (afsm);
-
-    }
-
-  while (more);
-
+      
+    } while (more);
+  
   blbegin = w_ftell (rectfile);
-
-  wdatal = WHDLine_getDataLength (hdl);
+  wdatal  = WHDLine_getDataLength (hdl);
 
   w_fseek_start (rectfile);
 
@@ -745,7 +742,6 @@ WPRIVATE void * WFile_nextRecordGzipCompressed (void * _self)
 
   w_fseek_start (rectfile);
 
-
   WRecord_setCHeaderPresence (wobject, WARC_FALSE);
 
   oldhdl = WRecord_setHDLine (wobject, hdl);
@@ -758,13 +754,12 @@ WPRIVATE void * WFile_nextRecordGzipCompressed (void * _self)
 
   if (WRecord_setContentSize (wobject, datasize) )
     {
-      destroy (objrectfile);
+      destroy (objrectfile); 
       destroy (wobject);
       return (NIL);
     }
 
   /* setting the offset of the data bloc in the WRecord */
-
   if (WRecord_setWoffset (wobject, blbegin) )
     {
       destroy (objrectfile);
@@ -773,7 +768,6 @@ WPRIVATE void * WFile_nextRecordGzipCompressed (void * _self)
     }
 
   /* setting the pointer to the WFile in the WRecord */
-
   if (WRecord_setWfile (wobject, self) )
     {
       destroy (objrectfile);
@@ -782,10 +776,9 @@ WPRIVATE void * WFile_nextRecordGzipCompressed (void * _self)
     }
 
   /* setting the data file in The Record (only in compressed mode )*/
-
   if (WRecord_setContentFromFileHandle (wobject, objrectfile) )
     {
-      destroy (objrectfile);
+     destroy (objrectfile);
       destroy (wobject);
       return (NIL);
     }
@@ -855,8 +848,9 @@ WPRIVATE void * WFile_nextRecordUncompressed (void * _self)
   else
     {
       /* error when parsing the WARC header line */
-      w_fprintf (fprintf (stderr , "error in FSM state address %p, at offset %ld in The Warc File \n",
-                          WFsmHDL_state (hfsm), w_ftell (FH) ) );
+      w_fprintf (fprintf (stderr , __FILE__ " (line %d) error in FSM state address %p, at offset %ld in the Warc file \n",
+                          __LINE__,  WFsmHDL_state (hfsm), w_ftell (FH) ) );
+
       destroy (hfsm);
       destroy (wobject);
       return (NIL);
@@ -886,8 +880,8 @@ WPRIVATE void * WFile_nextRecordUncompressed (void * _self)
       else
         {
           /* error when parsing the WARC header line */
-          w_fprintf (fprintf (stderr , "error in FSM state address %p, at offset %ld \"%s\"\n",
-                              WFsmANVL_state (afsm), w_ftell (FH), "") );
+          w_fprintf (fprintf (stderr , __FILE__ " (line %d) error in FSM state address %p, at offset %ld in the Warc file \n",
+                              __LINE__, WFsmANVL_state (afsm), w_ftell (FH) ) );
 
           destroy (lanvl);
           destroy (hdl);
@@ -906,7 +900,7 @@ WPRIVATE void * WFile_nextRecordUncompressed (void * _self)
 
   wdatal = WHDLine_getDataLength (hdl);
 
-  if (WRecord_setUncompressedSize (wobject, wdatal) )
+  if (WRecord_setUncompressedSize (wobject, wdatal + 4) )
     {
       destroy (wobject);
       destroy (hdl);
@@ -915,7 +909,7 @@ WPRIVATE void * WFile_nextRecordUncompressed (void * _self)
     }
 
 
-  if (WRecord_setCompressedSize (wobject, wdatal) )
+  if (WRecord_setCompressedSize (wobject, wdatal + 4) )
     {
       destroy (wobject);
       destroy (hdl);
@@ -1002,7 +996,6 @@ WPUBLIC void * WFile_nextRecord (void * _self)
 
   switch (COMP)
     {
-
       case WARC_FILE_COMPRESSED_GZIP:
         return (WFile_nextRecordGzipCompressed (self) );
 
@@ -1044,7 +1037,7 @@ WPUBLIC warc_bool_t WFile_register (void* _self, void * wrec,
                                       the record */
 
   warc_u32_t     ret       = 0;
-  void         * objwtfile = NIL;
+  void         * objwtfile = NIL; 
   void         * gzobj     = NIL; /* to manage compression */
   warc_u64_t     usize     = 0;
   warc_u64_t     csize     = 0;
@@ -1087,7 +1080,7 @@ WPUBLIC warc_bool_t WFile_register (void* _self, void * wrec,
       case WARC_FILE_COMPRESSED_GZIP:
         unless (WRecord_getCHeaderPresent (wrec) )
         {
-          w_fseek_from_here (WRecord_getDataFile (wrec), offset);
+          w_fseek_from_here (WTempFile_handle (WRecord_getDataFile (wrec)), offset);
         }
 
         else
@@ -1098,8 +1091,21 @@ WPUBLIC warc_bool_t WFile_register (void* _self, void * wrec,
             gzobj = bless (WGzip);
             assert (gzobj);
 
-            objwtfile = bless (WTempFile);
-            assert (WTempFile);
+/*            WTempFile_reset (TEMP_FILE); */
+
+             if ( WRecord_makeDataFile (wrec, WString_getText(WORKING_DIR), WString_getLength(WORKING_DIR)))
+              {
+                WarcDebugMsg ("faild to create record data file");
+                return (WARC_TRUE);
+              }
+
+/*             objwtfile = bless (WTempFile, WString_getText(WORKING_DIR), WString_getLength(WORKING_DIR));*/
+             objwtfile = WRecord_getDataFile (wrec);
+             unless (objwtfile) 
+               { 
+                WarcDebugMsg ("unable to create temporary space"); 
+                return (WARC_TRUE); 
+               }
 
             wtfile = WTempFile_handle (objwtfile);
 
@@ -1109,7 +1115,6 @@ WPUBLIC warc_bool_t WFile_register (void* _self, void * wrec,
             if (ret)
               {
                 WarcDebugMsg ("unable to uncompress a gzipped record");
-                destroy (objwtfile);
                 destroy (gzobj);
                 return (WARC_TRUE);
               }
@@ -1122,29 +1127,40 @@ WPUBLIC warc_bool_t WFile_register (void* _self, void * wrec,
             unless (WFile_checkEndCRLF (wtfile) )
             {
               WarcDebugMsg ("missing double CRLF");
-              destroy (objwtfile);
               return (WARC_TRUE);
             }
 
             w_fseek_from_here (wtfile, (-1 * WRecord_getDataSize (wrec) ) );
 
-            if (WRecord_setContentFromFileHandle (wrec, objwtfile) )
+/*            if (WRecord_setContentFromFileHandle (wrec, objwtfile) )
               {
                 WarcDebugMsg ("faild to give load date from handle");
-                destroy (objwtfile);
+                 destroy (objwtfile); 
                 return (WARC_TRUE);
-              }
+              }*/
           }
 
         break;
 
       case WARC_FILE_UNCOMPRESSED:
-        objwtfile = bless (WTempFile);
-        unless (objwtfile)
-        {
-          WarcDebugMsg ("unable to create temporary space");
-          return (WARC_TRUE);
-        }
+
+/*       WTempFile_reset (TEMP_FILE);*/
+
+         if (WRecord_makeDataFile (wrec, WString_getText(WORKING_DIR), WString_getLength(WORKING_DIR)))
+           {
+            WarcDebugMsg ("faild to create record data file");
+            w_fseek_from_start (FH, wcurrent);
+            return (WARC_TRUE);
+            }
+         /*objwtfile = bless (WTempFile, WString_getText(WORKING_DIR), WString_getLength(WORKING_DIR)); */
+
+         objwtfile = WRecord_getDataFile (wrec);
+
+         unless (objwtfile) 
+         { 
+           WarcDebugMsg ("unable to create temporary space"); 
+           return (WARC_TRUE); 
+         }
 
         wtfile = WTempFile_handle (objwtfile);
 
@@ -1155,7 +1171,6 @@ WPUBLIC warc_bool_t WFile_register (void* _self, void * wrec,
 
         if (WFile_fillTempFile (self, wtfile, size) )
           {
-            destroy (objwtfile);
             w_fseek_from_start (FH, wcurrent);
             return (WARC_TRUE);
           }
@@ -1164,12 +1179,12 @@ WPUBLIC warc_bool_t WFile_register (void* _self, void * wrec,
 
         w_fseek_from_start (FH, wcurrent);
 
-        if (WRecord_setContentFromFileHandle (wrec, objwtfile) )
+/*        if (WRecord_setContentFromFileHandle (wrec, objwtfile) )
           {
-            destroy (objwtfile);
+             destroy (objwtfile); 
             w_fseek_from_start (FH, wcurrent);
             return (WARC_TRUE);
-          }
+          }*/
 
         break;
 
@@ -1202,7 +1217,7 @@ WPUBLIC warc_bool_t WFile_seek (void * _self, const warc_u64_t offset)
 
   w_fseek_from_start (FH, offset);
 
-  return (WARC_TRUE);
+  return (WARC_FALSE);
 }
 
 /**
@@ -1241,11 +1256,15 @@ WPUBLIC warc_bool_t WFile_setMaxSize (void * _self, const warc_u64_t max_size)
  * Warc Record Warc ID field writing function
  */
 
-#define WARC_ID_LENGTH 28
 WIPRIVATE void WFile_writeWarcId (FILE * wtfile)
 {
-  /*   w_fwrite ("warc/0.9                    ", WARC_ID_LENGTH, 1, wtfile); */
-  w_fwrite (WARC_VERSION "                    ", WARC_ID_LENGTH, 1, wtfile);
+#define WARC_ID_LENGTH 28
+
+  warc_u32_t l = w_strlen((warc_u8_t *) WARC_VERSION);
+
+  /* w_fwrite (WARC_VERSION "                   ", WARC_ID_LENGTH, 1, wtfile); */
+  w_fwrite (WARC_VERSION, l, 1, wtfile);
+  w_fwrite(" ", 1, WARC_ID_LENGTH - l, wtfile);
 }
 
 
@@ -1265,47 +1284,47 @@ WPRIVATE void WFile_writeRecordType (FILE * wtfile, warc_rec_t type,
   switch (type)
     {
 
-      case UNKNOWN_RECORD:
+      case WARC_UNKNOWN_RECORD:
         w_fwrite ("unknown", 7, 1, wtfile);
         (* datalength) += 7;
         break;
 
-      case WARCINFO_RECORD:
+      case WARC_INFO_RECORD:
         w_fwrite ("warcinfo", 8, 1, wtfile);
         (* datalength) += 8;
         break;
 
-      case RESPONSE_RECORD:
+      case WARC_RESPONSE_RECORD:
         w_fwrite ("response", 8, 1, wtfile);
         (* datalength) += 8;
         break;
 
-      case REQUEST_RECORD:
+      case WARC_REQUEST_RECORD:
         w_fwrite ("request", 7, 1, wtfile);
         (* datalength) += 7;
         break;
 
-      case METADATA_RECORD:
+      case WARC_METADATA_RECORD:
         w_fwrite ("metadata", 8, 1, wtfile);
         (* datalength) += 8;
         break;
 
-      case REVISIT_RECORD:
+      case WARC_REVISIT_RECORD:
         w_fwrite ("revisit", 7, 1, wtfile);
         (* datalength) += 7;
         break;
 
-      case CONVERSION_RECORD:
+      case WARC_CONVERSION_RECORD:
         w_fwrite ("conversion", 10, 1, wtfile);
         (* datalength) += 10;
         break;
 
-      case CONTINUATION_RECORD:
+      case WARC_CONTINUATION_RECORD:
         w_fwrite ("continuation", 12, 1, wtfile);
         (* datalength) += 12;
         break;
 
-      case RESOURCE_RECORD:
+      case WARC_RESOURCE_RECORD:
         w_fwrite ("resource", 8, 1, wtfile);
         (* datalength) += 8;
         break;
@@ -1472,15 +1491,16 @@ WPRIVATE void WFile_writeAnvls (FILE * wtfile, const void * lanvl,
  */
 
 
-WPRIVATE warc_bool_t WFile_writeDataBloc (FILE * wtfile, FILE * bloc,
-    warc_u64_t size)
+WPRIVATE warc_bool_t WFile_writeDataBloc (FILE * wtfile, 
+                                          FILE * bloc,
+                                          warc_u64_t size)
 {
 #define WFLUSH_SIZ 4096
-
+  
   char          buf [WFLUSH_SIZ];
   warc_u32_t    r;
   warc_u32_t    p;
-
+  
   /* Preconditions */
   assert (wtfile);
   assert (bloc);
@@ -1491,21 +1511,21 @@ WPRIVATE warc_bool_t WFile_writeDataBloc (FILE * wtfile, FILE * bloc,
         r = WFLUSH_SIZ;
       else
         r = size;
-
+      
       size = size - r;
-
+      
       p = w_fread (buf, 1, r, bloc);
-
+      
       if (w_ferror (wtfile) || r != p)
         {
           WarcDebugMsg ("data copying error");
           return (WARC_TRUE);
         }
-
+      
       if (w_fwrite (buf, 1, r, wtfile) != r)
         return (WARC_TRUE);
     }
-
+  
 
   /*   char Byte; */
 
@@ -1517,41 +1537,6 @@ WPRIVATE warc_bool_t WFile_writeDataBloc (FILE * wtfile, FILE * bloc,
   /*     } */
 
   return (WARC_FALSE);
-}
-
-/**
- * @param numericvalue The Value to convert
- * @param strvalue The converted value as a char *
- *
- * @return The Numerical Value as a string
- *
- * WFile number to string transformation function
- */
-
-WPRIVATE warc_u8_t * WFile_numToString (warc_u32_t numericvalue,
-                                        warc_u8_t * strvalue)
-{
-  warc_u32_t i;
-  warc_u32_t quaut = 1;
-
-  while ( (numericvalue / quaut) != 0)
-    quaut *= 10;
-
-  quaut /= 10;
-
-  i      = 0;
-
-  while (quaut != 0)
-    {
-      strvalue [i] = '0' + (numericvalue / quaut);
-      numericvalue %= quaut;
-      quaut /= 10;
-      i++;
-    }
-
-  strvalue [i] = '\0';
-
-  return (strvalue);
 }
 
 
@@ -1612,40 +1597,37 @@ WPRIVATE warc_bool_t WFile_flushTemporary (FILE * warcf, FILE * wtfile)
  */
 
 WPRIVATE warc_bool_t
-WFile_storeRecordGzipComressed (void * _self,
-                                const void * wrec, warc_u32_t datalength,
-                                FILE * bloc, FILE * wtfile, void * objwtfile)
+WFile_storeRecordGzipCompressed (void * _self,
+                                 const void * wrec, 
+                                 warc_u32_t datalength,
+                                 FILE * bloc, FILE * wtfile
+/*                                 , void * objwtfile */
+                                )
 {
-
   struct WFile * self = _self;
 
   warc_u8_t      strData [20];
 /*   warc_u32_t     i       = 0; */
   void         * gzobj   = NIL;
   warc_u64_t     csize   = 0;    /* the size of the compressed data */
-  FILE         * crec    = NIL;  /* to store the compressed record */
-  void         * objcrec = NIL;
+  /*FILE         * crec    = NIL;*/  /* to store the compressed record  */
+/*   void         * objcrec = NIL; */
+  warc_u64_t     where   = 0;
   warc_gzlevel_t level;
 
   /* map the correct compression level */
-
   switch (COMP)
     {
-
       case WARC_FILE_COMPRESSED_GZIP:
-
       case WARC_FILE_COMPRESSED_GZIP_DEFAULT_COMPRESSION:
         level = WARC_GZIP_DEFAULT_COMPRESSION;
         break;
-
       case WARC_FILE_COMPRESSED_GZIP_NO_COMPRESSION:
         level = WARC_GZIP_NO_COMPRESSION;
         break;
-
       case WARC_FILE_COMPRESSED_GZIP_BEST_SPEED:
         level = WARC_GZIP_BEST_SPEED;
         break;
-
       case WARC_FILE_COMPRESSED_GZIP_BEST_COMPRESSION:
         level = WARC_GZIP_BEST_COMPRESSION;
         break;
@@ -1657,7 +1639,7 @@ WFile_storeRecordGzipComressed (void * _self,
   /* writing the data Length Field */
   w_fseek_from_start (wtfile, 10);
 
-  WFile_numToString (datalength, strData);
+  w_numToString (datalength, strData);
 
   w_fwrite (strData, w_strlen (strData), 1, wtfile);
 
@@ -1682,54 +1664,63 @@ WFile_storeRecordGzipComressed (void * _self,
 /*   i = 0x0A; */
 
 /*   w_fwrite (& i, 1, 1, wtfile); */
-
-  w_fwrite ("\r\n\r\n", 4, 1, wtfile); 
+  w_fwrite ("\r\n\r\n", 4, 1, wtfile);
 
   /* Creating the temporary file that will hold the
      compressed record */
-  objcrec = bless (WTempFile);
+/*   WTempFile_reset (TEMP_FILE2);*/ 
 
-  unless (objcrec)
-  {
-    WarcDebugMsg ("unable to create temporary space for the gzipped record");
-    destroy (objwtfile), wtfile = NIL;
-    return (WARC_TRUE);
-  }
+/*   objcrec = bless (WTempFile, WString_getText(WORKING_DIR), WString_getLength(WORKING_DIR)); 
+   unless (objcrec) 
+   { 
+     WarcDebugMsg ("unable to create temporary space for the gzipped record"); 
+     destroy (objwtfile), wtfile = NIL; 
+     return (WARC_TRUE); 
+   } */
 
-  crec = WTempFile_handle (objcrec);
+/*   crec = WTempFile_handle (TEMP_FILE2);*/ 
 
   /* Compressing the  record */
   w_fseek_start (wtfile);
   gzobj = bless (WGzip);
+  where = w_ftell (FH);
 
-  if (WGzip_compress (gzobj, wtfile, crec, level, & csize) )
+  if (WGzip_compress (gzobj, wtfile, FH, level, & csize) )
+/*   if (WGzip_compress (gzobj, wtfile, crec, level, & csize) )*/ 
     {
       WarcDebugMsg ("failed to GZIP compress the record");
-      destroy (objwtfile);
-      destroy (objcrec);
+/*       destroy (objwtfile); */
+/*       destroy (objcrec); */
+      w_fflush (FH);
+      w_ftruncate(w_fileno (FH), where);
+      w_fseek_from_start (FH, where);
       destroy (gzobj);
       return (WARC_TRUE);
     }
 
-  destroy (objwtfile), wtfile = NIL;
+/*   destroy (objwtfile), wtfile = NIL; */
 
   destroy (gzobj), gzobj = NIL;
 
   /* testing if the record will not overload the Warc File */
-
-  if ( (warc_u64_t) (MAXSIZE - w_ftell (FH) ) < csize)
+  if ( MAXSIZE < (warc_u64_t) w_ftell (FH) )
+/*   if ( (warc_u64_t) (MAXSIZE - w_ftell (FH) ) < csize) */
     {
-      destroy (objcrec);
+      w_fflush (FH);
+      w_ftruncate(w_fileno (FH), where);
+      w_fseek_from_start (FH, where);
+
+/*       destroy (objcrec); */
       WarcDebugMsg ("couldn't add record to the warc file, maximum size reached");
       return (WARC_TRUE);
     }
 
   /* adding the compressed record */
-  w_fseek_start (crec);
+   /*w_fseek_start (crec); 
 
-  WFile_writeDataBloc (FH, crec, csize);
+   WFile_writeDataBloc (FH, crec, csize); */
 
-  destroy (objcrec), crec = NIL;
+/*   destroy (objcrec), crec = NIL; */
 
   return (WARC_FALSE);
 }
@@ -1749,7 +1740,9 @@ WFile_storeRecordGzipComressed (void * _self,
 WPRIVATE warc_bool_t
 WFile_storeRecordUncompressed (void* _self, const void * wrec,
                                warc_u32_t datalength, FILE * bloc,
-                               FILE * wtfile, void * objwtfile)
+                               FILE * wtfile
+/*                                , void * objwtfile */
+                               )
 {
 
   struct WFile * self = _self;
@@ -1762,7 +1755,7 @@ WFile_storeRecordUncompressed (void* _self, const void * wrec,
   if ( (datalength + 4) > (datalength) && /* avoid integer overflow */
           (MAXSIZE - w_ftell (FH) ) < (datalength + 4) )
     {
-      destroy (objwtfile);
+/*       destroy (objwtfile); */
       WarcDebugMsg ("couldn't add record to the warc file, maximum size reached");
       return (WARC_TRUE);
     }
@@ -1770,7 +1763,7 @@ WFile_storeRecordUncompressed (void* _self, const void * wrec,
   /* writing the data Length Field */
   w_fseek_from_start (wtfile, 10);
 
-  WFile_numToString (datalength, strData);
+  w_numToString (datalength, strData);
 
   w_fwrite (strData, w_strlen (strData), 1, wtfile);
 
@@ -1782,7 +1775,7 @@ WFile_storeRecordUncompressed (void* _self, const void * wrec,
   WFile_writeDataBloc (FH, bloc, WRecord_getDataSize (wrec) );
 
   /* writing final double CRLF */
- /*  i = 0x0D; */
+/*   i = 0x0D; */
 
 /*   w_fwrite (& i, 1, 1, FH); */
 
@@ -1797,11 +1790,10 @@ WFile_storeRecordUncompressed (void* _self, const void * wrec,
 /*   i = 0x0A; */
 
 /*   w_fwrite (& i, 1, 1, FH); */
-
   w_fwrite ("\r\n\r\n", 4, 1, FH);
 
   /* destroying the temporary file */
-  destroy (objwtfile);
+/*   destroy (objwtfile); */
 
   return (WARC_FALSE);
 }
@@ -1825,7 +1817,7 @@ WPUBLIC warc_bool_t WFile_storeRecord (void* _self, const void * wrec)
   const void   * hdline;     /* recover Header line from the WRecord */
   const void   * lanvl;      /* recover the anvl list from the Warc Record */
   FILE         * wtfile     = NIL;   /* for creation of the temporary file */
-  void         * objwtfile  = NIL;
+/*   void         * objwtfile  = NIL; */
   warc_u32_t     datalength = 0;
 
   /* Preconditions */
@@ -1838,7 +1830,6 @@ WPUBLIC warc_bool_t WFile_storeRecord (void* _self, const void * wrec)
   }
 
   /* reject any other mode except for writing */
-
   if (MODE != WARC_FILE_WRITER)
     {
       return (WARC_TRUE);
@@ -1865,15 +1856,17 @@ WPUBLIC warc_bool_t WFile_storeRecord (void* _self, const void * wrec)
 
   w_fseek_start (bloc);
 
-  objwtfile = bless (WTempFile);
 
-  unless (objwtfile)
-  {
-    WarcDebugMsg ("failure to create temporary space");
-    return (WARC_TRUE);
-  }
+  WTempFile_reset (TEMP_FILE);
+  
+/*   objwtfile = bless (WTempFile, WString_getText(WORKING_DIR), WString_getLength(WORKING_DIR)); */
+/*   unless (objwtfile) */
+/*   { */
+/*     WarcDebugMsg ("failure to create temporary space"); */
+/*     return (WARC_TRUE); */
+/*   } */
 
-  wtfile = WTempFile_handle (objwtfile);
+  wtfile = WTempFile_handle (TEMP_FILE);
 
   hdline = WRecord_getHDLine (wrec);
   lanvl = WRecord_getAnvl (wrec);
@@ -1915,23 +1908,21 @@ WPUBLIC warc_bool_t WFile_storeRecord (void* _self, const void * wrec)
 
   switch (COMP)
     {
-
       case WARC_FILE_COMPRESSED_GZIP:
-
       case WARC_FILE_COMPRESSED_GZIP_DEFAULT_COMPRESSION:
-
       case WARC_FILE_COMPRESSED_GZIP_NO_COMPRESSION:
-
       case WARC_FILE_COMPRESSED_GZIP_BEST_SPEED:
-
       case WARC_FILE_COMPRESSED_GZIP_BEST_COMPRESSION:
-        return (WFile_storeRecordGzipComressed (self, wrec, datalength, bloc,
-                                                wtfile, objwtfile) );
+        return (WFile_storeRecordGzipCompressed (self, wrec, datalength, bloc,
+                                                 wtfile
+/*                                                , objwtfile  */
+                                                ));
 
       case WARC_FILE_UNCOMPRESSED:
         return (WFile_storeRecordUncompressed (self, wrec, datalength, bloc,
-                                               wtfile, objwtfile) );
-
+                                               wtfile
+/*                                                , objwtfile  */
+                                               ));
       default:
         WarcDebugMsg ("WARC file opened with an unknown mode");
     }
@@ -1959,6 +1950,59 @@ WIPUBLIC FILE * WFile_getFile (const void * const _self)
 }
 
 /**
+ * @param _self: a WFile object instance
+ *
+ * @return The warc file descriptor as a long integer, -1 otherwise
+ *
+ * Gives the long integer descriptor corresponding to the opened WARC file
+ */
+
+WIPUBLIC warc_i32_t WFile_fileno (void *_self)
+{
+
+  struct WFile * self = _self;
+
+  /* Preconditions */
+  CASSERT (self);
+
+  unless (FH)
+  return (-1);
+
+  return (fileno (FH) );
+}
+
+/**
+ * @param _self: a WFile object instance
+ * @param buf: the buffer char * to fill
+ * @param size: the size of data to fill
+ *
+ * @return the number of charcaters filled into the buffer
+ *
+ * Function that fills a buffer with an amount of bytes
+ */
+
+WIPUBLIC warc_bool_t WFile_fillBuffer (void * _self, char * buffer,
+                                       warc_i32_t size, warc_i32_t * ret)
+{
+
+  struct WFile * self = _self;
+
+  /* Precdonditions */
+  CASSERT (self);
+
+  * ret = w_fread (buffer, 1, size, FH);
+
+  if (w_ferror (FH) )
+    return WARC_TRUE;
+
+  if ( (* ret) < size && w_feof (FH) )
+    return WARC_FALSE;
+
+  return (WARC_FALSE);
+}
+
+
+/**
  * WFile_constructor - create a new WFile object instance
  *
  * @param _self WFile class object
@@ -1971,15 +2015,36 @@ WIPUBLIC FILE * WFile_getFile (const void * const _self)
 
 WPRIVATE void * WFile_constructor (void * _self, va_list * app)
 {
-
   struct WFile            * const self = _self;
   const char              * fname      = va_arg (* app, const char *);
   const warc_u32_t          max_size   = va_arg (* app, const warc_u32_t);
   wfile_mode_t              mode       = va_arg (* app, wfile_mode_t);
   const wfile_comp_t        compressed = va_arg (* app, const warc_bool_t);
+  const char              * dname      = va_arg (* app, const char *);
+  warc_u32_t                dname_len  = w_strlen ((warc_u8_t *) dname);
 
-  FNAME = bless (WString, fname, strlen (fname) );
-  assert (FNAME);
+  FNAME = bless (WString, fname, w_strlen ((warc_u8_t *) fname) );
+  unless (FNAME)
+    {
+      destroy (self);
+      return (NIL);
+    }
+
+  WORKING_DIR = bless (WString, dname, dname_len);
+  unless (WORKING_DIR)
+    {
+      destroy (self);
+      return (NIL);
+    }
+
+  TEMP_FILE = bless (WTempFile, dname, dname_len);
+  unless (TEMP_FILE)
+    {
+      WarcDebugMsg ("unable to create temporary space");
+      destroy (self);
+      return (NIL);
+    }
+
 
   COMP    = compressed;
   MODE    = mode;
@@ -2008,7 +2073,6 @@ WPRIVATE void * WFile_constructor (void * _self, va_list * app)
       }
 
       /* uncompression levels meaning nothing when reading */
-
       switch ( (warc_u32_t) (COMP) )
         {
 
@@ -2055,7 +2119,8 @@ WPRIVATE void * WFile_constructor (void * _self, va_list * app)
 
   else if (MODE == WARC_FILE_WRITER) /* writing to a WARC file */
     {
-      FH = w_fopen_wb (fname);
+/*       FH = w_fopen_wb (fname); */
+      w_open_cwb (fname, FH);
       unless (FH)
       {
         destroy (self);
@@ -2071,6 +2136,14 @@ WPRIVATE void * WFile_constructor (void * _self, va_list * app)
           destroy (self);
           return NIL;
         }
+
+ /*  TEMP_FILE2 = bless (WTempFile, dname, dname_len); 
+   unless (TEMP_FILE2) 
+     { 
+       WarcDebugMsg ("unable to create temporary space"); 
+       destroy (self); 
+       return (NIL); 
+     } */
     }
 
   else
@@ -2106,9 +2179,18 @@ WPRIVATE void * WFile_destructor (void * _self)
   if (FNAME)
     destroy (FNAME), FNAME = NIL;
 
-  MODE    = WARC_FILE_INVALID;
+  if (WORKING_DIR)
+    destroy (WORKING_DIR), WORKING_DIR = NIL;
 
-  COMP    = WARC_FALSE;
+  if (TEMP_FILE)
+    destroy (TEMP_FILE), TEMP_FILE = NIL;
+
+/*   if (TEMP_FILE2) 
+     destroy (TEMP_FILE2), TEMP_FILE2 = NIL; */
+
+  MODE = WARC_FILE_INVALID;
+
+  COMP = WARC_FALSE;
 
   MAXSIZE = 0;
 

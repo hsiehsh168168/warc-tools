@@ -54,6 +54,7 @@ extern "C"
 #include <ctype.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <fcntl.h>
 
 
     /**
@@ -96,8 +97,9 @@ extern "C"
 
 
 #ifndef w_fopen_wb
-#define w_fopen_wb(s) fopen ((s), "wb")
+#define w_fopen_wb(s) fopen ((s), "w+b")
 #endif
+
 
     /**
      * Macro to read in files
@@ -233,9 +235,10 @@ extern "C"
 #ifndef w_file_size_from_offset
 #define w_file_size_from_offset(file,size,offset) \
   do { \
+      warc_u64_t o = (offset); \
       w_fseek_end((file)); \
-      (size) = (warc_u64_t) w_ftell((file)) - offset; \
-      w_fseek_from_start((file), (offset)); \
+      (size) = (warc_u64_t) w_ftell((file)) - o; \
+      w_fseek_from_start((file), (o)); \
     } while (0)
 #endif
 
@@ -298,7 +301,77 @@ extern "C"
     } while (0)
 #endif
 
+    /**
+     * Macro to safetly return the file descriptor associated with FH
+     */
+#ifndef w_fileno
+#define w_fileno(fh) fileno(fh)
+#endif
 
+
+   /**
+     * Macro to safetly zero fill memory area
+     */
+
+#ifndef w_ftruncate
+#define w_ftruncate(fd, size) \
+  do { \
+      int ret = ftruncate (fd, 0); \
+      assert (! ret); \
+      UNUSED (ret); \
+    } while (0)
+#endif
+
+#ifndef w_fflush
+#define w_fflush(fh) \
+  do { \
+      int ret = fflush(fh); \
+      assert (! ret); \
+      UNUSED (ret); \
+    } while (0)
+#endif
+
+
+    /**
+     * Macro to safetly use fdopen for reading
+     */
+#ifndef w_fdopen_rb
+#define w_fdopen_rb(fh) fdopen (fh, "r+b")
+#endif
+
+    /**
+     * Macro to safetly use fdopen for writing
+     */
+#ifndef w_fdopen_wb
+#define w_fdopen_wb(fh) fdopen (fh, "w+b")
+#endif
+
+
+    /**
+     * Macro to open files in append binary mode
+     */
+
+#ifndef w_open_cwb
+#define w_open_cwb(s,fh) \
+ do { \
+      struct stat st; \
+      int fd; \
+      st . st_size = 0; \
+      fd = open ((s), O_RDWR | O_CREAT); \
+      assert (fd != -1); \
+      assert (fstat(fd, & st) != -1); \
+      if(st . st_size == 0) fchmod(fd, 0644); \
+      fh=w_fdopen_wb(fd); \
+    } while (0)
+#endif
+
+
+    /**
+      * Macro to safetly using strstr
+      */
+#ifndef w_ststr
+#define w_strstr(s1,s2) strstr ((const char *)s1,(const char *)s2)
+#endif
 
     extern ptrdiff_t  w_strncpy         (warc_u8_t *, const warc_u8_t *,
                                            size_t);
@@ -310,6 +383,11 @@ extern "C"
     extern warc_u32_t  roundToPowerOfTwoUInt (warc_u32_t);
     extern warc_bool_t isPowerOfTwoUInt (warc_u32_t);
     extern warc_u32_t  computeHash      (const char *, warc_u32_t);
+    extern warc_bool_t w_check_digital_string (const warc_u8_t *,
+          warc_u32_t);
+    extern warc_bool_t w_atou           (const warc_u8_t *, warc_u32_t,
+                                           warc_u32_t *);
+    extern warc_u8_t * w_numToString    (warc_i64_t, warc_u8_t *);
 
 #ifdef __cplusplus
   }

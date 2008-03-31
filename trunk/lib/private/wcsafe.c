@@ -320,3 +320,76 @@ WPUBLIC warc_u32_t computeHash (const char * _str, warc_u32_t len)
 
   return (hash & 0x7FFFFFFF);
 }
+
+/**
+ * @param dstring: the string to chek
+ *
+ * @return True if succeedds, False otherwise
+ *
+ * Cheks if a string represents a Numerical value or not
+ */
+
+WPUBLIC warc_bool_t w_check_digital_string (const warc_u8_t * dstring,
+    warc_u32_t len)
+{
+  warc_u32_t i = 0;
+
+  while ( (i < len) && ( (dstring[i] >= '0') || (dstring[i] <= '9') ) )
+    ++ i;
+
+  if (i < len)
+    return (WARC_FALSE);
+
+  return (WARC_TRUE);
+}
+
+
+/*
+  convert string to unsigned integern,
+  returns false if succeed and true if en error occure
+*/
+
+WPUBLIC warc_bool_t w_atou (const warc_u8_t * s, warc_u32_t len,
+                            warc_u32_t * val)
+{
+  unless (w_check_digital_string (s, len) )
+  return (WARC_TRUE);
+  else
+    * val = atoi ( (const char *) s);
+
+  return (WARC_FALSE);
+}
+
+
+/**
+ * Convert a digit its string representation
+ */
+
+WPUBLIC warc_u8_t * w_numToString (warc_i64_t numericvalue,
+                                   warc_u8_t * strvalue)
+{
+  warc_u32_t i;
+  warc_u32_t quaut = 1;
+
+  while ( (numericvalue / quaut) != 0)
+    quaut *= 10;
+
+  unless (numericvalue)
+  quaut = 1;
+  else
+    quaut /= 10;
+
+  i = 0;
+
+  while (quaut != 0)
+    {
+      strvalue [i] = '0' + (numericvalue / quaut);
+      numericvalue %= quaut;
+      quaut /= 10;
+      ++ i;
+    }
+
+  strvalue [i] = '\0';
+
+  return (strvalue);
+}

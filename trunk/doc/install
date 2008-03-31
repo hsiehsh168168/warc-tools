@@ -1,3 +1,4 @@
+-------------
 Requirements
 -------------
 
@@ -54,6 +55,7 @@ The library was tested in x86 and PPC on both 32 bits and 64 bits architectures.
     # export PATH=$PATH:/usr/local/bin
 
 
+--------
 Install
 --------
 
@@ -71,7 +73,7 @@ or use "gmake" on FreeBSD, NetBSD or OpenBSD:
   $ gmake
 
 
-
+---------
 Optional
 ---------
 
@@ -79,16 +81,23 @@ The following UNIX commands are used in the "makefile" to build "optional
 stuffs" (see below) and need to be present in your system (adjust your PATH 
 environment variable if necessary):
 
-- bash shell
+
+- bash again shell (bash)
 - echo
 - cat
 - find
+- grep
+- sed
 - gzip
 - mkdir
 - rm
 - cp
 - tar
-
+- curl
+- basename
+- dirname
+- strip
+- subversion client
 
 * To start unit tests, type:
 
@@ -102,6 +111,10 @@ environment variable if necessary):
 
   $ make shared
 
+* To compile in release mode (no debug info included), type:
+
+  $ make release
+
 * To build a tarball version of the library, type:
 
   $ make tgz
@@ -113,6 +126,12 @@ environment variable if necessary):
 * To de-install the library, as "root" type:
 
   # make deinstall
+
+* To install the library on your local system under "/usr/local/warc-tools" 
+  type:
+
+  $ su
+  # make install
 
 * To build an RPM or DEB package, you need to install the following
 softwares first:
@@ -155,7 +174,7 @@ Then, type:
   $ ./misc/beautifier.sh .
 
 
-* The library is compiled with debbuging symbols by default.
+* The library is compiled with debugging symbols by default.
 You can disable this feature by commenting the "makefile" line:
 
 DFLAG     = -g
@@ -164,3 +183,116 @@ like this:
 
 #DFLAG     = -g
 
+
+
+--------
+Modules
+--------
+
+* Apache "mod_warc":
+
+Follow the following steps to install the WARC library as an Apache plugin.
+
+o Download and install the lastest stable version of Apache2:
+
+ $ wget http://apache.multidist.com/httpd/httpd-2.0.63.tar.gz
+ $ tar xzvf httpd-2.0.63.tar.gz
+ $ cd httpd-2.0.63
+
+o Compile Apache with any option you like. The most important thing is to enable
+the support of DSO (Dynamic Shared Object) with "--enable-so":
+
+ $ ./configure --prefix=/usr/local/apache2 \
+               --enable-so \
+                --enable-modules=all \
+               --enable-mods-shared=all \
+               --enable-ssl \
+               --enable-deflate \
+               --enable-proxy{,-connect,-ftp,-http} \
+               --enable{,-disk,-mem}-cache \
+               --with-mpm=prefork
+
+The configure script may fail (ex. Ubuntu) because "/bin/sh"
+doesn't point to the "Bourne Again Shell". Fix it like this as "root":
+
+ # mv /bin/sh /bin/sh_old
+ # ln -sf /bin/bash /bin/sh
+
+o Compile and change to "root" user:
+
+ $ make
+ $ su
+
+o Install Apache2 as root:
+
+ # make install
+
+All files will be copied under the "/usr/local/apache2" directory.
+
+o For test purposes and to avoid collision with any running service 
+  on port "80", we'll use port number "9898" instead:
+
+ # sed -i "s|Listen 80|Listen 9898|" /usr/local/apache2/conf/httpd.conf
+  
+o Now, test if the server with:
+
+ # /usr/local/apache2/bin/apachectl -k start
+
+o Point your favourite browser to the address:
+
+ http://127.0.0.1:9898
+
+o Stop the server:
+
+ # /usr/local/apache2/bin/apachectl -k stop
+
+o Compile and install the WARC tools library on your system:
+
+ $ svn co http://warc-tools.googlecode.com/svn/trunk/ warc-tools-read-only
+ $ cd warc-tools-read-only
+
+o Change to "root" and install it under "/usr/local/warc-tools":
+
+ $ su
+ # make install
+
+o Add the following line to your Apache2 configuration file and 
+  MAKE SURE IT'LL BE INCLUDED BEFORE THE "DSO section".
+
+  # vi /usr/local/apache2/conf/httpd.conf
+  LoadFile /usr/local/warc-tools/lib/libwarc.so
+
+ The resulting configuration file needs to be like this:
+
+...
+LoadFile /usr/local/warc-tools/lib/libwarc.so
+
+#
+# Dynamic Shared Object (DSO) Support
+#
+# To be able to use the functionality of a module which was built as a DSO you
+# have to place corresponding `LoadModule' lines at this location so the
+# directives contained in it are actually available _before_ they are used.
+# Statically compiled modules (those listed by `httpd -l') do not need
+# to be loaded here.
+#
+# Example:
+# LoadModule foo_module modules/mod_foo.so
+#
+...
+
+o Install "mod_warc" as root:
+
+ # make mod_apache_install
+
+o Add the following Apache directives to the configuration file:
+
+ # vi /usr/local/apache2/conf/httpd.conf
+
+<Location /warc/0.9/>
+        warc_dir   "/tmp/"
+        SetHandler warc
+        Order Deny,Allow
+        Deny from all
+        Allow from 127.0.0.1
+</Location>

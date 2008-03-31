@@ -59,18 +59,19 @@ struct ARecord
     const void * class;
 
     /*@{*/
+    warc_u64_t   asize;  /**< The size of data bloc */
+    warc_i64_t   aoffset;  /**< The offset of the data bloc in the Arc file */
     void       * url;          /**< The ARC url */
     void       * ip_adress; /**< The ARC record ip adress */
     void       * creation_date; /**< The ARC record date of creation */
     void       * mime_type; /**< The ARC record mime type */
-    warc_u32_t   data_length; /**< The ARC record data_length */
-    warc_u64_t   asize;  /**< The size of data bloc */
-    warc_i64_t   aoffset;  /**< The offset of the data bloc in the Arc file */
+    void       * dname;    /**< working directory name */
     void       * env;           /**< The pointer to user data buffer */
     warc_bool_t (* callback) (void *, const char *, warc_u32_t);
     /**< The pointer to the user call back function */
     void       * datafile; /**< The data File descriptor */
     FILE       * who; /**< The Arc file wich containt the record */
+    warc_u32_t   data_length; /**< The ARC record data_length */
 
     /*@}*/
   };
@@ -88,6 +89,7 @@ struct ARecord
 #define    DATAF           (self -> datafile)
 #define    WHO             (self -> who)
 #define    ASIZE           (self -> asize)
+#define    WORKING_DIR     (self -> dname)
 
 
 /**
@@ -624,8 +626,7 @@ WIPUBLIC warc_bool_t ARecord_transferContent (void * _self, void * wrec,
       return  (WARC_TRUE);
     }
 
-  objatfile = bless (WTempFile);
-
+  objatfile = bless (WTempFile, WString_getText(WORKING_DIR), WString_getLength(WORKING_DIR));
   assert (objatfile);
 
   fin = WTempFile_handle (objatfile);
@@ -685,8 +686,8 @@ WPRIVATE void freeARecord (void * _self)
   if (IP_ADRESS)
     destroy (IP_ADRESS), IP_ADRESS = NIL;
 
-  if (DATAF)
-    destroy (DATAF), DATAF = NIL;
+/*   if (DATAF) */
+/*     destroy (DATAF), DATAF = NIL; */
 
   if (WHO)
     WHO = NIL;
@@ -731,6 +732,7 @@ WPRIVATE void * ARecord_constructor (void * const _self, va_list * app)
   const warc_u32_t         ct_l  = va_arg (* app, const warc_u32_t);
   const warc_u32_t         dt    = va_arg (* app, const warc_u32_t);
 
+  void                   * wdir  = va_arg (* app, void *);
 
   URL = bless (WString, url, url_l);
   unless (URL)
@@ -759,6 +761,9 @@ WPRIVATE void * ARecord_constructor (void * const _self, va_list * app)
     freeARecord (self);
     return (NIL);
   }
+
+  WORKING_DIR = wdir;
+
 
   DATAF = NIL;
   DATA_LENGTH = dt;

@@ -43,9 +43,18 @@ i=0
 j=0
 for t in $@;
 do
+
   trap - ABRT INT TERM EXIT
-  $t >/dev/null 2>&1
-  r=$?
+  if [ "$t" = "utest/server" ]; then
+      # start on background
+      ($t &) >/dev/null 2>&1
+      # stop the server
+      curl "http://0.0.0.0:8080/warc/0.9/stop" >/dev/null 2>&1
+      ret=$?
+  else
+      $t >/dev/null 2>&1
+      r=$?
+  fi
   trap - ABRT INT TERM EXIT
 
   if [ "$t" = "utest/object" ]; then

@@ -32,8 +32,12 @@
 #include <warc.h>
 
 
+#ifndef WARC_MAX_SIZE
 #define WARC_MAX_SIZE 629145600
-#define makeS(s) (warc_u8_t *) (s), w_strlen((warc_u8_t *) (s))
+#endif
+
+#define uS(s)  ((warc_u8_t *) (s))
+#define makeS(s) uS(s), w_strlen (uS(s))
 
 
 warc_bool_t match (const warc_u8_t * bigstring, warc_u32_t   bigstringlen,
@@ -59,25 +63,29 @@ int main (int argc, const char ** argv)
   void            * w        = NIL; /* warc file object */
   void            * r        = NIL; /* to recover records */
   const warc_u8_t * string   = NIL;
-  warc_u8_t       * flags    = (warc_u8_t *) "vcts:f:";
+  warc_u8_t       * flags    = uS ("vcf:u:m:r:t:");
   char            * fname    = NIL;
-  char            * pattern  = NIL;
+  char            * wdir     = ".";
+  char            * uri      = NIL;
+  char            * mime     = NIL;
+  warc_rec_t        rtype    = WARC_UNKNOWN_RECORD;
   warc_i32_t        c        = 0;
-  wfile_comp_t      cmode    = WARC_FILE_COMPRESSED_GZIP;
+  wfile_comp_t      cmode    = WARC_FILE_UNCOMPRESSED;
   warc_bool_t       amode    = WARC_FALSE;
-  wfile_comp_t      mime_uri = 0;    /* match MIME */
   warc_u32_t        ret      = 0;
 
 
-  if (argc < 6 || argc > 8)
+  if (argc < 5 || argc > 13)
     {
-      fprintf (stderr, "Filter WARC records based on MIME or URI\n");
-      fprintf (stderr, "Usage: %s -f <file.warc> [-c] -s <match> [-t] [-v]\n", argv [0]);
+      fprintf (stderr, "Filter WARC records based on MIME, URI and record type\n");
+      fprintf (stderr, "Usage: %s -f <file.warc> [-c] [-u <uri>] [-m <mime>] [-r <rtype>] [-v] [-t <working_dir>]\n", argv [0]);
       fprintf (stderr, "\t-f    : valid WARC file name\n");
-      fprintf (stderr, "\t[-c]  : GZIP compressed WARC (default true)\n");
-      fprintf (stderr, "\t-s    : pattern string\n");
-      fprintf (stderr, "\t[-t]  : compare with MIME (default true)\n");
-      fprintf (stderr, "\t[-v]  : dump ANVL (default false)\n");
+      fprintf (stderr, "\t[-c]  : assume GZIP compressed WARC (default no)\n");
+      fprintf (stderr, "\t[-u]  : compare with URI\n");
+      fprintf (stderr, "\t[-m]  : compare with MIME\n");
+      fprintf (stderr, "\t[-r]  : compare with record types (see \"public/wrectype.h\" for possible values)\n");
+      fprintf (stderr, "\t[-v]  : dump ANVL (default no)\n");
+      fprintf (stderr, "\t[-t]  : temporary working directory (default \".\")\n");
       return (2);
     }
 
@@ -100,24 +108,38 @@ int main (int argc, const char ** argv)
             break;
 
           case 'c' :
-            cmode = WARC_FILE_UNCOMPRESSED;
+            cmode = WARC_FILE_COMPRESSED_GZIP;
 
             break;
 
-          case 's' :
+          case 'u' :
             if (w_index (flags, c) [1] == ':')
-              pattern = WGetOpt_argument (p);
+              uri = WGetOpt_argument (p);
 
             break;
 
-          case 't' :
-            mime_uri = 1;
+          case 'm' :
+            if (w_index (flags, c) [1] == ':')
+              mime = WGetOpt_argument (p);
+
+            break;
+
+          case 'r' :
+            if (w_index (flags, c) [1] == ':')
+              rtype = (warc_rec_t) atoi (WGetOpt_argument (p) );
 
             break;
 
           case 'v' :
             amode = WARC_TRUE;
 
+            break;
+
+          case 't' :
+          
+            if (w_index (flags, c) [1] == ':')
+              wdir = WGetOpt_argument (p);
+          
             break;
 
           case '?' :  /* illegal option or missing argument */
@@ -135,23 +157,8 @@ int main (int argc, const char ** argv)
     return (1);
   }
 
-  unless (pattern)
-  {
-    fprintf (stderr, "missing pattern string. Use -s option\n");
-    destroy (p);
-    return (1);
-  }
-
-  unless (strcmp (pattern, "") )
-  {
-    fprintf (stderr, "empty pattern string\n");
-    destroy (p);
-    return (1);
-  }
-
-
-
-  w = bless (WFile, fname, WARC_MAX_SIZE,  WARC_FILE_READER, cmode);
+  w = bless (WFile, fname, WARC_MAX_SIZE,
+             WARC_FILE_READER, cmode, wdir);
   assert (w);
 
   fprintf (stderr, "%-10s %-10s %-10s %-10s %-15s %-14s %-20s %-56s %-100s\n",
@@ -162,7 +169,9 @@ int main (int argc, const char ** argv)
   while (WFile_hasMoreRecords (w) )
     {
       const void * al  = NIL; /* ANVL list object */
-      warc_bool_t  m   = WARC_TRUE;
+      warc_bool_t  m1  = WARC_TRUE;
+      warc_bool_t  m2  = WARC_TRUE;
+      warc_bool_t  m3  = WARC_TRUE;
 
       unless ( (r = WFile_nextRecord (w) ) )
       {
@@ -170,14 +179,26 @@ int main (int argc, const char ** argv)
         break;
       }
 
-      if (mime_uri)
-        string = WRecord_getSubjectUri (r);
-      else
-        string = WRecord_getContentType (r);
+      if (uri != NIL && * uri != '\0')
+        {
+          string = WRecord_getSubjectUri (r);
+          m1     = match (makeS (string), makeS (uri) );
+        }
 
-      m = match (makeS (string), makeS (pattern) );
+      if (mime != NIL && * mime != '\0')
+        {
+          string = WRecord_getContentType (r);
+          m2     = match (makeS (string), makeS (mime) );
+        }
 
-      if (m)
+      if (rtype != WARC_UNKNOWN_RECORD && rtype == WRecord_getRecordType (r) )
+        {
+          m3 = WARC_FALSE;
+        }
+
+      /* no match in any field */
+
+      if (m1 && m2 && m3)
         {
           destroy (r);
           continue;
@@ -209,7 +230,7 @@ int main (int argc, const char ** argv)
           warc_u32_t  i = 0;
           warc_u32_t  j = WList_size (al); /* how many ANVL are there? */
 
-          while ( i < j )
+          while (i < j)
             {
               const void  * a = WList_get (al, i); /* ANVL record */
 

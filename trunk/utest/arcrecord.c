@@ -38,6 +38,7 @@
 
 #define makeS(s) ((warc_u8_t *) s), w_strlen((warc_u8_t *) (s))
 
+static void * wdir  = NIL;
 
 int test1 (void)
 {
@@ -47,7 +48,8 @@ int test1 (void)
                            makeS ("192.168.4.1"),
                            makeS ("12172007"),
                            makeS ("warcproject/testheaderline"),
-                           12);
+                           12,
+                           wdir);
 
   assert (hl);
 
@@ -73,8 +75,8 @@ int test2 (void)
                            makeS ("192.168.4.1"),
                            makeS ("12172007"),
                            makeS ("warcproject/testheaderline"),
-                           12);
-
+                           12,
+                           wdir);
 
   fprintf (stdout, "%s>\n", t);
 
@@ -115,7 +117,7 @@ int test3 (void)
   return (1);
 
   /* init HDL FSM */
-  fsm = bless (AFsmHDL, fin);
+  fsm = bless (AFsmHDL, fin, wdir);
   assert (fsm);
 
   /* run the FSM for WHDLine object detection */
@@ -165,7 +167,7 @@ int test4 (void)
   return (1);
 
   /* init HDL FSM */
-  fsm = bless (AFsmHDL, fin);
+  fsm = bless (AFsmHDL, fin, wdir);
   assert (fsm);
 
   /* run the FSM for WHDLine object detection */
@@ -216,7 +218,7 @@ int test5 (void)
   return (1);
 
   /* init HDL FSM */
-  fsm = bless (AFsmHDL, fin);
+  fsm = bless (AFsmHDL, fin, wdir);
   assert (fsm);
 
   /* run the FSM for WHDLine object detection */
@@ -266,7 +268,7 @@ int test6 (void)
   return (1);
 
   /* init HDL FSM */
-  fsm = bless (AFsmHDL, fin);
+  fsm = bless (AFsmHDL, fin, wdir);
   assert (fsm);
 
   /* run the FSM for WHDLine object detection */
@@ -316,7 +318,7 @@ int test7 (void)
   return (1);
 
   /* init HDL FSM */
-  fsm = bless (AFsmHDL, fin);
+  fsm = bless (AFsmHDL, fin, wdir);
   assert (fsm);
 
   /* run the FSM for WHDLine object detection */
@@ -367,7 +369,7 @@ int test8 (void)
   return (1);
 
   /* init HDL FSM */
-  fsm = bless (AFsmHDL, fin);
+  fsm = bless (AFsmHDL, fin, wdir);
   assert (fsm);
 
   /* run the FSM for WHDLine object detection */
@@ -418,7 +420,7 @@ int test9 (void)
   return (1);
 
   /* init HDL FSM */
-  fsm = bless (AFsmHDL, fin);
+  fsm = bless (AFsmHDL, fin, wdir);
   assert (fsm);
 
   /* run the FSM for WHDLine object detection */
@@ -468,7 +470,7 @@ int test10 (void)
   return (1);
 
   /* init HDL FSM */
-  fsm = bless (AFsmHDL, fin);
+  fsm = bless (AFsmHDL, fin, wdir);
   assert (fsm);
 
   /* run the FSM for WHDLine object detection */
@@ -520,7 +522,7 @@ int test11 (void)
   return (1);
 
   /* init HDL FSM */
-  fsm = bless (AFsmHDL, fin);
+  fsm = bless (AFsmHDL, fin, wdir);
   assert (fsm);
 
   /* run the FSM for WHDLine object detection */
@@ -561,10 +563,13 @@ int main (void)
 
   warc_u32_t  i      = 0;
 
+  wdir = bless (WString, ".", 1);
+
   for (i = 0; i < 11; ++ i)
     {
       tests[i] ();
     }
 
+  destroy (wdir);
   return 0;
 }

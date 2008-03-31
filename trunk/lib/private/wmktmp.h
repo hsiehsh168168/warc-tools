@@ -52,8 +52,8 @@ extern "C"
     /* OS independante temporary file object */
     extern const void * WTempFile;
 
-    extern FILE  * WTempFile_handle  (const void * const);
-
+    extern FILE  *  WTempFile_handle  (const void * const);
+    extern void     WTempFile_reset   (const void * const);
 
 #ifdef __cplusplus
   }

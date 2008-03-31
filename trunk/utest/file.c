@@ -64,8 +64,7 @@ int test1 (void)
   const char * file1 = "./app/wdata/testwfile/unidesc.html";
 
   void * r = bless (WRecord);
-  void * w = bless (WFile, "./app/wdata/testwfile/awanvl.warc", 600 * 1024 * 1024,
-                    WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED);
+  void * w = bless (WFile, "./app/wdata/testwfile/awanvl.warc", 600 * 1024 * 1024,  WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED, ".");
   void * u = NIL;
 
   fprintf (stdout, "%s\n", t);
@@ -78,7 +77,7 @@ int test1 (void)
       return 1;
     }
 
-  if  (WRecord_setRecordType (r, WARCINFO_RECORD) )
+  if  (WRecord_setRecordType (r, WARC_INFO_RECORD) )
     {
       fprintf (stdout, "Corrupted Record type\n");
       destroy (r);
@@ -150,8 +149,7 @@ int test2 (void)
   const char * file1 = "./app/wdata/testwfile/unidesc.html";
 
   void * r = bless (WRecord);
-  void * w = bless (WFile, "./app/wdata/testwfile/awarcavl.warc", 600 * 1024 * 1024,
-                    WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED);
+  void * w = bless (WFile, "./app/wdata/testwfile/awarcavl.warc", 600 * 1024 * 1024, WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED, ".");
   void * u = NIL;
 
   fprintf  (stdout, "%s\n", t);
@@ -164,7 +162,7 @@ int test2 (void)
       return 1;
     }
 
-  if  (WRecord_setRecordType (r, WARCINFO_RECORD) )
+  if  (WRecord_setRecordType (r, WARC_INFO_RECORD) )
     {
       fprintf (stdout, "Corrupted Record type\n");
       destroy (r);
@@ -243,8 +241,7 @@ int test3 (void)
   const char * file2 = "./app/wdata/testwfile/anvlcom";
 
   void * r = bless (WRecord);
-  void * w = bless (WFile, "./app/wdata/testwfile/awarcmlp.warc", 600 * 1024 * 1024,
-                    WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED);
+  void * w = bless (WFile, "./app/wdata/testwfile/awarcmlp.warc", 600 * 1024 * 1024,  WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED, ".");
   void * u = NIL;
 
   fprintf (stdout, "%s\n", t);
@@ -257,7 +254,7 @@ int test3 (void)
       return 1;
     }
 
-  if  (WRecord_setRecordType (r, WARCINFO_RECORD) )
+  if  (WRecord_setRecordType (r, WARC_INFO_RECORD) )
     {
       fprintf (stdout, "Corrupted Record type\n");
       destroy (r);
@@ -326,7 +323,7 @@ int test3 (void)
       return 1;
     }
 
-  if  (WRecord_setRecordType (r, WARCINFO_RECORD) )
+  if  (WRecord_setRecordType (r, WARC_INFO_RECORD) )
     {
       fprintf (stdout, "Corrupted Record type\n");
       destroy (r);
@@ -387,158 +384,157 @@ int test3 (void)
 /* writing the firs rercord */
 
 
-/*int test4 (void)
-{
-  const char * t = "TEST 4: Trying to create a Warc File with a Warc record \
-                    having a corrupted Subject Uri field";
-  const char * file1 = "./app/wdata/testwfile/unidesc.html";
+/* int test4 (void) */
+/* { */
+/*   const char * t = "TEST 4: Trying to create a Warc File with a Warc record \ */
+/*                     having a corrupted Subject Uri field"; */
+/*   const char * file1 = "./app/wdata/testwfile/unidesc.html"; */
 
-  void * r = bless (WRecord);
-  void * w = bless (WFile, "./app/wdata/testwfile/awafgri.warc", 600 * 1024 * 1024,
-                    WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED);
+/*   void * r = bless (WRecord); */
+/*   void * w = bless (WFile, "./app/wdata/testwfile/awafgri.warc", 600 * 1024 * 1024, WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED, "."); */
 
-  fprintf (stdout,"%s\n",t);
+/*   fprintf (stdout,"%s\n",t); */
 
-  if (WRecord_setSubjectUri (r, makeS ("test:anunknownplace")))
-        {
-          fprintf (stdout, "Corrupted subject Uri\n");
-          destroy (r);
-          destroy (w);
-          return 1;
-         }
+/*   if (WRecord_setSubjectUri (r, makeS ("test:anunknownplace"))) */
+/*         { */
+/*           fprintf (stdout, "Corrupted subject Uri\n"); */
+/*           destroy (r); */
+/*           destroy (w); */
+/*           return 1; */
+/*          } */
 
-  if  (WRecord_setRecordType (r, WARCINFO_RECORD))
-        {
-          fprintf (stdout, "Corrupted Record type\n");
-          destroy (r);
-          destroy (w);
-          return 1;
-        }
+/*   if  (WRecord_setRecordType (r, WARCINFO_RECORD)) */
+/*         { */
+/*           fprintf (stdout, "Corrupted Record type\n"); */
+/*           destroy (r); */
+/*           destroy (w); */
+/*           return 1; */
+/*         } */
 
-  if  (WRecord_setCreationDate (r, makeS ("01052008123041")))
-        {
-          fprintf (stdout, "Corrupted date\n");
-          destroy (r);
-          destroy (w);
-          return 1;
-       }
+/*   if  (WRecord_setCreationDate (r, makeS ("01052008123041"))) */
+/*         { */
+/*           fprintf (stdout, "Corrupted date\n"); */
+/*           destroy (r); */
+/*           destroy (w); */
+/*           return 1; */
+/*        } */
 
-  if (WRecord_setRecordId (r, makeS ("record1://anunknownplace")))
-        {
-          fprintf (stdout, "Corrupted record ID\n");
-          destroy (r);
-         destroy (w);
-         return 1;
-        }
-
-
-  if  (WRecord_setContentType (r, makeS ("Text/random")))
-        {
-         fprintf (stdout, "Corrupted content type\n");
-         destroy (r);
-         destroy (w);
-         return 1;
-        }
-
-  if (WRecord_setContentFromFileName (r, file1))
-       {
-         fprintf (stdout, "record not filled\n");
-         destroy (r);
-         destroy (w);
-         return 1;
-       }
-
-  if (WFile_storeRecord (w, r))
-    {
-      fprintf (stdout, "record not stored\n");
-      destroy (r);
-      destroy (w);
-      return 1;
-    }
-
-  fprintf (stdout, "OK\n");
-  destroy (r);
-  destroy (w);
-
-  return 0;
-}
-
-int test5 (void)
-{
-  const char * t = "TEST 5: Trying to create a Warc File with a Warc record \
-                     having a corrupted Content Type field";
-  const char * file1 = "./app/wdata/testwfile/unidesc.html";
-
-  void * r = bless (WRecord);
-  void * w = bless (WFile, "./app/wdata/testwfile/awfgid.warc", 600 * 1024 * 1024,
-                    WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED);
-
-  fprintf (stdout,"%s\n",t);
-
-   if (WRecord_setSubjectUri (r, makeS ("test://anunknownplace")))
-        {
-          fprintf (stdout, "Corrupted subject Uri\n");
-          destroy (r);
-          destroy (w);
-          return 1;
-        }
-
-  if  (WRecord_setRecordType (r, WARCINFO_RECORD))
-        {
-          fprintf (stdout, "Corrupted Record type\n");
-          destroy (r);
-          destroy (w);
-          return 1;
-        }
-
-  if  (WRecord_setCreationDate (r, makeS ("01052008123041")))
-        {
-          fprintf (stdout, "Corrupted date\n");
-          destroy (r);
-          destroy (w);
-          return 1;
-       }
-
-  if (WRecord_setRecordId (r, makeS ("record1://anunknownplace")))
-        {
-          fprintf (stdout, "Corrupted record ID\n");
-          destroy (r);
-          destroy (w);
-          return 1;
-        }
+/*   if (WRecord_setRecordId (r, makeS ("record1://anunknownplace"))) */
+/*         { */
+/*           fprintf (stdout, "Corrupted record ID\n"); */
+/*           destroy (r); */
+/*          destroy (w); */
+/*          return 1; */
+/*         } */
 
 
-  if  (WRecord_setContentType (r, makeS ("Text|random")))
-        {
-         fprintf (stdout, "Corrupted content type\n");
-         destroy (r);
-         destroy (w);
-         return 1;
-        }
+/*   if  (WRecord_setContentType (r, makeS ("Text/random"))) */
+/*         { */
+/*          fprintf (stdout, "Corrupted content type\n"); */
+/*          destroy (r); */
+/*          destroy (w); */
+/*          return 1; */
+/*         } */
 
-  if (WRecord_setContentFromFileName (r, file1))
-       {
-         fprintf (stdout, "record not filled\n");
-         destroy (r);
-         destroy (w);
-         return 1;
-       }
+/*   if (WRecord_setContentFromFileName (r, file1)) */
+/*        { */
+/*          fprintf (stdout, "record not filled\n"); */
+/*          destroy (r); */
+/*          destroy (w); */
+/*          return 1; */
+/*        } */
 
-  if (WFile_storeRecord (w, r))
-      {
-        fprintf (stdout, "record not stored\n");
-        destroy (r);
-        destroy (w);
-        return 1;
-      }
+/*   if (WFile_storeRecord (w, r)) */
+/*     { */
+/*       fprintf (stdout, "record not stored\n"); */
+/*       destroy (r); */
+/*       destroy (w); */
+/*       return 1; */
+/*     } */
 
-  fprintf (stdout, "OK\n");
-  destroy (r);
-  destroy (w);
+/*   fprintf (stdout, "OK\n"); */
+/*   destroy (r); */
+/*   destroy (w); */
 
-  return 0;
-}
-*/
+/*   return 0; */
+/* } */
+
+/* int test5 (void) */
+/* { */
+/*   const char * t = "TEST 5: Trying to create a Warc File with a Warc record \ */
+/*                      having a corrupted Content Type field"; */
+/*   const char * file1 = "./app/wdata/testwfile/unidesc.html"; */
+
+/*   void * r = bless (WRecord); */
+/*   void * w = bless (WFile, "./app/wdata/testwfile/awfgid.warc", 600 * 1024 * 1024, WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED, "."); */
+
+/*   fprintf (stdout,"%s\n",t); */
+
+/*    if (WRecord_setSubjectUri (r, makeS ("test://anunknownplace"))) */
+/*         { */
+/*           fprintf (stdout, "Corrupted subject Uri\n"); */
+/*           destroy (r); */
+/*           destroy (w); */
+/*           return 1; */
+/*         } */
+
+/*   if  (WRecord_setRecordType (r, WARCINFO_RECORD)) */
+/*         { */
+/*           fprintf (stdout, "Corrupted Record type\n"); */
+/*           destroy (r); */
+/*           destroy (w); */
+/*           return 1; */
+/*         } */
+
+/*   if  (WRecord_setCreationDate (r, makeS ("01052008123041"))) */
+/*         { */
+/*           fprintf (stdout, "Corrupted date\n"); */
+/*           destroy (r); */
+/*           destroy (w); */
+/*           return 1; */
+/*        } */
+
+/*   if (WRecord_setRecordId (r, makeS ("record1://anunknownplace"))) */
+/*         { */
+/*           fprintf (stdout, "Corrupted record ID\n"); */
+/*           destroy (r); */
+/*           destroy (w); */
+/*           return 1; */
+/*         } */
+
+
+/*   if  (WRecord_setContentType (r, makeS ("Text|random"))) */
+/*         { */
+/*          fprintf (stdout, "Corrupted content type\n"); */
+/*          destroy (r); */
+/*          destroy (w); */
+/*          return 1; */
+/*         } */
+
+/*   if (WRecord_setContentFromFileName (r, file1)) */
+/*        { */
+/*          fprintf (stdout, "record not filled\n"); */
+/*          destroy (r); */
+/*          destroy (w); */
+/*          return 1; */
+/*        } */
+
+/*   if (WFile_storeRecord (w, r)) */
+/*       { */
+/*         fprintf (stdout, "record not stored\n"); */
+/*         destroy (r); */
+/*         destroy (w); */
+/*         return 1; */
+/*       } */
+
+/*   fprintf (stdout, "OK\n"); */
+/*   destroy (r); */
+/*   destroy (w); */
+
+/*   return 0; */
+/* } */
+
+
 int test6 (void)
 {
   const char * t = "TEST 6:  Trying to create a Warc File with a Warc record \
@@ -546,8 +542,7 @@ int test6 (void)
   const char * file1 = "./app/wdata/testwfile/unidesc.html";
 
   void * r = bless (WRecord);
-  void * w = bless (WFile, "./app/wdata/testwfile/awarfdt.warc", 600 * 1024 * 1024,
-                    WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED);
+  void * w = bless (WFile, "./app/wdata/testwfile/awarfdt.warc", 600 * 1024 * 1024, WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED, ".");
   void * u = NIL;
 
   fprintf (stdout, "%s\n", t);
@@ -560,7 +555,7 @@ int test6 (void)
       return 1;
     }
 
-  if  (WRecord_setRecordType (r, WARCINFO_RECORD) )
+  if  (WRecord_setRecordType (r, WARC_INFO_RECORD) )
     {
       fprintf (stdout, "Corrupted Record type\n");
       destroy (r);
@@ -632,8 +627,7 @@ int test7 (void)
   const char * file1 = "./app/wdata/testwfile/unidesc.html";
 
   void * r = bless (WRecord);
-  void * w = bless (WFile, "./app/wdata/testwfile/awarcfdt.warc", 600 * 1024 * 1024,
-                    WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED);
+  void * w = bless (WFile, "./app/wdata/testwfile/awarcfdt.warc", 600 * 1024 * 1024, WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED, ".");
   void * u = NIL;
 
   fprintf (stdout, "%s\n", t);
@@ -717,8 +711,7 @@ int test8 (void)
   const char * file1 = "./app/wdata/testwfile/unidesc.html";
 
   void * r = bless (WRecord);
-  void * w = bless (WFile, "./app/wdata/testwfile/awarfldt.warc", 600 * 1024 * 1024,
-                    WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED);
+  void * w = bless (WFile, "./app/wdata/testwfile/awarfldt.warc", 600 * 1024 * 1024, WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED, ".");
   void * u = NIL;
 
   fprintf (stdout, "%s\n", t);
@@ -733,7 +726,7 @@ int test8 (void)
       return 1;
     }
 
-  if  (WRecord_setRecordType (r, WARCINFO_RECORD) )
+  if  (WRecord_setRecordType (r, WARC_INFO_RECORD) )
     {
       fprintf (stdout, "Corrupted Record type\n");
       destroy (r);
@@ -813,8 +806,7 @@ int test9 (void)
   const char * file1 = "./app/wdata/testwfile/unidesc.html";
 
   void * r = bless (WRecord);
-  void * w = bless (WFile, "./app/wdata/testwfile/awasdat.warc", 600 * 1024 * 1024,
-                    WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED);
+  void * w = bless (WFile, "./app/wdata/testwfile/awasdat.warc", 600 * 1024 * 1024, WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED, ".");
   void * u = NIL;
 
   fprintf (stdout, "%s\n", t);
@@ -827,7 +819,7 @@ int test9 (void)
       return 1;
     }
 
-  if  (WRecord_setRecordType (r, WARCINFO_RECORD) )
+  if  (WRecord_setRecordType (r, WARC_INFO_RECORD) )
     {
       fprintf (stdout, "Corrupted Record type\n");
       destroy (r);
@@ -892,8 +884,7 @@ int test10 (void)
   const char * file1 = "./app/wdata/testwfile/unidesc.html";
 
   void * r = bless (WRecord);
-  void * w = bless (WFile, "./app/wdata/testwfile/awauri.warc", 600 * 1024 * 1024,
-                    WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED);
+  void * w = bless (WFile, "./app/wdata/testwfile/awauri.warc", 600 * 1024 * 1024, WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED, ".");
 
 
   fprintf (stdout, "%s\n", t);
@@ -906,7 +897,7 @@ int test10 (void)
       return 1;
     }
 
-  if  (WRecord_setRecordType (r, WARCINFO_RECORD) )
+  if  (WRecord_setRecordType (r, WARC_INFO_RECORD) )
     {
       fprintf (stdout, "Corrupted Record type\n");
       destroy (r);
@@ -970,7 +961,7 @@ int test11 (void)
   fprintf (stdout, "\n%s>\n", t);
 
   w = bless (WFile, "./app/wdata/testwfile/warcfile.warc", 600 * 1024 * 1024,
-             WARC_FILE_READER, WARC_FILE_UNCOMPRESSED);
+             WARC_FILE_READER, WARC_FILE_UNCOMPRESSED, ".");
   unless (w)
   return 1;
 
@@ -1024,7 +1015,7 @@ int test12 (void)
   fprintf (stdout, "\n%s>\n", t);
 
   w = bless (WFile, "./app/wdata/testwfile/awarcavl.warc",
-             660 * 1024 * 1024, WARC_FILE_READER, WARC_FILE_UNCOMPRESSED);
+             660 * 1024 * 1024, WARC_FILE_READER, WARC_FILE_UNCOMPRESSED, ".");
   assert (w);
 
   while (WFile_hasMoreRecords (w) )
@@ -1074,7 +1065,7 @@ int test13 (void)
   fprintf (stdout, "%s>\n", t);
 
   w = bless (WFile, "./app/wdata/testwfile/awarcmlp.warc", 660 * 1024 * 1024,
-             WARC_FILE_READER, WARC_FILE_UNCOMPRESSED);
+             WARC_FILE_READER, WARC_FILE_UNCOMPRESSED, ".");
   assert (w);
 
   while (WFile_hasMoreRecords (w) )
@@ -1129,7 +1120,7 @@ int test14 (void)
   fprintf (stdout, "%s>\n", t);
 
   w = bless (WFile, "./app/wdata/testwfile/ero1.warc", 300 * 1024 * 1024,
-             WARC_FILE_READER, WARC_FILE_UNCOMPRESSED);
+             WARC_FILE_READER, WARC_FILE_UNCOMPRESSED, ".");
 
   unless (w)
   return 1;
@@ -1177,7 +1168,7 @@ int test15 (void)
   fprintf (stdout, "%s>\n", t);
 
   w = bless (WFile, "./app/wdata/testwfile/ero2.warc", 300 * 1024 * 1024,
-             WARC_FILE_READER, WARC_FILE_UNCOMPRESSED);
+             WARC_FILE_READER, WARC_FILE_UNCOMPRESSED, ".");
 
   unless (w)
   return 1;
@@ -1226,7 +1217,7 @@ int test16 (void)
   fprintf (stdout, "%s>\n", t);
 
   w = bless (WFile, "./app/wdata/testwfile/ero3.warc", 300 * 1024 * 1024,
-             WARC_FILE_READER, WARC_FILE_UNCOMPRESSED);
+             WARC_FILE_READER, WARC_FILE_UNCOMPRESSED, ".");
 
   unless (w)
   return 1;
@@ -1279,7 +1270,7 @@ int test17 (void)
   fprintf (stdout, "\n%s>\n", t);
 
   w = bless (WFile, "./app/wdata/testwfile/warcfile.warc", 660 * 1024 * 1024,
-             WARC_FILE_READER, WARC_FILE_UNCOMPRESSED);
+             WARC_FILE_READER, WARC_FILE_UNCOMPRESSED, ".");
 
   unless (w)
   return 1;
@@ -1344,7 +1335,7 @@ int test18 (void)
   fprintf (stdout, "\n%s>\n", t);
 
   w = bless (WFile, "./app/wdata/testwfile/warcfile.warc", 660 * 1024 * 1024,
-             WARC_FILE_READER, WARC_FILE_UNCOMPRESSED);
+             WARC_FILE_READER, WARC_FILE_UNCOMPRESSED, ".");
 
   unless (w)
   return 1;
@@ -1371,7 +1362,6 @@ int test18 (void)
       fprintf (stdout, "\n\n");
 
 
-
       w2 = bless (WFile, "./app/wdata/testwfile/file.warc", 660 * 1024 * 1024,
                   WARC_FILE_READER, WARC_FILE_UNCOMPRESSED);
 
@@ -1383,6 +1373,7 @@ int test18 (void)
           destroy (w);
           return 1;
         }
+
 
       WRecord_getContent (r);
 
@@ -1404,11 +1395,13 @@ int test19 (void)
   const char * file1 = "./app/wdata/testwfile/unidesc.html";
   const char * file2 = "./app/wdata/testwfile/anvlcom";
 
-  void * r = bless (WRecord);
-  void * w = bless (WFile, "./app/wdata/testwfile/cwarc.warc.gz", 600 * 1024 * 1024,
-                    WARC_FILE_WRITER, WARC_FILE_COMPRESSED_GZIP_BEST_SPEED);
+  void * r = NIL;
+  void * w = NIL;
 
-  fprintf (stdout, "%s\n", t);
+  fprintf (stdout, "\n\n%s\n", t);
+
+  r = bless (WRecord);
+  w = bless (WFile, "cwarc.warc.gz", 600 * 1024 * 1024, WARC_FILE_WRITER, WARC_FILE_COMPRESSED_GZIP_BEST_SPEED, ".");
 
   if (WRecord_setSubjectUri (r, makeS ("test://anunknownplace") ) )
     {
@@ -1418,7 +1411,7 @@ int test19 (void)
       return 1;
     }
 
-  if  (WRecord_setRecordType (r, WARCINFO_RECORD) )
+  if  (WRecord_setRecordType (r, WARC_INFO_RECORD) )
     {
       fprintf (stdout, "Corrupted Record type\n");
       destroy (r);
@@ -1484,7 +1477,7 @@ int test19 (void)
       return 1;
     }
 
-  if  (WRecord_setRecordType (r, WARCINFO_RECORD) )
+  if  (WRecord_setRecordType (r, WARC_INFO_RECORD) )
     {
       fprintf (stdout, "Corrupted Record type\n");
       destroy (r);
@@ -1554,8 +1547,8 @@ int test20 (void)
 
   fprintf (stdout, "\n%s>\n", t);
 
-  w = bless (WFile, "./app/wdata/testwfile/cwarc.warc.gz", 600 * 1024 * 1024,
-             WARC_FILE_READER, WARC_FILE_COMPRESSED_GZIP);
+  w = bless (WFile, "cwarc.warc.gz", 600 * 1024 * 1024,
+             WARC_FILE_READER, WARC_FILE_COMPRESSED_GZIP, ".");
   assert (w);
 
   while (WFile_hasMoreRecords (w) )
@@ -1609,10 +1602,12 @@ int test20 (void)
 
 int main (void)
 {
-  int (* tests []) () = {  test1, test2, test3, test6, test7,
-                           test8, test9, test10, test11, test12, test13,
-                           test14, test15, test16, test17, test18, test19, test20
+  int (* tests []) () = {  test1, test2, test3, test6, test7, 
+                           test8, test9, test10, test11, test12, test13, 
+                           test14, test15, test16, test17, test18, test19, 
+                           test20
                         };
+
 
   warc_u32_t  i      = 0;
 

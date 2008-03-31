@@ -58,7 +58,7 @@ int test1 (void)
 {
   const char  * t = "TEST 1: uncompressed ARC file Which contains a single record";
   void        * a = bless (AFile, "./app/wdata/arc2warc/file.arc",
-                           WARC_FILE_UNCOMPRESSED);
+                           ARC_FILE_UNCOMPRESSED, ".");
 
   fprintf (stdout, "%s\n", t);
 
@@ -106,9 +106,9 @@ int test2 (void)
 {
   const char  * t = "TEST 2: uncompressed ARC file try to register another record in afile either the read one";
   void        * a = bless (AFile, "./app/wdata/arc2warc/file.arc",
-                           WARC_FILE_UNCOMPRESSED);
+                           ARC_FILE_UNCOMPRESSED, ".");
   void        * a2  = bless (AFile, "./app/wdata/arc2warc/mrec.arc",
-                             WARC_FILE_UNCOMPRESSED);
+                             ARC_FILE_UNCOMPRESSED, ".");
 
   fprintf (stdout, "%s\n", t);
 
@@ -158,7 +158,7 @@ int test3 (void)
 {
   const char  * t = "TEST 3: uncompressed  ARC file Which contains several records";
   void        * a = bless (AFile, "./app/wdata/arc2warc/mrec.arc",
-                           WARC_FILE_UNCOMPRESSED);
+                           ARC_FILE_UNCOMPRESSED, ".");
 
   fprintf (stdout, "%s\n", t);
 
@@ -206,7 +206,7 @@ int test4 (void)
 {
   const char  * t = "TEST 4: uncompressed ARC file Which contains several records ( the second record are corrupted ) ";
   void        * a = bless (AFile, "./app/wdata/arc2warc/err1.arc",
-                           WARC_FILE_UNCOMPRESSED);
+                           ARC_FILE_UNCOMPRESSED, ".");
 
   fprintf (stdout, "%s\n", t);
 
@@ -254,7 +254,7 @@ int test5 (void)
 {
   const char  * t = "TEST 5: uncompressed ARC file Which contains several records ( the first record are corrupted )";
   void        * a = bless (AFile, "./app/wdata/arc2warc/err2.arc",
-                           WARC_FILE_UNCOMPRESSED);
+                           ARC_FILE_UNCOMPRESSED, ".");
 
   fprintf (stdout, "%s\n", t);
 
@@ -301,8 +301,8 @@ int test5 (void)
 int test6 (void)
 {
   const char  * t = "TEST 6: compressed ARC file  Which contains a single record";
-  void        * a = bless (AFile, "./app/wdata/arc2warc/file.arc.gz"
-                           , WARC_FILE_COMPRESSED_GZIP);
+  void        * a = bless (AFile, "./app/wdata/arc2warc/file.arc.gz",
+                           ARC_FILE_COMPRESSED_GZIP, ".");
 
   fprintf (stdout, "%s\n", t);
 
@@ -349,8 +349,8 @@ int test6 (void)
 int test7 (void)
 {
   const char  * t = "TEST 7: compressed ARC file Which contains several records";
-  void        * a = bless (AFile, "./app/wdata/arc2warc/sfile.arc.gz"
-                           , WARC_FILE_COMPRESSED_GZIP);
+  void        * a = bless (AFile, "./app/wdata/arc2warc/sfile.arc.gz",
+                           ARC_FILE_COMPRESSED_GZIP, ".");
 
   fprintf (stdout, "%s\n", t);
 
@@ -397,8 +397,8 @@ int test7 (void)
 int test8 (void)
 {
   const char  * t = "TEST 8: compressed ARC file Which contains several records ( the second record are corrupted ) ";
-  void        * a = bless (AFile, "./app/wdata/arc2warc/mfile.arc.gz"
-                           , WARC_FILE_COMPRESSED_GZIP);
+  void        * a = bless (AFile, "./app/wdata/arc2warc/mfile.arc.gz",
+                           ARC_FILE_COMPRESSED_GZIP, ".");
 
   fprintf (stdout, "%s\n", t);
 
@@ -445,8 +445,8 @@ int test8 (void)
 int test9 (void)
 {
   const char  * t = "TEST 9: compressed ARC file Which contains several records ( the first record are corrupted ) ";
-  void        * a = bless (AFile, "./app/wdata/arc2warc/mmfile.arc.gz"
-                           , WARC_FILE_COMPRESSED_GZIP);
+  void        * a = bless (AFile, "./app/wdata/arc2warc/mmfile.arc.gz",
+                           ARC_FILE_COMPRESSED_GZIP, ".");
 
   fprintf (stdout, "%s\n", t);
 
