@@ -33,7 +33,7 @@ extern "C"
   {
 #endif
 
-#define WARC_VERSION "WARC/0.12"
+#define WARC_VERSION "warc/0.9"
 
 #ifdef __cplusplus
   }
