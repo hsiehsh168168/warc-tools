@@ -597,7 +597,7 @@ $(APP)/warcclient: 	  $(warcclient);  	 $(CC) $(CFLAGS) -o $@ $(warcclient) \
 # freshing
 ##############
 
-tclean:		;   @rm -f compress* uncompress* *.core out*.warc.gz *.warc.gz
+tclean:		;   @rm -f compress* uncompress* *.core out*.warc.gz *.warc.gz *.warc
 
 mod_apache_clean:	; @rm -rf $(mod_apache).la $(mod_apache).lo \
 					  $(mod_apache).o $(mod_apache).slo $(mod_apache).so \
@@ -617,4 +617,4 @@ clean:		tclean	mod_apache_clean
 				   $(EVENT)/*~	  $(EVENT)/*.o
 			@rm -rf $(DOC)/html    warc-tools*
 
-.PHONY: all static clean tclean doc source tgz rpm deb
+.PHONY: all static clean tclean doc source tgz rpm deb mod_apache_clean

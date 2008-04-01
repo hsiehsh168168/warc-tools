@@ -43,7 +43,7 @@ int test1 (void)
   const char  * t = "TEST 1: converting an uncompressed  Arc which contain a single record File to the Warc format";
 
   void  * a = bless (AFile, "./app/wdata/arc2warc/file.arc", ARC_FILE_UNCOMPRESSED, ".");
-  void  * w = bless (WFile, "./app/wdata/arc2warc/file.warc",
+  void  * w = bless (WFile, "file.warc",
                      WARC_MAX_SIZE, WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED, ".");
 
 
@@ -130,7 +130,7 @@ int test2 (void)
 
   fprintf (stdout, "%s>\n", t);
 
-  w = bless (WFile, "./app/wdata/arc2warc/file.warc", 660, WARC_FILE_READER, WARC_FILE_UNCOMPRESSED, ".");
+  w = bless (WFile, "file.warc", 660, WARC_FILE_READER, WARC_FILE_UNCOMPRESSED, ".");
   assert (w);
 
   while (WFile_hasMoreRecords (w) )
@@ -174,7 +174,7 @@ int test3 (void)
   const char  * t = "TEST 3: converting a uncomprssed Arc File Which contains several records to the Warc format";
 
   void  * a = bless (AFile, "./app/wdata/arc2warc/mrec.arc", ARC_FILE_UNCOMPRESSED, ".");
-  void  * w = bless (WFile, "./app/wdata/arc2warc/mrec.warc",
+  void  * w = bless (WFile, "mrec.warc",
                      WARC_MAX_SIZE, WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED, ".");
 
 
@@ -264,7 +264,7 @@ int test4 (void)
 
   fprintf (stdout, "%s>\n", t);
 
-  w = bless (WFile, "./app/wdata/arc2warc/mrec.warc", WARC_MAX_SIZE, WARC_FILE_READER, WARC_FILE_UNCOMPRESSED, ".");
+  w = bless (WFile, "mrec.warc", WARC_MAX_SIZE, WARC_FILE_READER, WARC_FILE_UNCOMPRESSED, ".");
   assert (w);
 
   while (WFile_hasMoreRecords (w) )
@@ -309,7 +309,7 @@ int test5 (void)
   const char  * t = "TEST 5: converting an Arc File Which contains several records to the Warc format";
 
   void  * a = bless (AFile, "./app/wdata/arc2warc/test1.arc", ARC_FILE_UNCOMPRESSED, ".");
-  void  * w = bless (WFile, "./app/wdata/arc2warc/test1.warc",
+  void  * w = bless (WFile, "test1.warc",
                      WARC_MAX_SIZE, WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED, ".");
 
 
@@ -399,7 +399,7 @@ int test6 (void)
 
   fprintf (stdout, "%s>\n", t);
 
-  w = bless (WFile, "./app/wdata/arc2warc/test1.warc", WARC_MAX_SIZE, WARC_FILE_READER, WARC_FILE_UNCOMPRESSED, ".");
+  w = bless (WFile, "test1.warc", WARC_MAX_SIZE, WARC_FILE_READER, WARC_FILE_UNCOMPRESSED, ".");
   assert (w);
 
   while (WFile_hasMoreRecords (w) )
@@ -445,7 +445,7 @@ int test7 (void)
   const char  * t = "TEST 7: converting a corrupted  Arc File in the second record to the Warc format";
 
   void  * a = bless (AFile, "./app/wdata/arc2warc/err1.arc", WARC_FILE_UNCOMPRESSED, ".");
-  void  * w = bless (WFile, "./app/wdata/arc2warc/err1.warc",
+  void  * w = bless (WFile, "err1.warc",
                      WARC_MAX_SIZE, WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED, ".");
 
 
@@ -533,7 +533,7 @@ int test8 (void)
   const char  * t = "TEST 8: converting a corrupted Arc File in the first to the Warc format";
 
   void  * a = bless (AFile, "./app/wdata/arc2warc/err2.arc", ARC_FILE_UNCOMPRESSED, ".");
-  void  * w = bless (WFile, "./app/wdata/arc2warc/err2.warc",
+  void  * w = bless (WFile, "err2.warc",
                      WARC_MAX_SIZE, WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED, ".");
 
 
@@ -620,7 +620,7 @@ int test9 (void)
   const char  * t = "TEST 9: converting a  Arc File wich contains several records to the Warc format";
 
   void  * a = bless (AFile, "./app/wdata/arc2warc/test2.arc", ARC_FILE_UNCOMPRESSED, ".");
-  void  * w = bless (WFile, "./app/wdata/arc2warc/test2.warc",
+  void  * w = bless (WFile, "test2.warc",
                      WARC_MAX_SIZE, WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED, ".");
 
 
@@ -709,7 +709,7 @@ int test10 (void)
 
   fprintf (stdout, "%s>\n", t);
 
-  w = bless (WFile, "./app/wdata/arc2warc/test2.warc", 660, WARC_FILE_READER, WARC_FILE_UNCOMPRESSED, ".");
+  w = bless (WFile, "test2.warc", 660, WARC_FILE_READER, WARC_FILE_UNCOMPRESSED, ".");
   assert (w);
 
   while (WFile_hasMoreRecords (w) )

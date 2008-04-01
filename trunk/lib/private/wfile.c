@@ -1261,10 +1261,16 @@ WIPRIVATE void WFile_writeWarcId (FILE * wtfile)
 #define WARC_ID_LENGTH 28
 
   warc_u32_t l = w_strlen((warc_u8_t *) WARC_VERSION);
+  warc_u32_t i = WARC_ID_LENGTH - l;
 
-  /* w_fwrite (WARC_VERSION "                   ", WARC_ID_LENGTH, 1, wtfile); */
+/*   w_fwrite (WARC_VERSION "                   ", WARC_ID_LENGTH, 1, wtfile); */
   w_fwrite (WARC_VERSION, l, 1, wtfile);
-  w_fwrite(" ", 1, WARC_ID_LENGTH - l, wtfile);
+   while (i)
+    {
+      w_fwrite(" ", 1, 1, wtfile);
+      -- i;
+    }
+
 }
 
 

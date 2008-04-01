@@ -64,7 +64,7 @@ int test1 (void)
   const char * file1 = "./app/wdata/testwfile/unidesc.html";
 
   void * r = bless (WRecord);
-  void * w = bless (WFile, "./app/wdata/testwfile/awanvl.warc", 600 * 1024 * 1024,  WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED, ".");
+  void * w = bless (WFile, "awanvl.warc", 600 * 1024 * 1024,  WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED, ".");
   void * u = NIL;
 
   fprintf (stdout, "%s\n", t);
@@ -149,7 +149,7 @@ int test2 (void)
   const char * file1 = "./app/wdata/testwfile/unidesc.html";
 
   void * r = bless (WRecord);
-  void * w = bless (WFile, "./app/wdata/testwfile/awarcavl.warc", 600 * 1024 * 1024, WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED, ".");
+  void * w = bless (WFile, "awarcavl.warc", 600 * 1024 * 1024, WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED, ".");
   void * u = NIL;
 
   fprintf  (stdout, "%s\n", t);
@@ -241,7 +241,7 @@ int test3 (void)
   const char * file2 = "./app/wdata/testwfile/anvlcom";
 
   void * r = bless (WRecord);
-  void * w = bless (WFile, "./app/wdata/testwfile/awarcmlp.warc", 600 * 1024 * 1024,  WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED, ".");
+  void * w = bless (WFile, "awarcmlp.warc", 600 * 1024 * 1024,  WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED, ".");
   void * u = NIL;
 
   fprintf (stdout, "%s\n", t);
@@ -1014,7 +1014,7 @@ int test12 (void)
   char env [20];
   fprintf (stdout, "\n%s>\n", t);
 
-  w = bless (WFile, "./app/wdata/testwfile/awarcavl.warc",
+  w = bless (WFile, "awarcavl.warc",
              660 * 1024 * 1024, WARC_FILE_READER, WARC_FILE_UNCOMPRESSED, ".");
   assert (w);
 
@@ -1064,7 +1064,7 @@ int test13 (void)
 
   fprintf (stdout, "%s>\n", t);
 
-  w = bless (WFile, "./app/wdata/testwfile/awarcmlp.warc", 660 * 1024 * 1024,
+  w = bless (WFile, "awarcmlp.warc", 660 * 1024 * 1024,
              WARC_FILE_READER, WARC_FILE_UNCOMPRESSED, ".");
   assert (w);
 
@@ -1362,7 +1362,7 @@ int test18 (void)
       fprintf (stdout, "\n\n");
 
 
-      w2 = bless (WFile, "./app/wdata/testwfile/file.warc", 660 * 1024 * 1024,
+      w2 = bless (WFile, "./app/wdata/testwfile/warcfile.warc", 660 * 1024 * 1024,
                   WARC_FILE_READER, WARC_FILE_UNCOMPRESSED);
 
       if (WFile_register (w2, r, callback, (void *) env) )
