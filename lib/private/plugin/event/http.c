@@ -927,7 +927,7 @@ evhttp_read_body (struct evhttp_connection *evcon, struct evhttp_request *req)
       evbuffer_add_buffer (req->input_buffer, buf);
     }
 
-  else if (EVBUFFER_LENGTH (buf) >= req->ntoread)
+  else if (EVBUFFER_LENGTH (buf) >= (unsigned int) req->ntoread)
     {
       /* Completed content length */
       evbuffer_add (req->input_buffer, EVBUFFER_DATA (buf),
