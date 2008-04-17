@@ -28,7 +28,8 @@
 
 usage () {
 
-    echo "Check if all WARC files in a directory are valid"
+    echo "" >&2
+    echo "Check if all WARC files in a directory are valid" >&2
     echo "Usage: $0 <-d dirname> [-c] [-t <working_dir>] [-v] [-h]"  >&2
     echo "       -d     : directory name containing ARC files"  >&2
     echo "       -c     : assume that all WARC files are GZIP compressed (default no)"  >&2
