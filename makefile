@@ -191,22 +191,26 @@ ifeq ($(UNAME_S),SunOS)
 	SONAME	     =
 endif
 ifneq ($(findstring MINGW,$(UNAME_S)),)
-	MKTEMP     = $(MINGW_DEP)/wmktmp
-	CSAFE	   = $(MINGW_DEP)/wcsafe
-	HEADERS   := $(HEADERS) -I$(MINGW_DEP)
-	SHARED_OS  = shared_mingw
-	LIBSUFFIX  = dll
-	SHAREDNAME = $(LIBNAME).$(LIBSUFFIX)
-	S_CFLAGS   = -DBUILD_DLL
-	BASH	   = sh
+	MKTEMP       = $(MINGW_DEP)/wmktmp
+	CSAFE	     = $(MINGW_DEP)/wcsafe
+	EV_OS        = $(EVENT)/os/mingw
+	HEADERS     := $(HEADERS) -I$(MINGW_DEP) -I$(EV_OS)
+	EV_SRC		 = 
+	EVENT_CONFIG = $(EV_OS)/config.h $(EV_OS)/event-config.h
+	EV_LIB		 = -lws2_32
+	SHARED_OS    = shared_mingw
+	LIBSUFFIX    = dll
+	SHAREDNAME   = $(LIBNAME).$(LIBSUFFIX)
+	S_CFLAGS     = -DBUILD_DLL
+	BASH	     = sh
 endif
 ifneq ($(findstring CYGWIN,$(UNAME_S)),)
 	EV_OS        = $(EVENT)/os/cygwin
 	HEADERS     := $(HEADERS) -I$(OSDEP) -I$(EV_OS)
 	EV_SRC		 = $(EVENT)/poll.c
 	EVENT_CONFIG = $(EV_OS)/config.h $(EV_OS)/event-config.h
-	EV_LIB		 = -lrt
-#-lnsl -lresolv
+	EV_LIB		 = -lresolv
+#-lnsl -lrt
 	SHARED_OS    = shared_cygwin
 	LIBSUFFIX    = dll
 	SHAREDNAME   = cyg$(LIBNAME).$(LIBSUFFIX)
