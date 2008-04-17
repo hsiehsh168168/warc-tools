@@ -2871,6 +2871,10 @@ name_from_addr (struct sockaddr *sa, socklen_t salen,
   *pport = strport;
 #else
   /* XXXX */
+  (void) sa;
+  (void) salen;
+  (void) phost;
+  (void) pport;
 #endif
 }
 
