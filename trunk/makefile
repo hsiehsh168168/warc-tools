@@ -44,7 +44,7 @@ TIGER    = $(PLUGIN)/tiger
 EVENT    = $(PLUGIN)/event
 EVENT_COMPACT = $(EVENT)/compat
 OSDEP    = $(PRIVATE)/os
-WIN32DEP = $(OSDEP)/win32
+MINGW_DEP= $(OSDEP)/win32
 HEADERS  = -I. -I$(PRIVATE) -I$(PUBLIC) -I$(GZIP) -I$(TIGER) \
 		   -I$(EVENT) -I$(EVENT_COMPACT)
 
@@ -122,7 +122,8 @@ CFLAGS += $(DFLAG)
 GCC_EXTRA = -Wextra
 
 # OS dependant functions (for portability issue)
-MKTEMP = $(PRIVATE)/wmktmp
+MKTEMP = $(OSDEP)/wmktmp
+CSAFE  = $(OSDEP)/wcsafe
 
 # compile WARC as a shared library
 SHARED_OS = shared_unix
@@ -134,7 +135,7 @@ endif
 ifeq ($(UNAME_S),Linux)
 	CFLAGS      += -pedantic-errors
 	EV_OS   	 = $(EVENT)/os/linux
-	HEADERS     += -I$(EV_OS)
+	HEADERS     += -I$(OSDEP) -I$(EV_OS)
 	EV_SRC		 = $(EVENT)/epoll.c $(EVENT)/poll.c $(EVENT)/strlcpy.c
 	EVENT_CONFIG = $(EV_OS)/config.h $(EV_OS)/event-config.h
 	EV_LIB		 = -lrt 
@@ -143,7 +144,7 @@ endif
 ifeq ($(UNAME_S),FreeBSD)
 	MAKE         = gmake
 	EV_OS   	 = $(EVENT)/os/freebsd
-	HEADERS    += -I$(EV_OS)
+	HEADERS     += -I$(OSDEP) -I$(EV_OS)
 	EV_SRC		 = $(EVENT)/kqueue.c $(EVENT)/poll.c
 	EVENT_CONFIG = $(EV_OS)/config.h $(EV_OS)/event-config.h
 	EV_LIB		 = 
@@ -152,7 +153,7 @@ ifeq ($(UNAME_S),OpenBSD)
 	MAKE         = gmake
 	CFLAGS      += -DWINLINE=""
 	EV_OS        = $(EVENT)/os/openbsd
-	HEADERS     += -I$(EV_OS)
+	HEADERS     += -I$(OSDEP) -I$(EV_OS)
 	EV_SRC		 = $(EVENT)/kqueue.c $(EVENT)/poll.c
 	EVENT_CONFIG = $(EV_OS)/config.h $(EV_OS)/event-config.h
 	EV_LIB		 = 
@@ -161,7 +162,7 @@ endif
 ifeq ($(UNAME_S),NetBSD)
 	MAKE         = gmake
 	EV_OS        = $(EVENT)/os/netbsd
-	HEADERS     += -I$(EV_OS)
+	HEADERS     += -I$(OSDEP) -I$(EV_OS)
 	EV_SRC		 = $(EVENT)/kqueue.c $(EVENT)/poll.c
 	EVENT_CONFIG = $(EVENT)/config.h $(EVENT)/event-config.h
 	EV_LIB		 = 
@@ -169,7 +170,7 @@ endif
 ifeq ($(UNAME_S),Darwin)
 	CFLAGS 		+= -pedantic
 	EV_OS        = $(EVENT)/os/osx
-	HEADERS     += -I$(EV_OS)
+	HEADERS     += -I$(OSDEP) -I$(EV_OS)
 	EV_SRC		 = $(EVENT)/kqueue.c $(EVENT)/poll.c
 	EVENT_CONFIG = $(EV_OS)/config.h $(EV_OS)/event-config.h
 	EV_LIB		 = 
@@ -182,7 +183,7 @@ ifeq ($(UNAME_S),Darwin)
 endif
 ifeq ($(UNAME_S),SunOS)
 	EV_OS        = $(EVENT)/os/solaris
-	HEADERS     += -I$(EV_OS)
+	HEADERS     += -I$(OSDEP) -I$(EV_OS)
 	EV_SRC		 = $(EVENT)/devpoll.c $(EVENT)/poll.c $(EVENT)/evport.c $(EVENT)/strlcpy.c
 	EVENT_CONFIG = $(EV_OS)/config.h $(EV_OS)/event-config.h
 	EV_LIB		 = -lrt -lsocket
@@ -190,8 +191,9 @@ ifeq ($(UNAME_S),SunOS)
 	SONAME	     =
 endif
 ifneq ($(findstring MINGW,$(UNAME_S)),)
-	MKTEMP     = $(WIN32DEP)/wmktmp
-	HEADERS   := $(HEADERS) -I$(WIN32DEP)
+	MKTEMP     = $(MINGW_DEP)/wmktmp
+	CSAFE	   = $(MINGW_DEP)/wcsafe
+	HEADERS   := $(HEADERS) -I$(MINGW_DEP)
 	SHARED_OS  = shared_mingw
 	LIBSUFFIX  = dll
 	SHAREDNAME = $(LIBNAME).$(LIBSUFFIX)
@@ -200,7 +202,7 @@ ifneq ($(findstring MINGW,$(UNAME_S)),)
 endif
 ifneq ($(findstring CYGWIN,$(UNAME_S)),)
 	EV_OS        = $(EVENT)/os/cygwin
-	HEADERS     := $(HEADERS) -I$(WIN32DEP) -I$(EV_OS)
+	HEADERS     := $(HEADERS) -I$(OSDEP) -I$(EV_OS)
 	EV_SRC		 = $(EVENT)/poll.c
 	EVENT_CONFIG = $(EV_OS)/config.h $(EV_OS)/event-config.h
 	EV_LIB		 = -lrt
@@ -225,7 +227,7 @@ CFLAGS += $(S_CFLAGS)
 b	= $(PRIVATE)/wstring.c   $(PRIVATE)/wclass.c  $(PRIVATE)/wlist.c \
 	  $(PRIVATE)/whdline.c   $(PRIVATE)/wfile.c   $(PRIVATE)/wrecord.c \
 	  $(PRIVATE)/wanvl.c     $(PRIVATE)/wfsmhdl.c $(PRIVATE)/afsmhdl.c \
-      $(PRIVATE)/wfsmanvl.c  $(PRIVATE)/wcsafe.c  $(PRIVATE)/wgetopt.c \
+      $(PRIVATE)/wfsmanvl.c  ${CSAFE}.c           $(PRIVATE)/wgetopt.c \
       $(PRIVATE)/arecord.c   $(PRIVATE)/afile.c   ${MKTEMP}.c \
       $(PRIVATE)/wendian.c   $(PRIVATE)/wuuid.c   $(PRIVATE)/wserver.c \
 	  $(PRIVATE)/whash.c     $(PRIVATE)/wkv.c	  $(PRIVATE)/wgzip.c \
@@ -261,8 +263,8 @@ h	= $(PUBLIC)/wclass.h     $(PUBLIC)/warc.h     $(PRIVATE)/wstring.h \
 	  $(PRIVATE)/whdline.h   $(PRIVATE)/wuuid.h   $(PRIVATE)/wgetopt.h \
 	  $(PUBLIC)/wrecord.h    $(PRIVATE)/wanvl.h   $(PRIVATE)/wmem.h \
 	  $(PRIVATE)/fsm.h       $(PRIVATE)/wfsmhdl.h $(PRIVATE)/fsmanvl.h \
-	  $(PRIVATE)/wcsafe.h    $(PRIVATE)/afsmhdl.h $(PRIVATE)/arecord.h \
-	  $(PRIVATE)/afile.h     $(PRIVATE)/wmktmp.h  $(PRIVATE)/arecord.h \
+	  ${CSAFE}.h    		 $(PRIVATE)/afsmhdl.h $(PRIVATE)/arecord.h \
+	  $(PRIVATE)/afile.h     ${MKTEMP}.h  		  $(PRIVATE)/arecord.h \
 	  $(PRIVATE)/wendian.h   $(PRIVATE)/whash.h   $(PRIVATE)/wkv.h \
 	  $(PUBLIC)/wgzip.h		 $(PRIVATE)/wserver.h $(PRIVATE)/wclient.h
 
@@ -435,39 +437,39 @@ doc:        ;   doxygen ./doc/warcdoc
 ##################
 
 string	= $(PRIVATE)/wclass.o    $(PRIVATE)/wstring.o   $(TST)/string.o \
-		  $(PRIVATE)/wcsafe.o
+		  $(CSAFE).o
 
 list	= $(PRIVATE)/wclass.o    $(PRIVATE)/wstring.o   $(PRIVATE)/wlist.o \
-		  $(PRIVATE)/wcsafe.o    $(TST)/list.o
+		  $(CSAFE).o    		 $(TST)/list.o
 
 hdline	= $(PRIVATE)/wclass.o    $(PRIVATE)/wstring.o   $(PRIVATE)/whdline.o \
-		  $(PRIVATE)/wfsmhdl.o   $(PRIVATE)/wcsafe.o    $(TST)/hdline.o
+		  $(PRIVATE)/wfsmhdl.o   $(CSAFE).o    		    $(TST)/hdline.o
 
 anvl	= $(PRIVATE)/wclass.o    $(PRIVATE)/wstring.o   $(PRIVATE)/wanvl.o \
-		  $(TST)/anvl.o          $(PRIVATE)/wfsmanvl.o  $(PRIVATE)/wcsafe.o
+		  $(TST)/anvl.o          $(PRIVATE)/wfsmanvl.o  $(CSAFE).o
 
 record	= $(PRIVATE)/wclass.o    $(PRIVATE)/wstring.o   $(PRIVATE)/wlist.o \
 		  $(PRIVATE)/whdline.o   $(PRIVATE)/wanvl.o     $(PRIVATE)/wrecord.o \
-	      $(PRIVATE)/wfsmhdl.o   $(PRIVATE)/wfsmanvl.o  $(PRIVATE)/wcsafe.o \
+	      $(PRIVATE)/wfsmhdl.o   $(PRIVATE)/wfsmanvl.o  $(CSAFE).o \
 		  ${MKTEMP}.o            $(TST)/record.o
 
 warcgzip  = $(PRIVATE)/wclass.o  $(gzlib)               $(TST)/warcgzip.o \
-		  $(PRIVATE)/wcsafe.o
+		  $(CSAFE).o
 
 warcgunzip= $(PRIVATE)/wclass.o  $(gzlib)               $(TST)/warcgunzip.o \
-		  $(PRIVATE)/wcsafe.o
+		  $(CSAFE).o
 
 object	= $(PRIVATE)/wclass.o    $(PRIVATE)/wstring.o   $(PRIVATE)/wlist.o \
-		  $(PRIVATE)/wanvl.o     $(TST)/object.o        $(PRIVATE)/wcsafe.o 
+		  $(PRIVATE)/wanvl.o     $(TST)/object.o        $(CSAFE).o 
 
 file    = $(PRIVATE)/wclass.o    $(PRIVATE)/wstring.o   $(PRIVATE)/wlist.o \
 	  	  $(PRIVATE)/whdline.o   $(PRIVATE)/wanvl.o     $(PRIVATE)/wrecord.o \
 	  	  $(PRIVATE)/wfile.o     $(PRIVATE)/wfsmhdl.o   $(PRIVATE)/wuuid.o \
-          $(PRIVATE)/wfsmanvl.o  $(PRIVATE)/wcsafe.o    $(gzlib) \
+          $(PRIVATE)/wfsmanvl.o  $(CSAFE).o    		    $(gzlib) \
 		  ${MKTEMP}.o            $(TST)/file.o          $(TIGER)/tiger.o
 
 arcrecord = $(PRIVATE)/arecord.o $(PRIVATE)/wstring.o   $(PRIVATE)/wclass.o \
-          $(PRIVATE)/afsmhdl.o   $(PRIVATE)/wcsafe.o    $(PRIVATE)/wrecord.o \
+          $(PRIVATE)/afsmhdl.o   $(CSAFE).o    		    $(PRIVATE)/wrecord.o \
           $(PRIVATE)/whdline.o   $(PRIVATE)/wanvl.o     $(PRIVATE)/wlist.o \
           $(PRIVATE)/afile.o     ${MKTEMP}.o            ${gzlib} \
           $(TST)/arcrecord.o
@@ -475,37 +477,37 @@ arcrecord = $(PRIVATE)/arecord.o $(PRIVATE)/wstring.o   $(PRIVATE)/wclass.o \
 a2w    = $(PRIVATE)/wclass.o     $(PRIVATE)/wstring.o   $(PRIVATE)/wlist.o \
 	 	 $(PRIVATE)/whdline.o    $(PRIVATE)/wanvl.o     $(PRIVATE)/wrecord.o \
 	 	 $(PRIVATE)/wfile.o      $(PRIVATE)/wfsmhdl.o   $(PRIVATE)/afsmhdl.o \
-	 	 $(PRIVATE)/wfsmanvl.o   $(PRIVATE)/wcsafe.o    $(PRIVATE)/arecord.o \
+	 	 $(PRIVATE)/wfsmanvl.o   $(CSAFE).o    			$(PRIVATE)/arecord.o \
 	 	 $(PRIVATE)/afile.o      $(gzlib)               ${MKTEMP}.o \
 	 	 $(TST)/a2w.o              
 
 arcfile = $(PRIVATE)/wclass.o    $(PRIVATE)/wstring.o   $(PRIVATE)/wlist.o \
-	  	 $(PRIVATE)/wcsafe.o     $(PRIVATE)/whdline.o   $(PRIVATE)/wanvl.o \
+	  	 $(CSAFE).o     		 $(PRIVATE)/whdline.o  	$(PRIVATE)/wanvl.o \
          $(PRIVATE)/wrecord.o    $(PRIVATE)/arecord.o   $(PRIVATE)/afsmhdl.o \
 		 $(PRIVATE)/afile.o      $(TST)/arcfile.o       ${MKTEMP}.o \
 	     $(gzlib)
 
-uuid	= $(PRIVATE)/wclass.o    $(PRIVATE)/wuuid.o     $(PRIVATE)/wcsafe.o \
+uuid	= $(PRIVATE)/wclass.o    $(PRIVATE)/wuuid.o     $(CSAFE).o \
 		 $(PRIVATE)/wstring.o    $(TIGER)/tiger.o       $(TST)/uuid.o
 
-getopt	= $(PRIVATE)/wclass.o    $(PRIVATE)/wgetopt.o   $(PRIVATE)/wcsafe.o \
+getopt	= $(PRIVATE)/wclass.o    $(PRIVATE)/wgetopt.o   $(CSAFE).o \
 		 $(PRIVATE)/wstring.o    $(TST)/getopt.o
 
-hash	= $(PRIVATE)/wclass.o    $(PRIVATE)/whash.o   	$(PRIVATE)/wcsafe.o \
+hash	= $(PRIVATE)/wclass.o    $(PRIVATE)/whash.o   	$(CSAFE).o \
 		  $(PRIVATE)/wlist.o	 $(PRIVATE)/wstring.o   $(PRIVATE)/wkv.o \
 		  $(TST)/hash.o
 
 server =  $(PRIVATE)/wclass.o	 $(PRIVATE)/wstring.o   $(PRIVATE)/wlist.o \
 		  $(PRIVATE)/whdline.o 	 $(PRIVATE)/wanvl.o 	$(PRIVATE)/wrecord.o \
 	      $(PRIVATE)/wfile.o	 $(PRIVATE)/wfsmhdl.o   $(PRIVATE)/wuuid.o \
-		  $(PRIVATE)/wfsmanvl.o	 $(PRIVATE)/wcsafe.o    $(gzlib) \
+		  $(PRIVATE)/wfsmanvl.o	 $(CSAFE).o    		    $(gzlib) \
 		  ${MKTEMP}.o 			 $(PRIVATE)/wserver.o   $(TIGER)/tiger.o \
 		  $(TST)/server.o		 $(evlib)
 
 client =  $(PRIVATE)/wclass.o	 $(PRIVATE)/wstring.o   $(PRIVATE)/wlist.o \
 		  $(PRIVATE)/whdline.o 	 $(PRIVATE)/wanvl.o 	$(PRIVATE)/wrecord.o \
 	      $(PRIVATE)/wfile.o	 $(PRIVATE)/wfsmhdl.o   $(PRIVATE)/wuuid.o \
-		  $(PRIVATE)/wfsmanvl.o	 $(PRIVATE)/wcsafe.o    $(gzlib) \
+		  $(PRIVATE)/wfsmanvl.o	 $(CSAFE).o    			$(gzlib) \
 		  ${MKTEMP}.o 			 $(PRIVATE)/wclient.o   $(TIGER)/tiger.o \
 		  $(TST)/client.o		 $(evlib)
 
@@ -541,13 +543,13 @@ $(TST)/client:	  $(client);	 ${CC} ${CFLAGS}   -o $@ $(client) $(EV_LIB)
 warcdump  = $(PRIVATE)/wclass.o     $(PRIVATE)/wstring.o $(PRIVATE)/wlist.o \
 		   $(PRIVATE)/whdline.o     $(PRIVATE)/wanvl.o   $(PRIVATE)/wrecord.o \
 		   $(PRIVATE)/wfile.o       $(PRIVATE)/wfsmhdl.o $(PRIVATE)/wgetopt.o \
-           $(PRIVATE)/wfsmanvl.o    $(PRIVATE)/wcsafe.o  $(gzlib) \
+           $(PRIVATE)/wfsmanvl.o    $(CSAFE).o  		 $(gzlib) \
            $(APP)/warcdump.o        ${MKTEMP}.o  
 
 arc2warc = $(PRIVATE)/wclass.o      $(PRIVATE)/wstring.o $(PRIVATE)/wlist.o \
 	       $(PRIVATE)/whdline.o     $(PRIVATE)/wanvl.o   $(PRIVATE)/wrecord.o \
 	       $(PRIVATE)/wfile.o       $(PRIVATE)/wfsmhdl.o $(PRIVATE)/afile.o \
-           $(PRIVATE)/wfsmanvl.o    $(PRIVATE)/wcsafe.o  $(PRIVATE)/arecord.o \
+           $(PRIVATE)/wfsmanvl.o    $(CSAFE).o  $(PRIVATE)/arecord.o \
            $(PRIVATE)/afsmhdl.o     $(TIGER)/tiger.o     $(PRIVATE)/wuuid.o \
 		   $(APP)/arc2warc.o        ${MKTEMP}.o          $(gzlib) \
 		   $(PRIVATE)/wgetopt.o
@@ -555,26 +557,26 @@ arc2warc = $(PRIVATE)/wclass.o      $(PRIVATE)/wstring.o $(PRIVATE)/wlist.o \
 warcfilter  = $(PRIVATE)/wclass.o   $(PRIVATE)/wstring.o $(PRIVATE)/wlist.o \
 		   $(PRIVATE)/whdline.o     $(PRIVATE)/wanvl.o   $(PRIVATE)/wrecord.o \
 		   $(PRIVATE)/wfile.o       $(PRIVATE)/wfsmhdl.o $(PRIVATE)/wgetopt.o \
-           $(PRIVATE)/wfsmanvl.o    $(PRIVATE)/wcsafe.o  $(gzlib) \
+           $(PRIVATE)/wfsmanvl.o    $(CSAFE).o  		 $(gzlib) \
            $(APP)/warcfilter.o      ${MKTEMP}.o  
 
 warcvalidator = $(PRIVATE)/wclass.o $(PRIVATE)/wstring.o $(PRIVATE)/wlist.o \
 		   $(PRIVATE)/whdline.o     $(PRIVATE)/wanvl.o   $(PRIVATE)/wrecord.o \
 		   $(PRIVATE)/wfile.o       $(PRIVATE)/wfsmhdl.o $(PRIVATE)/wgetopt.o \
-           $(PRIVATE)/wfsmanvl.o    $(PRIVATE)/wcsafe.o  $(gzlib)  \
+           $(PRIVATE)/wfsmanvl.o    $(CSAFE).o  		 $(gzlib)  \
            $(APP)/warcvalidator.o   ${MKTEMP}.o 
 
 warcserver = $(PRIVATE)/wclass.o	$(PRIVATE)/wstring.o $(PRIVATE)/wlist.o \
 		   $(PRIVATE)/whdline.o 	$(PRIVATE)/wanvl.o 	 $(PRIVATE)/wrecord.o \
 	       $(PRIVATE)/wfile.o	    $(PRIVATE)/wfsmhdl.o $(PRIVATE)/wuuid.o \
-		   $(PRIVATE)/wfsmanvl.o	$(PRIVATE)/wcsafe.o	 $(gzlib) \
+		   $(PRIVATE)/wfsmanvl.o	$(CSAFE).o	 $(gzlib) \
 		   ${MKTEMP}.o			    $(PRIVATE)/wserver.o $(PRIVATE)/wgetopt.o \
 		   $(TIGER)/tiger.o			$(APP)/warcserver.o	 $(evlib)
 
 warcclient = $(PRIVATE)/wclass.o	$(PRIVATE)/wstring.o $(PRIVATE)/wlist.o \
 		   $(PRIVATE)/whdline.o 	$(PRIVATE)/wanvl.o 	 $(PRIVATE)/wrecord.o \
 	       $(PRIVATE)/wfile.o	    $(PRIVATE)/wfsmhdl.o $(PRIVATE)/wuuid.o \
-		   $(PRIVATE)/wfsmanvl.o	$(PRIVATE)/wcsafe.o	 $(gzlib) \
+		   $(PRIVATE)/wfsmanvl.o	$(CSAFE).o	 		 $(gzlib) \
 		   ${MKTEMP}.o			    $(PRIVATE)/wclient.o $(PRIVATE)/wgetopt.o \
 		   $(TIGER)/tiger.o			$(APP)/warcclient.o	 $(evlib)
 
@@ -610,7 +612,7 @@ clean:		tclean	mod_apache_clean
 			       *.log          *.gz              $(PUBLIC)/*~ \
 			       $(PLUGIN)/*~   $(GZIP)/*~        $(APP)/*~ \
 				   $(APP)/*.exe   $(TST)/*~         $(TST)/*.exe \
-                   $(DOC)/*~      $(WIN32DEP)/*~    $(TIGER)/*~ \
+                   $(DOC)/*~      $(MINGW_DEP)/*~    $(TIGER)/*~ \
 			       $(MISC)/*~     $(MISC)/DEBIAN/*~ $(PRIVATE)/*~ \
 				   semantic.cache depend            *.dylib* \
 				   *.bak		  *.stackdump*		*core*	\
