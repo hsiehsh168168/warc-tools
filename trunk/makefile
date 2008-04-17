@@ -201,7 +201,7 @@ endif
 ifneq ($(findstring CYGWIN,$(UNAME_S)),)
 	EV_OS        = $(EVENT)/os/cygwin
 	HEADERS     := $(HEADERS) -I$(WIN32DEP) -I$(EV_OS)
-	EV_SRC		 = $(EVENT)/epoll.c $(EVENT)/poll.c
+	EV_SRC		 = $(EVENT)/poll.c
 	EVENT_CONFIG = $(EV_OS)/config.h $(EV_OS)/event-config.h
 	EV_LIB		 = -lrt
 #-lnsl -lresolv
