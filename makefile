@@ -44,7 +44,7 @@ TIGER    = $(PLUGIN)/tiger
 EVENT    = $(PLUGIN)/event
 EVENT_COMPACT = $(EVENT)/compat
 OSDEP    = $(PRIVATE)/os
-MINGW_DEP= $(OSDEP)/win32
+MINGW_DEP= $(OSDEP)/mingw
 HEADERS  = -I. -I$(PRIVATE) -I$(PUBLIC) -I$(GZIP) -I$(TIGER) \
 		   -I$(EVENT) -I$(EVENT_COMPACT)
 
