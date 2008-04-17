@@ -398,7 +398,7 @@ evbuffer_read (struct evbuffer *buf, int fd, int howmuch)
 
 #if defined(FIONREAD)
 #ifdef WIN32
-  long lng = n;
+  unsigned long lng = n;
 
   if (ioctlsocket (fd, FIONREAD, &lng) == -1 || (n = lng) == 0)
     {
@@ -441,7 +441,7 @@ evbuffer_read (struct evbuffer *buf, int fd, int howmuch)
   n = read (fd, p, howmuch);
 
 #else
-  n = recv (fd, p, howmuch, 0);
+  n = recv (fd, (char *) p, howmuch, 0);
 
 #endif
   if (n == -1)
@@ -468,7 +468,7 @@ evbuffer_write (struct evbuffer *buffer, int fd)
 #ifndef WIN32
   n = write (fd, buffer->buffer, buffer->off);
 #else
-  n = send (fd, buffer->buffer, buffer->off, 0);
+  n = send (fd, (void *) buffer->buffer, buffer->off, 0);
 #endif
 
   if (n == -1)
