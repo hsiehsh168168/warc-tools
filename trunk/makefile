@@ -194,8 +194,9 @@ ifneq ($(findstring MINGW,$(UNAME_S)),)
 	MKTEMP       = $(MINGW_DEP)/wmktmp
 	CSAFE	     = $(MINGW_DEP)/wcsafe
 	EV_OS        = $(EVENT)/os/mingw
-	HEADERS     := $(HEADERS) -I$(MINGW_DEP) -I$(EV_OS)
-	EV_SRC		 = 
+	WIN32CODE    = $(EVENT)/WIN32-Code
+	HEADERS     := $(HEADERS) -I$(MINGW_DEP) -I$(EV_OS) -I$(WIN32CODE)
+	EV_SRC	     = $(WIN32CODE)/misc.c $(WIN32CODE)/win32.c 
 	EVENT_CONFIG = $(EV_OS)/config.h $(EV_OS)/event-config.h
 	EV_LIB		 = -lws2_32
 	SHARED_OS    = shared_mingw
