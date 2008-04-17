@@ -26,8 +26,8 @@
 # -------------------------------------------------------------------  #
 
 usage () {
-    echo
-    echo "Convert all ARC files in a directory to WARC files"
+    echo >&2
+    echo "Convert all ARC files in a directory to WARC files" >&2
     echo "Usage: $0 <-d dirname> [-b] [-c] [-t <working_dir>] [-v] [-h]"  >&2
     echo "       -d     : directory name containing ARC files"  >&2
     echo "       -b     : assume all ARC files are GZIP compressed (default no)"  >&2
