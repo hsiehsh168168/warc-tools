@@ -24,10 +24,10 @@
 #define _EVENT_HAVE_DLFCN_H 1
 
 /* Define if your system supports the epoll system calls */
-/* #undef _EVENT_HAVE_EPOLL */
+#define _EVENT_HAVE_EPOLL 1
 
 /* Define to 1 if you have the `epoll_ctl' function. */
-/* #undef _EVENT_HAVE_EPOLL_CTL */
+#define _EVENT_HAVE_EPOLL_CTL 1
 
 /* Define if your system supports event ports */
 /* #undef _EVENT_HAVE_EVENT_PORTS */
@@ -39,10 +39,10 @@
 #define _EVENT_HAVE_FCNTL_H 1
 
 /* Define to 1 if you have the `getaddrinfo' function. */
-/* #undef _EVENT_HAVE_GETADDRINFO */
+#define _EVENT_HAVE_GETADDRINFO 1
 
 /* Define to 1 if you have the `getnameinfo' function. */
-/* #undef _EVENT_HAVE_GETNAMEINFO */
+#define _EVENT_HAVE_GETNAMEINFO 1
 
 /* Define to 1 if you have the `gettimeofday' function. */
 #define _EVENT_HAVE_GETTIMEOFDAY 1
@@ -57,13 +57,13 @@
 /* #undef _EVENT_HAVE_KQUEUE */
 
 /* Define to 1 if you have the `nsl' library (-lnsl). */
-/* #undef _EVENT_HAVE_LIBNSL */
+#define _EVENT_HAVE_LIBNSL 1
 
 /* Define to 1 if you have the `resolv' library (-lresolv). */
 #define _EVENT_HAVE_LIBRESOLV 1
 
 /* Define to 1 if you have the `rt' library (-lrt). */
-/* #undef _EVENT_HAVE_LIBRT */
+#define _EVENT_HAVE_LIBRT 1
 
 /* Define to 1 if you have the `socket' library (-lsocket). */
 /* #undef _EVENT_HAVE_LIBSOCKET */
@@ -117,7 +117,7 @@
 #define _EVENT_HAVE_STRING_H 1
 
 /* Define to 1 if you have the `strlcpy' function. */
-#define _EVENT_HAVE_STRLCPY 1
+/* #undef _EVENT_HAVE_STRLCPY */
 
 /* Define to 1 if you have the `strsep' function. */
 #define _EVENT_HAVE_STRSEP 1
@@ -129,13 +129,13 @@
 #define _EVENT_HAVE_STRTOLL 1
 
 /* Define to 1 if the system has the type `struct in6_addr'. */
-/* #undef _EVENT_HAVE_STRUCT_IN6_ADDR */
+#define _EVENT_HAVE_STRUCT_IN6_ADDR 1
 
 /* Define to 1 if you have the <sys/devpoll.h> header file. */
 /* #undef _EVENT_HAVE_SYS_DEVPOLL_H */
 
 /* Define to 1 if you have the <sys/epoll.h> header file. */
-/* #undef _EVENT_HAVE_SYS_EPOLL_H */
+#define _EVENT_HAVE_SYS_EPOLL_H 1
 
 /* Define to 1 if you have the <sys/event.h> header file. */
 /* #undef _EVENT_HAVE_SYS_EVENT_H */

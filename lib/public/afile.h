@@ -45,7 +45,8 @@ extern "C"
     extern const void * AFile;
 
     typedef enum {ARC_FILE_UNCOMPRESSED = 0,
-                  ARC_FILE_COMPRESSED_GZIP
+                  ARC_FILE_COMPRESSED_GZIP,
+                  ARC_FILE_DETECT_COMPRESSION
                  } afile_comp_t;
 
     extern void *          AFile_nextRecord     (void *);

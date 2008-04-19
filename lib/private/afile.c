@@ -558,7 +558,7 @@ WPRIVATE void * AFile_constructor (void * _self, va_list * app)
 
   /* check if it's a valid GZIP file */
 
-  if (COMP == ARC_FILE_COMPRESSED_GZIP)
+  if ((COMP == ARC_FILE_COMPRESSED_GZIP) || (COMP == ARC_FILE_DETECT_COMPRESSION))
     {
       warc_u64_t   where = 0;
       void       * g     = bless (WGzip);
@@ -573,11 +573,18 @@ WPRIVATE void * AFile_constructor (void * _self, va_list * app)
 
       if (WGzip_check (g, FH, 0) )
         {
-          w_fprintf (fprintf (stderr, "not a valid GZIP ARC file\n") );
-          destroy (g);
-          destroy (self);
-          return (NIL);
+        if (COMP == ARC_FILE_DETECT_COMPRESSION)
+          COMP = ARC_FILE_UNCOMPRESSED;
+        else
+          {
+           w_fprintf (fprintf (stderr, "not a valid GZIP ARC file\n") );
+           destroy (g);
+           destroy (self);
+           return (NIL);
+          }
         }
+      else
+        COMP = ARC_FILE_COMPRESSED_GZIP;
 
       w_fseek_from_start (FH, where);
 

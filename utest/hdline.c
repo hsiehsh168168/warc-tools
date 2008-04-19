@@ -50,7 +50,7 @@ int test1 (void)
                            makeS ("warc-x584jz39") );
 
   assert (hl);
-
+fprintf (stdout, "////////////////////////test 1//////////////////////////////\n");
   fprintf (stdout, "%s>\n", t);
 
   fprintf (stdout, "WarcId:       %s\n", WHDLine_getWarcId      (hl) );
@@ -78,7 +78,7 @@ int test2 (void)
                            makeS ("12172007"),
                            makeS ("warcproject/testheaderline"),
                            makeS ("warc-x584jz39") );
-
+fprintf (stdout, "////////////////////////test 2//////////////////////////////\n");
   fprintf (stdout, "%s>\n", t);
 
   assert (hl);
@@ -111,6 +111,7 @@ int test3 (void)
   void       * fin      = NIL;
   void       * hl       = NIL;
   void       * fsm      = NIL;
+fprintf (stdout, "////////////////////////test 3//////////////////////////////\n");
   fprintf (stdout, "%s>\n", t);
 
   /* open a valid WARC header file */
@@ -161,7 +162,7 @@ int test4 (void)
   void       * fin      = NIL;
   void       * hl       = NIL;
   void       * fsm      = NIL;
-
+fprintf (stdout, "////////////////////////test 4//////////////////////////////\n");
   fprintf (stdout, "%s>\n", t);
 
   /* open a valid WARC header file */
@@ -212,7 +213,7 @@ int test5 (void)
   void       * fin      = NIL;
   void       * hl       = NIL;
   void       * fsm      = NIL;
-
+fprintf (stdout, "////////////////////////test 5//////////////////////////////\n");
   fprintf (stdout, "%s>\n", t);
 
   /* open a valid WARC header file */
@@ -263,7 +264,7 @@ int test6 (void)
   void       * fin      = NIL;
   void       * hl       = NIL;
   void       * fsm      = NIL;
-
+fprintf (stdout, "////////////////////////test 6//////////////////////////////\n");
   fprintf (stdout, "%s>\n", t);
 
   /* open a valid WARC header file */
@@ -316,7 +317,7 @@ int test7 (void)
   void       * fin      = NIL;
   void       * hl       = NIL;
   void       * fsm      = NIL;
-
+fprintf (stdout, "////////////////////////test 7//////////////////////////////\n");
   fprintf (stdout, "%s>\n", t);
 
   /* open a valid WARC header file */
@@ -366,7 +367,7 @@ int test8 (void)
   void       * fin      = NIL;
   void       * hl       = NIL;
   void       * fsm      = NIL;
-
+fprintf (stdout, "////////////////////////test 8//////////////////////////////\n");
   fprintf (stdout, "%s>\n", t);
 
   /* open a valid WARC header file */
@@ -416,7 +417,7 @@ int test9 (void)
   void       * fin      = NIL;
   void       * hl       = NIL;
   void       * fsm      = NIL;
-
+fprintf (stdout, "////////////////////////test 9//////////////////////////////\n");
   fprintf (stdout, "%s>\n", t);
 
   /* open a valid WARC header file */

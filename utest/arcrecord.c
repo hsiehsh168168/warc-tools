@@ -23,13 +23,18 @@
 /*                                                                     */
 /*     http://code.google.com/p/warc-tools/                            */
 /* ------------------------------------------------------------------- */
-
+#include <Basic.h>
+#include <Console.h>
+#include <Automated.h>
+#include <CUnit.h>
+#include <CUError.h>
+#include <TestDB.h>
+#include <TestRun.h>
+#include <menu.h>
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
-
 #include <warc.h>
-
 #include <afsmhdl.h>
 #include <arecord.h>
 #include <arecord.x>
@@ -39,10 +44,15 @@
 #define makeS(s) ((warc_u8_t *) s), w_strlen((warc_u8_t *) (s))
 
 static void * wdir  = NIL;
+int init_suite1(void) { return 0; }
+int clean_suite1(void) { return 0; }
+int init_suite2(void) { return 0; }
+int clean_suite2(void) { return 0; }
+int init_suite3(void) { return 0; }
+int clean_suite3(void) { return 0; }
 
-int test1 (void)
+void test1 (void)
 {
-  const char * t  = "TEST 1";
   void       * hl = bless (ARecord,
                            makeS ("http://www.w3c.org"),
                            makeS ("192.168.4.1"),
@@ -51,24 +61,31 @@ int test1 (void)
                            12,
                            wdir);
 
-  assert (hl);
 
-  fprintf (stdout, "%s>\n", t);
-  fprintf (stdout, "DataLength:   %d\n", ARecord_getDataLength  (hl) );
+  assert (hl);
+ CU_ASSERT_PTR_NOT_EQUAL(hl,NIL);
+
+ /* fprintf (stdout, "DataLength:   %d\n", ARecord_getDataLength  (hl) );
   fprintf (stdout, "MimeType:   %s\n", ARecord_getMimeType  (hl) );
   fprintf (stdout, "Url:   %s\n",        ARecord_getUrl  (hl) );
   fprintf (stdout, "CreationDate: %s\n", ARecord_getCreationDate (hl) );
-  fprintf (stdout, "IP-adress:     %s\n", ARecord_getIpAddress    (hl) );
+  fprintf (stdout, "IP-adress:     %s\n", ARecord_getIpAddress    (hl) );*/
+ CU_ASSERT(12==ARecord_getDataLength  (hl)  ); 
+ CU_ASSERT_STRING_EQUAL("warcproject/testheaderline",ARecord_getMimeType  (hl)  );
+ /* CU_ASSERT_STRING_EQUAL("www.w3c.org",ARecord_getUrl  (hl)  ); */
+ CU_ASSERT_STRING_EQUAL("12172007",ARecord_getCreationDate (hl) ); 
+ CU_ASSERT_STRING_EQUAL("192.168.4.1", ARecord_getIpAddress    (hl)  ); 
+
 
   destroy (hl);
 
-  return 0;
+  return ;
 }
 
 
-int test2 (void)
+void test2 (void)
 {
-  const char * t  = "TEST 2";
+
 
   void       * hl = bless (ARecord,
                            makeS ("http://www.w3c.org"),
@@ -78,9 +95,9 @@ int test2 (void)
                            12,
                            wdir);
 
-  fprintf (stdout, "%s>\n", t);
 
   assert (hl);
+ CU_ASSERT_PTR_NOT_EQUAL(hl,NIL);
 
   ARecord_setDataLength   (hl, 15);
   ARecord_setUrl   (hl, makeS ("http://www.iso.net") );
@@ -89,32 +106,34 @@ int test2 (void)
   ARecord_setIpAddress     (hl, makeS ("168.12.0.0") );
 
 
-  fprintf (stdout, "DataLength:   %d\n", ARecord_getDataLength  (hl) );
+  /*fprintf (stdout, "DataLength:   %d\n", ARecord_getDataLength  (hl) );
   fprintf (stdout, "MimeType:   %s\n", ARecord_getMimeType  (hl) );
   fprintf (stdout, "Url:   %s\n",        ARecord_getUrl  (hl) );
   fprintf (stdout, "CreationDate: %s\n", ARecord_getCreationDate (hl) );
-  fprintf (stdout, "IP-adress:     %s\n", ARecord_getIpAddress    (hl) );
+  fprintf (stdout, "IP-adress:     %s\n", ARecord_getIpAddress    (hl) );*/
+CU_ASSERT(15==ARecord_getDataLength  (hl)  ); 
+ CU_ASSERT_STRING_EQUAL("application/xpdf",ARecord_getMimeType  (hl)  );
+  CU_ASSERT_STRING_EQUAL("http://www.iso.net",ARecord_getUrl  (hl)  ); 
+ CU_ASSERT_STRING_EQUAL("01012999",ARecord_getCreationDate (hl) ); 
+ CU_ASSERT_STRING_EQUAL("168.12.0.0", ARecord_getIpAddress    (hl)  ); 
 
   destroy (hl);
 
-  return 0;
+  return ;
 }
 
 
-int test3 (void)
+void test3 (void)
 {
-  const char * t        = "TEST 3";
   const char * filename = "app/wdata/testarc/file.arc";
   void       * fin      = NIL;
   void       * hl       = NIL;
   void       * fsm      = NIL;
 
-  fprintf (stdout, "%s>\n", t);
-
   /* open a valid WARC header file */
   fin = fopen (filename, "r");
   unless (fin)
-  return (1);
+  return ;
 
   /* init HDL FSM */
   fsm = bless (AFsmHDL, fin, wdir);
@@ -127,11 +146,16 @@ int test3 (void)
     hl = AFsmHDL_transform (fsm);
 
 
-    fprintf (stdout, "DataLength:   %d\n", ARecord_getDataLength  (hl) );
+   /* fprintf (stdout, "DataLength:   %d\n", ARecord_getDataLength  (hl) );
     fprintf (stdout, "MimeType:   %s\n", ARecord_getMimeType  (hl) );
     fprintf (stdout, "Url:   %s\n",        ARecord_getUrl  (hl) );
     fprintf (stdout, "CreationDate: %s\n", ARecord_getCreationDate (hl) );
-    fprintf (stdout, "IP-adress:     %s\n", ARecord_getIpAddress    (hl) );
+    fprintf (stdout, "IP-adress:     %s\n", ARecord_getIpAddress    (hl) );*/
+CU_ASSERT(22566==ARecord_getDataLength  (hl)  ); 
+ CU_ASSERT_STRING_EQUAL("text/plain",ARecord_getMimeType  (hl)  );
+  CU_ASSERT_STRING_EQUAL("filedesc://BnF-elec2007-20070524113301-00040-heritrix1.arc",ARecord_getUrl  (hl)  ); 
+ CU_ASSERT_STRING_EQUAL("20070524113301",ARecord_getCreationDate (hl) ); 
+ CU_ASSERT_STRING_EQUAL("0.0.0.0", ARecord_getIpAddress    (hl)  ); 
 
     destroy (hl);
   }
@@ -139,8 +163,8 @@ int test3 (void)
   else
     {
       /* error when parsing the WARC header line */
-      fprintf (stderr,  "error in FSM state address %p, at offset %ld in \"%s\"\n",
-               AFsmHDL_state (fsm), ftell (fin), filename);
+      CU_FAIL(fprintf (stderr,  "error in FSM state address %p, at offset %ld in \"%s\"\n",
+               AFsmHDL_state (fsm), ftell (fin), filename));
     }
 
 
@@ -148,23 +172,21 @@ int test3 (void)
 
   fclose  (fin);
 
-  return 0;
+  return ;
 }
 
-int test4 (void)
+void test4 (void)
 {
-  const char * t        = "TEST 4";
   const char * filename = "app/wdata/testarc/err1.arc";
   void       * fin      = NIL;
   void       * hl       = NIL;
   void       * fsm      = NIL;
 
-
-  fprintf (stdout, "%s>\n", t);
   /* open a valid WARC header file */
-  fin = fopen (filename, "r");
+ 
+fin = fopen (filename, "r");
   unless (fin)
-  return (1);
+  return ;
 
   /* init HDL FSM */
   fsm = bless (AFsmHDL, fin, wdir);
@@ -177,11 +199,17 @@ int test4 (void)
     hl = AFsmHDL_transform (fsm);
 
 
-    fprintf (stdout, "DataLength:   %d\n", ARecord_getDataLength  (hl) );
+    /*fprintf (stdout, "DataLength:   %d\n", ARecord_getDataLength  (hl) );
     fprintf (stdout, "MimeType:   %s\n", ARecord_getMimeType  (hl) );
     fprintf (stdout, "Url:   %s\n",        ARecord_getUrl  (hl) );
     fprintf (stdout, "CreationDate: %s\n", ARecord_getCreationDate (hl) );
-    fprintf (stdout, "IP-adress:     %s\n", ARecord_getIpAddress    (hl) );
+    fprintf (stdout, "IP-adress:     %s\n", ARecord_getIpAddress    (hl) );*/
+CU_ASSERT(1489==ARecord_getDataLength  (hl)  ); 
+ CU_ASSERT_STRING_EQUAL("text/plain",ARecord_getMimeType  (hl)  );
+  CU_ASSERT_STRING_EQUAL("filedesc:BnF-elec2007-20070524113301-00040-heritrix1.arc",ARecord_getUrl  (hl)  ); 
+ CU_ASSERT_STRING_EQUAL("20070524113301",ARecord_getCreationDate (hl) ); 
+ CU_ASSERT_STRING_EQUAL("0.0.0.0", ARecord_getIpAddress    (hl)  ); 
+
 
     destroy (hl);
   }
@@ -189,8 +217,8 @@ int test4 (void)
   else
     {
       /* error when parsing the WARC header line */
-      fprintf (stderr,  "error in FSM state address %p, at offset %ld in \"%s\"\n",
-               AFsmHDL_state (fsm), ftell (fin), filename);
+      CU_FAIL(fprintf (stderr,  "error in FSM state address %p, at offset %ld in \"%s\"\n",
+               AFsmHDL_state (fsm), ftell (fin), filename));
     }
 
 
@@ -198,24 +226,23 @@ int test4 (void)
 
   fclose  (fin);
 
-  return 0;
+  return ;
 }
 
 
-int test5 (void)
+void test5 (void)
 {
-  const char * t        = "TEST 5";
+
   const char * filename = "app/wdata/testarc/err2.arc";
   void       * fin      = NIL;
   void       * hl       = NIL;
   void       * fsm      = NIL;
-
-  fprintf (stdout, "%s>\n", t);
+fprintf(stdout,"////////// test 5//////////\n");
 
   /* open a valid WARC header file */
   fin = fopen (filename, "r");
   unless (fin)
-  return (1);
+  return ;
 
   /* init HDL FSM */
   fsm = bless (AFsmHDL, fin, wdir);
@@ -228,11 +255,11 @@ int test5 (void)
     hl = AFsmHDL_transform (fsm);
 
 
-    fprintf (stdout, "DataLength:   %d\n", ARecord_getDataLength  (hl) );
-    fprintf (stdout, "MimeType:   %s\n", ARecord_getMimeType  (hl) );
-    fprintf (stdout, "Url:   %s\n",        ARecord_getUrl  (hl) );
-    fprintf (stdout, "CreationDate: %s\n", ARecord_getCreationDate (hl) );
-    fprintf (stdout, "IP-adress:     %s\n", ARecord_getIpAddress    (hl) );
+   CU_FAIL( fprintf (stdout, "DataLength:   %d\n", ARecord_getDataLength  (hl) ));
+   CU_FAIL( fprintf (stdout, "MimeType:   %s\n", ARecord_getMimeType  (hl) ));
+    CU_FAIL(fprintf (stdout, "Url:   %s\n",        ARecord_getUrl  (hl) ));
+    CU_FAIL(fprintf (stdout, "CreationDate: %s\n", ARecord_getCreationDate (hl)) );
+    CU_FAIL(fprintf (stdout, "IP-adress:     %s\n", ARecord_getIpAddress    (hl)) );
 
     destroy (hl);
   }
@@ -240,8 +267,7 @@ int test5 (void)
   else
     {
       /* error when parsing the WARC header line */
-      fprintf (stderr,  "error in FSM state address %p, at offset %ld in \"%s\"\n",
-               AFsmHDL_state (fsm), ftell (fin), filename);
+    CU_PASS( expecting a valid creation date error in FSM state address 0x80652c0 at offset 73 in "app/wdata/testarc/err2.arc");
     }
 
 
@@ -249,23 +275,20 @@ int test5 (void)
 
   fclose  (fin);
 
-  return 0;
+  return ;
 }
 
-int test6 (void)
+void test6 (void)
 {
-  const char * t        = "TEST 6";
   const char * filename = "app/wdata/testarc/err3.arc";
   void       * fin      = NIL;
   void       * hl       = NIL;
   void       * fsm      = NIL;
 
-  fprintf (stdout, "%s>\n", t);
-
   /* open a valid WARC header file */
   fin = fopen (filename, "r");
   unless (fin)
-  return (1);
+  return ;
 
   /* init HDL FSM */
   fsm = bless (AFsmHDL, fin, wdir);
@@ -278,11 +301,16 @@ int test6 (void)
     hl = AFsmHDL_transform (fsm);
 
 
-    fprintf (stdout, "DataLength:   %d\n", ARecord_getDataLength  (hl) );
+/*    fprintf (stdout, "DataLength:   %d\n", ARecord_getDataLength  (hl) );
     fprintf (stdout, "MimeType:   %s\n", ARecord_getMimeType  (hl) );
     fprintf (stdout, "Url:   %s\n",        ARecord_getUrl  (hl) );
     fprintf (stdout, "CreationDate: %s\n", ARecord_getCreationDate (hl) );
-    fprintf (stdout, "IP-adress:     %s\n", ARecord_getIpAddress    (hl) );
+    fprintf (stdout, "IP-adress:     %s\n", ARecord_getIpAddress    (hl) );*/
+CU_ASSERT(1489==ARecord_getDataLength  (hl)  ); 
+ CU_ASSERT_STRING_EQUAL("textplain",ARecord_getMimeType  (hl)  );
+  CU_ASSERT_STRING_EQUAL("filedesc://BnF-elec2007-20070524113301-00040-heritrix1.arc",ARecord_getUrl  (hl)  ); 
+ CU_ASSERT_STRING_EQUAL("20070524113301",ARecord_getCreationDate (hl) ); 
+ CU_ASSERT_STRING_EQUAL("0.0.0.0", ARecord_getIpAddress    (hl)  ); 
 
     destroy (hl);
   }
@@ -290,8 +318,8 @@ int test6 (void)
   else
     {
       /* error when parsing the WARC header line */
-      fprintf (stderr,  "error in FSM state address %p, at offset %ld in \"%s\"\n",
-               AFsmHDL_state (fsm), ftell (fin), filename);
+      CU_FAIL(fprintf (stderr,  "error in FSM state address %p, at offset %ld in \"%s\"\n",
+               AFsmHDL_state (fsm), ftell (fin), filename));
     }
 
 
@@ -299,23 +327,21 @@ int test6 (void)
 
   fclose  (fin);
 
-  return 0;
+  return ;
 }
-
-int test7 (void)
+void test7 (void)
 {
-  const char * t        = "TEST 7";
+
   const char * filename = "app/wdata/testarc/err4.arc";
   void       * fin      = NIL;
   void       * hl       = NIL;
   void       * fsm      = NIL;
 
-  fprintf (stdout, "%s>\n", t);
-
+fprintf(stdout,"////////// test 7//////////\n");
   /* open a valid WARC header file */
   fin = fopen (filename, "r");
   unless (fin)
-  return (1);
+  return ;
 
   /* init HDL FSM */
   fsm = bless (AFsmHDL, fin, wdir);
@@ -328,11 +354,11 @@ int test7 (void)
     hl = AFsmHDL_transform (fsm);
 
 
-    fprintf (stdout, "DataLength:   %d\n", ARecord_getDataLength  (hl) );
-    fprintf (stdout, "MimeType:   %s\n", ARecord_getMimeType  (hl) );
-    fprintf (stdout, "Url:   %s\n",        ARecord_getUrl  (hl) );
-    fprintf (stdout, "CreationDate: %s\n", ARecord_getCreationDate (hl) );
-    fprintf (stdout, "IP-adress:     %s\n", ARecord_getIpAddress    (hl) );
+   CU_FAIL( fprintf (stdout, "DataLength:   %d\n", ARecord_getDataLength  (hl) ));
+   CU_FAIL( fprintf (stdout, "MimeType:   %s\n", ARecord_getMimeType  (hl) ));
+   CU_FAIL( fprintf (stdout, "Url:   %s\n",        ARecord_getUrl  (hl) ));
+    CU_FAIL(fprintf (stdout, "CreationDate: %s\n", ARecord_getCreationDate (hl) ));
+    CU_FAIL(fprintf (stdout, "IP-adress:     %s\n", ARecord_getIpAddress    (hl) ));
 
     destroy (hl);
   }
@@ -340,8 +366,7 @@ int test7 (void)
   else
     {
       /* error when parsing the WARC header line */
-      fprintf (stderr,  "error in FSM state address %p, at offset %ld in \"%s\"\n",
-               AFsmHDL_state (fsm), ftell (fin), filename);
+     CU_PASS( invalid data length: mm9 error in FSM state address 0x80653c0 at offset 101 in "app/wdata/testarc/err4.arc");
     }
 
 
@@ -349,24 +374,22 @@ int test7 (void)
 
   fclose  (fin);
 
-  return 0;
+  return ;
 }
 
 
-int test8 (void)
+void test8 (void)
 {
-  const char * t        = "TEST 8";
   const char * filename = "app/wdata/testarc/err5.arc";
   void       * fin      = NIL;
   void       * hl       = NIL;
   void       * fsm      = NIL;
-
-  fprintf (stdout, "%s>\n", t);
+fprintf(stdout,"////////// test 8//////////\n");
 
   /* open a valid WARC header file */
   fin = fopen (filename, "r");
   unless (fin)
-  return (1);
+  return ;
 
   /* init HDL FSM */
   fsm = bless (AFsmHDL, fin, wdir);
@@ -379,11 +402,11 @@ int test8 (void)
     hl = AFsmHDL_transform (fsm);
 
 
-    fprintf (stdout, "DataLength:   %d\n", ARecord_getDataLength  (hl) );
-    fprintf (stdout, "MimeType:   %s\n", ARecord_getMimeType  (hl) );
-    fprintf (stdout, "Url:   %s\n",        ARecord_getUrl  (hl) );
-    fprintf (stdout, "CreationDate: %s\n", ARecord_getCreationDate (hl) );
-    fprintf (stdout, "IP-adress:     %s\n", ARecord_getIpAddress    (hl) );
+    CU_FAIL(fprintf (stdout, "DataLength:   %d\n", ARecord_getDataLength  (hl)) );
+    CU_FAIL( fprintf (stdout, "MimeType:   %s\n", ARecord_getMimeType  (hl)) );
+    CU_FAIL( fprintf (stdout, "Url:   %s\n",        ARecord_getUrl  (hl) ));
+    CU_FAIL( fprintf (stdout, "CreationDate: %s\n", ARecord_getCreationDate (hl) ));
+    CU_FAIL( fprintf (stdout, "IP-adress:     %s\n", ARecord_getIpAddress    (hl) ));
 
     destroy (hl);
   }
@@ -391,8 +414,7 @@ int test8 (void)
   else
     {
       /* error when parsing the WARC header line */
-      fprintf (stderr,  "error in FSM state address %p, at offset %ld in \"%s\"\n",
-               AFsmHDL_state (fsm), ftell (fin), filename);
+      CU_PASS(found IP address: 0.0.00. error in FSM state address 0x8065240 at offset 66 in app/wdata/testarc/err5.arc);
     }
 
 
@@ -400,24 +422,21 @@ int test8 (void)
 
   fclose  (fin);
 
-  return 0;
+  return ;
 }
 
-
-int test9 (void)
+void test9 (void)
 {
-  const char * t        = "TEST 9";
   const char * filename = "app/wdata/testarc/err6.arc";
   void       * fin      = NIL;
   void       * hl       = NIL;
   void       * fsm      = NIL;
-
-  fprintf (stdout, "%s>\n", t);
+fprintf(stdout,"////////// test 9//////////\n");
 
   /* open a valid WARC header file */
   fin = fopen (filename, "r");
   unless (fin)
-  return (1);
+  return ;
 
   /* init HDL FSM */
   fsm = bless (AFsmHDL, fin, wdir);
@@ -430,20 +449,18 @@ int test9 (void)
     hl = AFsmHDL_transform (fsm);
 
 
-    fprintf (stdout, "DataLength:   %d\n", ARecord_getDataLength  (hl) );
-    fprintf (stdout, "MimeType:   %s\n", ARecord_getMimeType  (hl) );
-    fprintf (stdout, "Url:   %s\n",        ARecord_getUrl  (hl) );
-    fprintf (stdout, "CreationDate: %s\n", ARecord_getCreationDate (hl) );
-    fprintf (stdout, "IP-adress:     %s\n", ARecord_getIpAddress    (hl) );
-
+    CU_FAIL(fprintf (stdout, "DataLength:   %d\n", ARecord_getDataLength  (hl)) );
+    CU_FAIL( fprintf (stdout, "MimeType:   %s\n", ARecord_getMimeType  (hl)) );
+    CU_FAIL( fprintf (stdout, "Url:   %s\n",        ARecord_getUrl  (hl) ));
+    CU_FAIL( fprintf (stdout, "CreationDate: %s\n", ARecord_getCreationDate (hl) ));
+    CU_FAIL( fprintf (stdout, "IP-adress:     %s\n", ARecord_getIpAddress    (hl) ));
     destroy (hl);
   }
 
   else
     {
       /* error when parsing the WARC header line */
-      fprintf (stderr,  "error in FSM state address %p, at offset %ld in \"%s\"\n",
-               AFsmHDL_state (fsm), ftell (fin), filename);
+    CU_PASS(  ERROR:found IP address: 0.00.0);
     }
 
 
@@ -451,23 +468,21 @@ int test9 (void)
 
   fclose  (fin);
 
-  return 0;
+  return ;
 }
-
-int test10 (void)
+void test10 (void)
 {
-  const char * t        = "TEST 10";
+
   const char * filename = "app/wdata/testarc/err7.arc";
   void       * fin      = NIL;
   void       * hl       = NIL;
   void       * fsm      = NIL;
 
-  fprintf (stdout, "%s>\n", t);
-
+fprintf(stdout,"////////// test 10//////////\n");
   /* open a valid WARC header file */
   fin = fopen (filename, "r");
   unless (fin)
-  return (1);
+  return ;
 
   /* init HDL FSM */
   fsm = bless (AFsmHDL, fin, wdir);
@@ -480,20 +495,18 @@ int test10 (void)
     hl = AFsmHDL_transform (fsm);
 
 
-    fprintf (stdout, "DataLength:   %d\n", ARecord_getDataLength  (hl) );
-    fprintf (stdout, "MimeType:   %s\n", ARecord_getMimeType  (hl) );
-    fprintf (stdout, "Url:   %s\n",        ARecord_getUrl  (hl) );
-    fprintf (stdout, "CreationDate: %s\n", ARecord_getCreationDate (hl) );
-    fprintf (stdout, "IP-adress:     %s\n", ARecord_getIpAddress    (hl) );
-
+   CU_FAIL(fprintf (stdout, "DataLength:   %d\n", ARecord_getDataLength  (hl)) );
+    CU_FAIL( fprintf (stdout, "MimeType:   %s\n", ARecord_getMimeType  (hl)) );
+    CU_FAIL( fprintf (stdout, "Url:   %s\n",        ARecord_getUrl  (hl) ));
+    CU_FAIL( fprintf (stdout, "CreationDate: %s\n", ARecord_getCreationDate (hl) ));
+    CU_FAIL( fprintf (stdout, "IP-adress:     %s\n", ARecord_getIpAddress    (hl) ));
     destroy (hl);
   }
 
   else
     {
       /* error when parsing the WARC header line */
-      fprintf (stderr,  "error in FSM state address %p, at offset %ld in \"%s\"\n",
-               AFsmHDL_state (fsm), ftell (fin), filename);
+      CU_PASS( ERROR :found IP address: .10.40.3);
     }
 
 
@@ -501,25 +514,22 @@ int test10 (void)
 
   fclose  (fin);
 
-  return 0;
+  return ;
 }
 
 
-int test11 (void)
+void test11 (void)
 {
-  const char * t        = "TEST 11";
   const char * filename = "app/wdata/testarc/err8.arc";
   void       * fin      = NIL;
   void       * hl       = NIL;
   void       * fsm      = NIL;
 
-
-  fprintf (stdout, "%s>\n", t);
-
+fprintf(stdout,"////////// test 11//////////\n");
   /* open a valid WARC header file */
   fin = fopen (filename, "r");
   unless (fin)
-  return (1);
+  return ;
 
   /* init HDL FSM */
   fsm = bless (AFsmHDL, fin, wdir);
@@ -531,20 +541,18 @@ int test11 (void)
     /* generate the WHDLine object from the FSM */
     hl = AFsmHDL_transform (fsm);
 
-    fprintf (stdout, "DataLength:   %d\n", ARecord_getDataLength  (hl) );
-    fprintf (stdout, "MimeType:   %s\n", ARecord_getMimeType  (hl) );
-    fprintf (stdout, "Url:   %s\n",        ARecord_getUrl  (hl) );
-    fprintf (stdout, "CreationDate: %s\n", ARecord_getCreationDate (hl) );
-    fprintf (stdout, "IP-adress:     %s\n", ARecord_getIpAddress    (hl) );
-
+    CU_FAIL(fprintf (stdout, "DataLength:   %d\n", ARecord_getDataLength  (hl)) );
+    CU_FAIL( fprintf (stdout, "MimeType:   %s\n", ARecord_getMimeType  (hl)) );
+    CU_FAIL( fprintf (stdout, "Url:   %s\n",        ARecord_getUrl  (hl) ));
+    CU_FAIL( fprintf (stdout, "CreationDate: %s\n", ARecord_getCreationDate (hl) ));
+    CU_FAIL( fprintf (stdout, "IP-adress:     %s\n", ARecord_getIpAddress    (hl) ));
     destroy (hl);
   }
 
   else
     {
       /* error when parsing the WARC header line */
-      fprintf (stderr,  "error in FSM state address %p, at offset %ld in \"%s\"\n",
-               AFsmHDL_state (fsm), ftell (fin), filename);
+      CU_PASS (ERROR: found IP address: 109.407.184.356);
     }
 
 
@@ -552,24 +560,88 @@ int test11 (void)
 
   fclose  (fin);
 
-  return 0;
+  return ;
 }
 
 int main (void)
 {
-  int (* tests []) () = { test1, test2, test3, test4, test5,
-                          test6, test7, test8, test9, test10, test11
-                        };
+     CU_pSuite pSuite = NULL; 
+wdir = bless (WString, ".", 1);
+   /* initialize the CUnit test registry */
+   if (CUE_SUCCESS != CU_initialize_registry())
+      return CU_get_error();
 
-  warc_u32_t  i      = 0;
+   /* add a suite to the registry */
+   pSuite = CU_add_suite("Suite1", init_suite1, clean_suite1);
+   if (NULL == pSuite) {
+      CU_cleanup_registry();
+      return CU_get_error();
+                        }
 
-  wdir = bless (WString, ".", 1);
+   /* add the tests to the suite */
 
-  for (i = 0; i < 11; ++ i)
-    {
-      tests[i] ();
-    }
+   if ((NULL == CU_add_test(pSuite, " 1: ", test1)) ||
+       (NULL == CU_add_test(pSuite, " 2: ", test2))||
+       (NULL == CU_add_test(pSuite, " 3:  ", test3))||
+	(NULL == CU_add_test(pSuite, " 4: ", test4)))
+      
+   {
+      CU_cleanup_registry();
+      return CU_get_error();
+   } 
 
-  destroy (wdir);
-  return 0;
+   /* add a suite to the registry */
+   pSuite = CU_add_suite("Suite2", init_suite2, clean_suite2);
+   if (NULL == pSuite) {
+      CU_cleanup_registry();
+      return CU_get_error();
+                        }
+
+   /* add the tests to the suite */
+
+   if ((NULL == CU_add_test(pSuite, " 5: ", test5)) ||
+       (NULL == CU_add_test(pSuite, " 6:   ", test6))||
+ (NULL == CU_add_test(pSuite, " 7: ERROR invalid data length: mm9", test7))||
+ (NULL == CU_add_test(pSuite, " 8: found IP address: 0.0.00", test8)))   
+         {
+      CU_cleanup_registry();
+      return CU_get_error();
+          }
+
+
+   /* add a suite to the registry */
+   pSuite = CU_add_suite("Suite3", init_suite3, clean_suite3);
+   if (NULL == pSuite) {
+      CU_cleanup_registry();
+      return CU_get_error();
+                        }
+
+   /* add the tests to the suite */
+
+   if ((NULL == CU_add_test(pSuite,  " 9: ERROR:found IP address: 0.00.0", test9)) ||
+       (NULL == CU_add_test(pSuite, " 10: ERROR :found IP address: .10.40.3", test10))||
+       (NULL == CU_add_test(pSuite, " 11: ERROR: found IP address: 109.407.184.356", test11)))
+      
+             {
+      CU_cleanup_registry();
+      return CU_get_error();
+             }
+
+
+switch (menu()) 
+  {
+        case 1: {CU_console_run_tests();} 
+	case 2:  {CU_basic_run_tests();}
+        case 3:{
+                CU_set_output_filename("./utest/outputs/arcrecord");
+    		CU_set_output_filename("./utest/outputs/arcrecord" );
+  		CU_automated_run_tests();
+   		CU_list_tests_to_file();
+           	}
+     
+   }
+   CU_cleanup_registry();
+   return CU_get_error(); 
+ destroy (wdir);
+
 }

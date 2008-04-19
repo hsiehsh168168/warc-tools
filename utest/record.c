@@ -27,148 +27,2134 @@
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
-
+#include <Basic.h>
+#include <Console.h>
+#include <Automated.h>
+#include <CUnit.h>
+#include <CUError.h>
+#include <TestDB.h>
+#include <TestRun.h>
+#include <menu.h>
 #include <warc.h>
 
 #include <whdline.h>
 #include <wfsmhdl.h>
 #include <wfsmanvl.h>
+#include <wrecord.x> /* for WRecord_check */
 
 #define makeS(s) ((warc_u8_t *) s), w_strlen((warc_u8_t *) (s))
-
-
-int test1 (void)
+#define makeU(s) (const warc_u8_t *) (s), (warc_u64_t) w_strlen((warc_u8_t *) (s))
+int init_suite1(void) { return 0; }
+int clean_suite1(void) { return 0; }
+int init_suite2(void) { return 0; }
+int clean_suite2(void) { return 0; }
+int init_suite3(void) { return 0; }
+int clean_suite3(void) { return 0; }
+int init_suite4(void) { return 0; }
+int clean_suite4(void) { return 0; }
+void test1 (void)
 {
-  const char * t   = "TEST 1";
+  
   void       * r   = bless (WRecord);
 
 
-  fprintf (stdout, "%s>\n", t);
-
+CU_ASSERT_PTR_NOT_EQUAL(r,NIL);
 
   if (r)
     {
-      WRecord_setSubjectUri   (r, makeS ("http://www.w3c.org") );
-      WRecord_setCreationDate (r, makeS ("12172007") );
+      WRecord_setTargetUri   (r, makeS ("http://www.w3c.org") );
+      WRecord_setDate (r, makeS ("12172007") );
       WRecord_setContentType  (r, makeS ("warcproject/testheaderline") );
       WRecord_setRecordId     (r, makeS ("id://warc-x584jz39") );
       WRecord_setRecordType   (r, WARC_INFO_RECORD);
 
-      fprintf (stdout, "WarcId: %-20s\n",       WRecord_getWarcId      (r) );
-      fprintf (stdout, "DataLength: %-20d\n",   WRecord_getDataLength  (r) );
-      fprintf (stdout, "RecordType: %-20d\n",   WRecord_getRecordType  (r) );
-      fprintf (stdout, "SubjectUri: %-20s\n",   WRecord_getSubjectUri  (r) );
-      fprintf (stdout, "CreationDate: %-20s\n", WRecord_getCreationDate (r) );
-      fprintf (stdout, "ContentType: %-20s\n",  WRecord_getContentType (r) );
-      fprintf (stdout, "RecordId: %-20s\n",     WRecord_getRecordId    (r) );
+      /*fprintf (stdout, "WarcId: %-20s\n",       WRecord_getWarcId      (r) );
+     CU_FAIL( "ContentLength: %-20d\n",   WRecord_getContentLength  (r) );
+     CU_FAIL( "RecordType: %-20d\n",   WRecord_getRecordType  (r) );
+     CU_FAIL( "TargetUri: %-20s\n",   WRecord_getTargetUri  (r) );
+     CU_FAIL( "CreationDate: %-20s\n", WRecord_getDate (r) );
+     CU_FAIL( "ContentType: %-20s\n",  WRecord_getContentType (r) );
+     CU_FAIL( "RecordId: %-20s\n",     WRecord_getRecordId    (r) );*/
+        CU_ASSERT_STRING_EQUAL("WARC/0.17",WRecord_getWarcId (r));
+        CU_ASSERT(0== WRecord_getContentLength  (r)); 
+        CU_ASSERT(1==WRecord_getRecordType  (r) ); 
+        CU_ASSERT_STRING_EQUAL("http://www.w3c.org",WRecord_getTargetUri  (r) );
+	CU_ASSERT_STRING_EQUAL("",WRecord_getDate (r)  );
+	CU_ASSERT_STRING_EQUAL("warcproject/testheaderline",WRecord_getContentType (r) );
+	CU_ASSERT_STRING_EQUAL("id://warc-x584jz39",WRecord_getRecordId    (r) ); 
       destroy (r);
     }
 
 
 
 
-  return 0;
+ return;
 }
 
 
-int test2 (void)
+void test2 (void)
 {
-  const char * t        = "TEST 2";
-  const char * filename = "app/wdata/testwfile/file.warc";
-  void       * fin      = NIL;
-  void       * hl       = NIL;
-  void       * fsm      = NIL;
-  void       * afsm     = NIL;
-  void       * anvl     = NIL;
-  int          errore   =   0;
-  warc_bool_t      more     = WARC_TRUE;
+  
+  void * r = bless (WRecord);
+  void * u = NIL;
 
-  fprintf (stdout, "%s>\n", t);
+ 
+CU_ASSERT_PTR_NOT_EQUAL(r,NIL);
 
-  /* open a valid WARC header file */
-  fin = fopen (filename, "r");
-  unless (fin)
-  return (1);
-
-  /* init HDL FSM */
-  fsm = bless (WFsmHDL, fin);
-  assert (fsm);
-
-  /* run the FSM for WHDLine object detection */
-  unless (WFsmHDL_run (fsm) )
-  {
-    /* generate the WHDLine object from the FSM */
-    hl = WFsmHDL_transform (fsm);
-
-    fprintf (stdout, "WarcId:       %s\n", WHDLine_getWarcId      (hl) );
-    fprintf (stdout, "DataLength:   %d\n", WHDLine_getDataLength  (hl) );
-    fprintf (stdout, "RecordType:   %d\n", WHDLine_getRecordType  (hl) );
-    fprintf (stdout, "SubjectUri:   %s\n", WHDLine_getSubjectUri  (hl) );
-    fprintf (stdout, "CreationDate: %s\n", WHDLine_getCreationDate (hl) );
-    fprintf (stdout, "ContentType:  %s\n", WHDLine_getContentType (hl) );
-    fprintf (stdout, "RecordId:     %s\n", WHDLine_getRecordId    (hl) );
-
-    destroy (hl);
-  }
-
-  else
+  if (WRecord_setTargetUri (r, makeS ("test://anunknownplace") ) )
     {
-      /* error when parsing the WARC header line */
-      fprintf (stderr,  "error in FSM state address %p, at offset %ld in \"%s\"\n",
-               WFsmHDL_state (fsm), ftell (fin), filename);
-      errore = 1;
+     CU_FAIL( "Corrupted Target Uri\n");
+      destroy (r);
+      return;
     }
 
-  while (more && (errore != 1) )
+  if  (WRecord_setRecordType (r,WARC_REQUEST_RECORD) )
     {
-      afsm = bless (WFsmANVL, fin);
-      assert (afsm);
-
-      unless (WFsmANVL_run (afsm ) )
-      {
-        anvl = WFsmANVL_transform (afsm);
-
-        if (anvl)
-          {
-            printf ("ANVL Key: %s\n", WAnvl_getKey (anvl) );
-            printf ("ANVL Value: %s\n", WAnvl_getValue (anvl) );
-            destroy (anvl);
-          }
-
-        else more = WARC_FALSE;
-      }
-
-      else
-        {
-          /* error when parsing the WARC header line */
-          fprintf (stderr,  "error in FSM state address %p, at offset %ld in \"%s\"\n",
-                   WFsmHDL_state (fsm), ftell (fin), filename);
-          destroy (afsm);
-          break;
-        }
-
-      destroy (afsm);
+     CU_FAIL( "Corrupted Record type\n");
+      destroy (r);
+      return;
     }
 
+  if  (WRecord_setDate (r, makeS ("2008-04-03T02:59:55Z") ) )
+    {
+     CU_FAIL( "Corrupted date\n");
+      destroy (r);
+      return;
+    }
 
-  destroy (fsm);
+  u = bless (WUUID);
 
-  fclose  (fin);
+  WUUID_hash (u, makeU ("record1://anunknownplace") );
 
-  return 0;
+  if (WRecord_setRecordId (r, makeS (WUUID_text (u) ) ) )
+    {
+     CU_FAIL( "Corrupted record ID\n");
+      destroy (r);
+      destroy (u);
+      return;
+    }
+
+  destroy (u);
+
+  if  (WRecord_setContentType (r, makeS ("Text/random") ) )
+    {
+     CU_FAIL( "Corrupted content type\n");
+      destroy (r);
+      return;
+    }
+
+   if (WRecord_setConcurrentTo (r, makeS ( "concuuid://id1:warc-x584sld56" )))
+
+    {
+     CU_FAIL( "Corrupted concurrent to \n");
+      destroy (r);
+      return;
+    }
+  
+    if (WRecord_setBlockDigest (r, makeS ("sha1:0451-9645-AM35P-12LL")))
+
+     {
+     CU_FAIL( "Corrupted Bloc Digest to \n");
+      destroy (r);
+      return;
+     }
+
+    if (WRecord_setPayloadDigest (r, makeS ("sha2:0121-KJ45-1111-A001L")))
+
+     {
+     CU_FAIL( "Corrupted Pay Load Digest to \n");
+      destroy (r);
+      return;
+     }
+
+    if (WRecord_setTruncated (r, makeS("time")))
+   
+     {
+     CU_FAIL( "Corrupted Truncated  \n");
+      destroy (r);
+      return;
+     }
+     
+    if (WRecord_setProfile (r, makeS ("Compressed:gzip:best speed")))
+
+     {
+     CU_FAIL( "Corrupted Profile  \n");
+      destroy (r);
+      return;
+     } 
+
+    if (WRecord_setPayloadType (r, makeS("text/html; charset=unicode-utf8")))
+
+     
+     {
+     CU_FAIL( "Corrupted PayLoadType  \n");
+      destroy (r);
+      return;
+     }
+
+  WRecord_setContentFromFileName (r, "./version");
+  
+  unless (WRecord_check (r))
+    {
+     CU_FAIL( "inocmpatible fields with record type\n");
+      destroy (r);
+      return;
+    }
+
+ CU_PASS( "OK\n");
+
+  destroy (r);
+
+ return;
 }
+
+void test3 (void)
+{
+
+  void * r = bless (WRecord);
+  void * u = NIL;
+
+
+CU_ASSERT_PTR_NOT_EQUAL(r,NIL);
+
+  if (WRecord_setTargetUri (r, makeS ("test://anunknownplace") ) )
+    {
+     CU_FAIL( "Corrupted Target Uri\n");
+      destroy (r);
+      return;
+    }
+
+  if  (WRecord_setRecordType (r, WARC_RESOURCE_RECORD) )
+    {
+     CU_FAIL( "Corrupted Record type\n");
+      destroy (r);
+
+      return;
+    }
+
+  if  (WRecord_setDate (r, makeS ("2008-04-03T02:59:55Z") ) )
+    {
+     CU_FAIL( "Corrupted date\n");
+      destroy (r);
+
+      return;
+    }
+
+  u = bless (WUUID);
+
+  WUUID_hash (u, makeU ("record1://anunknownplace") );
+
+  if (WRecord_setRecordId (r, makeS (WUUID_text (u) ) ) )
+    {
+     CU_FAIL( "Corrupted record ID\n");
+      destroy (r);
+
+      destroy (u);
+      return;
+    }
+
+  destroy (u);
+
+  if  (WRecord_setContentType (r, makeS ("Text/random") ) )
+    {
+     CU_FAIL( "Corrupted content type\n");
+      destroy (r);
+
+      return;
+    }
+
+   if (WRecord_setConcurrentTo (r, makeS ( "concuuid://id1:warc-x584sld56" )))
+
+    {
+     CU_FAIL( "Corrupted concurrent to \n");
+      destroy (r);
+
+      return;
+    }
+  
+    if (WRecord_setBlockDigest (r, makeS ("sha1:0451-9645-AM35P-12LL")))
+
+     {
+     CU_FAIL( "Corrupted Bloc Digest to \n");
+      destroy (r);
+
+      return;
+     }
+
+    if (WRecord_setPayloadDigest (r, makeS ("sha2:0121-KJ45-1111-A001L")))
+
+     {
+     CU_FAIL( "Corrupted Pay Load Digest to \n");
+      destroy (r);
+
+      return;
+     }
+
+    if (WRecord_setIpAddress (r, makeS ("192.165.1.0")))
+ 
+     {
+     CU_FAIL( "Corrupted Ip Adress Digest to \n");
+      destroy (r);
+
+      return;
+     }
+
+     
+    if (WRecord_setWarcInfoId (r, makeS ("infuuid://id0:warc-x000sl076")))
+
+     {
+     CU_FAIL( "Corrupted InfoId  \n");
+      destroy (r);
+
+      return;
+     }
+   
+  WRecord_setContentFromFileName (r, "./version");
+  unless (WRecord_check (r))
+    {
+     CU_FAIL( "inocmpatible fields with record type\n");
+      destroy (r);
+      return;
+    }
+
+
+ CU_PASS( "OK\n");
+
+  destroy (r);
+
+ return;
+}
+
+void test4 (void)
+{
+  
+
+  void * r = bless (WRecord);
+  void * u = NIL;
+
+CU_ASSERT_PTR_NOT_EQUAL(r,NIL);
+
+  if  (WRecord_setRecordType (r, WARC_INFO_RECORD) )
+    {
+     CU_FAIL( "Corrupted Record type\n");
+      destroy (r);
+
+      return;
+    }
+
+  if  (WRecord_setDate (r, makeS ("2008-04-03T02:59:55Z") ) )
+    {
+     CU_FAIL( "Corrupted date\n");
+      destroy (r);
+
+      return;
+    }
+
+  u = bless (WUUID);
+
+  WUUID_hash (u, makeU ("record1://anunknownplace") );
+
+  if (WRecord_setRecordId (r, makeS (WUUID_text (u) ) ) )
+    {
+     CU_FAIL( "Corrupted record ID\n");
+      destroy (r);
+
+      destroy (u);
+      return;
+    }
+
+  destroy (u);
+
+  if  (WRecord_setContentType (r, makeS ("Text/random") ) )
+    {
+     CU_FAIL( "Corrupted content type\n");
+      destroy (r);
+
+      return;
+    }
+
+   
+  
+    if (WRecord_setBlockDigest (r, makeS ("sha1:0451-9645-AM35P-12LL")))
+
+     {
+     CU_FAIL( "Corrupted Bloc Digest to \n");
+      destroy (r);
+
+      return;
+     }
+
+    if (WRecord_setPayloadDigest (r, makeS ("sha2:0121-KJ45-1111-A001L")))
+
+     {
+     CU_FAIL( "Corrupted Pay Load Digest to \n");
+      destroy (r);
+
+      return;
+     }  
+
+
+    if (WRecord_setProfile (r, makeS ("Compressed:gzip:best speed")))
+
+     {
+     CU_FAIL( "Corrupted Profile  \n");
+      destroy (r);
+
+      return;
+     }
+  WRecord_setContentFromFileName (r, "./version");
+  unless (WRecord_check (r))
+    {
+     CU_FAIL( "inocmpatible fields with record type\n");
+      destroy (r);
+      return;
+    }
+
+ CU_PASS( "OK\n");
+
+  destroy (r);
+
+
+ return;
+}
+
+
+void test5 (void)
+{
+  
+  void * r = bless (WRecord);
+  void * u = NIL;
+
+
+CU_ASSERT_PTR_NOT_EQUAL(r,NIL);
+  if (WRecord_setTargetUri (r, makeS ("test://anunknownplace") ) )
+    {
+     CU_FAIL( "Corrupted Target Uri\n");
+      destroy (r);
+
+      return;
+    }
+
+  if  (WRecord_setRecordType (r, WARC_REVISIT_RECORD) )
+    {
+     CU_FAIL( "Corrupted Record type\n");
+      destroy (r);
+
+      return;
+    }
+
+  if  (WRecord_setDate (r, makeS ("2008-04-03T02:59:55Z") ) )
+    {
+     CU_FAIL( "Corrupted date\n");
+      destroy (r);
+
+      return;
+    }
+
+  u = bless (WUUID);
+
+  WUUID_hash (u, makeU ("record1://anunknownplace") );
+
+  if (WRecord_setRecordId (r, makeS (WUUID_text (u) ) ) )
+    {
+     CU_FAIL( "Corrupted record ID\n");
+      destroy (r);
+
+      destroy (u);
+      return;
+    }
+
+  destroy (u);
+
+  if  (WRecord_setContentType (r, makeS ("Text/random") ) )
+    {
+     CU_FAIL( "Corrupted content type\n");
+      destroy (r);
+
+      return;
+    }
+
+  
+    if (WRecord_setBlockDigest (r, makeS ("sha1:0451-9645-AM35P-12LL")))
+
+     {
+     CU_FAIL( "Corrupted Bloc Digest to \n");
+      destroy (r);
+
+      return;
+     }
+
+    if (WRecord_setPayloadDigest (r, makeS ("sha2:0121-KJ45-1111-A001L")))
+
+     {
+     CU_FAIL( "Corrupted Pay Load Digest to \n");
+      destroy (r);
+
+      return;
+     }
+
+    if (WRecord_setIpAddress (r, makeS ("192.165.1.0")))
+ 
+     {
+     CU_FAIL( "Corrupted Ip Adress Digest to \n");
+      destroy (r);
+
+      return;
+     }
+
+   if (WRecord_setRefersTo (r, makeS ("refuuid://id14:warc-x265sll76")))
+
+     {
+     CU_FAIL( "Corrupted Refers to \n");
+      destroy (r);
+
+      return;
+     }
+
+    if (WRecord_setTruncated (r, makeS("time")))
+   
+     {
+     CU_FAIL( "Corrupted Truncated  \n");
+      destroy (r);
+
+      return;
+     }
+     
+ 
+
+    if (WRecord_setProfile (r, makeS ("Compressed:gzip:best speed")))
+
+     {
+     CU_FAIL( "Corrupted Profile  \n");
+      destroy (r);
+
+      return;
+     }
+
+    if (WRecord_setPayloadType (r, makeS("text/html; charset=unicode-utf8")))
+
+     
+     {
+     CU_FAIL( "Corrupted PayLoadType  \n");
+      destroy (r);
+
+      return;
+     }
+  WRecord_setContentFromFileName (r, "./version");
+  unless (WRecord_check (r))
+    {
+     CU_FAIL( "inocmpatible fields with record type\n");
+      destroy (r);
+      return;
+    }
+
+ CU_PASS( "OK\n");
+
+  destroy (r);
+
+
+ return;
+}
+
+
+void test6 (void)
+{
+  
+
+  void * r = bless (WRecord);
+  void * u = NIL;
+
+
+CU_ASSERT_PTR_NOT_EQUAL(r,NIL);
+
+  if (WRecord_setTargetUri (r, makeS ("test://anunknownplace") ) )
+    {
+     CU_FAIL( "Corrupted Target Uri\n");
+      destroy (r);
+
+      return;
+    }
+
+  if  (WRecord_setRecordType (r, WARC_METADATA_RECORD) )
+    {
+     CU_FAIL( "Corrupted Record type\n");
+      destroy (r);
+
+      return;
+    }
+
+  if  (WRecord_setDate (r, makeS ("2008-04-03T02:59:55Z") ) )
+    {
+     CU_FAIL( "Corrupted date\n");
+      destroy (r);
+
+      return;
+    }
+
+  u = bless (WUUID);
+
+  WUUID_hash (u, makeU ("record1://anunknownplace") );
+
+  if (WRecord_setRecordId (r, makeS (WUUID_text (u) ) ) )
+    {
+     CU_FAIL( "Corrupted record ID\n");
+      destroy (r);
+
+      destroy (u);
+      return;
+    }
+
+  destroy (u);
+
+  if  (WRecord_setContentType (r, makeS ("Text/random") ) )
+    {
+     CU_FAIL( "Corrupted content type\n");
+      destroy (r);
+
+      return;
+    }
+
+   if (WRecord_setConcurrentTo (r, makeS ( "concuuid://id1:warc-x584sld56" )))
+
+    {
+     CU_FAIL( "Corrupted concurrent to \n");
+      destroy (r);
+
+      return;
+    }
+  
+    if (WRecord_setBlockDigest (r, makeS ("sha1:0451-9645-AM35P-12LL")))
+
+     {
+     CU_FAIL( "Corrupted Bloc Digest to \n");
+      destroy (r);
+
+      return;
+     }
+
+    if (WRecord_setPayloadDigest (r, makeS ("sha2:0121-KJ45-1111-A001L")))
+
+     {
+     CU_FAIL( "Corrupted Pay Load Digest to \n");
+      destroy (r);
+
+      return;
+     }
+
+    if (WRecord_setIpAddress (r, makeS ("192.165.1.0")))
+ 
+     {
+     CU_FAIL( "Corrupted Ip Adress Digest to \n");
+      destroy (r);
+
+      return;
+     }
+
+   if (WRecord_setRefersTo (r, makeS ("refuuid://id14:warc-x265sll76")))
+
+     {
+     CU_FAIL( "Corrupted Refers to \n");
+      destroy (r);
+
+      return;
+     }
+
+     
+    if (WRecord_setWarcInfoId (r, makeS ("infuuid://id0:warc-x000sl076")))
+
+     {
+     CU_FAIL( "Corrupted InfoId  \n");
+      destroy (r);
+
+      return;
+     }
+   
+
+
+    if (WRecord_setProfile (r, makeS ("Compressed:gzip:best speed")))
+
+     {
+     CU_FAIL( "Corrupted Profile  \n");
+      destroy (r);
+
+      return;
+     }
+  WRecord_setContentFromFileName (r, "./version");
+  unless (WRecord_check (r))
+    {
+     CU_FAIL( "inocmpatible fields with record type\n");
+      destroy (r);
+      return;
+    }
+
+ CU_PASS( "OK\n");
+
+  destroy (r);
+
+
+ return;
+}
+
+void test7 (void)
+{
+ 
+
+  void * r = bless (WRecord);
+  void * u = NIL;
+
+  
+CU_ASSERT_PTR_NOT_EQUAL(r,NIL);
+
+
+  if (WRecord_setTargetUri (r, makeS ("test://anunknownplace") ) )
+    {
+     CU_FAIL( "Corrupted Target Uri\n");
+      destroy (r);
+
+      return;
+    }
+
+  if  (WRecord_setRecordType (r, WARC_CONVERSION_RECORD) )
+    {
+     CU_FAIL( "Corrupted Record type\n");
+      destroy (r);
+
+      return;
+    }
+
+  if  (WRecord_setDate (r, makeS ("2008-04-03T02:59:55Z") ) )
+    {
+     CU_FAIL( "Corrupted date\n");
+      destroy (r);
+
+      return;
+    }
+
+  u = bless (WUUID);
+
+  WUUID_hash (u, makeU ("record1://anunknownplace") );
+
+  if (WRecord_setRecordId (r, makeS (WUUID_text (u) ) ) )
+    {
+     CU_FAIL( "Corrupted record ID\n");
+      destroy (r);
+
+      destroy (u);
+      return;
+    }
+
+  destroy (u);
+
+  if  (WRecord_setContentType (r, makeS ("Text/random") ) )
+    {
+     CU_FAIL( "Corrupted content type\n");
+      destroy (r);
+
+      return;
+    }
+  
+    if (WRecord_setBlockDigest (r, makeS ("sha1:0451-9645-AM35P-12LL")))
+
+     {
+     CU_FAIL( "Corrupted Bloc Digest to \n");
+      destroy (r);
+
+      return;
+     }
+
+    if (WRecord_setPayloadDigest (r, makeS ("sha2:0121-KJ45-1111-A001L")))
+
+     {
+     CU_FAIL( "Corrupted Pay Load Digest to \n");
+      destroy (r);
+
+      return;
+     }
+
+    
+
+   if (WRecord_setRefersTo (r, makeS ("refuuid://id14:warc-x265sll76")))
+
+     {
+     CU_FAIL( "Corrupted Refers to \n");
+      destroy (r);
+
+      return;
+     }
+
+
+     
+    if (WRecord_setWarcInfoId (r, makeS ("infuuid://id0:warc-x000sl076")))
+
+     {
+     CU_FAIL( "Corrupted InfoId  \n");
+      destroy (r);
+
+      return;
+     }
+   
+
+
+    if (WRecord_setProfile (r, makeS ("Compressed:gzip:best speed")))
+
+     {
+     CU_FAIL( "Corrupted Profile  \n");
+      destroy (r);
+
+      return;
+     }
+  WRecord_setContentFromFileName (r, "./version");
+  unless (WRecord_check (r))
+    {
+     CU_FAIL( "inocmpatible fields with record type\n");
+      destroy (r);
+      return;
+    }
+
+ CU_PASS( "OK\n");
+
+  destroy (r);
+
+
+ return;
+}
+
+
+void test8 (void)
+{
+ 
+  void * r = bless (WRecord);
+  void * u = NIL;
+
+  
+CU_ASSERT_PTR_NOT_EQUAL(r,NIL);
+
+  if (WRecord_setTargetUri (r, makeS ("test://anunknownplace") ) )
+    {
+     CU_FAIL( "Corrupted Target Uri\n");
+      destroy (r);
+
+      return;
+    }
+
+  if  (WRecord_setRecordType (r, WARC_CONTINUATION_RECORD) )
+    {
+     CU_FAIL( "Corrupted Record type\n");
+      destroy (r);
+
+      return;
+    }
+
+  if  (WRecord_setDate (r, makeS ("2008-04-03T02:59:55Z") ) )
+    {
+     CU_FAIL( "Corrupted date\n");
+      destroy (r);
+
+      return;
+    }
+
+  u = bless (WUUID);
+
+  WUUID_hash (u, makeU ("record1://anunknownplace") );
+
+  if (WRecord_setRecordId (r, makeS (WUUID_text (u) ) ) )
+    {
+     CU_FAIL( "Corrupted record ID\n");
+      destroy (r);
+
+      destroy (u);
+      return;
+    }
+
+  destroy (u);
+
+ 
+  
+    if (WRecord_setBlockDigest (r, makeS ("sha1:0451-9645-AM35P-12LL")))
+
+     {
+     CU_FAIL( "Corrupted Bloc Digest to \n");
+      destroy (r);
+
+      return;
+     }
+
+    if (WRecord_setPayloadDigest (r, makeS ("sha2:0121-KJ45-1111-A001L")))
+
+     {
+     CU_FAIL( "Corrupted Pay Load Digest to \n");
+      destroy (r);
+
+      return;
+     }
+
+  
+    if (WRecord_setSegmentOriginId (r, makeS ("orgid://w45-pp78-4574")))
+
+     {
+     CU_FAIL( "Corrupted Segment Oringin Id  \n");
+      destroy (r);
+
+      return;
+     }
+
+    if (WRecord_setSegmentNumber (r, 1))
+   
+     {
+     CU_FAIL( "Corrupted SegmentNumber  \n");
+      destroy (r);
+
+      return;
+     }
+
+    if (WRecord_setSegTotalLength (r, 145500))
+
+     {
+     CU_FAIL( "Corrupted TotalLength  \n");
+      destroy (r);
+
+      return;
+     }  
+  WRecord_setContentFromFileName (r, "./version");
+  unless (WRecord_check (r))
+    {
+     CU_FAIL( "inocmpatible fields with record type\n");
+      destroy (r);
+      return;
+    }
+
+ CU_PASS( "OK\n");
+
+  destroy (r);
+
+
+ return;
+}
+
+void test9 (void)
+{
+  
+
+
+  void * r = bless (WRecord);
+  void * u = NIL;
+
+
+CU_ASSERT_PTR_NOT_EQUAL(r,NIL);
+
+  if (WRecord_setTargetUri (r, makeS ("test://anunknownplace") ) )
+    {
+     CU_FAIL( "Corrupted Target Uri\n");
+      destroy (r);
+
+      return;
+    }
+
+  if  (WRecord_setRecordType (r,WARC_REQUEST_RECORD) )
+    {
+     CU_FAIL( "Corrupted Record type\n");
+      destroy (r);
+
+      return;
+    }
+
+  if  (WRecord_setDate (r, makeS ("2008-04-03T02:59:55Z") ) )
+    {
+     CU_FAIL( "Corrupted date\n");
+      destroy (r);
+
+      return;
+    }
+
+  u = bless (WUUID);
+
+  WUUID_hash (u, makeU ("record1://anunknownplace") );
+
+  if (WRecord_setRecordId (r, makeS (WUUID_text (u) ) ) )
+    {
+     CU_FAIL( "Corrupted record ID\n");
+      destroy (r);
+
+      destroy (u);
+      return;
+    }
+
+  destroy (u);
+
+  if  (WRecord_setContentType (r, makeS ("Text/random") ) )
+    {
+     CU_FAIL( "Corrupted content type\n");
+      destroy (r);
+
+      return;
+    }
+
+   if (WRecord_setConcurrentTo (r, makeS ( "concuuid://id1:warc-x584sld56" )))
+
+    {
+     CU_FAIL( "Corrupted concurrent to \n");
+      destroy (r);
+
+      return;
+    }
+  
+    if (WRecord_setBlockDigest (r, makeS ("sha1:0451-9645-AM35P-12LL")))
+
+     {
+     CU_FAIL( "Corrupted Bloc Digest to \n");
+      destroy (r);
+
+      return;
+     }
+
+    if (WRecord_setPayloadDigest (r, makeS ("sha2:0121-KJ45-1111-A001L")))
+
+     {
+     CU_FAIL( "Corrupted Pay Load Digest to \n");
+      destroy (r);
+
+      return;
+     }
+
+
+    if (WRecord_setTruncated (r, makeS("time")))
+   
+     {
+     CU_FAIL( "Corrupted Truncated  \n");
+      destroy (r);
+
+      return;
+     }
+
+   
+     if (WRecord_setFilename (r, makeS ("/home/user/warcfile.warc")))
+
+     {
+     CU_FAIL( "Corrupted Filename  \n");
+      destroy (r);
+
+      return;
+     } 
+
+    if (WRecord_setProfile (r, makeS ("Compressed:gzip:best speed")))
+
+     {
+     CU_FAIL( "Corrupted Profile  \n");
+      destroy (r);
+
+      return;
+     } 
+
+    if (WRecord_setPayloadType (r, makeS("text/html; charset=unicode-utf8")))
+
+     
+     {
+     CU_FAIL( "Corrupted PayLoadType  \n");
+      destroy (r);
+
+      return;
+     }
+
+
+  WRecord_setContentFromFileName (r, "./version");
+  unless (WRecord_check (r))
+    {
+     CU_PASS( "inocmpatible fields with record type\n");
+      destroy (r);
+      return;
+    }
+
+ CU_PASS( "OK\n");
+
+  destroy (r);
+
+
+ return;
+}
+
+void test10 (void)
+{
+  
+ 
+
+  void * r = bless (WRecord);
+  void * u = NIL;
+
+ 
+CU_ASSERT_PTR_NOT_EQUAL(r,NIL);
+
+  if (WRecord_setTargetUri (r, makeS ("test://anunknownplace") ) )
+    {
+     CU_FAIL( "Corrupted Target Uri\n");
+      destroy (r);
+
+      return;
+    }
+
+  if  (WRecord_setRecordType (r, WARC_RESOURCE_RECORD) )
+    {
+     CU_FAIL( "Corrupted Record type\n");
+      destroy (r);
+
+      return;
+    }
+
+  if  (WRecord_setDate (r, makeS ("2008-04-03T02:59:55Z") ) )
+    {
+     CU_FAIL( "Corrupted date\n");
+      destroy (r);
+
+      return;
+    }
+
+  u = bless (WUUID);
+
+  WUUID_hash (u, makeU ("record1://anunknownplace") );
+
+  if (WRecord_setRecordId (r, makeS (WUUID_text (u) ) ) )
+    {
+     CU_FAIL( "Corrupted record ID\n");
+      destroy (r);
+
+      destroy (u);
+      return;
+    }
+
+  destroy (u);
+
+  if  (WRecord_setContentType (r, makeS ("Text/random") ) )
+    {
+     CU_FAIL( "Corrupted content type\n");
+      destroy (r);
+
+      return;
+    }
+
+   if (WRecord_setConcurrentTo (r, makeS ( "concuuid://id1:warc-x584sld56" )))
+
+    {
+     CU_FAIL( "Corrupted concurrent to \n");
+      destroy (r);
+
+      return;
+    }
+  
+    if (WRecord_setBlockDigest (r, makeS ("sha1:0451-9645-AM35P-12LL")))
+
+     {
+     CU_FAIL( "Corrupted Bloc Digest to \n");
+      destroy (r);
+
+      return;
+     }
+
+    if (WRecord_setPayloadDigest (r, makeS ("sha2:0121-KJ45-1111-A001L")))
+
+     {
+     CU_FAIL( "Corrupted Pay Load Digest to \n");
+      destroy (r);
+
+      return;
+     }
+
+    if (WRecord_setIpAddress (r, makeS ("192.165.1.0")))
+ 
+     {
+     CU_FAIL( "Corrupted Ip Adress Digest to \n");
+      destroy (r);
+
+      return;
+     }
+
+    if (WRecord_setRefersTo (r, makeS ("refuuid://id14:warc-x265sll76")))
+
+     {
+     CU_FAIL( "Corrupted Refers to \n");
+      destroy (r);
+
+      return;
+     }
+
+     
+    if (WRecord_setWarcInfoId (r, makeS ("infuuid://id0:warc-x000sl076")))
+
+     {
+     CU_FAIL( "Corrupted InfoId  \n");
+      destroy (r);
+
+      return;
+     }
+   
+
+  WRecord_setContentFromFileName (r, "./version");
+  unless (WRecord_check (r))
+    {
+     CU_PASS( "inocmpatible fields with record type\n");
+      destroy (r);
+      return;
+    }
+
+ CU_PASS( "OK\n");
+
+  destroy (r);
+
+
+ return;
+}
+
+
+void test11 (void)
+{
+  
+
+  void * r = bless (WRecord);
+  void * u = NIL;
+
+CU_ASSERT_PTR_NOT_EQUAL(r,NIL);
+  if (WRecord_setTargetUri (r, makeS ("test://anunknownplace") ) )
+    {
+     CU_FAIL( "Corrupted Target Uri\n");
+      destroy (r);
+
+      return;
+    }
+
+  if  (WRecord_setRecordType (r, WARC_INFO_RECORD) )
+    {
+     CU_FAIL( "Corrupted Record type\n");
+      destroy (r);
+
+      return;
+    }
+
+  if  (WRecord_setDate (r, makeS ("2008-04-03T02:59:55Z") ) )
+    {
+     CU_FAIL( "Corrupted date\n");
+      destroy (r);
+
+      return;
+    }
+
+  u = bless (WUUID);
+
+  WUUID_hash (u, makeU ("record1://anunknownplace") );
+
+  if (WRecord_setRecordId (r, makeS (WUUID_text (u) ) ) )
+    {
+     CU_FAIL( "Corrupted record ID\n");
+      destroy (r);
+
+      destroy (u);
+      return;
+    }
+
+  destroy (u);
+
+  if  (WRecord_setContentType (r, makeS ("Text/random") ) )
+    {
+     CU_FAIL( "Corrupted content type\n");
+      destroy (r);
+
+      return;
+    }
+
+
+  
+    if (WRecord_setBlockDigest (r, makeS ("sha1:0451-9645-AM35P-12LL")))
+
+     {
+     CU_FAIL( "Corrupted Bloc Digest to \n");
+      destroy (r);
+
+      return;
+     }
+
+    if (WRecord_setPayloadDigest (r, makeS ("sha2:0121-KJ45-1111-A001L")))
+
+     {
+     CU_FAIL( "Corrupted Pay Load Digest to \n");
+      destroy (r);
+
+      return;
+     }
+
+   
+    if (WRecord_setProfile (r, makeS ("Compressed:gzip:best speed")))
+
+     {
+     CU_FAIL( "Corrupted Profile  \n");
+      destroy (r);
+
+      return;
+     }
+  WRecord_setContentFromFileName (r, "./version");
+  unless (WRecord_check (r))
+    {
+     CU_PASS( "inocmpatible fields with record type\n");
+      destroy (r);
+      return;
+    }
+
+ CU_FAIL( "OK\n");
+
+  destroy (r);
+
+
+ return;
+}
+
+void test12 (void)
+{
+   
+
+  void * r = bless (WRecord);
+  void * u = NIL;
+
+
+CU_ASSERT_PTR_NOT_EQUAL(r,NIL); 
+
+  if  (WRecord_setRecordType (r, WARC_INFO_RECORD) )
+    {
+     CU_FAIL( "Corrupted Record type\n");
+      destroy (r);
+
+      return;
+    }
+
+  if  (WRecord_setDate (r, makeS ("2008-04-03T02:59:55Z") ) )
+    {
+     CU_FAIL( "Corrupted date\n");
+      destroy (r);
+
+      return;
+    }
+
+  u = bless (WUUID);
+
+  WUUID_hash (u, makeU ("record1://anunknownplace") );
+
+  if (WRecord_setRecordId (r, makeS (WUUID_text (u) ) ) )
+    {
+     CU_FAIL( "Corrupted record ID\n");
+      destroy (r);
+
+      destroy (u);
+      return;
+    }
+
+  destroy (u);
+
+  if  (WRecord_setContentType (r, makeS ("Text/random") ) )
+    {
+     CU_FAIL( "Corrupted content type\n");
+      destroy (r);
+
+      return;
+    }
+  
+    if (WRecord_setBlockDigest (r, makeS ("sha1:0451-9645-AM35P-12LL")))
+
+     {
+     CU_FAIL( "Corrupted Bloc Digest to \n");
+      destroy (r);
+
+      return;
+     }
+
+    if (WRecord_setPayloadDigest (r, makeS ("sha2:0121-KJ45-1111-A001L")))
+
+     {
+     CU_FAIL( "Corrupted Pay Load Digest to \n");
+      destroy (r);
+
+      return;
+     }
+
+   
+    if (WRecord_setWarcInfoId (r, makeS ("infuuid://id0:warc-x000sl076")))
+
+     {
+     CU_FAIL( "Corrupted InfoId  \n");
+      destroy (r);
+
+      return;
+     }
+   
+    if (WRecord_setFilename (r, makeS ("/home/user/warcfile.warc")))
+
+     {
+     CU_FAIL( "Corrupted Filename  \n");
+      destroy (r);
+
+      return;
+     }
+
+    if (WRecord_setProfile (r, makeS ("Compressed:gzip:best speed")))
+
+     {
+     CU_FAIL( "Corrupted Profile  \n");
+      destroy (r);
+
+      return;
+     }
+
+  WRecord_setContentFromFileName (r, "./version");
+  unless (WRecord_check (r))
+    {
+     CU_PASS( "inocmpatible fields with record type\n");
+      destroy (r);
+      return;
+    }
+
+ CU_PASS( "OK\n");
+
+  destroy (r);
+
+
+ return;
+}
+
+
+void test13 (void)
+{
+ 
+  void * r = bless (WRecord);
+  void * u = NIL;
+
+  
+CU_ASSERT_PTR_NOT_EQUAL(r,NIL);
+
+  if (WRecord_setTargetUri (r, makeS ("test://anunknownplace") ) )
+    {
+     CU_FAIL( "Corrupted Target Uri\n");
+      destroy (r);
+
+      return;
+    }
+
+  if  (WRecord_setRecordType (r, WARC_REVISIT_RECORD) )
+    {
+     CU_FAIL( "Corrupted Record type\n");
+      destroy (r);
+
+      return;
+    }
+
+  if  (WRecord_setDate (r, makeS ("2008-04-03T02:59:55Z") ) )
+    {
+     CU_FAIL( "Corrupted date\n");
+      destroy (r);
+
+      return;
+    }
+
+  u = bless (WUUID);
+
+  WUUID_hash (u, makeU ("record1://anunknownplace") );
+
+  if (WRecord_setRecordId (r, makeS (WUUID_text (u) ) ) )
+    {
+     CU_FAIL( "Corrupted record ID\n");
+      destroy (r);
+
+      destroy (u);
+      return;
+    }
+
+  destroy (u);
+
+  if  (WRecord_setContentType (r, makeS ("Text/random") ) )
+    {
+     CU_FAIL( "Corrupted content type\n");
+      destroy (r);
+
+      return;
+    }
+
+
+  
+    if (WRecord_setBlockDigest (r, makeS ("sha1:0451-9645-AM35P-12LL")))
+
+     {
+     CU_FAIL( "Corrupted Bloc Digest to \n");
+      destroy (r);
+
+      return;
+     }
+
+    if (WRecord_setPayloadDigest (r, makeS ("sha2:0121-KJ45-1111-A001L")))
+
+     {
+     CU_FAIL( "Corrupted Pay Load Digest to \n");
+      destroy (r);
+
+      return;
+     }
+
+    if (WRecord_setIpAddress (r, makeS ("192.165.1.0")))
+ 
+     {
+     CU_FAIL( "Corrupted Ip Adress Digest to \n");
+      destroy (r);
+
+      return;
+     }
+
+   if (WRecord_setRefersTo (r, makeS ("refuuid://id14:warc-x265sll76")))
+
+     {
+     CU_FAIL( "Corrupted Refers to \n");
+      destroy (r);
+
+      return;
+     }
+
+    if (WRecord_setTruncated (r, makeS("time")))
+   
+     {
+     CU_FAIL( "Corrupted Truncated  \n");
+      destroy (r);
+
+      return;
+     }
+     
+  
+
+  
+
+    if (WRecord_setPayloadType (r, makeS("text/html; charset=unicode-utf8")))
+
+     
+     {
+     CU_FAIL( "Corrupted PayLoadType  \n");
+      destroy (r);
+
+      return;
+     }
+
+  WRecord_setContentFromFileName (r, "./version");
+  unless (WRecord_check (r))
+    {
+     CU_PASS( "inocmpatible fields with record type\n");
+      destroy (r);
+      return;
+    }
+
+ CU_PASS( "OK\n");
+
+  destroy (r);
+
+
+ return;
+}
+
+void test14 (void)
+{
+ 
+  void * r = bless (WRecord);
+  void * u = NIL;
+
+ 
+CU_ASSERT_PTR_NOT_EQUAL(r,NIL);
+
+  if (WRecord_setTargetUri (r, makeS ("test://anunknownplace") ) )
+    {
+     CU_FAIL( "Corrupted Target Uri\n");
+      destroy (r);
+
+      return;
+    }
+
+  if  (WRecord_setRecordType (r, WARC_METADATA_RECORD) )
+    {
+     CU_FAIL( "Corrupted Record type\n");
+      destroy (r);
+
+      return;
+    }
+
+  if  (WRecord_setDate (r, makeS ("2008-04-03T02:59:55Z") ) )
+    {
+     CU_FAIL( "Corrupted date\n");
+      destroy (r);
+
+      return;
+    }
+
+  u = bless (WUUID);
+
+  WUUID_hash (u, makeU ("record1://anunknownplace") );
+
+  if (WRecord_setRecordId (r, makeS (WUUID_text (u) ) ) )
+    {
+     CU_FAIL( "Corrupted record ID\n");
+      destroy (r);
+
+      destroy (u);
+      return;
+    }
+
+  destroy (u);
+
+  if  (WRecord_setContentType (r, makeS ("Text/random") ) )
+    {
+     CU_FAIL( "Corrupted content type\n");
+      destroy (r);
+
+      return;
+    }
+
+   if (WRecord_setConcurrentTo (r, makeS ( "concuuid://id1:warc-x584sld56" )))
+
+    {
+     CU_FAIL( "Corrupted concurrent to \n");
+      destroy (r);
+
+      return;
+    }
+  
+    if (WRecord_setBlockDigest (r, makeS ("sha1:0451-9645-AM35P-12LL")))
+
+     {
+     CU_FAIL( "Corrupted Bloc Digest to \n");
+      destroy (r);
+
+      return;
+     }
+
+    if (WRecord_setPayloadDigest (r, makeS ("sha2:0121-KJ45-1111-A001L")))
+
+     {
+     CU_FAIL( "Corrupted Pay Load Digest to \n");
+      destroy (r);
+
+      return;
+     }
+
+    if (WRecord_setIpAddress (r, makeS ("192.165.1.0")))
+ 
+     {
+     CU_FAIL( "Corrupted Ip Adress Digest to \n");
+      destroy (r);
+
+      return;
+     }
+
+   if (WRecord_setRefersTo (r, makeS ("refuuid://id14:warc-x265sll76")))
+
+     {
+     CU_FAIL( "Corrupted Refers to \n");
+      destroy (r);
+
+      return;
+     }
+
+
+     
+    if (WRecord_setWarcInfoId (r, makeS ("infuuid://id0:warc-x000sl076")))
+
+     {
+     CU_FAIL( "Corrupted InfoId  \n");
+      destroy (r);
+
+      return;
+     }
+   
+
+
+    if (WRecord_setProfile (r, makeS ("Compressed:gzip:best speed")))
+
+     {
+     CU_FAIL( "Corrupted Profile  \n");
+      destroy (r);
+
+      return;
+     }
+
+    if (WRecord_setPayloadType (r, makeS("text/html; charset=unicode-utf8")))
+
+     
+     {
+     CU_FAIL( "Corrupted PayLoadType  \n");
+      destroy (r);
+
+      return;
+     }
+
+    if (WRecord_setSegmentOriginId (r, makeS ("orgid://w45-pp78-4574")))
+
+     {
+     CU_FAIL( "Corrupted Segment Oringin Id  \n");
+      destroy (r);
+
+      return;
+     }
+
+   
+  WRecord_setContentFromFileName (r, "./version");
+  unless (WRecord_check (r))
+    {
+     CU_PASS( "inocmpatible fields with record type\n");
+      destroy (r);
+      return;
+    }
+
+ CU_PASS( "OK\n");
+
+  destroy (r);
+
+
+ return;
+}
+
+void test15 (void)
+{
+
+  void * r = bless (WRecord);
+  void * u = NIL;
+
+  
+CU_ASSERT_PTR_NOT_EQUAL(r,NIL);
+
+  if (WRecord_setTargetUri (r, makeS ("test://anunknownplace") ) )
+    {
+     CU_FAIL( "Corrupted Target Uri\n");
+      destroy (r);
+
+      return;
+    }
+
+  if  (WRecord_setRecordType (r, WARC_CONVERSION_RECORD) )
+    {
+     CU_FAIL( "Corrupted Record type\n");
+      destroy (r);
+
+      return;
+    }
+
+  if  (WRecord_setDate (r, makeS ("2008-04-03T02:59:55Z") ) )
+    {
+     CU_FAIL( "Corrupted date\n");
+      destroy (r);
+
+      return;
+    }
+
+  u = bless (WUUID);
+
+  WUUID_hash (u, makeU ("record1://anunknownplace") );
+
+  if (WRecord_setRecordId (r, makeS (WUUID_text (u) ) ) )
+    {
+     CU_FAIL( "Corrupted record ID\n");
+      destroy (r);
+
+      destroy (u);
+      return;
+    }
+
+  destroy (u);
+
+  if  (WRecord_setContentType (r, makeS ("Text/random") ) )
+    {
+     CU_FAIL( "Corrupted content type\n");
+      destroy (r);
+
+      return;
+    }
+  
+    if (WRecord_setBlockDigest (r, makeS ("sha1:0451-9645-AM35P-12LL")))
+
+     {
+     CU_FAIL( "Corrupted Bloc Digest to \n");
+      destroy (r);
+
+      return;
+     }
+
+    if (WRecord_setPayloadDigest (r, makeS ("sha2:0121-KJ45-1111-A001L")))
+
+     {
+     CU_FAIL( "Corrupted Pay Load Digest to \n");
+      destroy (r);
+
+      return;
+     }
+
+    if (WRecord_setIpAddress (r, makeS ("192.165.1.0")))
+ 
+     {
+     CU_FAIL( "Corrupted Ip Adress Digest to \n");
+      destroy (r);
+
+      return;
+     }
+
+   if (WRecord_setRefersTo (r, makeS ("refuuid://id14:warc-x265sll76")))
+
+     {
+     CU_FAIL( "Corrupted Refers to \n");
+      destroy (r);
+
+      return;
+     }
+
+
+    if (WRecord_setWarcInfoId (r, makeS ("infuuid://id0:warc-x000sl076")))
+
+     {
+     CU_FAIL( "Corrupted InfoId  \n");
+      destroy (r);
+
+      return;
+     }
+   
+
+
+    if (WRecord_setProfile (r, makeS ("Compressed:gzip:best speed")))
+
+     {
+     CU_FAIL( "Corrupted Profile  \n");
+      destroy (r);
+
+      return;
+     }
+
+  WRecord_setContentFromFileName (r, "./version");
+  unless (WRecord_check (r))
+    {
+     CU_PASS( "inocmpatible fields with record type\n");
+      destroy (r);
+      return;
+    }
+
+ CU_PASS( "OK\n");
+
+  destroy (r);
+
+
+ return;
+}
+
+void test16 (void)
+{
+ 
+
+  void * r = bless (WRecord);
+  void * u = NIL;
+
+
+CU_ASSERT_PTR_NOT_EQUAL(r,NIL);
+  if (WRecord_setTargetUri (r, makeS ("test://anunknownplace") ) )
+    {
+     CU_FAIL( "Corrupted Target Uri\n");
+      destroy (r);
+
+      return;
+    }
+
+  if  (WRecord_setRecordType (r, WARC_CONTINUATION_RECORD) )
+    {
+     CU_FAIL( "Corrupted Record type\n");
+      destroy (r);
+
+      return;
+    }
+
+  if  (WRecord_setDate (r, makeS ("2008-04-03T02:59:55Z") ) )
+    {
+     CU_FAIL( "Corrupted date\n");
+      destroy (r);
+
+      return;
+    }
+
+  u = bless (WUUID);
+
+  WUUID_hash (u, makeU ("record1://anunknownplace") );
+
+  if (WRecord_setRecordId (r, makeS (WUUID_text (u) ) ) )
+    {
+     CU_FAIL( "Corrupted record ID\n");
+      destroy (r);
+
+      destroy (u);
+      return;
+    }
+
+  destroy (u);
+
+  if  (WRecord_setContentType (r, makeS ("Text/random") ) )
+    {
+     CU_FAIL( "Corrupted content type\n");
+      destroy (r);
+
+      return;
+    }
+  
+    if (WRecord_setBlockDigest (r, makeS ("sha1:0451-9645-AM35P-12LL")))
+
+     {
+     CU_FAIL( "Corrupted Bloc Digest to \n");
+      destroy (r);
+
+      return;
+     }
+
+    if (WRecord_setPayloadDigest (r, makeS ("sha2:0121-KJ45-1111-A001L")))
+
+     {
+     CU_FAIL( "Corrupted Pay Load Digest to \n");
+      destroy (r);
+
+      return;
+     }
+
+  
+
+    if (WRecord_setSegmentOriginId (r, makeS ("orgid://w45-pp78-4574")))
+
+     {
+     CU_FAIL( "Corrupted Segment Oringin Id  \n");
+      destroy (r);
+
+      return;
+     }
+
+    if (WRecord_setSegmentNumber (r, 1))
+   
+     {
+     CU_FAIL( "Corrupted SegmentNumber  \n");
+      destroy (r);
+
+      return;
+     }
+
+    if (WRecord_setSegTotalLength (r, 145500))
+
+     {
+     CU_FAIL( "Corrupted TotalLength  \n");
+      destroy (r);
+
+      return;
+     }  
+  WRecord_setContentFromFileName (r, "./version");
+  unless (WRecord_check (r))
+    {
+     CU_PASS( "inocmpatible fields with record type\n");
+      destroy (r);
+      return;
+    }
+
+ CU_PASS( "OK\n");
+
+  destroy (r);
+
+
+ return;
+}
+
+void test17 (void)
+{
+ 
+
+  void * r = bless (WRecord);
+  void * u = NIL;
+
+
+CU_ASSERT_PTR_NOT_EQUAL(r,NIL);
+  if (WRecord_setTargetUri (r, makeS ("test://anunknownplace") ) )
+    {
+     CU_FAIL( "Corrupted Target Uri\n");
+      destroy (r);
+
+      return;
+    }
+
+  if  (WRecord_setRecordType (r, WARC_CONTINUATION_RECORD) )
+    {
+     CU_FAIL( "Corrupted Record type\n");
+      destroy (r);
+
+      return;
+    }
+
+  if  (WRecord_setDate (r, makeS ("2008-04-03T02:59:55Z") ) )
+    {
+     CU_FAIL( "Corrupted date\n");
+      destroy (r);
+
+      return;
+    }
+
+  u = bless (WUUID);
+
+  WUUID_hash (u, makeU ("record1://anunknownplace") );
+
+  if (WRecord_setRecordId (r, makeS (WUUID_text (u) ) ) )
+    {
+     CU_FAIL( "Corrupted record ID\n");
+      destroy (r);
+
+      destroy (u);
+      return;
+    }
+
+  destroy (u);
+
+ 
+  
+    if (WRecord_setBlockDigest (r, makeS ("sha1:0451-9645-AM35P-12LL")))
+
+     {
+     CU_FAIL( "Corrupted Bloc Digest to \n");
+      destroy (r);
+
+      return;
+     }
+
+    if (WRecord_setPayloadDigest (r, makeS ("sha2:0121-KJ45-1111-A001L")))
+
+     {
+     CU_FAIL( "Corrupted Pay Load Digest to \n");
+      destroy (r);
+
+      return;
+     }
+
+
+    if (WRecord_setSegmentNumber (r, 1))
+   
+     {
+     CU_FAIL( "Corrupted SegmentNumber  \n");
+      destroy (r);
+
+      return;
+     }
+
+    if (WRecord_setSegTotalLength (r, 145500))
+
+     {
+     CU_FAIL( "Corrupted TotalLength  \n");
+      destroy (r);
+
+      return;
+     }  
+  WRecord_setContentFromFileName (r, "./version");
+  unless (WRecord_check (r))
+    {
+     CU_PASS( "inocmpatible fields with record type\n");
+      destroy (r);
+      return;
+    }
+
+ CU_PASS( "OK\n");
+
+  destroy (r);
+
+
+ return;
+}
+
+
 
 int main (void)
 {
-  int (* tests []) () = { test1, test2};
-  warc_u32_t  i      = 0;
+  CU_pSuite pSuite = NULL; 
 
-  for (i = 0; i < ARRAY_LEN (tests); ++ i)
-    {
-      tests[i] ();
-    }
+   /* initialize the CUnit test registry */
+   if (CUE_SUCCESS != CU_initialize_registry())
+      return CU_get_error();
 
-  return 0;
+   /* add a suite to the registry */
+   pSuite = CU_add_suite("Suite1", init_suite1, clean_suite1);
+   if (NULL == pSuite) {
+      CU_cleanup_registry();
+      return CU_get_error();
+                        }
+
+   /* add the tests to the suite */
+
+  if ((NULL == CU_add_test(pSuite, "TEST 1:", test1)) ||
+       (NULL == CU_add_test(pSuite, " TEST 2: Filling a record with one valide request record which \
+contains all mandatory field and target uri mandatory for \
+request, esource, responce and revisit", test2))||
+       (NULL == CU_add_test(pSuite, "TEST 3:Filling a valid resource record ", test3))||
+	(NULL == CU_add_test(pSuite, "TEST 4:Filline a valid WARC_INFO record having no anvl fields", test4)))
+      
+   {
+      CU_cleanup_registry();
+      return CU_get_error();
+   } 
+ /* add a suite to the registry */
+   pSuite = CU_add_suite("Suite2", init_suite2, clean_suite2);
+   if (NULL == pSuite) {
+      CU_cleanup_registry();
+      return CU_get_error();
+                        }
+
+   /* add the tests to the suite */
+
+  if ((NULL == CU_add_test(pSuite, "TEST 5:Filling valid revisit record havinng no anvl fields", test5)) ||
+       (NULL == CU_add_test(pSuite, "TEST 6:Filling a valid metadata record having no anvl fields ", test6))||
+       (NULL == CU_add_test(pSuite, "TEST 7: Filling a valid conversion record ", test7))||
+	(NULL == CU_add_test(pSuite, "TEST 8:Filling a valid continuation record", test8)))
+      
+   {
+      CU_cleanup_registry();
+      return CU_get_error();
+   } 
+ /* add a suite to the registry */
+   pSuite = CU_add_suite("Suite3", init_suite3, clean_suite3);
+   if (NULL == pSuite) {
+      CU_cleanup_registry();
+      return CU_get_error();
+                        }
+
+   /* add the tests to the suite */
+
+  if ((NULL == CU_add_test(pSuite, "TEST 9:Filling a request record sith bad fields", test9)) ||
+       (NULL == CU_add_test(pSuite, "TEST 10:Filling a resource record with bad fields ", test10))||
+       (NULL == CU_add_test(pSuite, "TEST 11:Filling a WARC_INFO with no WarcInfoId field", test11))||
+	(NULL == CU_add_test(pSuite, "TEST 12:Filling a WARC_INFO record with innapropriate fields", test12)))
+      
+   {
+      CU_cleanup_registry();
+      return CU_get_error();
+   }
+ /* add a suite to the registry */
+   pSuite = CU_add_suite("Suite4", init_suite4, clean_suite4);
+   if (NULL == pSuite) {
+      CU_cleanup_registry();
+      return CU_get_error();
+                        }
+
+   /* add the tests to the suite */
+
+  if ((NULL == CU_add_test(pSuite, "TEST 13:Filling a revisit record with innapropriate fields", test13)) ||
+       (NULL == CU_add_test(pSuite, "TEST 14:Filling a metadata record with innapropriate fields ", test14))||
+       (NULL == CU_add_test(pSuite, "TEST 15:Filling a conversion record with innapropraite fields", test15))||
+	(NULL == CU_add_test(pSuite, "TEST 16:Filling a continuation record with innapropriate fields", test16))||
+	(NULL == CU_add_test(pSuite, "TEST 17:Fillng a continuation record an other innapropriate field", test17)))
+      
+   {
+      CU_cleanup_registry();
+      return CU_get_error();
+   }  
+switch (menu()) 
+  {
+        case 1: {CU_console_run_tests();} 
+	case 2:  {CU_basic_run_tests();}
+        case 3:{
+                CU_set_output_filename("./utest/outputs/record");
+    		CU_set_output_filename("./utest/outputs/record" );
+  		CU_automated_run_tests();
+   		CU_list_tests_to_file();
+           	}
+     
+   }
+   CU_cleanup_registry();
+   return CU_get_error();  
 }
 
 

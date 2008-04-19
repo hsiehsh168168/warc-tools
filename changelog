@@ -24,6 +24,14 @@
 /*     http://code.google.com/p/warc-tools/                            */
 /* ------------------------------------------------------------------- */
 
+2008-04-06 to 2008-02-08 by "voidptrptr":
+
+	* Second stable release. Compliant with WARC/0.17 specification
+
+2008-02-15 to 2008-02-08 by "voidptrptr":
+
+	* Stable release. Compliant with WARC/0.9 specification
+
 2007-11-20 to 2008-02-08 by "voidptrptr":
 
-* First stable release
+	* First candidate release.

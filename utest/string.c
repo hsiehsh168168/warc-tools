@@ -24,180 +24,303 @@
 /*     http://code.google.com/p/warc-tools/                            */
 /* ------------------------------------------------------------------- */
 
+#include <Basic.h>
+#include <Console.h>
+#include <Automated.h>
+#include <CUnit.h>
+#include <CUError.h>
+#include <TestDB.h>
+#include <TestRun.h>
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
-
+#include <menu.h>
 #include <warc.h>
 
 #define makeS(s) ((warc_u8_t *) s), w_strlen((warc_u8_t *) (s))
 #define makeWString(s) (bless (WString, ((warc_u8_t *)s), w_strlen((warc_u8_t *) (s))))
 
-int test1 (void)
+
+/*                 the suites                         */
+
+int init_suite1(void) { return 0; }
+int clean_suite1(void) { return 0; }
+
+int init_suite2(void) { return 0; }
+int clean_suite2(void) { return 0; }
+
+int init_suite3(void) { return 0; }
+int clean_suite3(void) { return 0; }
+
+int init_suite4(void) { return 0; }
+int clean_suite4(void) { return 0; }
+
+int init_suite5(void) { return 0; }
+int clean_suite5(void) { return 0; }
+
+int init_suite6(void) { return 0; }
+int clean_suite6(void) { return 0; }
+
+/*         les tests                                  */
+
+void test11 (void)
 {
-  const char * t = "TEST 1";
   void       * s = NIL;
+   s = makeWString ("");
+   CU_ASSERT_PTR_NOT_EQUAL(s,NIL);
+   destroy (s);
+}
 
-  fprintf (stdout, "%s>\n", t);
-
-  /* empty string */
+void test12 (void)
+{
+  void       * s = NIL;
   s = makeWString ("");
-  assert (s);
-
-  fprintf (stdout, "[%s]\n", WString_getText   (s) );
-  fprintf (stdout, "%d\n",   WString_getLength (s) );
-
-  destroy (s);
-
-  return 0;
+  CU_ASSERT_PTR_NOT_EQUAL(s,NIL);
+  CU_ASSERT_STRING_EQUAL("", WString_getText   (s)  ); 
+  CU_ASSERT_NOT_EQUAL(5, WString_getLength (s) );       			
+  destroy (s);  
 }
 
-
-int test2 (void)
+void test13 (void)
 {
-  const char * t = "TEST 2";
   void       * s = NIL;
+  s = makeWString ("");
+  CU_ASSERT_PTR_NOT_EQUAL(s,NIL);
+  CU_ASSERT_STRING_EQUAL("",WString_getText   (s)  ); 
+  CU_ASSERT_EQUAL(0,WString_getLength (s) );				
+  destroy (s);
+}
+void test21 (void)
+{
+  void       * s = NIL;
+   s = makeWString ("AABBCCDDEEF");
+   CU_ASSERT_PTR_NOT_EQUAL(s,NIL);
+   destroy (s);
+}
 
-  fprintf (stdout, "%s>\n", t);
-
-  /* non empty string */
+void test22 (void)
+{
+  void       * s = NIL;
   s = makeWString ("AABBCCDDEEF");
-  assert (s);
-
-  fprintf (stdout, "[%s]\n", WString_getText   (s) );
-  fprintf (stdout, "%d\n", WString_getLength (s) );
-
-  destroy (s);
-
-  return 0;
+  CU_ASSERT_PTR_NOT_EQUAL(s,NIL);
+  CU_ASSERT_STRING_EQUAL("AABBCCDDEEF", WString_getText   (s)  ); 
+  CU_ASSERT_EQUAL(11, WString_getLength (s) );				
+  destroy (s);  
 }
-
-int test3 (void)
+void test23 (void)
 {
-  const char * t = "TEST 3";
   void       * s = NIL;
-
-  fprintf (stdout, "%s>\n", t);
-
-  /* non empty string */
-  s = makeWString ("AA");
-  assert (s);
-
-  fprintf (stdout, "[%s]\n", WString_getText   (s) );
-  fprintf (stdout, "%d\n", WString_getLength (s) );
-
-  /* set string text */
-  WString_setText (s, makeS ("BBBBB") );
-  fprintf (stdout, "[%s]\n", WString_getText   (s) );
-  fprintf (stdout, "%d\n", WString_getLength (s) );
-
-  /* set string text */
-  WString_setText (s, makeS ("AABBCCDDEEF") );
-  fprintf (stdout, "[%s]\n", WString_getText   (s) );
-  fprintf (stdout, "%d\n", WString_getLength (s) );
-
+  s = makeWString ("AABBCCDDEEF");
+  CU_ASSERT_PTR_NOT_EQUAL(s,NIL);
+  CU_ASSERT_STRING_NOT_EQUAL("AABBCCDDEEE",WString_getText   (s)  ); 
+  CU_ASSERT_EQUAL(11,WString_getLength (s) );				
   destroy (s);
-
-  return 0;
 }
 
-int test4 (void)
+void test31 (void)
 {
-  const char * t = "TEST 4";
+  void       * s = NIL;
+         s = makeWString ("AA");
+        CU_ASSERT_PTR_NOT_EQUAL(s,NIL);
+	CU_ASSERT_STRING_EQUAL("AA", WString_getText   (s)  ); 
+        CU_ASSERT_EQUAL(2, WString_getLength (s) );
+        WString_setText (s, makeS ("BBBBB") );
+	CU_ASSERT_STRING_NOT_EQUAL("AA", WString_getText   (s)  ); 
+        CU_ASSERT_EQUAL(5, WString_getLength (s) );
+        WString_setText (s, makeS ("AABBCCDDEEF") );
+	CU_ASSERT_STRING_EQUAL("AABBCCDDEEF", WString_getText   (s)  ); 
+        CU_ASSERT_EQUAL(11, WString_getLength (s) );
+				
+  destroy (s);  
+}
+
+void test41 (void)
+{
   void       * a = NIL;
   void       * b = NIL;
+   a = makeWString ("ABCD");
+ 
+   CU_ASSERT_PTR_NOT_EQUAL(a,NIL);
+   b = makeWString ("EF");
 
-  fprintf (stdout, "%s>\n", t);
-
-  a = makeWString ("ABCD");
-  assert (a);
-
-  fprintf (stdout, "a: [%s]\n", WString_getText   (a) );
-  fprintf (stdout, "a: %d\n",   WString_getLength (a) );
-
-  b = makeWString ("EF");
-  assert (b);
-
-  /* concatenate string "a" + string "b" and save the result in "a" */
-  assert (! WString_concat (a, b) );
-  fprintf (stdout, "a: [%s]\n", WString_getText   (a) );
-  fprintf (stdout, "a: %d\n",   WString_getLength (a) );
-
-  fprintf (stdout, "b: [%s]\n", WString_getText   (a) );
-  fprintf (stdout, "b: %d\n",   WString_getLength (a) );
-
-  destroy (b);
-  destroy (a);
-
-  return 0;
+   CU_ASSERT_PTR_NOT_EQUAL(b,NIL);
+   destroy (a);
+   destroy (b);
 }
 
-
-int test5 (void)
+void test42 (void)
 {
-  const char          * t = "TEST 5";
+  void       * a = NIL;
+  void       * b = NIL;
+   a = makeWString ("ABCD");
+
+   CU_ASSERT_PTR_NOT_EQUAL(a,NIL);
+   b = makeWString ("EF");
+   
+        CU_ASSERT_PTR_NOT_EQUAL(b,NIL);
+	CU_ASSERT_STRING_EQUAL("ABCD", WString_getText   (a)  ); 
+        CU_ASSERT_EQUAL(4, WString_getLength (a) );
+	CU_ASSERT_STRING_EQUAL("EF", WString_getText   (b)  ); 
+        CU_ASSERT_EQUAL(2, WString_getLength (b) );
+        assert (! WString_concat (a, b) );
+	CU_ASSERT_STRING_EQUAL("ABCDEF", WString_getText   (a)  ); 
+        CU_ASSERT_EQUAL(6, WString_getLength (a) );
+	CU_ASSERT_STRING_NOT_EQUAL("ACDEF", WString_getText   (a)  ); 
+        CU_ASSERT_NOT_EQUAL(5, WString_getLength (a) );				
+        destroy (a);  
+	destroy (b);
+}
+
+void test51 (void)
+{
   const warc_u8_t * x = (unsigned char *) "better";
   const warc_u8_t * y = (unsigned char *) "c++";
   void                * s = NIL;
 
-  fprintf (stdout, "%s>\n", t);
-
-  /* non empty string */
   s = makeWString ("warc is better than arc");
-  assert (s);
-
-  fprintf (stdout, "string is : %s\n", WString_getText (s) );
-
-  fprintf (stdout, "found substring \"%s\" at index %d\n",
-           x, WString_strstr (s, x) );
-
-  fprintf (stdout, "found substring \"%s\" at index %d\n",
-           y, WString_strstr (s, y) );
-
+  CU_ASSERT_PTR_NOT_EQUAL(s,NIL);
+  CU_ASSERT_STRING_EQUAL("warc is better than arc", WString_getText   (s)  ); 
+  CU_ASSERT_STRING_EQUAL("better", x  ); 
+  CU_ASSERT_EQUAL(8, WString_strstr (s, x) )
+  CU_ASSERT_STRING_EQUAL("c++", y  ); 
+  CU_ASSERT_EQUAL(-1, WString_strstr (s, y) )
   destroy (s);
 
-  return 0;
 }
 
 
-int test6 (void)
+void test61 (void)
 {
-  const char * t = "TEST 6";
   void       * s = NIL;
-
-  fprintf (stdout, "%s>\n", t);
-
-  /* non empty string */
   s = makeWString ("XML is ... ");
-  assert (s);
-
+  CU_ASSERT_PTR_NOT_EQUAL(s,NIL);
+  CU_ASSERT_STRING_EQUAL("XML is ... ", WString_getText   (s)  ); 
   WString_append (s, makeS ("for the old") );
-  fprintf (stdout, "string is : %s\n", WString_getText (s) );
-
+  CU_ASSERT_STRING_EQUAL("XML is ... for the old", WString_getText   (s)  ); 
   WString_append (s, makeS (" school. ") );
-  fprintf (stdout, "string is : %s\n", WString_getText (s) );
-
+  CU_ASSERT_STRING_EQUAL("XML is ... for the old school. ", WString_getText   (s)  ); 
   WString_append (s, makeS ("JSON is better !!!") );
-  fprintf (stdout, "string is : %s\n", WString_getText (s) );
-
+  CU_ASSERT_STRING_EQUAL("XML is ... for the old school. JSON is better !!!", WString_getText   (s)  );
   destroy (s);
-
-  return 0;
 }
 
-
-int main (void)
+int main(void)
 {
-  int (* tests []) () = { test1, test2, test3,
-                          test4, test5, test6
-                        };
+   CU_pSuite pSuite = NULL;
 
-  warc_u32_t  i      = 0;
+   /* initialize the CUnit test registry */
+   if (CUE_SUCCESS != CU_initialize_registry())
+      return CU_get_error();
 
-  for (i = 0; i < ARRAY_LEN (tests); ++ i)
-    {
-      tests[i] ();
-    }
+   /* add a suite to the registry */
+   pSuite = CU_add_suite("Suite1", init_suite1, clean_suite1);
+   if (NULL == pSuite) {
+      CU_cleanup_registry();
+      return CU_get_error();
+   }
 
-  return 0;
+   /* add the tests to the suite */
+
+   if ((NULL == CU_add_test(pSuite, "test_pointeur_NIL()", test11)) ||
+       (NULL == CU_add_test(pSuite, "test_chaine1_vide()", test12))||
+       (NULL == CU_add_test(pSuite, "test_chaine2_vide()", test13)))
+   {
+      CU_cleanup_registry();
+      return CU_get_error();
+   }
+   /* add a suite to the registry */
+   pSuite = CU_add_suite("Suite2", init_suite2, clean_suite2);
+   if (NULL == pSuite) {
+      CU_cleanup_registry();
+      return CU_get_error();
+   }
+
+   /* add the tests to the suite */
+ 
+   if ((NULL == CU_add_test(pSuite, "test_pointeur()", test21)) ||
+       (NULL == CU_add_test(pSuite, "test_chaine1()", test22))||
+       (NULL == CU_add_test(pSuite, "test_chaine2()", test23)))
+   {
+      CU_cleanup_registry();
+      return CU_get_error();
+   }
+   /* add a suite to the registry */
+   pSuite = CU_add_suite("Suite3", init_suite3, clean_suite3);
+   if (NULL == pSuite) {
+      CU_cleanup_registry();
+      return CU_get_error();
+   }
+
+   /* add the tests to the suite */
+
+   if (NULL == CU_add_test(pSuite, "test_pointeur()", test31))
+       
+   {
+      CU_cleanup_registry();
+      return CU_get_error();
+   }
+   /* add a suite to the registry */
+   pSuite = CU_add_suite("Suite4", init_suite4, clean_suite4);
+   if (NULL == pSuite) {
+      CU_cleanup_registry();
+      return CU_get_error();
+   }
+
+   /* add the tests to the suite */
+
+   if ((NULL == CU_add_test(pSuite, "test_pointeur_a_b()", test41)) ||
+       (NULL == CU_add_test(pSuite, "test_concatenation_a_b()", test42)))
+   {
+      CU_cleanup_registry();
+      return CU_get_error();
+   }
+
+   /* add a suite to the registry */
+   pSuite = CU_add_suite("Suite5", init_suite5, clean_suite5);
+   if (NULL == pSuite) {
+      CU_cleanup_registry();
+      return CU_get_error();
+   }
+
+   /* add the tests to the suite */
+
+   if ((NULL == CU_add_test(pSuite, "test_index()", test51)) )
+      
+   {
+      CU_cleanup_registry();
+      return CU_get_error();
+   }  
+
+   /* add a suite to the registry */
+   pSuite = CU_add_suite("Suite6", init_suite6, clean_suite6);
+   if (NULL == pSuite) {
+      CU_cleanup_registry();
+      return CU_get_error();
+   }
+
+   /* add the tests to the suite */
+
+   if ((NULL == CU_add_test(pSuite, "test_append_s()", test61)) )
+      
+   {
+      CU_cleanup_registry();
+      return CU_get_error();
+   }
+
+
+   /* Run all tests using the automated interface*/ 
+switch (menu()) 
+  {
+  case 1: {CU_console_run_tests();} 
+  case 2:  {CU_basic_run_tests();}
+  case 3:{
+    CU_set_output_filename("./utest/outputs/string");
+    CU_set_output_filename("./utest/outputs/string" );
+    CU_automated_run_tests();
+    CU_list_tests_to_file();
+  }
+  }
+/*CU_console_run_tests();*/
+ CU_cleanup_registry();
+ return CU_get_error();
 }

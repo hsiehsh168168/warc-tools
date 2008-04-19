@@ -23,7 +23,14 @@
 /*                                                                     */
 /*     http://code.google.com/p/warc-tools/                            */
 /* ------------------------------------------------------------------- */
-
+#include <Basic.h>
+#include <Console.h>
+#include <Automated.h>
+#include <CUnit.h>
+#include <CUError.h>
+#include <TestDB.h>
+#include <TestRun.h>
+#include <menu.h>
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
@@ -31,6 +38,11 @@
 #include <warc.h>
 
 #include <wgzip.h>       /* WGzip */
+int init_suite1(void) { return 0; }
+int clean_suite1(void) { return 0; }
+
+int init_suite2(void) { return 0; }
+int clean_suite2(void) { return 0; }
 
 struct CallbackEnv
   {
@@ -285,11 +297,12 @@ FILE * openWriting (const char * fout)
 
   return out;
 }
+const char * f1 = "app/wdata/testwfile/file.warc.gz";
+  const char * f2 = "app/wdata/testarc/test.arc.gz";
 
-
-int test1 (const char * fin)
+void test1 (void)
 {
-  const char * t     = "TEST 1";
+  
   const char * fout  = "uncompressed1";
   FILE       * in    = NIL;
   FILE       * out   = NIL;
@@ -299,38 +312,46 @@ int test1 (const char * fin)
   warc_u64_t   csize = 0;   /* compressed file size */
 
 
-  fprintf (stdout, "%s>\n", t);
+ 
 
   /* empty string */
   g = bless (WGzip);
   assert (g);
 
-  in = openReading (fin);
+  in = openReading (f1);
   assert (in);
 
   out = openWriting (fout);
   assert (out);
-
+CU_ASSERT_PTR_NOT_EQUAL(g,NIL);
+ CU_ASSERT_PTR_NOT_EQUAL(in,NIL);
+ CU_ASSERT_PTR_NOT_EQUAL(out,NIL);
   /* uncompress file from offset 0 using the callback with env = fout */
   ret = WGzip_uncompress (g, in, 0, & usize, & csize,
                           callback1_warc, (void *) out);
   assert (! ret);
-  fprintf (stdout,
+CU_ASSERT_PTR_EQUAL(ret,NIL);
+  /*fprintf (stdout,
            "uncompressed \"%s\" to \"%s\" [usize: %llu][csize: %llu]\n",
-           fin, fout, (unsigned long long) usize, (unsigned long long) csize);
+           f1, fout, (unsigned long long) usize, (unsigned long long) csize);*/
+CU_ASSERT_STRING_EQUAL(f1,"app/wdata/testwfile/file.warc.gz");
+CU_ASSERT_STRING_EQUAL(fout,"uncompressed1");
+CU_ASSERT(3591==usize);
+CU_ASSERT(1431==csize);
+
 
   fclose (out);
   fclose (in);
 
   destroy (g);
 
-  return 0;
+  return ;
 }
 
 
-int test2 (const char * fin)
+void test2 (void)
 {
-  const char * t     = "TEST 2";
+  
   const char * fout  = "uncompressed2";
   FILE       * in    = NIL;
   FILE       * out   = NIL;
@@ -341,18 +362,20 @@ int test2 (const char * fin)
 
   struct CallbackEnv cenv;
 
-  fprintf (stdout, "%s>\n", t);
+ 
 
   /* empty string */
   g = bless (WGzip);
   assert (g);
 
-  in = openReading (fin);
+  in = openReading (f1);
   assert (in);
 
   out = openWriting (fout);
   assert (out);
-
+CU_ASSERT_PTR_NOT_EQUAL(g,NIL);
+ CU_ASSERT_PTR_NOT_EQUAL(in,NIL);
+ CU_ASSERT_PTR_NOT_EQUAL(out,NIL);
   /* set the environment variable */
   cenv . out   = out;
   cenv . crlf  = 0;
@@ -362,24 +385,30 @@ int test2 (const char * fin)
   ret = WGzip_uncompress (g, in, 0, & usize, & csize,
                           callback2_warc, (void *) & cenv);
   assert (! ret);
-  fprintf (stdout,
+CU_ASSERT_PTR_EQUAL(ret,NIL);
+
+  /*fprintf (stdout,
            "uncompressed \"%s\" to \"%s\" [usize: %llu][csize: %llu]\n",
-           fin, fout,
-           (unsigned long long) cenv . usize, (unsigned long long) csize);
+           f1, fout,
+           (unsigned long long) cenv . usize, (unsigned long long) csize);*/
+CU_ASSERT_STRING_EQUAL(f1,"app/wdata/testwfile/file.warc.gz");
+CU_ASSERT_STRING_EQUAL(fout,"uncompressed2");
+/*CU_ASSERT(160 ==usize);*/
+CU_ASSERT(1422==csize);
 
   fclose (out);
   fclose (in);
 
   destroy (g);
 
-  return 0;
+  return;
 }
 
 
 
-int test3 (const char * fin)
+void test3 (void)
 {
-  const char * t      = "TEST 3";
+  
   const char * fout   = "uncompressed3";
   FILE       * in     = NIL;
   FILE       * out    = NIL;
@@ -389,18 +418,20 @@ int test3 (const char * fin)
   warc_u64_t   csize  = 0;   /* compressed file size */
   warc_u64_t   offset = 0;   /* WARC record offset */
 
-  fprintf (stdout, "%s>\n", t);
+ 
 
   /* empty string */
   g = bless (WGzip);
   assert (g);
 
-  in = openReading (fin);
+  in = openReading (f2);
   assert (in);
 
   out = openWriting (fout);
   assert (out);
-
+CU_ASSERT_PTR_NOT_EQUAL(g,NIL);
+ CU_ASSERT_PTR_NOT_EQUAL(in,NIL);
+ CU_ASSERT_PTR_NOT_EQUAL(out,NIL);
 
   /* first record at offset 0 */
   offset = 0;
@@ -416,11 +447,14 @@ int test3 (const char * fin)
       if (ret)
         break;
 
-      fprintf (stdout,
+      /*fprintf (stdout,
                "uncompressed \"%s\" to \"%s\" [usize: %llu][csize: %llu]\n",
-               fin, fout,
-               (unsigned long long) usize, (unsigned long long) csize);
-
+               f2, fout,
+               (unsigned long long) usize, (unsigned long long) csize);*/
+CU_ASSERT_STRING_EQUAL(f2,"app/wdata/testarc/test.arc.gz");
+CU_ASSERT_STRING_EQUAL(fout,"uncompressed3");
+CU_ASSERT(1589==usize);
+CU_ASSERT(794==csize);
       /* goto to the next record */
       offset += csize;
     }
@@ -431,13 +465,12 @@ int test3 (const char * fin)
 
   destroy (g);
 
-  return 0;
+  return;
 }
 
-
-int test4 (const char * fin)
+void test4 (void)
 {
-  const char * t      = "TEST 4";
+  
   const char * fout   = "uncompressed4";
   FILE       * in     = NIL;
   FILE       * out    = NIL;
@@ -447,18 +480,19 @@ int test4 (const char * fin)
   warc_u64_t   csize  = 0;   /* compressed file size */
   warc_u64_t   offset = 0;   /* WARC record offset */
 
-  fprintf (stdout, "%s>\n", t);
-
+ 
   /* empty string */
   g = bless (WGzip);
   assert (g);
 
-  in = openReading (fin);
+  in = openReading (f1);
   assert (in);
 
   out = openWriting (fout);
   assert (out);
-
+CU_ASSERT_PTR_NOT_EQUAL(g,NIL);
+ CU_ASSERT_PTR_NOT_EQUAL(in,NIL);
+ CU_ASSERT_PTR_NOT_EQUAL(out,NIL);
   /* first record at offset 0 */
   offset = 0;
 
@@ -472,10 +506,14 @@ int test4 (const char * fin)
       if (ret)
         break;
 
-      fprintf (stdout,
+    /*  fprintf (stdout,
                "uncompressed \"%s\" to \"%s\" [usize: %llu][csize: %llu]\n",
-               fin, fout,
-               (unsigned long long) usize, (unsigned long long) csize);
+               f1, fout,
+               (unsigned long long) usize, (unsigned long long) csize);*/
+CU_ASSERT_STRING_EQUAL(f1,"app/wdata/testwfile/file.warc.gz");
+CU_ASSERT_STRING_EQUAL(fout,"uncompressed4");
+CU_ASSERT(3591==usize);
+CU_ASSERT(1431==csize);
 
       /* goto to the next record */
       offset += csize;
@@ -487,55 +525,136 @@ int test4 (const char * fin)
 
   destroy (g);
 
-  return 0;
+  return;
 }
 
-int test5 (const char * fin)
+void test5 (void)
 {
-  const char * t     = "TEST 5";
+ 
   FILE       * in    = NIL;
   void       * g     = NIL; /* WGzip object */
   warc_bool_t  ret   = WARC_FALSE;
 
-  fprintf (stdout, "%s>\n", t);
+  
 
   /* empty string */
   g = bless (WGzip);
   assert (g);
 
-  in = openReading (fin);
+  in = openReading (f2);
   assert (in);
-
+CU_ASSERT_PTR_NOT_EQUAL(g,NIL);
+ CU_ASSERT_PTR_NOT_EQUAL(in,NIL);
   /* check the validity of GZIP file from offset 0 */
   ret = WGzip_check (g, in, 0);
   unless (ret)
-  w_fprintf (fprintf (stdout, "\"%s\" is a valid GZIP file\n", fin) );
+ {CU_PASS( "'app/wdata/testwfile/file.warc.gz' is a valid GZIP file" );}
   else
-    w_fprintf (fprintf (stdout, "\"%s\" is an invalid GZIP file\n", fin) );
+    CU_FAIL(w_fprintf (fprintf (stdout, "\"%s\" is an invalid GZIP file\n", f2)) );
 
   fclose (in);
 
   destroy (g);
 
-  return 0;
+  return;
+}
+void test6 (void)
+{
+
+  FILE       * in    = NIL;
+  void       * g     = NIL; /* WGzip object */
+  warc_bool_t  ret   = WARC_FALSE;
+
+  /* empty string */
+  g = bless (WGzip);
+  assert (g);
+
+  in = openReading (f1);
+  assert (in);
+CU_ASSERT_PTR_NOT_EQUAL(g,NIL);
+ CU_ASSERT_PTR_NOT_EQUAL(in,NIL);
+ 
+
+  /* check the validity of GZIP file from offset 0 */
+  ret = WGzip_check (g, in, 0);
+  unless (ret)
+  {CU_PASS("'app/wdata/testarc/test.arc.gz' is a valid GZIP file");}
+  else
+   CU_FAIL( w_fprintf (fprintf (stdout, "\"%s\" is an invalid GZIP file\n", f1) ));
+
+  fclose (in);
+
+  destroy (g);
+
+  return;
 }
 
-
-int main (int argc, char ** argv)
+int main (void)
 {
-  const char * f1 = "app/wdata/testwfile/file.warc.gz";
-  const char * f2 = "app/wdata/testarc/test.arc.gz";
-
-  UNUSED (argc);
-  UNUSED (argv);
-
-  /* uncomment to try a spesific test */
-  test1 (f1);
+  
+  /*test1 (f1);
   test2 (f1);
   test3 (f2);
   test4 (f1);
   test5 (f1);
-  test5 (f2);
+  test5 (f2);*/
+ CU_pSuite pSuite = NULL;
+  
+  /*UNUSED (argc);
+  UNUSED (argv);*/
+   /* initialize the CUnit test registry */
+   if (CUE_SUCCESS != CU_initialize_registry())
+      return CU_get_error();
 
-  return 0;
+   /* add a suite to the registry */
+   pSuite = CU_add_suite("Suite1", init_suite1, clean_suite1);
+   if (NULL == pSuite) {
+      CU_cleanup_registry();
+      return CU_get_error();
+   }
+
+   /* add the tests to the suite */
+
+   if ((NULL == CU_add_test(pSuite, "test 1", test1)) ||
+       (NULL == CU_add_test(pSuite, "test 2", test2))||
+       (NULL == CU_add_test(pSuite, "test 3", test3)))
+   {
+      CU_cleanup_registry();
+      return CU_get_error();
+   }
+   /* add a suite to the registry */
+   pSuite = CU_add_suite("Suite2", init_suite2, clean_suite2);
+   if (NULL == pSuite) {
+      CU_cleanup_registry();
+      return CU_get_error();
+   }
+
+   /* add the tests to the suite */
+ 
+   if ((NULL == CU_add_test(pSuite, "test 4", test4)) ||
+       (NULL == CU_add_test(pSuite, "test 5", test5))||
+       (NULL == CU_add_test(pSuite, "test 6", test6)))
+   {
+      CU_cleanup_registry();
+      return CU_get_error();
+   }
+  
+
+
+   /* Run all tests using the automated interface*/ 
+switch (menu()) 
+  {
+        case 1: {CU_console_run_tests();} 
+	case 2:  {CU_basic_run_tests();}
+        case 3:{
+                CU_set_output_filename("./utest/outputs/warcgunzip");
+    		CU_set_output_filename("./utest/outputs/warcgunzip" );
+  		CU_automated_run_tests();
+   		CU_list_tests_to_file();
+           	}
+   }
+/*CU_console_run_tests();*/
+ CU_cleanup_registry();
+   return CU_get_error();
+
 }

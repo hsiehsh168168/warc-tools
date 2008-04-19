@@ -44,13 +44,14 @@
 #include <wcsafe.h>
 #include <wfile.h>   /* for class's prototypes */
 #include <wrecord.h> /* for class's prototypes */
-#include <wversion.h>
+#include <wversion.h> /* for the warc version */
 
 #include <event.h> /* event structures and functions */
 #include <evhttp.h> /* evhttp structures and functions */
 
 
 #define makeS(s) (s), w_strlen ((s))
+#define makeU(s) ((warc_u8_t *) (s))
 
 /* This structure that will be ginven to callback function as user argument*/
 
@@ -134,6 +135,7 @@ struct WClient
     /*@{*/
 
     void *      server_uri; /**< The uri wher the server is installed as a WString object */
+    warc_u8_t * server; /**< the name of the asked server */
     warc_u32_t  port; /**< The port where to send the requests*/
 
     struct event_base * base_event; /**< The base event associated with the client */
@@ -147,6 +149,7 @@ struct WClient
 
 #define URI       (self -> server_uri)
 #define PORT      (self -> port)
+#define SERVER    (self -> server)
 #define BASE      (self -> base_event)
 #define CONNECT   (self -> connection)
 
@@ -280,6 +283,8 @@ WPUBLIC warc_bool_t WClient_getWRecord (void * const _self,
 
   arg . file = outfh;
 
+  WString_concat (rest_request, SERVER);
+
   WString_append (rest_request, makeS ((const warc_u8_t *) WARC_VERSION) );
 
   WString_append (rest_request, makeS ((const warc_u8_t *) "/record"));
@@ -290,7 +295,12 @@ WPUBLIC warc_bool_t WClient_getWRecord (void * const _self,
 
   WString_append (rest_request, (const warc_u8_t *) "/", 1);
 
-  w_numToString (offset, char_offset);
+  unless (w_numToString (offset, char_offset))
+    {
+    w_fclose (outfh);
+    destroy (rest_request);
+    return (WARC_TRUE);
+    }
 
   WString_append (rest_request, makeS (char_offset) );
 
@@ -301,11 +311,13 @@ WPUBLIC warc_bool_t WClient_getWRecord (void * const _self,
   request = evhttp_request_new (READCB, & arg);
 
   unless (request)
-  {
+    {
     w_fclose (outfh);
     destroy (rest_request);
     return (WARC_TRUE);
-  }
+    }
+
+  evhttp_add_header (request -> output_headers, "Host", "Warc-client");
 
   evhttp_request_set_chunked_cb (request, CHUNKCB);
 
@@ -324,7 +336,7 @@ WPUBLIC warc_bool_t WClient_getWRecord (void * const _self,
   w_fclose (outfh);
 
   unless (arg . size)
-  return (WARC_TRUE);
+     return (WARC_TRUE);
 
   if (WClient_end (self) )
     return (WARC_TRUE);
@@ -384,6 +396,8 @@ WPUBLIC warc_bool_t WClient_getWFile (void * const _self, const warc_u8_t * comp
 
   arg . file = outfh;
 
+  WString_concat (rest_request, SERVER);
+
   WString_append (rest_request, makeS ( (const warc_u8_t *) WARC_VERSION) );
 
   WString_append (rest_request, (const warc_u8_t *) "/file", 5);
@@ -394,7 +408,12 @@ WPUBLIC warc_bool_t WClient_getWFile (void * const _self, const warc_u8_t * comp
 
   WString_append (rest_request, (const warc_u8_t *) "/", 1);
 
-  w_numToString (offset, char_offset);
+  unless (w_numToString (offset, char_offset))
+    {
+    w_fclose (outfh);
+    destroy (rest_request);
+    return (WARC_TRUE);
+    }
 
   WString_append (rest_request, makeS (char_offset) );
 
@@ -406,11 +425,13 @@ WPUBLIC warc_bool_t WClient_getWFile (void * const _self, const warc_u8_t * comp
   request = evhttp_request_new (READCB, &arg);
 
   unless (request)
-  {
+    {
     w_fclose (outfh);
     destroy (rest_request);
     return (WARC_TRUE);
-  }
+    }
+
+  evhttp_add_header (request -> output_headers, "Host", "Warc-client");
 
   evhttp_request_set_chunked_cb (request, CHUNKCB);
 
@@ -501,6 +522,8 @@ WPUBLIC warc_bool_t WClient_getFiltredWFile (void * const _self,
 
   arg . file = outfh;
 
+  WString_concat (rest_request, SERVER);
+
   WString_append (rest_request, makeS ( (const warc_u8_t *) WARC_VERSION) );
 
   WString_append (rest_request, makeS ((const warc_u8_t *) "/filter"));
@@ -511,7 +534,12 @@ WPUBLIC warc_bool_t WClient_getFiltredWFile (void * const _self,
 
   WString_append (rest_request, (const warc_u8_t *) "/", 1);
 
-  w_numToString (offset, char_offset);
+  unless (w_numToString (offset, char_offset))
+    {
+    w_fclose (outfh);
+    destroy (rest_request);
+    return (WARC_TRUE);
+    }
 
   WString_append (rest_request, makeS (char_offset) );
 
@@ -530,11 +558,13 @@ WPUBLIC warc_bool_t WClient_getFiltredWFile (void * const _self,
   request = evhttp_request_new (READCB, & arg);
 
   unless (request)
-  {
+    {
     w_fclose (outfh);
     destroy (rest_request);
     return (WARC_TRUE);
-  }
+    }
+
+  evhttp_add_header (request -> output_headers, "Host", "Warc-client");
 
   evhttp_request_set_chunked_cb (request, CHUNKCB);
 
@@ -583,6 +613,8 @@ WPRIVATE void * WClient_constructor (void * _self, va_list * app)
   const warc_u8_t * uri     =   va_arg (*app, const warc_u8_t *);
   warc_u32_t        uri_len =   va_arg (*app, warc_u32_t);
   warc_u32_t        port    =   va_arg (*app, warc_u32_t);
+  const warc_u8_t * server  =   va_arg (*app, warc_u8_t *);
+  warc_u32_t        serverlen = va_arg (*app, warc_u32_t);
 
   unless (uri || uri_len)
   {
@@ -601,6 +633,33 @@ WPRIVATE void * WClient_constructor (void * _self, va_list * app)
     {
       destroy (self);
       return (NIL);
+    }
+
+  unless (server || serverlen)
+    {
+    destroy (self);
+    return (NIL);
+    }
+
+  unless ((w_strcmp (server, makeU ("warcserver"))) && (w_strcmp (server, makeU ("apache2"))))
+     SERVER = bless (WString, "", 0);
+  else
+     unless (w_strcmp (server, makeU ("lighttpd-cgi")))
+        SERVER = bless (WString, makeS (makeU ("warc.cgi/")));
+     else
+        unless (w_strcmp (server, makeU ("lighttpd-fcgi")))
+          SERVER = bless (WString, makeS (makeU ("warc.fcgi/")));
+        else
+          {
+          destroy (self);
+          WarcDebugMsg ("unknown server name");
+          return (NIL);
+          }
+
+  unless (SERVER)
+    {
+    destroy (self);
+    return (NIL);
     }
 
   PORT = port;
@@ -636,6 +695,9 @@ WPRIVATE void * WClient_destructor (void * _self)
 
   if (PORT)
     PORT = 0;
+
+  if (SERVER)
+    destroy (SERVER), SERVER = NIL;
 
   if (CONNECT)
     evhttp_connection_free (CONNECT), CONNECT = NIL;

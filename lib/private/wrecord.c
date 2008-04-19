@@ -39,17 +39,16 @@
 #include <wclass.h>  /* bless, destroy, cassert, struct Class */
 #include <wsign.h>   /* CASSET macro */
 #include <wrecord.h> /* for class's prototypes */
-#include <whdline.h> /* WHDLine */
 #include <wstring.h> /* WString */
-#include <wlist.h>   /* WList */
-#include <wanvl.h>   /* WAnvl */
 #include <wmktmp.h>  /* WTempFile */
 #include <wmisc.h>   /* unless */
 #include <wcsafe.h>  /*w_strcasestr  */
+#include <wheader.h>
 #include <wcsafe.h>
 
 #define _GNU_SOURCE
 
+#define makeU(s) ((warc_u8_t *) (s))
 
 
 /**
@@ -58,7 +57,19 @@
 
 #define SIGN 5
 
-#define MASK 0x0000001F
+#define MASK1    0x0000000F
+#define AND_MSK1 0x00000001
+#define OR_MSK1  0x00000061
+#define AND_MSK2 0x00000011
+#define OR_MSK2  0x00000457
+#define AND_MSK3 0x00000051
+#define OR_MSK3  0x0000045F
+#define AND_MSK4 0x00000001
+#define OR_MSK4  0x0000045F
+#define AND_MSK5 0x00000011
+#define OR_MSK5  0x00000459
+#define AND_MSK6 0x00000190
+#define OR_MSK6  0x000007D0
 
 struct WRecord
   {
@@ -66,12 +77,12 @@ struct WRecord
     const void * class;
 
     /*@{*/
-    void * hdl; /**< WHDLine object */
-    void * list; /**< WList of WAnvl objects */
+    void * header; /**< Header object */
     void * tdatafile; /**< Temporary Data File descriptor */
     FILE * externdfile; /**< User given data file descriptor */
     void * arccontent; /**< data File recovered from an Arc Record */
-    warc_u32_t check; /**< Fields presence cheking value */
+    warc_u32_t check; /**< Mandatory Fields presence cheking value */
+    warc_u32_t opt_check; /**< Optionnaly fields presence checking value */
     warc_u64_t size; /**< Warc Data File size */
     warc_bool_t (* callback) (void* env, const char * buff, warc_u32_t size); /**< Pointer to the user call back function */
     void * env; /**< pointer to user data buffer */
@@ -87,11 +98,11 @@ struct WRecord
   };
 
 
-#define HDL     (self -> hdl)
-#define LIST    (self -> list)
+#define HDL     (self -> header)
 #define DATAF   (self -> tdatafile)
 #define EDATAF  (self -> externdfile)
 #define CHECK   (self -> check)
+#define OPT_CHK (self -> opt_check)
 #define CBACK   (self -> callback)
 #define ENV     (self -> env)
 #define SIZE    (self -> size)
@@ -263,7 +274,7 @@ WIPUBLIC const warc_u8_t * WRecord_getWarcId (const void * const _self)
   /* preconditions */
   CASSERT (self);
 
-  return (WHDLine_getWarcId (HDL) );
+  return (WHeader_getWarcId (HDL));
 }
 
 
@@ -278,20 +289,23 @@ WIPUBLIC const warc_u8_t * WRecord_getWarcId (const void * const _self)
 WIPUBLIC warc_u32_t WRecord_getDataLength (const void * const _self)
 {
 
-  const struct WRecord * const self = _self;
+  const struct WRecord * const self = _self; 
 
   /* preconditions */
+
+
   CASSERT (self);
 
-  return (WHDLine_getDataLength (HDL) );
+  return (WHeader_getDataLength (HDL) );
 
 }
+
 
 
 /**
  * @param _self WRecord object
  *
- * @return WARC-record type as an integer (see "whdline.h")
+ * @return WARC-record type as an integer (see "wheader.h")
  *
  * Returns the WARC-record type
  */
@@ -304,7 +318,7 @@ WIPUBLIC warc_rec_t WRecord_getRecordType (const void * const _self)
   /* preconditions */
   CASSERT (self);
 
-  return (WHDLine_getRecordType (HDL) );
+  return (WHeader_getRecordType (HDL) );
 
 }
 
@@ -312,13 +326,14 @@ WIPUBLIC warc_rec_t WRecord_getRecordType (const void * const _self)
 /**
  * @param _self WRecord object
  *
- * @return WARC-record subject URI string
+ * @return WARC-record target URI string
  *
  * Returns a constant string which represent the
- * subject URI of the WARC-record
+ * target URI of the WARC-record
  */
 
-WIPUBLIC const warc_u8_t * WRecord_getSubjectUri (const void * const _self)
+
+WIPUBLIC const warc_u8_t * WRecord_getTargetUri (const void * const _self)
 {
 
   const struct WRecord * const self = _self;
@@ -326,7 +341,7 @@ WIPUBLIC const warc_u8_t * WRecord_getSubjectUri (const void * const _self)
   /* preconditions */
   CASSERT (self);
 
-  return (WHDLine_getSubjectUri (HDL) );
+  return (WHeader_getSubjectUri (HDL) );
 }
 
 
@@ -338,7 +353,7 @@ WIPUBLIC const warc_u8_t * WRecord_getSubjectUri (const void * const _self)
  * Returns the WARC-record creation date
  */
 
-WIPUBLIC const warc_u8_t * WRecord_getCreationDate (const void * const _self)
+WIPUBLIC const warc_u8_t * WRecord_getDate (const void * const _self)
 {
 
   const struct WRecord * const self = _self;
@@ -346,7 +361,7 @@ WIPUBLIC const warc_u8_t * WRecord_getCreationDate (const void * const _self)
   /* preconditions */
   CASSERT (self);
 
-  return (WHDLine_getCreationDate (HDL) );
+  return (WHeader_getCreationDate (HDL) );
 }
 
 
@@ -366,7 +381,7 @@ WIPUBLIC const warc_u8_t * WRecord_getContentType (const void * const _self)
   /* preconditions */
   CASSERT (self);
 
-  return (WHDLine_getContentType (HDL) );
+  return (WHeader_getContentType (HDL) );
 }
 
 
@@ -386,13 +401,284 @@ WIPUBLIC const warc_u8_t * WRecord_getRecordId (const void * const _self)
   /* preconditions */
   CASSERT (self);
 
-  return (WHDLine_getRecordId (HDL) );
+  return (WHeader_getRecordId (HDL) );
 }
+
+/**
+ * @param _self WRecord object
+ *
+ * @return content length as a 32 bits unsigned integer
+ *
+ * Returns the content length of the WARC-record
+ */
+
+WIPUBLIC  warc_u32_t  WRecord_getContentLength (const void * const _self)
+{
+
+  const struct WRecord * const self = _self;
+
+  /* preconditions */
+  CASSERT (self);
+
+  return (WHeader_getContentLength (HDL) );
+}
+
+/**
+ * @param _self WRecord object
+ *
+ * @return concurrent record id constant string
+ *
+ * Returns the Record id which this one is concurrent to.
+ */
+
+WIPUBLIC const warc_u8_t * WRecord_getConcurrentTo  (const void * const _self)
+{
+
+  const struct WRecord * const self = _self;
+
+  /* preconditions */
+  CASSERT (self);
+
+  return (WHeader_getConcurrentTo (HDL) );
+}
+
+/**
+ * @param _self WRecord object
+ *
+ * @return The string describing the block digest algorithm and value
+ *
+ * Returns the Block digest string value
+ */
+
+WIPUBLIC const warc_u8_t * WRecord_getBlockDigest (const void * const _self)
+{
+
+  const struct WRecord * const self = _self;
+
+  /* preconditions */
+  CASSERT (self);
+
+  return (WHeader_getBlockDigest (HDL) );
+}
+
+/**
+ * @param _self WRecord object
+ *
+ * @return The PayLoad Digest algorithm and value as a string
+ *
+ * Returns the WArc Record PayLoad Digest string
+ */
+
+WIPUBLIC const warc_u8_t * WRecord_getPayloadDigest (const void * const _self)
+{
+
+  const struct WRecord * const self = _self;
+
+  /* preconditions */
+  CASSERT (self);
+
+  return (WHeader_getPayloadDigest (HDL) );
+}
+
+/**
+ * @param _self WRecord object
+ *
+ * @return The material Source ip Address string
+ *
+ * Returns the WARC Record IP Address
+ */
+
+WIPUBLIC const warc_u8_t * WRecord_getIpAddress (const void * const _self)
+{
+
+  const struct WRecord * const self = _self;
+
+  /* preconditions */
+  CASSERT (self);
+
+  return (WHeader_getIpAddress (HDL) );
+}
+
+/**
+ * @param _self WRecord object
+ *
+ * @return The referenced record id string
+ *
+ * Returns the Referenced WARC Record Id
+ */
+
+WIPUBLIC const warc_u8_t * WRecord_getRefersTo (const void * const _self)
+{
+
+  const struct WRecord * const self = _self;
+
+  /* preconditions */
+  CASSERT (self);
+
+  return (WHeader_getRefers (HDL) );
+}
+
+/**
+ * @param _self WRecord object
+ *
+ * @return Truncation cause describing string
+ *
+ * Returns the WARC Record Truncated String
+ */
+
+WIPUBLIC const warc_u8_t * WRecord_getTruncated (const void * const _self)
+{
+
+  const struct WRecord * const self = _self;
+
+  /* preconditions */
+  CASSERT (self);
+
+  return (WHeader_getTruncated (HDL) );
+}
+
+/**
+ * @param _self WRecord object
+ *
+ * return Related Warc Info Id string
+ *
+ * Returns the WARC info Record id related to this one
+ */
+
+WIPUBLIC const warc_u8_t * WRecord_getWarcInfoId (const void * const _self)
+{
+
+  const struct WRecord * const self = _self;
+
+  /* preconditions */
+  CASSERT (self);
+
+  return (WHeader_getInfoId (HDL) );
+}
+
+/**
+ * @param _self WRecord object
+ *
+ * @return The Profile field string
+ *
+ * Returns the WARC Record Profile
+ */
+
+WIPUBLIC const warc_u8_t * WRecord_getProfile (const void * const _self)
+{
+
+  const struct WRecord * const self = _self;
+
+  /* preconditions */
+  CASSERT (self);
+
+  return (WHeader_getProfile (HDL) );
+}
+
+/**
+ * @param _self WRecord object
+ *
+ * @return The Payload type string
+ *
+ * Returns the WARC Record Payload Type field
+ */
+
+WIPUBLIC const warc_u8_t * WRecord_getPayloadType (const void * const _self)
+{
+
+  const struct WRecord * const self = _self;
+
+  /* preconditions */
+  CASSERT (self);
+
+  return (WHeader_getPayloadType (HDL) );
+}
+
+
 
 
 /**
  * @param _self WRecord object
- * @param t WARC-record type integer (see "whdline.h")
+ *
+ * @return The SegmentOriginId field string
+ *
+ * Returns the WARC Record Id origin of this segment Record
+ */
+
+WIPUBLIC const warc_u8_t * WRecord_getSegmentOriginId (const void * const _self)
+{
+
+  const struct WRecord * const self = _self;
+
+  /* preconditions */
+  CASSERT (self);
+
+  return (WHeader_getSegmentOriginId (HDL) );
+}
+
+/**
+ * @param _self WRecord object
+ *
+ * @return The segment number field as a 32 bits unsigned integer
+ *
+ * Returns the Row of a segment Warc Record
+ */
+
+WIPUBLIC  warc_u32_t  WRecord_getSegmentNumber (const void * const _self)
+{
+
+  const struct WRecord * const self = _self;
+
+  /* preconditions */
+  CASSERT (self);
+
+  return (WHeader_getSegmentNumber (HDL) );
+}
+
+/**
+ * @param _self WRecord object
+ *
+ * @return The total segmented record size as a 32 bits unsigned integer
+ *
+ * Returns the total size of a segmented WARC-record (only in the last segment)
+ */
+
+WIPUBLIC  warc_u32_t WRecord_getSegTotalLength (const void * const _self)
+{
+
+  const struct WRecord * const self = _self;
+
+  /* preconditions */
+  CASSERT (self);
+
+  return (WHeader_getSegTotalLength (HDL) );
+}
+
+/**
+ * @param _self WRecord object
+ *
+ * @return Related Warc File name string
+ *
+ * Returns the WARC File name related to this record
+ */
+
+WIPUBLIC const warc_u8_t * WRecord_getFilename (const void * const _self)
+{
+
+  const struct WRecord * const self = _self;
+
+  /* preconditions */
+  CASSERT (self);
+
+  return (WHeader_getFilename (HDL) );
+}
+
+
+
+
+/**
+ * @param _self WRecord object
+ * @param t WARC-record type integer (see "wheader.h")
  *
  * @return boolean ,false if is failed true if success
  *
@@ -409,7 +695,9 @@ WIPUBLIC warc_bool_t WRecord_setRecordType (void * _self, const warc_rec_t t)
   /* preconditions */
   CASSERT (self);
 
-  wrt = WHDLine_setRecordType (HDL, t);
+  wrt = WHeader_setRecordType (HDL, t);
+
+  /* mime check */
 
   if (wrt == WARC_FALSE)
     CHECK = CHECK | 0x0001;
@@ -420,17 +708,17 @@ WIPUBLIC warc_bool_t WRecord_setRecordType (void * _self, const warc_rec_t t)
 
 /**
  * @param _self WRecord object
- * @param suri Subject URI string
+ * @param suri target URI string
  * @param len WARC id string length
  *
  * @return false if succseeds, true otherwise
  *
- * Sets the subject URI of the WARC-record
+ * Sets the tagget URI of the WARC-record
  */
 
-WIPUBLIC warc_bool_t WRecord_setSubjectUri (void * _self,
-    const warc_u8_t * suri,
-    const warc_u32_t len)
+WIPUBLIC warc_bool_t WRecord_setTargetUri (void * _self,
+                                            const warc_u8_t * suri,
+                                            const warc_u32_t len)
 {
 
   struct WRecord * self = _self;
@@ -440,12 +728,75 @@ WIPUBLIC warc_bool_t WRecord_setSubjectUri (void * _self,
   CASSERT (self);
   assert (suri);
 
-  wrt = WHDLine_setSubjectUri (HDL, suri, len);
+  /* Uri check */
+
+  wrt = WHeader_setSubjectUri (HDL, suri, len);
 
   if (wrt == WARC_FALSE)
-    CHECK = CHECK | 0x0002;
+    OPT_CHK = OPT_CHK | 0x0010;
 
   return wrt;
+}
+
+
+
+/**
+ * @param date: the date string;
+ * @param datele: the date string length
+ *
+ * @return True if succeeds, False otherwise
+ * 
+ * Checks if a date string is conform to the ISO norm
+ */
+
+WPRIVATE warc_bool_t WRecord_checkDate (const warc_u8_t * date, warc_u32_t datelen)
+{
+    warc_u32_t    i = 0;
+    warc_u32_t    j = 0;
+
+   if (datelen != 20)
+      return (WARC_FALSE);
+
+   i = datelen-1;
+
+   if ((date [i] != 'z') && (date[i] != 'Z'))
+      return (WARC_FALSE);
+
+   i--;
+
+   for (j = 0; j<3; j++)
+      {
+      if (! isdigit (date[i]) || (! isdigit (date[i-1])))
+         return (WARC_FALSE);
+
+     if ((j <2) && (date[i-2] != ':'))
+          return (WARC_FALSE);
+
+     else if ((j == 2) && ((date[i-2] != 't') && (date[i-2] != 'T')))
+            return (WARC_FALSE);
+
+      i = i-3;
+      }
+
+   for (j = 0; j<2; j++)
+      {
+      if ((! isdigit (date[i])) || (! isdigit(date[i-1])))
+         return (WARC_FALSE);
+
+      if (date[i-2] != '-')
+         return (WARC_FALSE);
+
+      i = i-3;
+      }
+
+   for (j =0; j<4; j++)
+       {
+       if (! isdigit (date [i]))
+          return (WARC_FALSE);
+
+       i--;
+       }
+return (WARC_TRUE);
 }
 
 
@@ -459,9 +810,9 @@ WIPUBLIC warc_bool_t WRecord_setSubjectUri (void * _self,
  * Sets the creation date of the WARC-record
  */
 
-WIPUBLIC warc_bool_t WRecord_setCreationDate (void *  _self,
-    const warc_u8_t * cd,
-    const warc_u32_t len)
+WIPUBLIC warc_bool_t WRecord_setDate (void *  _self,
+                                              const warc_u8_t * cd,
+                                              const warc_u32_t len) 
 {
 
   struct WRecord *  self = _self;
@@ -471,7 +822,11 @@ WIPUBLIC warc_bool_t WRecord_setCreationDate (void *  _self,
   CASSERT (self);
   assert (cd);
 
-  wrt = WHDLine_setCreationDate (HDL, cd, len);
+  /* Check of the date format */
+  unless (WRecord_checkDate (cd, len))
+     return (WARC_TRUE);
+
+  wrt = WHeader_setCreationDate (HDL, cd, len);
 
   if (wrt == WARC_FALSE)
     CHECK = CHECK | 0x0004;
@@ -481,7 +836,91 @@ WIPUBLIC warc_bool_t WRecord_setCreationDate (void *  _self,
 
 
 /**
- * @param _self WHDLine object
+ * @param date: the date in  w3c-iso8601 format
+ * 
+ * @return 
+ *
+ * Convert date extract from arc file to w3c-iso8601 format
+ */
+
+
+WPRIVATE void * WRecord_convertDate (const warc_u8_t * date)
+{
+ warc_u32_t i  = 0;
+
+ void * item = bless (WString, "", 0);  /* the return item */
+ warc_u8_t achar[2] = {' ', '\0'};     /* to append item characters */
+ 
+ for (i = 0; i < w_strlen (date); i ++)
+     {
+  
+      achar [0] = date [i];
+      WString_append (item, achar, 1);
+           
+      if (( i == 3) || (i == 5))
+         {
+          achar [0] = '-';
+          WString_append (item, achar, 1);
+         }
+
+       if (i == 7)
+          {
+            achar [0] = 'T' ;
+            WString_append (item, achar, 1);
+          }
+
+       if ((i == 9) || (i == 11))
+          {
+           achar [0] = ':' ;
+           WString_append (item, achar, 1);
+          }
+
+        if (i == 13)
+          {
+           achar [0] = 'Z' ;
+           WString_append (item, achar, 1);
+          }
+
+      }
+  return item;
+}
+
+/**
+ * @param _self WRecord object
+ * @param cd creation date string
+ * @param len creation date string length
+ *
+ * @return false if succseeds, true otherwise
+ *
+ * Sets the creation date of the WARC-record From an Arc Record
+ */
+
+WIPUBLIC warc_bool_t WRecord_setDateFromArc   (void *  _self,
+                                              const warc_u8_t * cd,
+                                              const warc_u32_t len) 
+{
+
+  struct WRecord *  self = _self;
+  void * item;
+  warc_bool_t wrt;
+
+  UNUSED (len);
+
+  /* preconditions */
+  CASSERT (self);
+  assert (cd);
+
+  item = WRecord_convertDate (cd);
+
+  wrt = WRecord_setDate (self, WString_getText (item), WString_getLength (item));
+  destroy (item);
+
+  return wrt;
+}
+
+
+/**
+ * @param _self WRecord object
  * @param ct content type string
  * @param len content type string length
  *
@@ -502,17 +941,605 @@ WIPUBLIC warc_bool_t WRecord_setContentType (void * _self,
   CASSERT (self);
   assert (ct);
 
-  wrt = WHDLine_setContentType (HDL, ct, len);
+  /* mime check */
+
+  wrt = WHeader_setContentType (HDL, ct, len);
 
   if (wrt == WARC_FALSE)
-    CHECK = CHECK | 0x0008;
+    OPT_CHK = OPT_CHK | 0x0001;
+
+  return wrt;
+}
+
+/**
+ * @param _self WRecord object
+ * @param rid Warc Record id constant string
+ * @param len WARC Record id string length
+ *
+ * @return false if succseeds, true otherwise
+ *
+ * Sets the Warc Concurrent Record id
+ */
+
+WIPUBLIC warc_bool_t WRecord_setConcurrentTo (void * _self,
+    const warc_u8_t * rid,
+    const warc_u32_t len)
+{
+
+  struct WRecord * self = _self;
+  warc_bool_t wrt;
+
+  /* preconditions */
+  CASSERT (self);
+  assert (rid);
+
+  /* check Uri */
+
+  wrt = WHeader_setConcurrentTo (HDL, rid, len);
+
+  if (wrt == WARC_FALSE)
+    OPT_CHK = OPT_CHK | 0x0002;
+
+  return wrt;
+}
+
+
+
+/**
+ * @param digest;l the digest to check
+ *
+ * @return True if succeeds, False otherwise
+ *
+ * Checks if a Digest Format is correct
+ */
+
+WPRIVATE warc_bool_t WRecord_checkDigest (const warc_u8_t * digest)
+{
+    warc_u32_t    i    = 0;
+    warc_u32_t    size = w_strlen (digest);
+
+  while ((digest[i] != ':') && (i < size))
+      i++;
+ 
+  if (i == size)
+    return (WARC_FALSE);
+
+    i++;
+
+  while (i < size)
+    {
+   
+    if ((digest[i] <= 31) || (digest[i] == 127))
+       return (WARC_FALSE);
+
+    switch (digest[i])
+      {
+      case '(':
+      case '\r':
+      case '\n':
+      case ')':
+      case '<':
+      case '>':
+      case '@':
+      case ',':
+      case ';':
+      case ':':
+      case '\\':
+      case '"':
+      case '/':
+      case '[':
+      case ']':
+      case '?':
+      case '=':
+      case '{':
+      case '}':
+      case ' ':
+      case '\t': return (WARC_FALSE);
+
+      default  : break;
+      }
+    i++;
+    }
+
+  return (WARC_TRUE);
+}
+
+
+/**
+ * @param _self WRecord object
+ * @param digest Block Digest Constant string
+ * @param len Block Digest string length
+ *
+ * @return false if succseeds, true otherwise
+ *
+ * Sets the Block Digest string
+ */
+
+WIPUBLIC warc_bool_t WRecord_setBlockDigest (void * _self,
+    const warc_u8_t * digest,
+    const warc_u32_t len)
+{
+
+  struct WRecord * self = _self;
+  warc_bool_t wrt;
+
+  /* preconditions */
+  CASSERT (self);
+  assert (digest);
+
+  /* Check of the digest */
+  unless (WRecord_checkDigest (digest))
+     return (WARC_TRUE);
+
+  wrt = WHeader_setBlockDigest (HDL, digest, len);
+
+  /*if (wrt == WARC_FALSE)
+    CHECK = CHECK | 0x0008;*/
+
+  return wrt;
+}
+
+/**
+ * @param _self WRecord object
+ * @param paydigest Payload Digest string
+ * @param len Payload digest string length
+ *
+ * @return false if succseeds, true otherwise
+ *
+ * Sets the WARC Header Payload Digest field
+ */
+
+WIPUBLIC warc_bool_t WRecord_setPayloadDigest (void * _self,
+    const warc_u8_t * paydigest,
+    const warc_u32_t len)
+{
+
+  struct WRecord * self = _self;
+  warc_bool_t wrt;
+
+  /* preconditions */
+  CASSERT (self);
+  assert (paydigest);
+
+  /* check the digest */
+  unless (WRecord_checkDigest (paydigest))
+     return (WARC_TRUE);
+
+  wrt = WHeader_setPayloadDigest (HDL, paydigest, len);
+
+  /*if (wrt == WARC_FALSE)
+    CHECK = CHECK | 0x0008;*/
+
+  return wrt;
+}
+
+
+
+/**
+ * @param ipadd: the IP Address string
+ *
+ * @return True if correct, false otherwise
+ *
+ * Checks if an IP Address is correct
+ */
+
+WPRIVATE warc_bool_t  WRecord_checkIpAddress (const warc_u8_t * ipadd)
+{
+#define PORTMAX 65535 /* or whatever appropriate */
+
+  warc_u32_t   rc;
+  warc_u32_t   b1, b2, b3, b4, port = 0;
+  warc_u8_t    c;
+
+  rc = sscanf ( (const char *) ipadd, "%3u.%3u.%3u.%3u:%u%c",
+                & b1, & b2, & b3, & b4, & port, & c);
+
+  if (rc != 4 && rc != 5)
+    {
+      w_fprintf (fprintf (stderr, "error> found IP address: %s\n", (char *) ipadd) );
+      /* raise the flag error */
+      WarcDebugMsg ("expecting a valid IP address: accept only IPv4 and IPv6 adresses");
+
+      return   WARC_FALSE;
+    }
+
+
+  if ( (b1 | b2 | b3 | b4) > 255 || port > PORTMAX)
+    {
+      w_fprintf (fprintf (stderr, "error> found IP address: %s\n", (char *) ipadd) );
+      /* raise the flag error */
+      WarcDebugMsg ("expecting a valid IP address: IP range greater than 255 or port number greater than" PORTMAX);
+
+      return WARC_FALSE;
+    }
+
+  if (strspn ( (const char *) ipadd, "0123456789.:") < w_strlen (ipadd))
+    {
+      w_fprintf (fprintf (stderr, "error> found IP address: %s\n", (char *) ipadd) );
+      /* raise the flag error */
+      WarcDebugMsg ("expecting a valid IP address: only \"0123456789.:\" are valid");
+      
+      return WARC_FALSE;
+    }
+
+  /* Valid IP address */
+  return WARC_TRUE;
+}
+
+
+
+/**
+ * @param _self WRecord object
+ * @param ip IP Ardess constant string
+ * @param len The ip Address string length
+ *
+ * @return false if succseeds, true otherwise
+ *
+ * Sets the WARC Record IP Adress field
+ */
+
+WIPUBLIC warc_bool_t  WRecord_setIpAddress (void * _self,
+    const warc_u8_t * ip,
+    const warc_u32_t len)
+{
+
+  struct WRecord * self = _self;
+  warc_bool_t wrt;
+
+  /* preconditions */
+  CASSERT (self);
+  assert (ip);
+
+  /* check Ip address */
+  unless (WRecord_checkIpAddress (ip))
+    return (WARC_TRUE);
+
+  wrt = WHeader_setIpAddress (HDL, ip, len);
+
+  if (wrt == WARC_FALSE)
+    OPT_CHK = OPT_CHK | 0x0004;
+
+  return wrt;
+}
+
+/**
+ * @param _self WRecord object
+ * @param ref referenced Warc Record id constant string
+ * @param len referenced WARC Record id string length
+ *
+ * @return false if succseeds, true otherwise
+ *
+ * Sets the WARC Record Refers_To Record id string
+ */
+
+WIPUBLIC warc_bool_t  WRecord_setRefersTo (void * _self,
+    const warc_u8_t * ref,
+    const warc_u32_t len)
+{
+
+  struct WRecord * self = _self;
+  warc_bool_t wrt;
+
+  /* preconditions */
+  CASSERT (self);
+  assert (ref);
+
+  /* Uri check */
+
+  wrt = WHeader_setRefersTo (HDL, ref, len);
+
+  if (wrt == WARC_FALSE)
+    OPT_CHK = OPT_CHK | 0x0008;
 
   return wrt;
 }
 
 
 /**
- * @param _self WHDLine object
+ * @param trunc: the trucnation to check
+ *
+ * @return True if succeed, False otherwise
+ *
+ * Checks the possible trucations causes
+ */
+
+WPRIVATE  warc_bool_t  WRecord_checkTruncated (const warc_u8_t * trunc)
+{
+if (w_strcmp (trunc, makeU ("length")))
+   if (w_strcmp (trunc, makeU ("time")))
+     if (w_strcmp (trunc, makeU ("disconnect")))
+        if (w_strcmp (trunc, makeU ("unspecifed")))
+            return WARC_FALSE;
+ 
+
+return WARC_TRUE;
+}
+
+
+/**
+ * @param _self WRecord object
+ * @param trunc record id constant string
+ * @param len WARC Record id string length
+ *
+ * @return false if succseeds, true otherwise
+ *
+ * Sets the WARC Record Truncation Field
+ */
+
+WIPUBLIC warc_bool_t  WRecord_setTruncated (void * _self,
+    const warc_u8_t * trunc,
+    const warc_u32_t len)
+{
+
+  struct WRecord * self = _self;
+  warc_bool_t wrt;
+
+  /* preconditions */
+  CASSERT (self);
+  assert (trunc);
+
+  /* truncation check */
+  unless (WRecord_checkTruncated (trunc))
+    return (WARC_TRUE);
+
+  wrt = WHeader_setTruncated (HDL, trunc, len);
+
+  /*if (wrt == WARC_FALSE)
+    CHECK = CHECK | 0x0008;*/
+
+  return wrt;
+}
+
+/**
+ * @param _self WRecord object
+ * @param idinfo Warcinfo Record id constant string
+ * @param len Warcinfo Record id string length
+ *
+ * @return false if succseeds, true otherwise
+ *
+ * Sets the WARC Record Related Warcinfo Record Id
+ */
+
+WIPUBLIC warc_bool_t   WRecord_setWarcInfoId (void * _self,
+    const warc_u8_t * idinfo,
+    const warc_u32_t len)
+{
+
+  struct WRecord * self = _self;
+  warc_bool_t wrt;
+
+  /* preconditions */
+  CASSERT (self);
+  assert (idinfo);
+
+  /* check Uri */
+
+  wrt =  WHeader_setInfoId (HDL, idinfo, len);
+
+  if (wrt == WARC_FALSE)
+    OPT_CHK = OPT_CHK | 0x0400;
+
+  return wrt;
+}
+
+/**
+ * @param _self WRecord object
+ * @param prof Record Profile string
+ * @param len WARC Profile string length
+ *
+ * @return false if succseeds, true otherwise
+ *
+ * Sets the WARC Record Profile field
+ */
+
+WIPUBLIC warc_bool_t   WRecord_setProfile (void * _self,
+    const warc_u8_t * prof,
+    const warc_u32_t len)
+{
+
+  struct WRecord * self = _self;
+  warc_bool_t wrt;
+
+  /* preconditions */
+  CASSERT (self);
+  assert (prof);
+
+  /* check Uri */
+
+  wrt =  WHeader_setProfile (HDL, prof, len);
+
+  if (wrt == WARC_FALSE)
+    OPT_CHK = OPT_CHK | 0x0040;
+
+  return wrt;
+}
+
+/**
+ * @param _self WRecord object
+ * @param paytype Payload type string
+ * @param len Payload type string length
+ *
+ * @return false if succseeds, true otherwise
+ *
+ * Sets the WARC Record Payload type field
+ */
+
+WIPUBLIC warc_bool_t   WRecord_setPayloadType (void * _self,
+    const warc_u8_t * paytype,
+    const warc_u32_t len)
+{
+
+  struct WRecord * self = _self;
+  warc_bool_t wrt;
+
+  /* preconditions */
+  CASSERT (self);
+  assert (paytype);
+
+  /* mime check */
+
+  wrt =  WHeader_setPayloadType (HDL, paytype, len);
+
+  /*if (wrt == WARC_FALSE)
+    CHECK = CHECK | 0x0008;*/
+
+  return wrt;
+}
+
+/**
+ * @param _self WRecord object
+ * @param segid Origin Warc Record id constant string
+ * @param len Origin Warc Record id string length
+ *
+ * @return false if succseeds, true otherwise
+ *
+ * Sets the sgement WARC-Record Origin record id
+ */
+
+WIPUBLIC warc_bool_t   WRecord_setSegmentOriginId (void * _self,
+    const warc_u8_t * segid,
+    const warc_u32_t len)
+{
+
+  struct WRecord * self = _self;
+  warc_bool_t wrt;
+
+  /* preconditions */
+  CASSERT (self);
+  assert (segid);
+
+  /* uri check */
+
+  wrt =  WHeader_setSegmentOriginId (HDL, segid, len);
+
+  if (wrt == WARC_FALSE)
+    OPT_CHK = OPT_CHK | 0x0100;
+
+  return wrt;
+}
+
+/**
+ * @param _self WRecord object
+ * @param snumber Segment number as a 32 bits unsigned integer
+ * 
+ *
+ * @return false if succseeds, true otherwise
+ *
+ * Sets the Segment number of a segment Warc Record
+ */
+
+WIPUBLIC warc_bool_t    WRecord_setSegmentNumber (void * _self,
+    const warc_u32_t snumber)
+{
+
+  struct WRecord * self = _self;
+  warc_bool_t wrt;
+
+  /* preconditions */
+  CASSERT (self);
+  assert (snumber);
+
+  wrt =   WHeader_setSegmentNumber (HDL, snumber);
+
+  if (wrt == WARC_FALSE)
+    OPT_CHK = OPT_CHK | 0x0080;
+
+  return wrt;
+}
+
+/**
+ * @param _self WRecord object
+ * @param stlength The total size as 32 bits unsigfned integer
+ * 
+ *
+ * @return false if succseeds, true otherwise
+ *
+ * Sets the Total size of segmented WARC-record (only in the last segment)
+ */
+
+WIPUBLIC warc_bool_t     WRecord_setSegTotalLength (void * _self,
+    const warc_u32_t stlength)
+{
+
+  struct WRecord * self = _self;
+  warc_bool_t wrt;
+
+  /* preconditions */
+  CASSERT (self);
+  assert (stlength);
+
+  wrt =    WHeader_setSegTotalLength (HDL, stlength);
+
+  if (wrt == WARC_FALSE)
+    OPT_CHK = OPT_CHK | 0x0200;
+
+  return wrt;
+}
+
+
+/**
+ * @param fname: the filename to check
+ * 
+ * @return True if succeeds, False otherwise
+ *
+ * Checks if a file name is correct
+ */
+
+WPRIVATE warc_bool_t WRecord_checkFilename (const warc_u8_t * fname)
+{
+    warc_u32_t   i    = 0;
+    warc_u32_t   size = w_strlen (fname);
+
+    while (i < size)
+      {
+      if ((fname[i] <= 31) || (fname[i] == 127))
+         return (WARC_FALSE);
+      i++;
+      }
+
+  return (WARC_TRUE);
+}
+
+
+
+/**
+ * @param _self WRecord object
+ * @param fname Warc File name constant string
+ * @param len Warc File name string length
+ *
+ * @return false if succseeds, true otherwise
+ *
+ * Sets the WARC Record Related Warc File name
+ */
+
+WPUBLIC warc_bool_t WRecord_setFilename (void * _self,
+    const warc_u8_t * fname,
+    const warc_u32_t len)
+{
+
+  struct WRecord * self = _self;
+  warc_bool_t wrt;
+
+  /* preconditions */
+  CASSERT (self);
+  assert (fname);
+
+  /* check the file name */
+  unless (WRecord_checkFilename (fname))
+     return (WARC_TRUE);
+
+  wrt = WHeader_setFilename (HDL, fname, len);
+
+  if (wrt == WARC_FALSE)
+    OPT_CHK = OPT_CHK | 0x0020;
+
+  return (wrt);
+}
+
+
+
+/**
+ * @param _self WRecord object
  * @param rid record id constant string
  * @param len record id string length
  *
@@ -533,13 +1560,34 @@ WPUBLIC warc_bool_t WRecord_setRecordId (void * _self,
   CASSERT (self);
   assert (rid);
 
-  wrt = WHDLine_setRecordId (HDL, rid, len);
+  /*check URI */
+
+  wrt = WHeader_setRecordId (HDL, rid, len);
 
   if (wrt == WARC_FALSE)
-    CHECK = CHECK | 0x0010;
+    CHECK = CHECK | 0x002;
 
   return (wrt);
 }
+
+
+/**
+ * @param _self: WRecord object instance
+ *
+ * @return WList object if succeeds, NIL otherwise
+ *
+ * Return a list of Non predefined named fileds 
+ */
+
+WIPUBLIC const void * WRecord_getAnvl (const void * const _self)
+{
+    const struct WRecord * const self = _self;
+
+  /* Preconditions */
+  CASSERT (self);
+
+return (WHeader_getAnvl (HDL));
+} 
 
 
 /**
@@ -552,35 +1600,15 @@ WPUBLIC warc_bool_t WRecord_setRecordId (void * _self,
  */
 
 WIPUBLIC const warc_u8_t * WRecord_getAnvlValue (const void* const _self,
-    const warc_u8_t * key)
+                                                const warc_u8_t * key)
 {
 
   const struct WRecord * const self = _self;
-  const void * anvl   = NIL;
-  warc_u32_t   i      = 0;
-  warc_u32_t   lsize;
 
   /* Preconditions */
   CASSERT (self);
 
-  unless (LIST)
-  return (NIL);
-
-  unless (key)
-  return (NIL);
-
-  lsize = WList_size (LIST);
-
-  while (i < lsize)
-    {
-      anvl = WList_get (LIST, i);
-      unless (w_strcmp (WAnvl_getKey (anvl), key) )
-      return (WAnvl_getValue (anvl) );
-      else
-        ++ i;
-    }
-
-  return (NIL);
+  return (WHeader_getAnvlValue (HDL, key));
 }
 
 
@@ -604,35 +1632,24 @@ WIPUBLIC warc_bool_t WRecord_addAnvl (void * _self,
 {
 
   struct WRecord * self = _self;
-  void * anvl = NIL;
 
-  /* Preconditions */
+  /* Precondition */
   CASSERT (self);
 
-  unless (key)
-  return (WARC_TRUE);
+  return (WHeader_addAnvl (HDL, key, klen, value, vlen));
 
-  unless (value)
-  return (WARC_TRUE);
-
-  anvl = bless (WAnvl, key, klen, value, vlen);
-
-  unless (anvl)
-  return (WARC_TRUE);
-
-  return (WList_push (LIST, anvl) );
 }
 
 
 /**
  * @param _self a WRecord object
  *
- * @return the WRecord header Line object if succeeds, NIL otherwise
+ * @return the WRecord header  object if succeeds, NIL otherwise
  *
- * Returns the Warc Record Geader Line object
+ * Returns the Warc Record Header object
  */
 
-WIPUBLIC const void * WRecord_getHDLine (const void * const _self)
+WIPUBLIC const void * WRecord_getHeader (const void * const _self)
 {
 
   const struct WRecord * const self = _self;
@@ -646,14 +1663,14 @@ WIPUBLIC const void * WRecord_getHDLine (const void * const _self)
 
 /**
  * @param _self A WRecord object
- * @param h a WHDLine object reference
+ * @param h a WHeader object reference
  *
- * @return The old stored WHDLine object reference if succeeds, NIL otherwise
+ * @return The old stored WHDeader object reference if succeeds, NIL otherwise
  *
- * Set a new header line for the Warc Record and returns the old one for uage or destruction
+ * Set a new header for the Warc Record and returns the old one for uage or destruction
  */
 
-WIPUBLIC void * WRecord_setHDLine (void * const _self, void * h)
+WIPUBLIC void * WRecord_setHeader (void * const _self, void * h)
 {
 
   struct WRecord * const self = _self;
@@ -672,57 +1689,6 @@ WIPUBLIC void * WRecord_setHDLine (void * const _self, void * h)
   return (NIL);
 }
 
-
-/**
- * @param _self a WRecord object
- *
- * @param The list of Anvl Fields of the WRecord if succeeds, NIL otherwise
- *
- * Returns the list of the Warc Record anvl fields
- */
-
-WIPUBLIC const void * WRecord_getAnvl (const void * const _self)
-{
-
-  const struct WRecord * const self = _self;
-
-
-  /* preconditions */
-  CASSERT (self);
-
-  return (LIST);
-}
-
-
-
-/**
- * @param _self a WRecord object
- * @param a a WList object reference
- *
- * @return The old stored anvl List reference if succeeds, NIL otherwise
- *
- * Sets a new List of anvl fields for the Warc record and
- * returns the old one for usage or destruction
- */
-
-WIPUBLIC void * WRecord_setAnvl (void * const _self, void * const a)
-{
-
-  struct WRecord * const self = _self;
-  void                 *       old;
-
-  /* preconditions */
-  CASSERT (self);
-
-  if (a)
-    {
-      old = LIST;
-      LIST = a;
-      return (old);
-    }
-
-  return (NIL);
-}
 
 
 /**
@@ -756,6 +1722,14 @@ WIPUBLIC warc_bool_t WRecord_setContentFromFileName (void * _self,
   EDATAF = dfile;
 
   w_file_size (dfile, SIZE);
+
+  if (WHeader_setContentLength (HDL, SIZE))
+     {
+     w_fclose (dfile);
+     return (WARC_TRUE);
+     }
+
+  CHECK = CHECK | 0x0008;
 
   return (WARC_FALSE);
 }
@@ -897,6 +1871,11 @@ WPUBLIC warc_bool_t WRecord_setContentSize (void * _self, warc_i64_t sz)
   return (WARC_TRUE);
 
   SIZE = sz;
+
+  if (WHeader_setContentLength (HDL, SIZE))
+     return (WARC_TRUE);
+
+  CHECK = CHECK | 0x0008;
 
   return (WARC_FALSE);
 }
@@ -1072,10 +2051,66 @@ WPUBLIC warc_bool_t WRecord_check (const void * const _self)
   const struct WRecord * const self = _self;
   CASSERT (self);
 
-  if (MASK == CHECK)
-    return (WARC_TRUE);
+  if (MASK1 != CHECK)
+    return (WARC_FALSE);
 
-  return (WARC_FALSE);
+  switch (WHeader_getRecordType (HDL))
+    {
+    case WARC_INFO_RECORD:
+         if ((OPT_CHK & AND_MSK1) != AND_MSK1)
+           return (WARC_FALSE);
+         if ((OPT_CHK | OR_MSK1) != OR_MSK1)
+           return (WARC_FALSE);
+
+         break;
+
+    case WARC_RESPONSE_RECORD:
+    case WARC_RESOURCE_RECORD:
+    case WARC_REQUEST_RECORD:
+         if ((OPT_CHK & AND_MSK2) != AND_MSK2)
+           return (WARC_FALSE);
+         if ((OPT_CHK | OR_MSK2) != OR_MSK2)
+           return (WARC_FALSE);
+
+         break;
+
+    case WARC_REVISIT_RECORD:
+         if ((OPT_CHK & AND_MSK3) != AND_MSK3)
+           return (WARC_FALSE);
+         if ((OPT_CHK | OR_MSK3) != OR_MSK3)
+           return (WARC_FALSE);
+
+         break;
+
+    case WARC_METADATA_RECORD:
+         if ((OPT_CHK & AND_MSK4) != AND_MSK4)
+           return (WARC_FALSE);
+         if ((OPT_CHK | OR_MSK4) != OR_MSK4)
+           return (WARC_FALSE);
+
+         break;
+
+    case WARC_CONVERSION_RECORD:
+         if ((OPT_CHK & AND_MSK5) != AND_MSK5)
+           return (WARC_FALSE);
+         if ((OPT_CHK | OR_MSK5) != OR_MSK5)
+           return (WARC_FALSE);
+
+         break;
+
+    case WARC_CONTINUATION_RECORD:
+         if ((OPT_CHK & AND_MSK6) != AND_MSK6)
+           return (WARC_FALSE);
+         if ((OPT_CHK | OR_MSK6) != OR_MSK6)
+           return (WARC_FALSE);
+
+         break;
+
+    case WARC_UNKNOWN_RECORD:
+    default: break;
+    }
+
+  return (WARC_TRUE);
 }
 
 
@@ -1206,7 +2241,7 @@ WIPUBLIC warc_bool_t WRecord_setContentFromArc (void * _self, void * arcontent)
  *
  * @return a valid WRecord object or NIL
  *
- * @brief WARC List constructor
+ * @brief WARC Record constructor
  */
 
 WPRIVATE void * WRecord_constructor (void * _self, va_list * app)
@@ -1215,18 +2250,15 @@ WPRIVATE void * WRecord_constructor (void * _self, va_list * app)
   struct WRecord * const self = _self;
   UNUSED (app);
 
-  /* create a WHDLine object */
-  HDL = bless (WHDLine, "", 0, 0, WARC_UNKNOWN_RECORD, "", 0, "", 0, "", 0, "", 0);
+  /* create a WHeader object */
+  HDL = bless (WHeader, WARC_UNKNOWN_RECORD, "", 0, "", 0);
   assert (HDL);
-
-  /* create a WAnvl object */
-  LIST = bless (WList);
-  assert (LIST);
 
   DATAF  = NIL;
   EDATAF = NIL;
   ACONT =  NIL;
   CHECK  = 0;
+  OPT_CHK  = 0;
   CBACK  = NIL;
   SIZE   = 0;
   OFFSET = 0;
@@ -1243,7 +2275,6 @@ WPRIVATE void * WRecord_constructor (void * _self, va_list * app)
  *
  * WRecord destructor
  */
-
 WPRIVATE void * WRecord_destructor (void * _self)
 {
 
@@ -1252,12 +2283,7 @@ WPRIVATE void * WRecord_destructor (void * _self)
   /* preconditions */
   CASSERT (self);
 
-  /* free the WAnvl object */
-
-  if (LIST)
-    destroy (LIST), LIST = NIL;
-
-  /* free the WHDLine object */
+  /* free the WHeader object */
   if (HDL)
     destroy (HDL), HDL = NIL;
 
@@ -1272,6 +2298,9 @@ WPRIVATE void * WRecord_destructor (void * _self)
 
   if (CHECK)
     CHECK = 0;
+
+  if (OPT_CHK)
+    OPT_CHK = 0;
 
   if (CBACK)
     CBACK = NIL;

@@ -383,7 +383,7 @@ WPRIVATE WSend_filtredResponse (const warc_u8_t * fname, const warc_u8_t * prefi
        rsize = WRecord_getCompressedSize (record);
 
        unless (w_strcmp (fdfilter, "uri"))
-              hofld =   WRecord_getSubjectUri  (record);
+              hofld =   WRecord_getTargetUri  (record);
        else
          {
          unless (w_strcmp(fdfilter, "contenttype"))
@@ -437,7 +437,7 @@ WPRIVATE WSend_filtredResponse (const warc_u8_t * fname, const warc_u8_t * prefi
           }
        }
 
-       if (w_strcasestr (hofld, filter))
+       if ( (hofld) && (w_strcasestr (hofld, filter)))
           {
            WFile_seek (w, offset);
            offset += rsize;          
@@ -523,6 +523,10 @@ WPRIVATE warc_bool_t WSend_distantDumpResponse (const warc_u8_t * fname, const w
     
    while (WFile_hasMoreRecords (w) )
       {
+       const warc_u8_t * string = NIL;
+       warc_u32_t  tlen   = 0  ;
+       warc_bool_t m      = WARC_FALSE;
+
        unless ( (record = WFile_nextRecord (w) ) )
          {
           r->content_type = "text/html";
@@ -531,21 +535,134 @@ WPRIVATE warc_bool_t WSend_distantDumpResponse (const warc_u8_t * fname, const w
           return (WARC_TRUE);
          }
 
+      r -> content_type = "text/html";
+
       /*print WHDLine object for this WRecord */
       ap_rprintf (r, "<I> <B> <FONT SIZE = 5  COLOR = blue> Warc record that begin at offset  %d  fields : </FONT> </B> </I>\n\n",
                        WRecord_getOffset (record) );
 
       ap_rprintf (r, "<p> <FONT SIZE = 4 COLOR = purple >  Header line field </FONT>  <p>\n");
       ap_rprintf (r, "<BLOCKQUOTE> <TABLE BORDER = 2   BGCOLOR = gray>");
-      ap_rprintf (r, " <TR>  <TD> <B>  WarcId  </B> </TD> <TD> %-20s </TD> </TR> \n",        WRecord_getWarcId      (record) );
-      ap_rprintf (r,"<TR> <TD> <B>  DataLength  </B> </TD> <TD> %-20d </TD> </TR>\n",        WRecord_getDataLength  (record) );
-      ap_rprintf (r, "<TR> <TD> <B>  RecordType  </B> </TD> <TD> %-20d </TD> </TR>\n",       WRecord_getRecordType  (record) );
-      ap_rprintf (r, "<TR> <TD> <B>  SubjectUri  </B> </TD> <TD> %-20s </TD> </TR>\n",       WRecord_getSubjectUri  (record) );
-      ap_rprintf (r, "<TR> <TD> <B>  CreationDate  </B> </TD> <TD> %-20s </TD> </TR>\n",     WRecord_getCreationDate (record));
-      ap_rprintf (r, " <TR> <TD> <B> ContentType </B> </TD> <TD> %-20s </TD> </TR>\n",       WRecord_getContentType (record) );
-      ap_rprintf (r, "<TR> <TD> <B>  RecordId   </B>   </TD> <TD> %-20s </TD> </TR> \n",     WRecord_getRecordId    (record) );
-      
+      ap_rprintf (r, " <TR>  <TD> <B>  Warc ID  </B> </TD> <TD> %-20s </TD> </TR> \n",        WRecord_getWarcId      (record) );
+      ap_rprintf (r,"<TR> <TD> <B>  Content-Length  </B> </TD> <TD> %-20d </TD> </TR>\n",        WRecord_getContentLength  (record) );
+      ap_rprintf (r, "<TR> <TD> <B>  WARC-Type  </B> </TD> <TD> %-20d </TD> </TR>\n",       WRecord_getRecordType  (record) );
+      ap_rprintf (r, "<TR> <TD> <B>  WARC-Record-ID   </B>   </TD> <TD> %-20s </TD> </TR> \n",     WRecord_getRecordId    (record) );
+      ap_rprintf (r, "<TR> <TD> <B>  WARC-Date  </B> </TD> <TD> %-20s </TD> </TR>\n",     WRecord_getDate (record));
       ap_rprintf (r, "</TABLE> </BLOCKQUOTE>");
+
+      ap_rprintf (r, "<font color = darkgreen size 3= > Other fields </font><br>");
+
+      ap_rprintf (r, "<BLOCKQUOTE> <TABLE BORDER = 2   BGCOLOR = gray>");
+
+      string = WRecord_getContentType (record);
+      if (string)
+        {
+         ap_rprintf (r, " <TR> <TD> <B> Content-Type </B> </TD> <TD> %-20s </TD> </TR>\n", string);
+         m = WARC_TRUE;
+        }
+
+      string = WRecord_getConcurrentTo (record);
+      if (string)
+        {
+         ap_rprintf (r, " <TR> <TD> <B> WARC-Concurrent-To </B> </TD> <TD> %-20s </TD> </TR>\n", string);
+         m = WARC_TRUE;
+        }
+
+      string = WRecord_getBlockDigest (record);
+      if (string)
+        {
+         ap_rprintf (r, " <TR> <TD> <B> WARC-Block-Digest </B> </TD> <TD> %-20s </TD> </TR>\n", string);
+         m = WARC_TRUE;
+        }
+
+      string = WRecord_getPayloadDigest (record);
+      if (string)
+        {
+         ap_rprintf (r, " <TR> <TD> <B> WARC-Payload-Digest </B> </TD> <TD> %-20s </TD> </TR>\n", string);
+         m = WARC_TRUE;
+        }
+
+      string = WRecord_getIpAddress (record);
+      if (string)
+        {
+         ap_rprintf (r, " <TR> <TD> <B> WARC-IP-Address </B> </TD> <TD> %-20s </TD> </TR>\n", string);
+         m = WARC_TRUE;
+        }
+
+      string = WRecord_getRefersTo (record);
+      if (string)
+        {
+         ap_rprintf (r, " <TR> <TD> <B> WARC-Refers-To </B> </TD> <TD> %-20s </TD> </TR>\n", string);
+         m = WARC_TRUE;
+        }
+
+      string = WRecord_getTargetUri (record);
+      if (string)
+        {
+         ap_rprintf (r, "<TR> <TD> <B>  WARC-target-URI  </B> </TD> <TD> %-20s </TD> </TR>\n", string);
+         m = WARC_TRUE;
+        }
+
+      string = WRecord_getTruncated (record);
+      if (string)
+        {
+         ap_rprintf (r, " <TR> <TD> <B> WARC-Truncated </B> </TD> <TD> %-20s </TD> </TR>\n", string);
+         m = WARC_TRUE;
+        }
+
+      string = WRecord_getWarcInfoId (record);
+      if (string)
+        {
+         ap_rprintf (r, " <TR> <TD> <B> WARC-Warcinfo-ID </B> </TD> <TD> %-20s </TD> </TR>\n", string);
+         m = WARC_TRUE;
+        }
+
+      string = WRecord_getFilename (record);
+      if (string)
+        {
+         ap_rprintf (r, " <TR> <TD> <B> WARC-Filename </B> </TD> <TD> %-20s </TD> </TR>\n", string);
+         m = WARC_TRUE;
+        }
+
+      string = WRecord_getProfile (record);
+      if (string)
+        {
+         ap_rprintf (r, " <TR> <TD> <B> WARC-Profile </B> </TD> <TD> %-20s </TD> </TR>\n", string);
+         m = WARC_TRUE;
+        }
+
+      string = WRecord_getPayloadType (record);
+      if (string)
+        {
+         ap_rprintf (r, " <TR> <TD> <B> WARC-Identified-Payload-Type </B> </TD> <TD> %-20s </TD> </TR>\n", string);
+         m = WARC_TRUE;
+        }
+
+      string = WRecord_getSegmentOriginId (record);
+      if (string)
+        {
+         ap_rprintf (r, " <TR> <TD> <B> WARC-Segment-Origin-ID </B> </TD> <TD> %-20s </TD> </TR>\n", string);
+
+         ap_rprintf (r, " <TR> <TD> <B> WARC-Segment-Number </B> </TD> <TD> %-20d </TD> </TR>\n",
+                     WRecord_getSegmentNumber (record));
+
+         m = WARC_TRUE;
+        }
+
+      tlen = WRecord_getSegTotalLength (record);
+      if (tlen)
+        {
+         ap_rprintf (r, " <TR> <TD> <B> WARC-Segment-Total-Length </B> </TD> <TD> %-20d </TD> </TR>\n", tlen);
+
+         m = WARC_TRUE;
+        }
+
+      unless (m)
+         ap_rprintf (r, " <TR><TD> --No One-- </TD> </TR>\n");
+
+      ap_rprintf (r, "</TABLE> </BLOCKQUOTE>");
+      
+
           
       const void * al = NIL;
       /* dump ANVLs */
@@ -594,7 +711,7 @@ static warc_i32_t warc_handler(request_rec * r)
     void         *   objmode;
     void         *   objrec;
     void         *   objnature;
-    warc_u32_t pos             = 9;
+    warc_u32_t pos             = w_strlen (uS(WARC_VERSION)) + 1;
     warc_i32_t       offset    = -1;
 
 
@@ -608,6 +725,8 @@ static warc_i32_t warc_handler(request_rec * r)
     r->content_type = "text/html";
     objnature = recoverUriField (r-> uri, & pos);
     reqnature = WString_getText (objnature);
+
+          fprintf (stderr, "---------\n");
 
     if ( w_strcmp (reqnature, "file" ))
           if ( w_strcmp (reqnature, "record"))

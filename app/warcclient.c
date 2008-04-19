@@ -40,13 +40,17 @@ int main (int argc, const char ** argv)
 {
   void           * s       = NIL; /* WClient object */
   void           * p       = NIL; /* WGetOpt object */
-  warc_u8_t      * flags   = uS("i:p:o:crf:t:");
+  warc_u8_t      * flags   = uS("i:p:s:o:u:n:d:crf:t:");
   warc_u8_t      * ip      = uS("0.0.0.0");
   warc_u8_t      * ps      = NIL;
   warc_u8_t      * off     = NIL;
   warc_u8_t      * wfn     = NIL;
   warc_u8_t      * target  = NIL;
+  warc_u8_t      * server  = NIL;
+  warc_u8_t      * pattern = uS ("");
+  warc_u8_t        what [12];
   warc_bool_t      request = WARC_FALSE;
+  warc_bool_t      filter  = WARC_FALSE;
   warc_u8_t      * comp    = uS("uncompressed");
   warc_u32_t       port    = 0;
   warc_u32_t       offset  = 0;
@@ -55,9 +59,14 @@ int main (int argc, const char ** argv)
   if (argc <= 7)
     {
       fprintf (stderr, "WARC client to access remote WARC resources\n");
-      fprintf (stderr, "Usage: %s -i <ip> -p <port> -t <remote_warc> -o <local_warc> [-f <offset>] [-c] [-r]\n", argv [0]);
+      fprintf (stderr, "Usage: %s -i <ip> -p <port> -t <remote_warc> -o <local_warc> -s <server_name> [-f <offset>] -[u <uri_pattern>] \
+[-n <content_type_pattern>] [-d <record_type_string>] [-c] [-r]\n", argv [0]);
       fprintf (stderr, "\t[-i]  : ip address\n");
       fprintf (stderr, "\t[-p]  : port number\n");
+      fprintf (stderr, "\t[-s]  : server name\n");
+      fprintf (stderr, "\t[-u]  : filter file on Record uri value (default no)\n");
+      fprintf (stderr, "\t[-n]  : filter file on content type value (default no) \n");
+      fprintf (stderr, "\t[-d]  : filter file on Record type value (deefault unkown)\n");
       fprintf (stderr, "\t[-t]  : remote WARC filename\n");
       fprintf (stderr, "\t[-o]  : output WARC filename\n");
       fprintf (stderr, "\t[-c]  : assume GZIP compressed WARC file (default no)\n");
@@ -117,6 +126,37 @@ int main (int argc, const char ** argv)
           
           break;
 
+        case 's' :
+          if (w_index (flags, c) [1] == ':')
+             server = (warc_u8_t *) WGetOpt_argument (p);
+          
+          break;
+
+        case 'u' :
+          if (w_index (flags, c) [1] == ':')
+             pattern = (warc_u8_t *) WGetOpt_argument (p);
+             w_strncpy (what, makeS("uri"));
+             filter = WARC_TRUE;
+          
+          break;
+
+
+        case 'n' :
+          if (w_index (flags, c) [1] == ':')
+             pattern = (warc_u8_t *) WGetOpt_argument (p);
+             w_strncpy (what, makeS("contenttype"));
+             filter = WARC_TRUE;
+          
+          break;
+
+        case 'd' :
+          if (w_index (flags, c) [1] == ':')
+             pattern = (warc_u8_t *) WGetOpt_argument (p);
+             w_strncpy (what, makeS("recordtype"));
+             filter = WARC_TRUE;
+          
+          break;
+
         case 't' :
           if (w_index (flags, c) [1] == ':')
             target = (warc_u8_t *) WGetOpt_argument (p);
@@ -146,7 +186,7 @@ int main (int argc, const char ** argv)
     }
 
 
-  s = bless (WClient, makeS(ip), port);
+  s = bless (WClient, makeS(ip), port, makeS (server));
   unless (s)
     {
      fprintf (stderr, "Unable to create the WARC client using the IP address %s on the port %d.\n", ip, port);
@@ -157,20 +197,42 @@ int main (int argc, const char ** argv)
 
   if (request)
     {
-      if (WClient_getWFile (s, makeS(comp), offset, makeS(target), wfn))
-        {
-          fprintf (stderr, "WClient_getWFile error : request not satisfied\n");
-          free_obj(s, 8);
-        }
+     if (filter)
+       {
+        fprintf (stderr, "Options conflict: can not send two requests once \n");
+        free_obj (s,10);
+       }
+     else
+       if (WClient_getWFile (s, makeS(comp), offset, makeS(target), wfn))
+         {
+           fprintf (stderr, "WClient_getWFile error : request not satisfied\n");
+           free_obj(s, 8);
+         }
     }
-  else
-    {
-      if (WClient_getWRecord (s, makeS(comp), offset, makeS(target), wfn))
-        {
-          fprintf (stderr, "WClient_getWRecord error: request not satisfied\n");
-          free_obj(s, 9);
-        }
-    }
+  else if (filter)
+      {
+        if (request)
+          {
+           fprintf (stderr, "Options conflict: can not send two requests once \n");
+           free_obj (s,10);
+          }
+        else
+          {
+           if (WClient_getFiltredWFile (s, makeS (comp), offset, makeS (what), makeS (pattern), makeS (target), wfn))
+             {
+              fprintf (stderr, "WClient_getFiltredWFile error: request not satisfied\n");
+              free_obj(s, 11);
+             }
+          }
+      }
+    else
+      {
+        if (WClient_getWRecord (s, makeS(comp), offset, makeS(target), wfn))
+          {
+            fprintf (stderr, "WClient_getWRecord error: request not satisfied\n");
+            free_obj(s, 9);
+          }
+      }
 
   destroy (s);
   

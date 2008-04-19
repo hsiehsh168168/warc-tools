@@ -44,7 +44,7 @@
 #include <wrecord.h>  /* WRecord */
 #include <wrecord.x>  /* WRecord_getDataFile, WRecord_getDataFileExtern */
 #include <wanvl.h>    /* WAnvl */
-#include <whdline.h>  /* WHDLine */
+#include <wheader.h>  /* WHeader */
 #include <wfsmhdl.h>  /* WFsmHDL automata */
 #include <wfsmanvl.h> /* WFsmANVL automata */
 #include <wmktmp.h>   /* WTempFile */
@@ -52,7 +52,8 @@
 #include <wversion.h> /* WARC_VERSION */
 #include <wcsafe.h>   /* w_fprintf ... */
 
-
+#define makeS(s) (s), w_strlen ((s))
+#define makeU(s) ((warc_u8_t *) (s))
 
 /**
  * WARC WFile class internal
@@ -380,19 +381,13 @@ WFile_nextRecordGzipCompressedFast (void * _self,
   void 		    * wobject  = NIL; /* to recover the WRecord Object */
   warc_u32_t      wdatal   = 0;   /* to recover the Record dataLength */
   warc_u32_t      datasize = 0;
-  warc_i64_t      blbegin = -1;
-  void          * hdl      = NIL; /* To recover Header line */
-  void          * anvl     = NIL; /* To recover One Anvl Fields */
-  void          * lanvl    = NIL; /* To store anvl fields */
-  void          * oldhdl   = NIL; /* for destruction of old value*/
-  void          * oldlanvl = NIL; /* for destruction of old value*/
-  void          * hfsm     = NIL; /* Header Line automatum */
-  void          * afsm     = NIL; /* Anvl Field automatum */
+  warc_i64_t      blbegin  = -1;
+  void          * head     = NIL; /* to recover the record Header */
+  void          * oldhd    = NIL; /* for destruction of old value*/
   FILE          * rectfile = NIL;
   warc_u64_t      husize   = 0;   /* uncompressed data size */
   warc_u64_t      hcsize   = 0;   /* compressed data size stored in header */
   warc_u32_t      ret      = 0;
-  warc_bool_t     more     = WARC_TRUE;
 
   struct CallbackEnv cbenv;
 
@@ -457,80 +452,32 @@ WFile_nextRecordGzipCompressedFast (void * _self,
   w_fseek_start (rectfile);
   w_fseek_from_start (FH, offset);
 
-  hfsm = bless (WFsmHDL, rectfile);
-  assert (hfsm);
+  head = bless (WHeader, WARC_UNKNOWN_RECORD, makeS (makeU (" ")), makeS (makeU (" ")));
 
-  unless (WFsmHDL_run (hfsm) )
-  {
-    /* generate the WHDLine object from the FSM */
-    hdl = WFsmHDL_transform (hfsm);
-  }
-  else
+  unless (head)
     {
-      /* error when parsing the WARC header line */
-      w_fprintf (fprintf (stderr , __FILE__ " (line %d) error in FSM state address %p\n",
-                          __LINE__, WFsmHDL_state (hfsm) ) );
-      
-      /*       destroy (objrectfile); */
-      destroy (hfsm);
-      destroy (wobject);
-      return (NIL);
-    }
-  destroy (hfsm);
-
-  lanvl = bless (WList);
-  assert (lanvl);
-
-  do
-    {
-      /* init ANVL FSM */
-      afsm = bless (WFsmANVL, rectfile);
-      assert (afsm);
-
-      unless (WFsmANVL_run (afsm) )
-      {
-        anvl = WFsmANVL_transform (afsm);
-
-        if (anvl)
-          WList_push (lanvl, anvl);
-        else
-          more = WARC_FALSE;
-      }
-      else
-        {
-          /* error when parsing the WARC header line */
-          w_fprintf (fprintf (stderr , __FILE__ " (line %d) error in FSM state address %p\n",
-                              __LINE__, WFsmANVL_state (afsm) ) );
-
-/*           destroy (objrectfile); */
-          destroy (lanvl);
-          destroy (hdl);
-          destroy (afsm);
-          destroy (wobject);
-          return  (NIL);
-        }
-
-      destroy (afsm);
-
+     destroy (wobject);
+     return (NIL);
     }
 
-  while (more);
+  if (WHeader_extractFromWarcFile (head, rectfile))
+    {
+     destroy (head);
+     destroy (wobject);
+     return (NIL);
+    }
 
   blbegin = w_ftell (rectfile);
 
-  wdatal = WHDLine_getDataLength (hdl);
+  wdatal = WHeader_getDataLength (head);
 
 /*   destroy (objrectfile); */
 
   WRecord_setCHeaderPresence (wobject, WARC_TRUE);
 
-  oldhdl = WRecord_setHDLine (wobject, hdl);
+  oldhd = WRecord_setHeader (wobject, head);
 
-  destroy (oldhdl);
-
-  oldlanvl = WRecord_setAnvl (wobject, lanvl);
-
-  destroy (oldlanvl);
+  destroy (oldhd);
 
   datasize = wdatal - blbegin;
 
@@ -573,13 +520,8 @@ WPRIVATE void * WFile_nextRecordGzipCompressed (void * _self)
   warc_u32_t      wdatal   = 0;   /* to recover the Record dataLength */
   warc_u32_t      datasize = 0;
   warc_i64_t      blbegin = -1, recend = -1;
-  void          * hdl      = NIL; /* To recover Header line */
-  void          * anvl     = NIL; /* To recover One Anvl Fields */
-  void          * lanvl    = NIL; /* To store anvl fields */
-  void          * oldhdl   = NIL; /* for destruction of old value*/
-  void          * oldlanvl = NIL; /* for destruction of old value*/
-  void          * hfsm     = NIL; /* Header Line automatum */
-  void          * afsm     = NIL; /* Anvl Field automatum */
+  void          * head    = NIL; /* To recover Header */
+  void          * oldhd    = NIL; /* for destruction of old value*/
   void          * gzobj    = NIL; /* for decompression */
   warc_u64_t      usize    = 0;   /* uncompressed data size */
   warc_u64_t      csize    = 0;   /* compressed data size */
@@ -587,7 +529,6 @@ WPRIVATE void * WFile_nextRecordGzipCompressed (void * _self)
   warc_u32_t      ret      = 0;
   FILE          * rectfile = NIL; /* to uncompress the WRecord */
   void          * objrectfile = NIL;
-  warc_bool_t     more     = WARC_TRUE;
 
 
   WTempFile_reset (TEMP_FILE);
@@ -661,67 +602,25 @@ WPRIVATE void * WFile_nextRecordGzipCompressed (void * _self)
   destroy (gzobj);
   w_fseek_start (rectfile);
 
-  hfsm = bless (WFsmHDL, rectfile);
-  assert (hfsm);
-
-  unless (WFsmHDL_run (hfsm))
-  {
-    /* generate the WHDLine object from the FSM */
-    hdl = WFsmHDL_transform (hfsm);
-  }
-  else
+  head = bless (WHeader, WARC_UNKNOWN_RECORD, makeS (makeU (" ")), makeS (makeU (" ")));
+  
+  unless (head)
     {
-      /* error when parsing the WARC header line */
-      w_fprintf (fprintf (stderr , __FILE__ " (line %d) error in FSM state address %p\n",
-                          __LINE__, WFsmHDL_state (hfsm) ) );
-      
-      destroy (objrectfile); 
-      destroy (hfsm);
       destroy (wobject);
+      destroy (objrectfile); 
       return (NIL);
     }
 
-  destroy (hfsm);
-
-  lanvl = bless (WList);
-  assert (lanvl);
-
-  do
+  if (WHeader_extractFromWarcFile (head, rectfile))
     {
-      /* init ANVL FSM */
-      afsm = bless (WFsmANVL, rectfile);
-      assert (afsm);
+      destroy (head);
+      destroy (wobject);
+      destroy (objrectfile); 
+      return (NIL);
+    }
 
-      unless (WFsmANVL_run (afsm) )
-      {
-        anvl = WFsmANVL_transform (afsm);
-
-        if (anvl)
-          WList_push (lanvl, anvl);
-        else
-          more = WARC_FALSE;
-      }
-
-      else
-        {
-          /* error when parsing the WARC header line */
-          w_fprintf (fprintf (stderr , __FILE__ " (line %d) error in FSM state address %p\n",
-                              __LINE__,  WFsmANVL_state (afsm) ) );
-
-          destroy (objrectfile);
-          destroy (lanvl);
-          destroy (hdl);
-          destroy (afsm);
-          destroy (wobject);
-          return  (NIL);
-        }
-
-      destroy (afsm);
-      
-    } while (more);
-  
   blbegin = w_ftell (rectfile);
-  wdatal  = WHDLine_getDataLength (hdl);
+  wdatal  = WHeader_getDataLength (head);
 
   w_fseek_start (rectfile);
 
@@ -734,9 +633,8 @@ WPRIVATE void * WFile_nextRecordGzipCompressed (void * _self)
   {
     WarcDebugMsg ("found a corrupted record");
     destroy (objrectfile);
-    destroy (hdl);
+    destroy (head);
     destroy (wobject);
-    destroy (lanvl);
     return (NIL);
   }
 
@@ -744,11 +642,8 @@ WPRIVATE void * WFile_nextRecordGzipCompressed (void * _self)
 
   WRecord_setCHeaderPresence (wobject, WARC_FALSE);
 
-  oldhdl = WRecord_setHDLine (wobject, hdl);
-  destroy (oldhdl);
-
-  oldlanvl = WRecord_setAnvl (wobject, lanvl);
-  destroy (oldlanvl);
+  oldhd  = WRecord_setHeader (wobject, head);
+  destroy (oldhd);
 
   datasize = recend;
 
@@ -804,14 +699,8 @@ WPRIVATE void * WFile_nextRecordUncompressed (void * _self)
   warc_u32_t      wdatal   = 0;   /* to recover the Record dataLength */
   warc_u32_t      datasize = 0;
   warc_i64_t      recbegin = -1, blbegin = -1, recend = -1;
-  void          * hdl      = NIL; /* To recover Header line */
-  void          * anvl     = NIL; /* To recover One Anvl Fields */
-  void          * lanvl    = NIL; /* To store anvl fields */
-  void          * oldhdl   = NIL; /* for destruction of old value*/
-  void          * oldlanvl = NIL; /* for destruction of old value*/
-  void          * hfsm     = NIL; /* Header Line automatum */
-  void          * afsm     = NIL; /* Anvl Field automatum */
-  warc_bool_t     more     = WARC_TRUE;
+  void          * head     = NIL; /* To recover Header */
+  void          * oldhd    = NIL; /* for destruction of old value*/
 
   /* preconditions */
   CASSERT (self);
@@ -835,76 +724,30 @@ WPRIVATE void * WFile_nextRecordUncompressed (void * _self)
       return (NIL);
     }
 
-  hfsm = bless (WFsmHDL, FH);
+  head = bless (WHeader, WARC_UNKNOWN_RECORD, makeS (makeU (" ")), makeS (makeU (" ")));
 
-  assert (hfsm);
-
-  unless (WFsmHDL_run (hfsm) )
-  {
-    /* generate the WHDLine object from the FSM */
-    hdl = WFsmHDL_transform (hfsm);
-  }
-
-  else
+  unless (head)
     {
-      /* error when parsing the WARC header line */
-      w_fprintf (fprintf (stderr , __FILE__ " (line %d) error in FSM state address %p, at offset %ld in the Warc file \n",
-                          __LINE__,  WFsmHDL_state (hfsm), w_ftell (FH) ) );
-
-      destroy (hfsm);
       destroy (wobject);
       return (NIL);
     }
 
-  destroy (hfsm);
-
-  lanvl = bless (WList);
-  assert (lanvl);
-
-  do
-    {
-      /* init ANVL FSM */
-      afsm = bless (WFsmANVL, FH);
-      assert (afsm);
-
-      unless (WFsmANVL_run (afsm) )
-      {
-        anvl = WFsmANVL_transform (afsm);
-
-        if (anvl)
-          WList_push (lanvl, anvl);
-        else
-          more = WARC_FALSE;
-      }
-
-      else
-        {
-          /* error when parsing the WARC header line */
-          w_fprintf (fprintf (stderr , __FILE__ " (line %d) error in FSM state address %p, at offset %ld in the Warc file \n",
-                              __LINE__, WFsmANVL_state (afsm), w_ftell (FH) ) );
-
-          destroy (lanvl);
-          destroy (hdl);
-          destroy (afsm);
-          destroy (wobject);
-          return  (NIL);
-        }
-
-      destroy (afsm);
-
-    }
-
-  while (more);
+  if (WHeader_extractFromWarcFile (head, FH))
+     {
+      destroy (head);
+      destroy (wobject);
+      return (NIL);
+     }
 
   blbegin = w_ftell (FH);
 
-  wdatal = WHDLine_getDataLength (hdl);
+
+  wdatal = WHeader_getDataLength (head);
 
   if (WRecord_setUncompressedSize (wobject, wdatal + 4) )
     {
       destroy (wobject);
-      destroy (hdl);
-      destroy (lanvl);
+      destroy (head);
       return (NIL);
     }
 
@@ -912,8 +755,7 @@ WPRIVATE void * WFile_nextRecordUncompressed (void * _self)
   if (WRecord_setCompressedSize (wobject, wdatal + 4) )
     {
       destroy (wobject);
-      destroy (hdl);
-      destroy (lanvl);
+      destroy (head);
       return (NIL);
     }
 
@@ -927,19 +769,16 @@ WPRIVATE void * WFile_nextRecordUncompressed (void * _self)
   unless (WFile_checkEndCRLF (FH) )
   {
     WarcDebugMsg ("failed to copy the record in a temporary space");
-    destroy (hdl);
-    destroy (lanvl);
+    destroy (head);
     destroy (wobject);
     return (NIL);
   }
 
 
-  oldhdl = WRecord_setHDLine (wobject, hdl);
+  oldhd = WRecord_setHeader (wobject, head);
 
-  destroy (oldhdl);
+  destroy (oldhd);
 
-  oldlanvl = WRecord_setAnvl (wobject, lanvl);
-  destroy (oldlanvl);
 
   datasize = recend - blbegin;
 
@@ -1099,7 +938,6 @@ WPUBLIC warc_bool_t WFile_register (void* _self, void * wrec,
                 return (WARC_TRUE);
               }
 
-/*             objwtfile = bless (WTempFile, WString_getText(WORKING_DIR), WString_getLength(WORKING_DIR));*/
              objwtfile = WRecord_getDataFile (wrec);
              unless (objwtfile) 
                { 
@@ -1132,12 +970,6 @@ WPUBLIC warc_bool_t WFile_register (void* _self, void * wrec,
 
             w_fseek_from_here (wtfile, (-1 * WRecord_getDataSize (wrec) ) );
 
-/*            if (WRecord_setContentFromFileHandle (wrec, objwtfile) )
-              {
-                WarcDebugMsg ("faild to give load date from handle");
-                 destroy (objwtfile); 
-                return (WARC_TRUE);
-              }*/
           }
 
         break;
@@ -1152,7 +984,6 @@ WPUBLIC warc_bool_t WFile_register (void* _self, void * wrec,
             w_fseek_from_start (FH, wcurrent);
             return (WARC_TRUE);
             }
-         /*objwtfile = bless (WTempFile, WString_getText(WORKING_DIR), WString_getLength(WORKING_DIR)); */
 
          objwtfile = WRecord_getDataFile (wrec);
 
@@ -1178,13 +1009,6 @@ WPUBLIC warc_bool_t WFile_register (void* _self, void * wrec,
         w_fseek_start (wtfile);
 
         w_fseek_from_start (FH, wcurrent);
-
-/*        if (WRecord_setContentFromFileHandle (wrec, objwtfile) )
-          {
-             destroy (objwtfile); 
-            w_fseek_from_start (FH, wcurrent);
-            return (WARC_TRUE);
-          }*/
 
         break;
 
@@ -1258,18 +1082,13 @@ WPUBLIC warc_bool_t WFile_setMaxSize (void * _self, const warc_u64_t max_size)
 
 WIPRIVATE void WFile_writeWarcId (FILE * wtfile)
 {
-#define WARC_ID_LENGTH 28
+
 
   warc_u32_t l = w_strlen((warc_u8_t *) WARC_VERSION);
-  warc_u32_t i = WARC_ID_LENGTH - l;
 
 /*   w_fwrite (WARC_VERSION "                   ", WARC_ID_LENGTH, 1, wtfile); */
   w_fwrite (WARC_VERSION, l, 1, wtfile);
-   while (i)
-    {
-      w_fwrite(" ", 1, 1, wtfile);
-      -- i;
-    }
+  w_fwrite ("\r\n", 2, 1, wtfile);
 
 }
 
@@ -1287,6 +1106,10 @@ WIPRIVATE void WFile_writeWarcId (FILE * wtfile)
 WPRIVATE void WFile_writeRecordType (FILE * wtfile, warc_rec_t type,
                                      warc_u32_t  * datalength)
 {
+
+  w_fwrite ("WARC-Type:", 10, 1, wtfile);
+  (*datalength) += 10;
+
   switch (type)
     {
 
@@ -1336,9 +1159,9 @@ WPRIVATE void WFile_writeRecordType (FILE * wtfile, warc_rec_t type,
         break;
     }
 
-  w_fwrite (TSPS, TSPSIZE, 1, wtfile);
+  w_fwrite ("\r\n", 2, 1, wtfile);
 
-  (* datalength) += TSPSIZE;
+  (* datalength) += 2;
 }
 
 
@@ -1357,11 +1180,15 @@ WIPRIVATE void WFile_writeSubjectUri (FILE * wtfile,
                                       warc_u32_t s,
                                       warc_u32_t * datalength)
 {
+
+  w_fwrite ("WARC-Target-URI:", 16, 1, wtfile);
+  (* datalength) += 16;
+
   w_fwrite (suri, s, 1, wtfile);
   (* datalength) += s;
 
-  w_fwrite (TSPS, TSPSIZE, 1, wtfile);
-  (* datalength) += TSPSIZE;
+  w_fwrite ("\r\n", 2, 1, wtfile);
+  (* datalength) += 2;
 }
 
 
@@ -1380,11 +1207,14 @@ WIPRIVATE void WFile_writeCreationDate (FILE * wtfile,
                                         warc_u32_t s,
                                         warc_u32_t * datalength)
 {
+  w_fwrite ("WARC-Date:", 10, 1, wtfile);
+  (* datalength) += 10;
+
   w_fwrite (cdate, s , 1, wtfile);
   (* datalength) += s ;
 
-  w_fwrite (TSPS, TSPSIZE, 1, wtfile);
-  (* datalength) += TSPSIZE;
+  w_fwrite ("\r\n", 2, 1, wtfile);
+  (* datalength) += 2;
 }
 
 
@@ -1403,11 +1233,14 @@ WIPRIVATE void WFile_writeContentType (FILE * wtfile,
                                        warc_u32_t s,
                                        warc_u32_t * datalength)
 {
+  w_fwrite ("Content-Type:", 13, 1, wtfile);
+  (*datalength) += 13;
+
   w_fwrite (ctype, s , 1, wtfile);
   (* datalength) += s ;
 
-  w_fwrite (TSPS, TSPSIZE, 1, wtfile);
-  (* datalength) += TSPSIZE;
+  w_fwrite ("\r\n", 2, 1, wtfile);
+  (* datalength) += 2;
 }
 
 
@@ -1426,10 +1259,386 @@ WIPRIVATE void WFile_writeRecordId (FILE * wtfile,
                                     warc_u32_t s,
                                     warc_u32_t * datalength)
 {
+  w_fwrite ("WARC-Record-ID:", 15, 1, wtfile);
+  (* datalength) += 15;
+
   w_fwrite (rec_id, s , 1, wtfile);
   (* datalength) += s ;
 
-  w_fwrite ("\x0D\x0A", 2, 1, wtfile);
+  w_fwrite ("\r\n", 2, 1, wtfile);
+  (* datalength) += 2;
+}
+
+
+
+/**
+ * @param wtfile The output Temporary Warc Record File
+ * @param clen The Warc Record Content length
+ * @param [out]datalength The Warc Record Data Length Value to be updated
+ *
+ * @return none
+ *
+ * Warc Content Length Filed writing function
+ */
+
+WIPRIVATE void WFile_writeContentLength (FILE * wtfile,
+                                    warc_u32_t clen,
+                                    warc_u32_t * datalength)
+{
+  warc_u8_t   strdat[20];
+
+  w_fwrite ("Content-Length:", 15, 1, wtfile);
+  (* datalength) += 15;
+
+  w_numToString (clen, strdat);
+
+  w_fwrite (strdat, w_strlen (strdat) , 1, wtfile);
+  (* datalength) += w_strlen (strdat);
+
+  w_fwrite ("\r\n", 2, 1, wtfile);
+  (* datalength) += 2;
+}
+
+
+/**
+ * @param wtfile The output Temporary Warc Record File
+ * @param rec_id The Warc Concurrent To as a const char *
+ * @param [out]datalength The Warc Record Data Length Value to be updated
+ *
+ * @return none
+ *
+ * Warc Concurrent To Filed writing function
+ */
+
+WIPRIVATE void WFile_writeConcurrentTo (FILE * wtfile,
+                                      const warc_u8_t * rec_id,
+                                      warc_u32_t s,
+                                      warc_u32_t * datalength)
+{
+  w_fwrite ("WARC-Concurrent-To:", 19, 1, wtfile);
+  (* datalength) += 19;
+
+  w_fwrite (rec_id, s , 1, wtfile);
+  (* datalength) += s ;
+
+  w_fwrite ("\r\n", 2, 1, wtfile);
+  (* datalength) += 2;
+}
+
+/**
+ * @param wtfile The output Temporary Warc Record File
+ * @param pdig The Warc Record Digest as a const char *
+ * @param [out]datalength The Warc Record Data Length Value to be updated
+ *
+ * @return none
+ *
+ * Warc Record Block Digest Filed writing function
+ */
+
+WIPRIVATE void WFile_writeBlockDigest (FILE * wtfile,
+                                    const warc_u8_t * dig,
+                                    warc_u32_t s,
+                                    warc_u32_t * datalength)
+{
+  w_fwrite ("WARC-Block-Digest:", 18, 1, wtfile);
+  (* datalength) += 18;
+
+  w_fwrite (dig, s , 1, wtfile);
+  (* datalength) += s ;
+
+  w_fwrite ("\r\n", 2, 1, wtfile);
+  (* datalength) += 2;
+}
+
+/**
+ * @param wtfile The output Temporary Warc Record File
+ * @param pdig The Warc Record Payload Digest as a const char *
+ * @param [out]datalength The Warc Record Data Length Value to be updated
+ *
+ * @return none
+ *
+ * Warc Record Payload digest Filed writing function
+ */
+
+WIPRIVATE void WFile_writePayloadDigest (FILE * wtfile,
+                                    const warc_u8_t * pdig,
+                                    warc_u32_t s,
+                                    warc_u32_t * datalength)
+{
+  w_fwrite ("WARC-Payload-Digest:", 20, 1, wtfile);
+  (* datalength) += 20;
+
+  w_fwrite (pdig, s , 1, wtfile);
+  (* datalength) += s ;
+
+  w_fwrite ("\r\n", 2, 1, wtfile);
+  (* datalength) += 2;
+}
+
+/**
+ * @param wtfile The output Temporary Warc Record File
+ * @param ip The Warc Record IP address as a const char *
+ * @param [out]datalength The Warc Record Data Length Value to be updated
+ *
+ * @return none
+ *
+ * Warc Record IP Adress Filed writing function
+ */
+
+WIPRIVATE void WFile_writeIpAddress (FILE * wtfile,
+                                    const warc_u8_t * ip,
+                                    warc_u32_t s,
+                                    warc_u32_t * datalength)
+{
+  w_fwrite ("WARC-IP-Address:", 16, 1, wtfile);
+  (* datalength) += 16;
+
+  w_fwrite (ip, s , 1, wtfile);
+  (* datalength) += s ;
+
+  w_fwrite ("\r\n", 2, 1, wtfile);
+  (* datalength) += 2;
+}
+
+/**
+ * @param wtfile The output Temporary Warc Record File
+ * @param rec_id The Referenced Warc Record Id as a const char *
+ * @param [out]datalength The Warc Record Data Length Value to be updated
+ *
+ * @return none
+ *
+ * Warc Record Refers to Filed writing function
+ */
+
+WIPRIVATE void WFile_writeRefersTo (FILE * wtfile,
+                                    const warc_u8_t * rec_id,
+                                    warc_u32_t s,
+                                    warc_u32_t * datalength)
+{
+  w_fwrite ("WARC-Refers-To:", 15, 1, wtfile);
+  (* datalength) += 15;
+
+  w_fwrite (rec_id, s , 1, wtfile);
+  (* datalength) += s ;
+
+  w_fwrite ("\r\n", 2, 1, wtfile);
+  (* datalength) += 2;
+}
+
+
+/**
+ * @param wtfile The output Temporary Warc Record File
+ * @param trunc The Warc Record Truncation cause as a const char *
+ * @param [out]datalength The Warc Record Data Length Value to be updated
+ *
+ * @return none
+ *
+ * Warc Record Truncated Filed writing function
+ */
+
+WIPRIVATE void WFile_writeTruncated (FILE * wtfile,
+                                    const warc_u8_t * trunc,
+                                    warc_u32_t s,
+                                    warc_u32_t * datalength)
+{
+  w_fwrite ("WARC-Truncated:", 15, 1, wtfile);
+  (* datalength) += 15;
+
+  w_fwrite (trunc, s , 1, wtfile);
+  (* datalength) += s ;
+
+  w_fwrite ("\r\n", 2, 1, wtfile);
+  (* datalength) += 2;
+}
+
+
+/**
+ * @param wtfile The output Temporary Warc Record File
+ * @param rec_id The Related Warc Info Record Id as a const char *
+ * @param [out]datalength The Warc Record Data Length Value to be updated
+ *
+ * @return none
+ *
+ * Warc Record Warc Info Filed writing function
+ */
+
+WIPRIVATE void WFile_writeWarcInfo (FILE * wtfile,
+                                    const warc_u8_t * rec_id,
+                                    warc_u32_t s,
+                                    warc_u32_t * datalength)
+{
+  w_fwrite ("WARC-Warcinfo-ID:", 17, 1, wtfile);
+  (* datalength) += 17;
+
+  w_fwrite (rec_id, s , 1, wtfile);
+  (* datalength) += s ;
+
+  w_fwrite ("\r\n", 2, 1, wtfile);
+  (* datalength) += 2;
+}
+
+
+/**
+ * @param wtfile: The output Temporary Warc Record File
+ * @param fname: The Warc File name as a const char *
+ * @param [out]datalength: The Warc Record Data Length Value to be updated
+ *
+ * @return none
+ *
+ * Warc Record File Name Filed writing function
+ */
+
+WIPRIVATE void WFile_writeFilename (FILE * wtfile,
+                                    const warc_u8_t * fname,
+                                    warc_u32_t s,
+                                    warc_u32_t * datalength)
+{
+  w_fwrite ("WARC-Filename:", 14, 1, wtfile);
+  (* datalength) += 14;
+
+  w_fwrite (fname, s , 1, wtfile);
+  (* datalength) += s ;
+
+  w_fwrite ("\r\n", 2, 1, wtfile);
+  (* datalength) += 2;
+}
+
+
+/**
+ * @param wtfile The output Temporary Warc Record File
+ * @param rec_id The Warc Record Profile as a const char *
+ * @param [out]datalength The Warc Record Data Length Value to be updated
+ *
+ * @return none
+ *
+ * Warc Record Profile Filed writing function
+ */
+
+WIPRIVATE void WFile_writeProfile (FILE * wtfile,
+                                    const warc_u8_t * rec_id,
+                                    warc_u32_t s,
+                                    warc_u32_t * datalength)
+{
+  w_fwrite ("WARC-Profile:", 13, 1, wtfile);
+  (* datalength) += 13;
+
+  w_fwrite (rec_id, s , 1, wtfile);
+  (* datalength) += s ;
+
+  w_fwrite ("\r\n", 2, 1, wtfile);
+  (* datalength) += 2;
+}
+
+
+/**
+ * @param wtfile The output Temporary Warc Record File
+ * @param ptype The Warc Record payload type as a const char *
+ * @param [out]datalength The Warc Record Data Length Value to be updated
+ *
+ * @return none
+ *
+ * Warc Record pyload Type  Filed writing function
+ */
+
+WIPRIVATE void WFile_writePayloadType (FILE * wtfile,
+                                    const warc_u8_t * ptype,
+                                    warc_u32_t s,
+                                    warc_u32_t * datalength)
+{
+  w_fwrite ("WARC-Identified-Payload-Type:", 29, 1, wtfile);
+  (* datalength) += 29;
+
+  w_fwrite (ptype, s , 1, wtfile);
+  (* datalength) += s ;
+
+  w_fwrite ("\r\n", 2, 1, wtfile);
+  (* datalength) += 2;
+}
+
+
+/**
+ * @param wtfile The output Temporary Warc Record File
+ * @param rec_id The Warc Record Origin Segment Id as a const char *
+ * @param [out]datalength The Warc Record Data Length Value to be updated
+ *
+ * @return none
+ *
+ * Warc Record origin Segment Id Filed writing function
+ */
+
+WIPRIVATE void WFile_writeSegOriginId (FILE * wtfile,
+                                    const warc_u8_t * rec_id,
+                                    warc_u32_t s,
+                                    warc_u32_t * datalength)
+{
+  w_fwrite ("WARC-Segment-Origin-ID:", 23, 1, wtfile);
+  (* datalength) += 23;
+
+  w_fwrite (rec_id, s , 1, wtfile);
+  (* datalength) += s ;
+
+  w_fwrite ("\r\n", 2, 1, wtfile);
+  (* datalength) += 2;
+}
+
+
+/**
+ * @param wtfile The output Temporary Warc Record File
+ * @param snum The Segment Warc Record row 
+ * @param [out]datalength The Warc Record Data Length Value to be updated
+ *
+ * @return none
+ *
+ * Segmented Warc Record Number Filed writing function
+ */
+
+WIPRIVATE void WFile_writeSegNumber (FILE * wtfile,
+                                    warc_u32_t snum,
+                                    warc_u32_t * datalength)
+{
+  warc_u8_t   strdat[20];
+
+  strdat [0] = '\0';
+
+  w_fwrite ("WARC-Segment-Number:", 20, 1, wtfile);
+  (* datalength) += 20;
+
+  w_numToString (snum, strdat);
+
+  w_fwrite (strdat, w_strlen (strdat) , 1, wtfile);
+  (* datalength) += w_strlen (strdat);
+
+  w_fwrite ("\r\n", 2, 1, wtfile);
+  (* datalength) += 2;
+}
+
+
+
+/**
+ * @param wtfile The output Temporary Warc Record File
+ * @param tlen The segmented Warc Record Total length
+ * @param [out]datalength The Warc Record Data Length Value to be updated
+ *
+ * @return none
+ *
+ * Segmented Warc Record Total Length Filed writing function
+ */
+
+WIPRIVATE void WFile_writeSegTotalLength (FILE * wtfile,
+                                    warc_u32_t tlen,
+                                    warc_u32_t * datalength)
+{
+  warc_u8_t   strdat[20];
+
+  w_fwrite ("WARC-Segment-Total-Length:", 26, 1, wtfile);
+  (* datalength) += 26;
+
+  w_numToString (tlen, strdat);
+
+  w_fwrite (strdat, w_strlen (strdat) , 1, wtfile);
+  (* datalength) += w_strlen (strdat);
+
+  w_fwrite ("\r\n", 2, 1, wtfile);
   (* datalength) += 2;
 }
 
@@ -1612,7 +1821,6 @@ WFile_storeRecordGzipCompressed (void * _self,
 {
   struct WFile * self = _self;
 
-  warc_u8_t      strData [20];
 /*   warc_u32_t     i       = 0; */
   void         * gzobj   = NIL;
   warc_u64_t     csize   = 0;    /* the size of the compressed data */
@@ -1620,6 +1828,8 @@ WFile_storeRecordGzipCompressed (void * _self,
 /*   void         * objcrec = NIL; */
   warc_u64_t     where   = 0;
   warc_gzlevel_t level;
+
+  UNUSED (datalength);
 
   /* map the correct compression level */
   switch (COMP)
@@ -1641,13 +1851,6 @@ WFile_storeRecordGzipCompressed (void * _self,
       default:
         return (WARC_TRUE);
     }
-
-  /* writing the data Length Field */
-  w_fseek_from_start (wtfile, 10);
-
-  w_numToString (datalength, strData);
-
-  w_fwrite (strData, w_strlen (strData), 1, wtfile);
 
   w_fseek_end (wtfile);
 
@@ -1672,19 +1875,6 @@ WFile_storeRecordGzipCompressed (void * _self,
 /*   w_fwrite (& i, 1, 1, wtfile); */
   w_fwrite ("\r\n\r\n", 4, 1, wtfile);
 
-  /* Creating the temporary file that will hold the
-     compressed record */
-/*   WTempFile_reset (TEMP_FILE2);*/ 
-
-/*   objcrec = bless (WTempFile, WString_getText(WORKING_DIR), WString_getLength(WORKING_DIR)); 
-   unless (objcrec) 
-   { 
-     WarcDebugMsg ("unable to create temporary space for the gzipped record"); 
-     destroy (objwtfile), wtfile = NIL; 
-     return (WARC_TRUE); 
-   } */
-
-/*   crec = WTempFile_handle (TEMP_FILE2);*/ 
 
   /* Compressing the  record */
   w_fseek_start (wtfile);
@@ -1721,12 +1911,6 @@ WFile_storeRecordGzipCompressed (void * _self,
       return (WARC_TRUE);
     }
 
-  /* adding the compressed record */
-   /*w_fseek_start (crec); 
-
-   WFile_writeDataBloc (FH, crec, csize); */
-
-/*   destroy (objcrec), crec = NIL; */
 
   return (WARC_FALSE);
 }
@@ -1753,7 +1937,6 @@ WFile_storeRecordUncompressed (void* _self, const void * wrec,
 
   struct WFile * self = _self;
 
-  warc_u8_t      strData [20];
 /*   warc_u32_t     i    = 0; */
 
   /* testing if the record writing will not overload the Warc File */
@@ -1765,13 +1948,6 @@ WFile_storeRecordUncompressed (void* _self, const void * wrec,
       WarcDebugMsg ("couldn't add record to the warc file, maximum size reached");
       return (WARC_TRUE);
     }
-
-  /* writing the data Length Field */
-  w_fseek_from_start (wtfile, 10);
-
-  w_numToString (datalength, strData);
-
-  w_fwrite (strData, w_strlen (strData), 1, wtfile);
 
   /* flushing the Warc Record Header Temporary file into
      the Warc File */
@@ -1820,11 +1996,12 @@ WPUBLIC warc_bool_t WFile_storeRecord (void* _self, const void * wrec)
   struct WFile * self = _self;
 
   FILE         * bloc;       /* to open the data bloc file */
-  const void   * hdline;     /* recover Header line from the WRecord */
-  const void   * lanvl;      /* recover the anvl list from the Warc Record */
+  const void   * head;      /* recover Header from the WRecord */
+  const void   * lanvl;      /* recover the anvl list from the Warc Record Header */
   FILE         * wtfile     = NIL;   /* for creation of the temporary file */
 /*   void         * objwtfile  = NIL; */
   warc_u32_t     datalength = 0;
+  const warc_u8_t    * field      = NIL; /*wil; hold the different fields value*/
 
   /* Preconditions */
 
@@ -1851,7 +2028,7 @@ WPUBLIC warc_bool_t WFile_storeRecord (void* _self, const void * wrec)
 
   unless (WRecord_check (wrec) )
   {
-    WarcDebugMsg ("some header line fields are missing");
+    WarcDebugMsg ("The filled field are not compatible with the WARC Record Type");
     return (WARC_TRUE);
   }
 
@@ -1862,55 +2039,171 @@ WPUBLIC warc_bool_t WFile_storeRecord (void* _self, const void * wrec)
 
   w_fseek_start (bloc);
 
-
   WTempFile_reset (TEMP_FILE);
   
-/*   objwtfile = bless (WTempFile, WString_getText(WORKING_DIR), WString_getLength(WORKING_DIR)); */
-/*   unless (objwtfile) */
-/*   { */
-/*     WarcDebugMsg ("failure to create temporary space"); */
-/*     return (WARC_TRUE); */
-/*   } */
-
   wtfile = WTempFile_handle (TEMP_FILE);
 
-  hdline = WRecord_getHDLine (wrec);
-  lanvl = WRecord_getAnvl (wrec);
+  head = WRecord_getHeader (wrec);
+  unless (head)
+    return (WARC_TRUE);
 
-  /* writing header line*/
+
+  lanvl = WHeader_getAnvl (head);
+  unless (lanvl)
+    return (WARC_TRUE);
+
+  /* writing header */
 
   /* Writing warc_id */
   WFile_writeWarcId (wtfile);
-  datalength += WARC_ID_LENGTH;
+  datalength += w_strlen ((warc_u8_t *) WARC_VERSION) +2;
 
-  /* writing record_type field */
-  WFile_writeRecordType (wtfile, WHDLine_getRecordType (hdline),
+ /* writing record_type field */
+  WFile_writeRecordType (wtfile, WHeader_getRecordType (head),
                          & datalength);
-
-  /* writing subject uri field */
-  WFile_writeSubjectUri (wtfile, WHDLine_getSubjectUri (hdline),
-                         WHDLine_getSubjectUriLen (hdline),
-                         & datalength);
-
-  /* writing creation date field */
-  WFile_writeCreationDate (wtfile, WHDLine_getCreationDate (hdline),
-                           WHDLine_getCreationDateLen (hdline),
-                           & datalength);
-
-  /* writing content type field */
-  WFile_writeContentType (wtfile, WHDLine_getContentType (hdline),
-                          WHDLine_getContentTypeLen (hdline),
-                          & datalength);
 
   /*writing record id field */
-  WFile_writeRecordId (wtfile, WHDLine_getRecordId (hdline),
-                       WHDLine_getRecordIdLen (hdline),
+  WFile_writeRecordId (wtfile, WHeader_getRecordId (head),
+                       WHeader_getRecordIdLen (head),
                        & datalength);
+
+  /* writing creation date field */
+  WFile_writeCreationDate (wtfile, WHeader_getCreationDate (head),
+                           WHeader_getCreationDateLen (head),
+                           & datalength);
+
+  /* writing the Content Length field */
+  WFile_writeContentLength (wtfile, WRecord_getDataSize (wrec), 
+                            &datalength);
+
+  /* writing content type field */
+  field = WHeader_getContentType (head);
+  if (field)
+     {
+      WFile_writeContentType (wtfile, field,
+                          WHeader_getContentTypeLen (head),
+                          & datalength);
+     }
+
+  /* writing concurrent to field */
+  field = WHeader_getConcurrentTo (head);
+  if (field)
+     {
+      WFile_writeConcurrentTo (wtfile, field,
+                          WHeader_getConcurrentToLen (head),
+                          & datalength);
+     }
+
+  /* writing Block Digest field */
+  field = WHeader_getBlockDigest (head);
+  if (field)
+     {
+      WFile_writeBlockDigest (wtfile, field,
+                          WHeader_getBlockDigestLen (head),
+                          & datalength);
+     }
+
+  /* writing Payload Digest field */
+  field = WHeader_getPayloadDigest (head);
+  if (field)
+     {
+      WFile_writePayloadDigest (wtfile, field,
+                          WHeader_getPayloadDigestLen (head),
+                          & datalength);
+     }
+
+  /* writing Ip Address field */
+  field = WHeader_getIpAddress (head);
+  if (field)
+     {
+      WFile_writeIpAddress (wtfile, field,
+                          WHeader_getIpAddressLen (head),
+                          & datalength);
+     }
+
+  /* writing Refers to field */
+  field = WHeader_getRefers (head);
+  if (field)
+     {
+      WFile_writeRefersTo (wtfile, field,
+                          WHeader_getRefersToLen (head),
+                          & datalength);
+     }
+
+  /* writing target Uri to field */
+  field = WHeader_getSubjectUri (head);
+  if (field)
+     {
+      WFile_writeSubjectUri (wtfile, field,
+                          WHeader_getSubjectUriLen (head),
+                          & datalength);
+     }
+
+  /* writing Truncated field */
+  field = WHeader_getTruncated (head);
+  if (field)
+     {
+      WFile_writeTruncated (wtfile, field,
+                          WHeader_getTruncatedLen (head),
+                          & datalength);
+     }
+
+  /* writing Warc Info Id field */
+  field = WHeader_getInfoId (head);
+  if (field)
+     {
+      WFile_writeWarcInfo (wtfile, field,
+                          WHeader_getInfoIdLen (head),
+                          & datalength);
+     }
+
+  /* writing File name field */
+  field = WHeader_getFilename (head);
+  if (field)
+     {
+      WFile_writeFilename (wtfile, field,
+                          WHeader_getFilenameLen (head),
+                          & datalength);
+     }
+
+  /* writing Profile field */
+  field = WHeader_getProfile (head);
+  if (field)
+     {
+      WFile_writeProfile (wtfile, field,
+                          WHeader_getProfileLen (head),
+                          & datalength);
+     }
+
+  /* writing payload type field */
+  field = WHeader_getPayloadType (head);
+  if (field)
+     {
+      WFile_writePayloadType (wtfile, field,
+                          WHeader_getPayloadTypeLen (head),
+                          & datalength);
+     }
+
+  /* writing Segmentation information field */
+  field = WHeader_getSegmentOriginId (head);
+  if (field)
+     {
+      WFile_writeSegOriginId (wtfile, field,
+                          WHeader_getSegmentOriginIdLen (head),
+                          & datalength);
+
+     WFile_writeSegNumber (wtfile, WHeader_getSegmentNumber (head), & datalength);
+     }
+
+  /* writing Total segment length field */
+  if (WHeader_getSegTotalLength (head))
+    WFile_writeSegTotalLength (wtfile, WHeader_getSegTotalLength (head), & datalength);
+
 
   /* Writing the anvl fields */
   WFile_writeAnvls (wtfile, lanvl, & datalength);
 
-  datalength = datalength + WRecord_getDataSize (wrec);
+  datalength = datalength + (warc_u32_t) WRecord_getDataSize (wrec);
 
   switch (COMP)
     {
@@ -2095,7 +2388,7 @@ WPRIVATE void * WFile_constructor (void * _self, va_list * app)
 
       /* check if it's a valid GZIP file */
 
-      if (COMP == WARC_FILE_COMPRESSED_GZIP)
+      if ((COMP == WARC_FILE_COMPRESSED_GZIP) || (COMP == WARC_FILE_DETECT_COMPRESSION))
         {
           warc_u64_t   where = 0;
           void       * g     = bless (WGzip);
@@ -2110,11 +2403,18 @@ WPRIVATE void * WFile_constructor (void * _self, va_list * app)
 
           if (WGzip_check (g, FH, 0) )
             {
-              w_fprintf (fprintf (stderr, "not a valid GZIP WARC file\n") );
-              destroy (g);
-              destroy (self);
-              return (NIL);
+             if (COMP == WARC_FILE_DETECT_COMPRESSION)
+                COMP = WARC_FILE_UNCOMPRESSED;
+             else
+              {
+               w_fprintf (fprintf (stderr, "not a valid GZIP WARC file\n") );
+               destroy (g);
+               destroy (self);
+               return (NIL);
+              }
             }
+           else
+            COMP = WARC_FILE_COMPRESSED_GZIP;
 
           w_fseek_from_start (FH, where);
 
