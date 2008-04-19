@@ -374,7 +374,7 @@ o Lighttpd server use by default the port number "3000". See your
 o To install warc-tools as CGI and FCGI module, type:
 
   $ cd warc-tools-read-only
-  $ make
+   $ make mod_lighttpd
 
   You must copy the files "warc.cgi" and "warc.fcgi" to the directory 
   referenced by the variable:
