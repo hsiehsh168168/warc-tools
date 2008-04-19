@@ -33,7 +33,7 @@
 
 
 #ifndef WARC_MAX_SIZE
-#define WARC_MAX_SIZE 629145600
+#define WARC_MAX_SIZE 1629145600
 #endif
 
 #define uS(s)  ((warc_u8_t *) (s))
@@ -59,7 +59,7 @@ int main (int argc, const char ** argv)
   warc_u8_t      * flags   = (warc_u8_t *) "cvf:t:";
   char           * fname   = NIL;
   char           * wdir    = ".";
-  wfile_comp_t     cmode   = WARC_FILE_UNCOMPRESSED;
+  wfile_comp_t     cmode   = WARC_FILE_DETECT_COMPRESSION;
   warc_bool_t      verbose = WARC_FALSE;
 
   if (argc < 3 || argc > 7)
@@ -67,7 +67,6 @@ int main (int argc, const char ** argv)
       fprintf (stderr, "Check WARC file consistency\n");
       fprintf (stderr, "Usage: %s -f <file.warc> [-c] [-v] [-t <working_dir>]\n", argv [0]);
       fprintf (stderr, "\t-f    : valid WARC file name\n");
-      fprintf (stderr, "\t[-c]  : assume GZIP compressed WARC (default no)\n");
       fprintf (stderr, "\t[-v]  : verbose mode (default no)\n");
       fprintf (stderr, "\t[-t]  : temporary working directory (default \".\")\n");
       return (2);
@@ -90,11 +89,6 @@ int main (int argc, const char ** argv)
 
             if (w_index (flags, c) [1] == ':')
               fname = WGetOpt_argument (p);
-
-            break;
-
-          case 'c' :
-            cmode = WARC_FILE_COMPRESSED_GZIP;
 
             break;
 

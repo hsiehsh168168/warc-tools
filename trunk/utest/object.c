@@ -39,7 +39,7 @@ int test1 (void)
   const char * t   = "TEST 1";
   void       * s   = makeWString ("");
   void       * a   = bless (WAnvl);
-
+fprintf(stdout,"//////////test1/////////\n");
   fprintf (stderr, "%s>\n", t);
 
   assert (s);
@@ -60,7 +60,7 @@ int test2 (void)
   const char * t   = "TEST 2";
   void       * s   = makeWString ("");
   void       * l   = bless (WList);
-
+fprintf(stdout,"//////////test2/////////\n");
   fprintf (stderr, "%s>\n", t);
 
   assert (s);

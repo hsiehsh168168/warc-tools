@@ -47,13 +47,13 @@ do
 
   trap - ABRT INT TERM EXIT
   if [ "$t" = "utest/server" ]; then
-      # start on background
-      ($t &) >/dev/null 2>&1
+      # start on background xith basic unit testing mode (non interactive)
+      (echo "2" | $t &) >/dev/null 2>&1
       # stop the server
       curl "http://0.0.0.0:8080/warc/0.9/stop" >/dev/null 2>&1
       ret=$?
   else
-      $t >/dev/null 2>&1
+      echo "2" | $t >/dev/null 2>&1
       r=$?
   fi
   trap - ABRT INT TERM EXIT

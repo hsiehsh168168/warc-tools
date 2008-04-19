@@ -611,13 +611,13 @@ WPRIVATE warc_bool_t WServer_parseRequest (const warc_u8_t * uri,
     return (WARC_FALSE);
    }
 
+  destroy (item);
 return (WARC_TRUE);
 }
 
 
 /**
  * @param fname: the name of the warc file to be sent as a WString
- * @param pref: the prefix to add to the file name to be opened as a WString
  * @param comp_mode: the compression mode, only for header sending
  * @param offset: the offset in the warc file from where we start the transfert
  * @param server_name: the name of the server machine as a WString
@@ -629,7 +629,7 @@ return (WARC_TRUE);
  * Send the response to a full warc file request
  */
 
-WPRIVATE warc_bool_t WSend_fullResponse (void * fname, void * pref, wfile_comp_t comp_mode, warc_i32_t offset, const void * server_name, 
+WPRIVATE warc_bool_t WSend_fullResponse (void * fname, wfile_comp_t comp_mode, warc_i32_t offset, const void * server_name, 
                                                      struct evhttp_request * req, struct evbuffer * buf)
 {
    char         *   buffer         = NIL ;
@@ -639,7 +639,6 @@ WPRIVATE warc_bool_t WSend_fullResponse (void * fname, void * pref, wfile_comp_t
    warc_u8_t        char_size[26]        ;
    warc_u8_t        content_type[25]     ;
    
-   WString_concat (fname, pref);
    full_file = w_fopen_rb ((const char *) WString_getText(fname));
 
    unless (full_file)
@@ -714,11 +713,11 @@ WPRIVATE warc_bool_t WSend_fullResponse (void * fname, void * pref, wfile_comp_t
 
    content_type[0] = '\0';
    if (comp_mode == WARC_FILE_COMPRESSED_GZIP)
-      strcpy ((char *) content_type, "application/x-gzip");
+      w_strncpy (content_type, (warc_u8_t *) "application/x-gzip", 18);
    else if (comp_mode == WARC_FILE_UNCOMPRESSED)
-      strcpy ((char *) content_type, "text/plain");
+      w_strncpy (content_type, (warc_u8_t *) "text/plain", 10);
    else 
-      strcpy ((char *) content_type, "");
+      w_strncpy (content_type, (warc_u8_t *) "", 0);
 
    evhttp_add_header (req -> output_headers, 
                       "Content-Type", (const char *)content_type);
@@ -886,11 +885,11 @@ WPRIVATE warc_bool_t WSend_record (void * fname, void * pref, wfile_comp_t comp_
 
    content_type[0] = '\0';
    if (comp_mode == WARC_FILE_COMPRESSED_GZIP)
-      strcpy ((char *) content_type, "application/x-gzip");
+      w_strncpy (content_type, (warc_u8_t *) "application/x-gzip", 18);
    else if (comp_mode == WARC_FILE_UNCOMPRESSED)
-      strcpy ((char *) content_type, "text/plain");
+      w_strncpy (content_type, (warc_u8_t *) "text/plain", 10);
    else 
-      strcpy ((char *) content_type, "");
+      w_strncpy (content_type, (warc_u8_t *) "", 0);
 
    evhttp_add_header (req -> output_headers, 
                       "Content-Type", (const char *)content_type);
@@ -997,6 +996,9 @@ WPRIVATE warc_bool_t WSend_distantDumpResponse (void * fname, void * pref, wfile
   while (WFile_hasMoreRecords (wfile) )
     {
       const void * al  = NIL; /* ANVL list object */
+      warc_bool_t  m   = WARC_FALSE;
+      const warc_u8_t * string = NIL;
+      warc_u32_t   tlen = 0;
 
       unless ( (wrecord = WFile_nextRecord (wfile) ) )
           {
@@ -1026,25 +1028,144 @@ WPRIVATE warc_bool_t WSend_distantDumpResponse (void * fname, void * pref, wfile
       evbuffer_add_printf (buf, "<tr><td><font color=darkgreen size = 3> Warc ID </font></td><td>%-10s</td></tr> ",
                               (const char *) WRecord_getWarcId      (wrecord) );
 
-      evbuffer_add_printf (buf, "<tr><td><font color=darkgreen size = 3> Data Length </font></td><td>%-10u</td></tr>",
-                              WRecord_getDataLength  (wrecord) );
+      evbuffer_add_printf (buf, "<tr><td><font color=darkgreen size = 3> Content-Length </font></td><td>%-10u</td></tr>",
+                              WRecord_getContentLength  (wrecord) );
 
-      evbuffer_add_printf (buf, "<tr><td><font color=darkgreen size = 3> Record Type </font></td><td>%-15u</td></tr>",
+      evbuffer_add_printf (buf, "<tr><td><font color=darkgreen size = 3> WARC-Type </font></td><td>%-15u</td></tr>",
                               WRecord_getRecordType  (wrecord) );
 
-      evbuffer_add_printf (buf, "<tr><td><font color=darkgreen size = 3> Content Type </font></td><td>%-14s</td></tr>",
-                              (const char *) WRecord_getCreationDate (wrecord) );
+      evbuffer_add_printf (buf, "<tr><td><font color=darkgreen size = 3> WARC-Date </font></td><td>%-14s</td></tr>",
+                              (const char *) WRecord_getDate (wrecord) );
 
-      evbuffer_add_printf (buf, "<tr><td><font color=darkgreen size = 3> Compressed size </font></td><td>%-20s</td></tr>",
-                              (const char *) WRecord_getContentType (wrecord) );
-
-      evbuffer_add_printf (buf, "<tr><td><font color=darkgreen size = 3> Record ID </font></td><td>%-56s</td></tr>",
+      evbuffer_add_printf (buf, "<tr><td><font color=darkgreen size = 3> WARC-Record-ID </font></td><td>%-56s</td></tr>",
                               (const char *) WRecord_getRecordId    (wrecord) );
 
-      evbuffer_add_printf (buf, "<tr><td><font color=darkgreen size = 3> Subject Uri </font></td><td>%-100s</td></tr>",
-                              (const char *) WRecord_getSubjectUri  (wrecord) );
+      evbuffer_add_printf (buf, "</table></blockquote><br>");
+
+      evbuffer_add_printf (buf, "<font color=darkgreen size = 4> <b> Other Fields </b> </font>");
+      evbuffer_add_printf (buf, "<blockquote> <table BORDER = 2 bgcolor=lightgray>");
+
+      string = WRecord_getContentType (wrecord);
+      if (string)
+         {
+         evbuffer_add_printf (buf, "<tr><td><font color=darkgreen size = 3> Content-Type </font></td><td>%-20s</td></tr>",
+                              (const char *) string);
+         m = WARC_TRUE;
+         }
+
+      string = WRecord_getConcurrentTo (wrecord);
+      if (string)
+         {
+         evbuffer_add_printf (buf, "<tr><td><font color=darkgreen size = 3> WARC-Concurrent-To </font></td><td>%-20s</td></tr>",
+                              (const char *) string);
+         m = WARC_TRUE;
+         }
+
+      string = WRecord_getBlockDigest (wrecord);
+      if (string)
+         {
+         evbuffer_add_printf (buf, "<tr><td><font color=darkgreen size = 3> WARC-Block-Digest </font></td><td>%-20s</td></tr>",
+                              (const char *) string);
+         m = WARC_TRUE;
+         }
+
+      string = WRecord_getPayloadDigest (wrecord);
+      if (string)
+         {
+         evbuffer_add_printf (buf, "<tr><td><font color=darkgreen size = 3> WARC-Payload-Digest </font></td><td>%-20s</td></tr>",
+                              (const char *) string);
+         m = WARC_TRUE;
+         }
+
+      string = WRecord_getIpAddress (wrecord);
+      if (string)
+         {
+         evbuffer_add_printf (buf, "<tr><td><font color=darkgreen size = 3> WARC-IP-Address </font></td><td>%-20s</td></tr>",
+                              (const char *) string);
+         m = WARC_TRUE;
+         }
+
+      string = WRecord_getRefersTo (wrecord);
+      if (string)
+         {
+         evbuffer_add_printf (buf, "<tr><td><font color=darkgreen size = 3> WARC-Refers-To </font></td><td>%-20s</td></tr>",
+                              (const char *) string);
+         m = WARC_TRUE;
+         }
+
+      string = WRecord_getTargetUri (wrecord);
+      if (string)
+        {
+         evbuffer_add_printf (buf, "<tr><td><font color=darkgreen size = 3> WARC-Target-URI </font></td><td>%-100s</td></tr>",
+                              (const char *) string );
+         m = WARC_TRUE;
+         }
+
+      string = WRecord_getTruncated (wrecord);
+      if (string)
+         {
+         evbuffer_add_printf (buf, "<tr><td><font color=darkgreen size = 3> WARC-Truncated </font></td><td>%-20s</td></tr>",
+                              (const char *) string);
+         m = WARC_TRUE;
+         }
+
+      string = WRecord_getWarcInfoId (wrecord);
+      if (string)
+         {
+         evbuffer_add_printf (buf, "<tr><td><font color=darkgreen size = 3> WARC-warcinfo-ID </font></td><td>%-20s</td></tr>",
+                              (const char *) string);
+         m = WARC_TRUE;
+         }
+
+      string = WRecord_getFilename (wrecord);
+      if (string)
+         {
+         evbuffer_add_printf (buf, "<tr><td><font color=darkgreen size = 3> WARC-Filename </font></td><td>%-20s</td></tr>",
+                              (const char *) string);
+         m = WARC_TRUE;
+         }
+
+      string = WRecord_getProfile (wrecord);
+      if (string)
+         {
+         evbuffer_add_printf (buf, "<tr><td><font color=darkgreen size = 3> WARC-Profile </font></td><td>%-20s</td></tr>",
+                              (const char *) string);
+         m = WARC_TRUE;
+         }
+
+      string = WRecord_getPayloadType (wrecord);
+      if (string)
+         {
+         evbuffer_add_printf (buf, "<tr><td><font color=darkgreen size = 3> WARC-Identified-Payload-Type </font></td><td>%-20s</td></tr>",
+                              (const char *) string);
+         m = WARC_TRUE;
+         }
+
+      string = WRecord_getSegmentOriginId (wrecord);
+      if (string)
+         {
+         evbuffer_add_printf (buf, "<tr><td><font color=darkgreen size = 3> WARC-Segment-Origin-ID </font></td><td>%-20s</td></tr>",
+                              (const char *) string);
+
+         evbuffer_add_printf (buf, "<tr><td><font color=darkgreen size = 3> WARC-Segment-Number </font></td><td>%-20d</td></tr>",
+                             WRecord_getSegmentNumber (wrecord));
+         m = WARC_TRUE;
+         }
+
+      tlen = WRecord_getSegTotalLength (wrecord);
+      if (tlen)
+         {
+         evbuffer_add_printf (buf, "<tr><td><font color=darkgreen size = 3> WARC-Segment-Total-Length </font></td><td>%-20d</td></tr>",
+                              tlen);
+         m = WARC_TRUE;
+         }
+
+     unless (m)
+        evbuffer_add_printf (buf, "<tr><td><font color=darkgreen size =3 > --No One-- </font></td></tr>");
 
       evbuffer_add_printf (buf, "</table></blockquote><br>");
+
+
 
       /* dump ANVLs */
 
@@ -1055,7 +1176,7 @@ WPRIVATE warc_bool_t WSend_distantDumpResponse (void * fname, void * pref, wfile
         
          if (j)
            {
-           evbuffer_add_printf (buf, "<font color=darkred size = 4> <b> More informations </b> </font>");
+           evbuffer_add_printf (buf, "<font color=darkred size = 4> <b> More information </b> </font>");
            evbuffer_add_printf (buf, "<blockquote> <table BORDER = 2 bgcolor=lightgray>");
        
            while ( i < j )
@@ -1189,11 +1310,12 @@ WPRIVATE warc_bool_t WSend_distantFilterResponse (void * fname, void * pref, wfi
 
    content_type[0] = '\0';
    if (comp_mode == WARC_FILE_COMPRESSED_GZIP)
-      strcpy ((char *) content_type, "application/x-gzip");
+      w_strncpy (content_type, (warc_u8_t *) "application/x-gzip", 18);
    else if (comp_mode == WARC_FILE_UNCOMPRESSED)
-      strcpy ((char *) content_type, "text/plain");
+      w_strncpy (content_type, (warc_u8_t *) "text/plain", 10);
    else 
-      strcpy ((char *) content_type, "");
+      w_strncpy (content_type, (warc_u8_t *) "", 0);
+
 
    evhttp_add_header (req -> output_headers, 
                       "Content-Type", (const char *)content_type);
@@ -1223,14 +1345,20 @@ WPRIVATE warc_bool_t WSend_distantFilterResponse (void * fname, void * pref, wfi
       switch (what)
          {
          case WARC_URI:
-             string = WRecord_getSubjectUri (wrecord);
-             found  = match (makeS (string), WString_getText (value), WString_getLength (value));
+             string = WRecord_getTargetUri (wrecord);
+             if (string)
+               found  = match (makeS (string), WString_getText (value), WString_getLength (value));
+             else
+               found = WARC_TRUE;
 
          break;
 
          case WARC_MIME:
              string = WRecord_getContentType (wrecord);
-             found  = match (makeS (string), WString_getText (value), WString_getLength (value));
+             if (string)
+                found  = match (makeS (string), WString_getText (value), WString_getLength (value));
+             else
+                found = WARC_TRUE;
 
              break;
 
@@ -1296,7 +1424,7 @@ WPRIVATE warc_bool_t WSend_distantFilterResponse (void * fname, void * pref, wfi
          {
          buffer[0] = '\0';
          evbuffer_expand (buf, WSERVER_MAX_BUFFER_SIZE);
-      
+
          /* coming back to the record begining */
 
          /* sending the data chunk per chunk */
@@ -1451,10 +1579,10 @@ WPRIVATE void WAccess_callback (struct evhttp_request * req, void * _arg)
                             & offset, &what, cvalue, & req_kind))
     {
       evbuffer_add_printf (buf, "<center> <b> <font color=darkblue size=2> Bad request format\r\n </font> </b> </center><br>");
-      evbuffer_add_printf (buf, "The correct format is:<br>/warc/version/record/compression_mode/record_offset/warc_file_path\r\n<br>");
-      evbuffer_add_printf (buf, "Or:<br>/warc/version/file/compression_mode/offset/warc_file_path\r\n<br>");
-      evbuffer_add_printf (buf, "Or:<br>/warc/version/list/compression_mode/offset/warc_file_path\r\n<br>");
-      evbuffer_add_printf (buf, "Or:<br>/warc/version/filter/compression_mode/offset/what_to_filter_on/filter_value/warc_file_path\r\n<br>");
+      evbuffer_add_printf (buf, "The correct format is:<br>/WARC/version/record/compression_mode/record_offset/warc_file_path\r\n<br>");
+      evbuffer_add_printf (buf, "Or:<br>/WARC/version/file/compression_mode/offset/warc_file_path\r\n<br>");
+      evbuffer_add_printf (buf, "Or:<br>/WARC/version/list/compression_mode/offset/warc_file_path\r\n<br>");
+      evbuffer_add_printf (buf, "Or:<br>/WARC/version/filter/compression_mode/offset/what_to_filter_on/filter_value/warc_file_path\r\n<br>");
 
       evhttp_add_header (req -> output_headers, 
                          "Server", (const char *) WString_getText(server_name));
@@ -1476,7 +1604,7 @@ WPRIVATE void WAccess_callback (struct evhttp_request * req, void * _arg)
 
         /* here a full warc file is requested */
         destroy (cvalue);
-        WSend_fullResponse (fname, pref, comp_mode, offset, server_name, req, buf);
+        WSend_fullResponse (fname, comp_mode, offset, server_name, req, buf);
         destroy (fname);
         evbuffer_free (buf);
 

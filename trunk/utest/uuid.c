@@ -24,103 +24,124 @@
 /*     http://code.google.com/p/warc-tools/                            */
 /* ------------------------------------------------------------------- */
 
+#include <Basic.h>
+#include <Console.h>
+#include <Automated.h>
+#include <CUnit.h>
+#include <CUError.h>
+#include <TestDB.h>
+#include <TestRun.h>
 #include <assert.h>
 #include <stdio.h>
-
+#include <menu.h>
 #include <warc.h>
 
 #define makeU(s) (const warc_u8_t *) (s), (warc_u64_t) w_strlen((warc_u8_t *) (s))
-
-int test1 (void)
+int init_suite1(void) { return 0; }
+int clean_suite1(void) { return 0; }
+ 
+void test1 (void)
 {
-  const char * t = "TEST 1";
   void       * u = NIL;
   const char * s = NIL;
-
-  fprintf (stdout, "%s>\n", t);
-
   /* empty string */
   u = bless (WUUID);
-  assert (u);
-
+  CU_ASSERT_PTR_NOT_EQUAL(u,NIL);
   WUUID_hash (u, makeU ("") );
   s = WUUID_text (u);
-  fprintf (stdout, "%s\n", s);
-
-
+  CU_ASSERT_STRING_EQUAL(s, "uuid:24F0130C63AC933216166E76B1BB925FF373DE2D49584E7A"); 
+  /*fprintf (stdout, "%s\n", s);*/
   WUUID_reinit (u); /* re-initialize the Tiger buffer */
   WUUID_hash (u, makeU ("Hello World") );
   s = WUUID_text (u);
-  fprintf (stdout, "%s\n", s);
+  CU_ASSERT_STRING_EQUAL(s, "uuid:C01CED32B823AB2B24299F5A8E8B495455AA2AA2352F04D4"); 
+ /* fprintf (stdout, "%s\n", s);*/
 
   destroy (u);
 
-  return 0;
 }
 
-int test2 (void)
+void test2 (void)
 {
-  const char * t = "TEST 2";
+
   void       * u = NIL;
   const char * s = NIL;
-
-  fprintf (stdout, "%s>\n", t);
-
   /* empty string */
   u = bless (WUUID);
-  assert (u);
-
+  CU_ASSERT_PTR_NOT_EQUAL(u,NIL);
   WUUID_hash (u, makeU ("Tiger Hashing") );
   s = WUUID_text (u);
-  fprintf (stdout, "%s\n", s);
-
+/* fprintf (stdout, "%s\n", s);*/
+  CU_ASSERT_STRING_EQUAL(s, "uuid:857E9A95798EFA1164240BC483EE63FC7EEC1898B2F0A245"); 
   WUUID_reinit (u); /* re-initialize the Tiger buffer */
   s = WUUID_text (u);
-  fprintf (stdout, "%s\n", s);
-
+  /*fprintf (stdout, "%s\n", s);*/
+  CU_ASSERT_STRING_EQUAL(s, "uuid:0123456789ABCDEFFEDCBA9876543210F096A5B4C3B2E187"); 
   destroy (u);
 
-  return 0;
 }
 
-int test3 (void)
+void test3 (void)
 {
-  const char * t = "TEST 3";
+
   void       * u = NIL;
   const char * s = NIL;
 
-  fprintf (stdout, "%s>\n", t);
-
   /* empty string */
   u = bless (WUUID);
-  assert (u);
-
+  CU_ASSERT_PTR_NOT_EQUAL(u,NIL);
   WUUID_hash (u, makeU ("Hello") );
   WUUID_hash (u, makeU ("World") );
   s = WUUID_text (u);
-  fprintf (stdout, "%s\n", s);
-
+  /*fprintf (stdout, "%s\n", s);*/
+  CU_ASSERT_STRING_EQUAL(s, "uuid:73CB4D1F4675C95E0B9E4A0B8974AD14CD1DFDB91E01BCD1"); 
   WUUID_reinit (u); /* re-initialize the Tiger buffer */
   WUUID_hash (u, makeU ("Hello World") );
   s = WUUID_text (u);
-  fprintf (stdout, "%s\n", s);
-
+  /*fprintf (stdout, "%s\n", s);*/
+  CU_ASSERT_STRING_EQUAL(s, "uuid:C01CED32B823AB2B24299F5A8E8B495455AA2AA2352F04D4"); 
   destroy (u);
 
-  return 0;
 }
 
 
 int main (void)
 {
-  int (* tests []) () = { test1, test2, test3 };
 
-  warc_u32_t  i      = 0;
+CU_pSuite pSuite = NULL;
 
-  for (i = 0; i < ARRAY_LEN (tests); ++ i)
-    {
-      tests[i] ();
-    }
+   /* initialize the CUnit test registry */
+   if (CUE_SUCCESS != CU_initialize_registry())
+      return CU_get_error();
 
-  return 0;
+   /* add a suite to the registry */
+   pSuite = CU_add_suite("Suite1", init_suite1, clean_suite1);
+   if (NULL == pSuite) {
+      CU_cleanup_registry();
+      return CU_get_error();
+   }
+   /* add the tests to the suite */
+   if ((NULL == CU_add_test(pSuite, "TEST 1: ", test1)) ||
+       (NULL == CU_add_test(pSuite, "TEST 2:  ", test2))||
+       (NULL == CU_add_test(pSuite, "TEST 3:  ", test3 )))
+      
+   {
+      CU_cleanup_registry();
+      return CU_get_error();
+   }
+ /* Run all tests using the automated interface*/ 
+    switch (menu()) 
+  {
+        case 1: {CU_console_run_tests();} 
+	case 2:  {CU_basic_run_tests();}
+        case 3:{
+                CU_set_output_filename("./utest/outputs/uuid");
+    		CU_set_output_filename("./utest/outputs/uuid" );
+  		CU_automated_run_tests();
+   		CU_list_tests_to_file();
+           	}
+   }
+   CU_cleanup_registry();
+   return CU_get_error();
+
 }

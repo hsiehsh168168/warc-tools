@@ -23,247 +23,409 @@
 /*                                                                     */
 /*     http://code.google.com/p/warc-tools/                            */
 /* ------------------------------------------------------------------- */
-
+#include <Basic.h>
+#include <Console.h>
+#include <Automated.h>
+#include <CUnit.h>
+#include <CUError.h>
+#include <TestDB.h>
+#include <TestRun.h>
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
-
+#include <menu.h>
+#include <wcsafe.h>
 #include <warc.h>
-
+#include <menu.h>
 #define makeWString(s) (bless (WString, ((warc_u8_t *) s), w_strlen ((warc_u8_t *) (s))))
+int init_suite1(void) { return 0; }
+int clean_suite1(void) { return 0; }
+int init_suite2(void) { return 0; }
+int clean_suite2(void) { return 0; }
+int init_suite3(void) { return 0; }
+int clean_suite3(void) { return 0; }
 
-int test1 (void)
+void test1 (void)
 {
-  const char * t = "TEST 1";
-  void       * l = bless (WList);
-
-  assert (l);
+ void       * l = bless (WList);
+  
+  CU_ASSERT_PTR_NOT_EQUAL(l,NIL);
 
   WList_push (l, makeWString ("AAAA") );
   WList_push (l, makeWString ("BBBB") );
   WList_push (l, makeWString ("CCCC") );
-
-  fprintf (stdout, "%s> list size: %d\n", t, WList_size (l) );
-
-  destroy (l);
-
-  return 0;
+ /*printf (stdout, "%s> list size: %d\n", t, WList_size (l) );*/
+  CU_ASSERT_EQUAL(3, WList_size (l));
+  CU_ASSERT_NOT_EQUAL(0, WList_size (l));
+  CU_ASSERT_NOT_EQUAL(4, WList_size (l));
+  destroy (l);  
+/*return 0;*/
 }
 
-int test2 (void)
+void test2 (void)
 {
-  const char * t = "TEST 2";
   void       * l  = bless (WList);
 
-  assert (l);
+  CU_ASSERT_PTR_NOT_EQUAL(l,NIL);
 
   WList_unshift (l, makeWString ("AAAA") );
   WList_unshift (l, makeWString ("BBB") );
   WList_unshift (l, makeWString ("CCCCC") );
 
-  fprintf (stdout, "%s> list size: %d\n", t, WList_size (l) );
-
-  destroy (l);
-
-  return 0;
+/* fprintf (stdout, "%s> list size: %d\n", t, WList_size (l) );*/
+  CU_ASSERT_EQUAL(3, WList_size (l));
+  CU_ASSERT_NOT_EQUAL(4, WList_size (l));
+  CU_ASSERT_NOT_EQUAL(2, WList_size (l));  
+  destroy (l); 
+/*return 0;*/
 }
 
-int test3 (void)
+void test3 (void)
 {
-  const char * t = "TEST 3";
   void       * l = bless (WList);
 
-  assert (l);
+  CU_ASSERT_PTR_NOT_EQUAL(l,NIL);
 
   WList_unshift (l, makeWString ("AAAA") );
   WList_unshift (l, makeWString ("BBB") );
   WList_unshift (l, makeWString ("CCCCC") );
   WList_unshift (l, makeWString ("DDDD") );
 
-  fprintf (stdout, "%s> list size: %d\n", t, WList_size (l) );
-
-  destroy (l);
-
-  return 0;
+ /* fprintf (stdout, "%s> list size: %d\n", t, WList_size (l) );*/
+  CU_ASSERT_EQUAL(4, WList_size (l));
+  CU_ASSERT_NOT_EQUAL(5, WList_size (l));
+  CU_ASSERT_NOT_EQUAL(3, WList_size (l));  
+  destroy (l); 
+/*return 0;*/
 }
 
-int test4 (void)
+void test4 (void)
 {
-  const char * t = "TEST 4";
   void       * l = bless (WList);
   void       * s = NIL;
 
-  assert (l);
+  warc_u32_t  i      = 1;
+  CU_ASSERT_PTR_NOT_EQUAL(l,NIL);
 
   WList_unshift (l, makeWString ("AAAA") );
   WList_unshift (l, makeWString ("BBB") );
   WList_unshift (l, makeWString ("CCCCC") );
   WList_push    (l, makeWString ("DD") );
-
-  fprintf (stdout, "%s> list size: %d\n", t, WList_size (l) );
+  
+  CU_ASSERT_NOT_EQUAL(3, WList_size (l));
+  CU_ASSERT_EQUAL(4, WList_size (l));
+  CU_ASSERT_NOT_EQUAL(5, WList_size (l));
+/*fprintf (stdout, "%s> list size: %d\n", t, WList_size (l) );*/
 
   while ( WList_size (l) )
     {
-      s = WList_shift (l); /* WList_shift */
-      fprintf (stdout, "%s\n", WString_getText (s) );
+       s = WList_shift (l); /* WList_shift */
+     /* fprintf (stdout, "%s\n", WString_getText (s) );*/
+       if (i==1)
+         {
+	CU_ASSERT_STRING_EQUAL("CCCCC",WString_getText (s));
+        CU_ASSERT_STRING_NOT_EQUAL("BBB",WString_getText (s));		
+	CU_ASSERT_STRING_NOT_EQUAL("DD",WString_getText (s));
+	CU_ASSERT_STRING_NOT_EQUAL("AAAA",WString_getText (s)); 
+	}
+      
+       if (i==2)
+         {
+	CU_ASSERT_STRING_EQUAL("BBB",WString_getText (s));
+        CU_ASSERT_STRING_NOT_EQUAL("AAAA",WString_getText (s));		
+	CU_ASSERT_STRING_NOT_EQUAL("CCCCC",WString_getText (s));
+	CU_ASSERT_STRING_NOT_EQUAL("DD",WString_getText (s)); 
+	}   
+    
+       if (i==3)
+         {
+	CU_ASSERT_STRING_EQUAL("AAAA",WString_getText (s));
+        CU_ASSERT_STRING_NOT_EQUAL("DD",WString_getText (s));		
+	CU_ASSERT_STRING_NOT_EQUAL("CCCCC",WString_getText (s));
+	CU_ASSERT_STRING_NOT_EQUAL("BBB",WString_getText (s)); 
+	}  
+      
+	if (i==4)
+         {
+	CU_ASSERT_STRING_EQUAL("DD",WString_getText (s));
+        CU_ASSERT_STRING_NOT_EQUAL("BBB",WString_getText (s));		
+	CU_ASSERT_STRING_NOT_EQUAL("CCCCC",WString_getText (s));
+	CU_ASSERT_STRING_NOT_EQUAL("AAAA",WString_getText (s)); 
+
+	}
+	i++;
       destroy (s);
     }
-
   destroy (l);
 
-  return 0;
 }
 
-int test5 (void)
+void test5 (void)
 {
-  const char * t = "TEST 5";
   void       * l = bless (WList);
   void       * s = NIL;
 
-  assert (l);
+  warc_u32_t  i      = 1;
+  CU_ASSERT_PTR_NOT_EQUAL(l,NIL);
 
   WList_push (l, makeWString ("AAAA") );
   WList_push (l, makeWString ("BBBB") );
   WList_push (l, makeWString ("CCCC") );
   WList_push (l, makeWString ("DDDD") );
 
-  fprintf (stdout, "%s> list size: %d\n", t, WList_size (l) );
-
-  while ( WList_size (l) )
+  /* fprintf (stdout, "%s> list size: %d\n", t, WList_size (l) );*/
+  CU_ASSERT_EQUAL(4, WList_size (l));
+  CU_ASSERT_NOT_EQUAL(5, WList_size (l));
+  CU_ASSERT_NOT_EQUAL(3, WList_size (l));
+ 
+while ( WList_size (l) )
     {
       s = WList_pop (l); /* WList_pop */
-      fprintf (stdout, "%s\n", WString_getText (s) );
+     /* fprintf (stdout, "%s\n", WString_getText (s) );*/
+       if (i==1)
+         {
+         CU_ASSERT_STRING_EQUAL("DDDD",WString_getText (s));		
+        CU_ASSERT_STRING_NOT_EQUAL("AAAA",WString_getText (s));		
+	CU_ASSERT_STRING_NOT_EQUAL("CCCC",WString_getText (s));
+	CU_ASSERT_STRING_NOT_EQUAL("BBBB",WString_getText (s)); 
+	}
+     
+       if (i==2)
+         {
+	CU_ASSERT_STRING_EQUAL("CCCC",WString_getText (s));
+        CU_ASSERT_STRING_NOT_EQUAL("BBBB",WString_getText (s));		
+	CU_ASSERT_STRING_NOT_EQUAL("AAAA",WString_getText (s));
+	CU_ASSERT_STRING_NOT_EQUAL("DDDD",WString_getText (s)); 
+	}   
+
+      if (i==3)
+         {
+	CU_ASSERT_STRING_EQUAL("BBBB",WString_getText (s));
+        CU_ASSERT_STRING_NOT_EQUAL("DDDD",WString_getText (s));		
+	CU_ASSERT_STRING_NOT_EQUAL("CCCC",WString_getText (s));
+	CU_ASSERT_STRING_NOT_EQUAL("AAAA",WString_getText (s)); 
+	}  
+
+      if (i==4)
+         {
+	CU_ASSERT_STRING_EQUAL("AAAA",WString_getText (s));
+        CU_ASSERT_STRING_NOT_EQUAL("BBBB",WString_getText (s));		
+	CU_ASSERT_STRING_NOT_EQUAL("DDDD",WString_getText (s));
+	CU_ASSERT_STRING_NOT_EQUAL("CCCC",WString_getText (s)); 
+	}
       destroy (s);
+      i++;
     }
-
   destroy (l);
-
-  return 0;
 }
 
 
-int test6 (void)
+void test6 (void)
 {
-  const char * t = "TEST 6";
   void       * l = bless (WList);
   void       * s = NIL;
   warc_u32_t   i;
 
-  assert (l);
+  CU_ASSERT_PTR_NOT_EQUAL(l,NIL);
 
   WList_push (l, makeWString ("AAAA") );
   WList_push (l, makeWString ("BBBB") );
   WList_push (l, makeWString ("CCCC") );
 
-  fprintf (stdout, "%s> list size: %d\n", t, WList_size (l) );
-
+  /*fprintf (stdout, "%s> list size: %d\n", t, WList_size (l) );*/
+  CU_ASSERT_EQUAL(3, WList_size (l));
+  CU_ASSERT_NOT_EQUAL(4, WList_size (l));
+  CU_ASSERT_NOT_EQUAL(2, WList_size (l));
   i = 1;
   s = (void *) WList_get (l, i);
-  fprintf (stdout, "list index %d is : %s\n", i, WString_getText (s) );
-
+  /*fprintf (stdout, "list index %d is : %s\n", i, WString_getText (s) );*/
+  CU_ASSERT_STRING_EQUAL("BBBB",WString_getText (s));
+  
   i = 0;
   s = (void *) WList_get (l, i);
-  fprintf (stdout, "list index %d is : %s\n", i, WString_getText (s) );
+ /*fprintf (stdout, "list index %d is : %s\n", i, WString_getText (s) );*/
+  CU_ASSERT_STRING_EQUAL("AAAA",WString_getText (s));
 
   i = 2;
   s = (void *) WList_get (l, i);
-  fprintf (stdout, "list index %d is : %s\n", i, WString_getText (s) );
-
+ /* fprintf (stdout, "list index %d is : %s\n", i, WString_getText (s) );*/
+  CU_ASSERT_STRING_EQUAL("CCCC",WString_getText (s));
   destroy (l);
 
-  return 0;
 }
 
-int test7 (void)
+void test7 (void)
 {
-  const char * t = "TEST 7";
+  
   void       * l = bless (WList);
   void       * s = NIL;
   void       * o = makeWString ("ZZZZZZZ");
   warc_u32_t   i = 1;
-
-  assert (l);
+  CU_ASSERT_PTR_NOT_EQUAL(l,NIL);
 
   WList_push (l, makeWString ("AAAA") );
   WList_push (l, makeWString ("BBBB") );
   WList_push (l, makeWString ("CCCC") );
 
-  fprintf (stdout, "%s> list size: %d\n", t, WList_size (l) );
+  CU_ASSERT_EQUAL(3, WList_size (l));
+  CU_ASSERT_NOT_EQUAL(2, WList_size (l));
+  CU_ASSERT_NOT_EQUAL(4, WList_size (l));
+ /* fprintf (stdout, "%s> list size: %d\n", t, WList_size (l) );*/
 
   s = (void *) WList_set (l, i, o);
-  fprintf (stdout, "replace %s at index %d by %s\n",
-           WString_getText (s), i, WString_getText (o) );
-
+/* fprintf (stdout, "replace %s at index %d by %s\n",*/
+  /*         WString_getText (s), i, WString_getText (o) );*/
+  CU_ASSERT_STRING_EQUAL("ZZZZZZZ", WString_getText (o));
+  CU_ASSERT_STRING_EQUAL("BBBB", WString_getText (s));
+  CU_ASSERT_STRING_NOT_EQUAL("BBBB", WString_getText (o));
+  CU_ASSERT_STRING_NOT_EQUAL("ZZZZZZZ", WString_getText (s));
   destroy (s);
   destroy (l);
-
-  return 0;
 }
 
 
-int test8 (void)
-{
-  const char * t = "TEST 8";
+void test8 (void)
+{ 
   void       * l = bless (WList);
   void       * s = NIL;
   warc_u32_t   i;
-
-  assert (l);
+  CU_ASSERT_PTR_NOT_EQUAL(l,NIL);
 
   WList_push (l, makeWString ("AAAA") );
   WList_push (l, makeWString ("BBBB") );
   WList_push (l, makeWString ("CCCC") );
   WList_push (l, makeWString ("DDDD") );
 
-  fprintf (stdout, "%s> list size: %d\n", t, WList_size (l) );
+  CU_ASSERT_EQUAL(4, WList_size (l));
+  CU_ASSERT_NOT_EQUAL(5, WList_size (l));
+  CU_ASSERT_NOT_EQUAL(3, WList_size (l));
+  /*fprintf (stdout, "%s> list size: %d\n", t, WList_size (l) );*/
 
   i = 2;
   s = WList_remove (l, i);
-  fprintf (stdout, "remove %s from index %d\n",
-           WString_getText (s), i);
+  /*fprintf (stdout, "remove %s from index %d\n",
+          WString_getText (s), i);*/
+  CU_ASSERT_STRING_EQUAL("CCCC", WString_getText (s));
   destroy (s);
+  /*assurer que CCCC est supprimé*/
+   i = 2;
+  s = (void *) WList_get (l, i);
+  CU_ASSERT_STRING_NOT_EQUAL("CCCC",WString_getText (s));
+  CU_ASSERT_STRING_EQUAL("DDDD",WString_getText (s));
 
   i = 0;
   s = WList_remove (l, i);
-  fprintf (stdout, "remove %s from index %d\n",
-           WString_getText (s), i);
+  /*fprintf (stdout, "remove %s from index %d\n",
+           WString_getText (s), i);*/
+  CU_ASSERT_STRING_EQUAL("AAAA", WString_getText (s));
 
   destroy (s);
   destroy (l);
-
-  return 0;
 }
 
 
-int test9 (void)
+void test9 (void)
 {
-  const char * t = "TEST 9";
   void       * l = bless (WList);
 
-  assert (l);
-
-  fprintf (stdout, "%s> list size: %d\n", t, WList_size (l) );
-
+  CU_ASSERT_PTR_NOT_EQUAL(l,NIL);
+  CU_ASSERT_EQUAL(0, WList_size (l));
+  CU_ASSERT_NOT_EQUAL(3, WList_size (l));
+/*fprintf (stdout, "%s> list size: %d\n", t, WList_size (l) );*/
   WList_pop (l);
-
   destroy (l);
 
-  return 0;
 }
 
 
 int main (void)
 {
-  int (* tests []) () = { test1, test2, test3, test4,
-                          test5, test6, test7, test8,
-                          test9
-                        };
-  warc_u32_t  i      = 0;
+ 
+/*void (* tests []) () = { test1,  test2, test3};
+  warc_u32_t  i      = 0;*/
+  /* warc_u32_t  j      = 2;
+  warc_u8_t  s[20];*/
+  /*char       * ss = NIL;*/
+ 
+ CU_pSuite pSuite = NULL;   
+   /* initialize the CUnit test registry */
+   if (CUE_SUCCESS != CU_initialize_registry())
+      return CU_get_error();
 
-  for (i = 0; i < ARRAY_LEN (tests); ++ i)
-    {
-      tests[i] ();
-    }
+   /* add a suite to the registry */
+   pSuite = CU_add_suite("Suite1", init_suite1, clean_suite1);
+   if (NULL == pSuite) {
+      CU_cleanup_registry();
+      return CU_get_error();
+                        }
+  
+ /* for (i = 0; i < ARRAY_LEN (tests); ++ i)
+	{
+         
+         if (NULL == CU_add_test(pSuite,"ttttttttttttttt" ,  tests [i]))
+	{
+     	 CU_cleanup_registry();
+      	return CU_get_error();
+  	 }
+    }*/
+   /* add the tests to the suite */
 
-  return 0;
+   if ((NULL == CU_add_test(pSuite, "TEST 1:size l1 (younes) ", test1)) ||
+       (NULL == CU_add_test(pSuite, "TEST 2: size l2 ", test2))||
+       (NULL == CU_add_test(pSuite, "TEST 3: size l3 ", test3)))
+      
+   {
+      CU_cleanup_registry();
+      return CU_get_error();
+   } 
+
+   /* add a suite to the registry */
+   pSuite = CU_add_suite("Suite2", init_suite2, clean_suite2);
+   if (NULL == pSuite) {
+      CU_cleanup_registry();
+      return CU_get_error();
+                        }
+
+   /* add the tests to the suite */
+
+   if ((NULL == CU_add_test(pSuite, "TEST 4:contenu l1 ", test4)) ||
+       (NULL == CU_add_test(pSuite, "TEST 5: contenu l2 ", test5)))   
+         {
+      CU_cleanup_registry();
+      return CU_get_error();
+          }
+
+
+   /* add a suite to the registry */
+   pSuite = CU_add_suite("Suite3", init_suite3, clean_suite3);
+   if (NULL == pSuite) {
+      CU_cleanup_registry();
+      return CU_get_error();
+                        }
+
+   /* add the tests to the suite */
+
+   if ((NULL == CU_add_test(pSuite, "TEST 6: INDEX ", test6)) ||
+       (NULL == CU_add_test(pSuite, "TEST 7: REMPLACE ", test7))||
+       (NULL == CU_add_test(pSuite, "TEST 8: REMOVE ", test8))||
+       (NULL == CU_add_test(pSuite, "TEST 9: LIST VIDE ", test9)))
+             {
+      CU_cleanup_registry();
+      return CU_get_error();
+             }
+
+switch (menu()) 
+  {
+        case 1: {CU_console_run_tests();} 
+	case 2:  {CU_basic_run_tests();}
+        case 3:{
+                CU_set_output_filename("./utest/outputs/list");
+    		CU_set_output_filename("./utest/outputs/list" );
+  		CU_automated_run_tests();
+   		CU_list_tests_to_file();
+           	}
+     
+   }
+   CU_cleanup_registry();
+   return CU_get_error();
 }

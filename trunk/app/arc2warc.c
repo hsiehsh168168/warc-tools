@@ -34,7 +34,7 @@
 #include <arecord.h>
 
 
-#define WARC_MAX_SIZE 629145600
+#define WARC_MAX_SIZE 1629145600
 
 #define uS(s)  ((warc_u8_t *) (s))
 #define makeS(s) uS(s), w_strlen (uS(s))
@@ -116,7 +116,6 @@ int main (int argc, const char ** argv)
       fprintf (stderr, "Usage: %s -a <file.arc> [-b] -f <file.warc> [-c] [-t <working_dir>]\n",
                argv [0]);
       fprintf (stderr, "\t-a    : valid ARC file name\n");
-      fprintf (stderr, "\t[-b]  : assume ARC file is GZIP compressed (default no)\n");
       fprintf (stderr, "\t-f    : valid WARC file name\n");
       fprintf (stderr, "\t[-c]  : WARC file will be GZIP compressed (default no)\n");
       fprintf (stderr, "\t[-t]  : temporary working directory (default \".\")\n");
@@ -148,11 +147,6 @@ int main (int argc, const char ** argv)
           case 'a' :
             if (w_index (flags, c) [1] == ':')
               aname = WGetOpt_argument (p);
-
-            break;
-
-          case 'b' :
-            amode = ARC_FILE_COMPRESSED_GZIP;
 
             break;
 
@@ -190,6 +184,7 @@ int main (int argc, const char ** argv)
   unless (a)
   {
     fprintf (stderr, "unable to create the Arc object\n");
+    free_p;
     return (2);
   }
 
@@ -199,6 +194,7 @@ int main (int argc, const char ** argv)
   unless (w)
   {
     fprintf (stderr, "unable to create the Warc object\n");
+    free_p;
     free_a;
     return (3);
   }
@@ -208,6 +204,7 @@ int main (int argc, const char ** argv)
   unless (u)
   {
     fprintf (stderr, "unable to create a UUID object\n");
+    free_p;
     free_w;
     free_a;
     return (4);
@@ -238,7 +235,7 @@ int main (int argc, const char ** argv)
       }
 
       /* set the subject URI */
-      b = WRecord_setSubjectUri  (wr, makeS (ARecord_getUrl (ar) ) );
+      b = WRecord_setTargetUri  (wr, makeS (ARecord_getUrl (ar) ) );
 
       if (b)
         free_err (7);
@@ -249,8 +246,9 @@ int main (int argc, const char ** argv)
       if (b)
         free_err (8);
 
+
       /* set the creation date */
-      b = WRecord_setCreationDate (wr, makeS (ARecord_getCreationDate (ar) ) );
+      b = WRecord_setDateFromArc (wr, makeS (ARecord_getCreationDate (ar) ) );
 
       if (b)
         free_err (9);
@@ -274,8 +272,7 @@ int main (int argc, const char ** argv)
       WUUID_reinit (u); /* re-initialize the UUID object */
 
       /* add the ARC IP as an Anvl */
-      b = WRecord_addAnvl (wr, makeS ("IpAddress"),
-                           makeS (ARecord_getIpAddress (ar) ) );
+      b = WRecord_setIpAddress (wr, makeS (ARecord_getIpAddress (ar) ) );
 
       if (b)
         free_err (12);

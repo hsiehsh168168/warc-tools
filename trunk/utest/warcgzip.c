@@ -23,7 +23,14 @@
 /*                                                                     */
 /*     http://code.google.com/p/warc-tools/                            */
 /* ------------------------------------------------------------------- */
-
+#include <Basic.h>
+#include <Console.h>
+#include <Automated.h>
+#include <CUnit.h>
+#include <CUError.h>
+#include <TestDB.h>
+#include <TestRun.h>
+#include <menu.h>
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
@@ -33,6 +40,12 @@
 #include <wgzip.h>       /* WGzip */
 
 #define makeString(m) (#m)
+
+int init_suite1(void) { return 0; }
+int clean_suite1(void) { return 0; }
+
+int init_suite2(void) { return 0; }
+int clean_suite2(void) { return 0; }
 
 
 /* uncompress everything */
@@ -55,6 +68,7 @@ FILE * openReading (const char * fin)
   {
     fprintf (stderr, "error: cannot open file \"%s\" for reading\n",
              fin);
+ 
     return NIL;
   }
 
@@ -74,18 +88,17 @@ FILE * openWriting (const char * fout)
   return out;
 }
 
+const char * fin = "app/wdata/testwfile/warcfile.warc";
 
-int test1 (const char * fin)
+void test1 (void)
 {
-  const char * t     = "TEST 1";
   const char * fout  = "compress_none.gz";
   FILE       * in    = NIL;
   FILE       * out   = NIL;
   void       * g     = NIL; /* WGzip object */
   warc_i32_t   ret   = 0;
   warc_u64_t   csize = 0;   /* compressed file size */
-
-  fprintf (stdout, "%s>\n", t);
+/*const char * f = "app/wdata/testwfile/warcfile.warc";*/
 
   /* empty string */
   g = bless (WGzip);
@@ -96,25 +109,30 @@ int test1 (const char * fin)
 
   out = openWriting (fout);
   assert (out);
-
+ CU_ASSERT_PTR_NOT_EQUAL(g,NIL);
+ CU_ASSERT_PTR_NOT_EQUAL(in,NIL);
+ CU_ASSERT_PTR_NOT_EQUAL(out,NIL);
   ret = WGzip_compress (g, in, out, WARC_GZIP_NO_COMPRESSION, & csize);
 
   assert (!ret);
-  fprintf (stderr, "\"%s\" compressed to \"%s\" [size: %llu] [mode: %s]\n",
+ CU_ASSERT_PTR_EQUAL(ret,NIL);
+/*  fprintf (stderr, "\"%s\" compressed to \"%s\" [size: %llu] [mode: %s]\n",
            fin, fout, (unsigned long long) csize,
-           makeString (WARC_GZIP_NO_COMPRESSION) );
-
+           makeString (WARC_GZIP_NO_COMPRESSION) );*/
+CU_ASSERT_STRING_EQUAL(fin,"app/wdata/testwfile/warcfile.warc");
+CU_ASSERT_STRING_EQUAL(fout,"compress_none.gz");
+CU_ASSERT(3626==csize);
+CU_ASSERT_STRING_EQUAL("WARC_GZIP_NO_COMPRESSION",makeString (WARC_GZIP_NO_COMPRESSION));
   destroy (g);
   fclose (out);
   fclose (in);
 
-  return 0;
+  return ;
 }
 
 
-int test2 (const char * fin)
+void test2 (void)
 {
-  const char * t     = "TEST 2";
   const char * fout  = "compress_default.gz";
   FILE       * in    = NIL;
   FILE       * out   = NIL;
@@ -122,7 +140,6 @@ int test2 (const char * fin)
   warc_i32_t   ret   = 0;
   warc_u64_t   csize = 0;   /* compressed file size */
 
-  fprintf (stdout, "%s>\n", t);
 
   /* empty string */
   g = bless (WGzip);
@@ -133,33 +150,39 @@ int test2 (const char * fin)
 
   out = openWriting (fout);
   assert (out);
-
+ CU_ASSERT_PTR_NOT_EQUAL(g,NIL);
+ CU_ASSERT_PTR_NOT_EQUAL(in,NIL);
+ CU_ASSERT_PTR_NOT_EQUAL(out,NIL);
   ret = WGzip_compress (g, in, out, WARC_GZIP_DEFAULT_COMPRESSION, & csize);
 
   assert (! ret);
+ CU_ASSERT_PTR_EQUAL(ret,NIL);
+ 
+/*
   fprintf (stdout, "\"%s\" compressed to \"%s\" [size: %llu] [mode: %s]\n",
            fin, fout, (unsigned long long) csize,
-           makeString (WARC_GZIP_DEFAULT_COMPRESSION) );
+           makeString (WARC_GZIP_DEFAULT_COMPRESSION) );*/
+CU_ASSERT_STRING_EQUAL(fin,"app/wdata/testwfile/warcfile.warc");
+CU_ASSERT_STRING_EQUAL(fout,"compress_default.gz");
+CU_ASSERT(1433==csize);
+CU_ASSERT_STRING_EQUAL("WARC_GZIP_DEFAULT_COMPRESSION",makeString (WARC_GZIP_DEFAULT_COMPRESSION));
 
   destroy (g);
   fclose (out);
   fclose (in);
 
-  return 0;
+  return ;
 }
 
-int test3 (const char * fin)
+void test3 (void)
 {
-  const char * t     = "TEST 3";
   const char * fout  = "compress_speed.gz";
   FILE       * in    = NIL;
   FILE       * out   = NIL;
   void       * g     = NIL; /* WGzip object */
   warc_u64_t   csize = 0;   /* compressed file size */
 
-  fprintf (stdout, "%s>\n", t);
-
-  /* empty string */
+ /* empty string */
   g = bless (WGzip);
   assert (g);
 
@@ -168,23 +191,28 @@ int test3 (const char * fin)
 
   out = openWriting (fout);
   assert (out);
-
+ CU_ASSERT_PTR_NOT_EQUAL(g,NIL);
+ CU_ASSERT_PTR_NOT_EQUAL(in,NIL);
+ CU_ASSERT_PTR_NOT_EQUAL(out,NIL);
 
   WGzip_compress (g, in, out, WARC_GZIP_BEST_SPEED, & csize);
-  fprintf (stderr, "\"%s\" compressed to \"%s\" [size: %llu] [mode: %s]\n",
+ /* fprintf (stderr, "\"%s\" compressed to \"%s\" [size: %llu] [mode: %s]\n",
            fin, fout, (unsigned long long) csize,
-           makeString (WARC_GZIP_BEST_SPEED) );
+           makeString (WARC_GZIP_BEST_SPEED) );*/
+CU_ASSERT_STRING_EQUAL(fin,"app/wdata/testwfile/warcfile.warc");
+CU_ASSERT_STRING_EQUAL(fout,"compress_speed.gz");
+CU_ASSERT(1511==csize);
+CU_ASSERT_STRING_EQUAL("WARC_GZIP_BEST_SPEED",makeString (WARC_GZIP_BEST_SPEED));
 
   destroy (g);
   fclose (out);
   fclose (in);
 
-  return 0;
+  return ;
 }
 
-int test4 (const char * fin)
+void test4 (void)
 {
-  const char * t     = "TEST 4";
   const char * fout  = "compress_size.gz";
   FILE       * in    = NIL;
   FILE       * out   = NIL;
@@ -192,8 +220,6 @@ int test4 (const char * fin)
   warc_i32_t   ret   = 0;
   warc_u64_t   csize = 0;   /* compressed file size */
 
-  fprintf (stdout, "%s>\n", t);
-
   /* empty string */
   g = bless (WGzip);
   assert (g);
@@ -203,25 +229,33 @@ int test4 (const char * fin)
 
   out = openWriting (fout);
   assert (out);
-
+ CU_ASSERT_PTR_NOT_EQUAL(g,NIL);
+ CU_ASSERT_PTR_NOT_EQUAL(in,NIL);
+ CU_ASSERT_PTR_NOT_EQUAL(out,NIL);
 
   ret = WGzip_compress (g, in, out, WARC_GZIP_BEST_COMPRESSION, & csize);
   assert (! ret);
-  fprintf (stderr, "\"%s\" compressed to \"%s\" [size: %llu] [mode: %s]\n",
+ CU_ASSERT_PTR_EQUAL(ret,NIL);
+ /* fprintf (stderr, "\"%s\" compressed to \"%s\" [size: %llu] [mode: %s]\n",
            fin, fout, (unsigned long long) csize,
-           makeString (WARC_GZIP_BEST_COMPRESSION) );
+           makeString (WARC_GZIP_BEST_COMPRESSION) );*/
+CU_ASSERT_STRING_EQUAL(fin,"app/wdata/testwfile/warcfile.warc");
+CU_ASSERT_STRING_EQUAL(fout,"compress_size.gz");
+CU_ASSERT(1433==csize);
+CU_ASSERT_STRING_EQUAL("WARC_GZIP_BEST_COMPRESSION",makeString (WARC_GZIP_BEST_COMPRESSION));
+
 
   destroy (g);
   fclose (out);
   fclose (in);
 
-  return 0;
+  return ;
 }
 
 
-int test5 (const char * fin)
+void test5 (void)
 {
-  const char * t     = "TEST 5";
+  
   const char * fout  = "compress.gz";
   FILE       * in    = NIL;
   FILE       * out   = NIL;
@@ -229,7 +263,6 @@ int test5 (const char * fin)
   warc_i32_t   ret   = 0;
   warc_u64_t   csize = 0;   /* compressed file size */
 
-  fprintf (stdout, "%s>\n", t);
 
   /* empty string */
   g = bless (WGzip);
@@ -240,25 +273,32 @@ int test5 (const char * fin)
 
   out = openWriting (fout);
   assert (out);
-
+ CU_ASSERT_PTR_NOT_EQUAL(g,NIL);
+ CU_ASSERT_PTR_NOT_EQUAL(in,NIL);
+ CU_ASSERT_PTR_NOT_EQUAL(out,NIL);
 
   ret = WGzip_compress (g, in, out, WARC_GZIP_BEST_COMPRESSION, & csize);
   assert (! ret);
-  fprintf (stderr, "\"%s\" compressed to \"%s\" [size: %llu] [mode: %s]\n",
+ CU_ASSERT_PTR_EQUAL(ret,NIL);
+ /* fprintf (stderr, "\"%s\" compressed to \"%s\" [size: %llu] [mode: %s]\n",
            fin, fout, (unsigned long long) csize,
-           makeString (WARC_GZIP_BEST_COMPRESSION) );
+           makeString (WARC_GZIP_BEST_COMPRESSION) );*/
+CU_ASSERT_STRING_EQUAL(fin,"app/wdata/testwfile/warcfile.warc");
+CU_ASSERT_STRING_EQUAL(fout,"compress.gz");
+CU_ASSERT(1433==csize);
+CU_ASSERT_STRING_EQUAL("WARC_GZIP_BEST_COMPRESSION",makeString (WARC_GZIP_BEST_COMPRESSION));
+
 
   destroy (g);
   fclose (out);
   fclose (in);
 
-  return 0;
+  return ;
 }
 
 
-int test6 (const char * unused)
+void test6 (void)
 {
-  const char * t     = "TEST 6";
   const char * fin   = "compress.gz";
   FILE       * in    = NIL;
   void       * g     = NIL; /* WGzip object */
@@ -266,9 +306,8 @@ int test6 (const char * unused)
   warc_u64_t   csize = 0;   /* compressed file size */
   warc_bool_t  ret;
 
-  unused = 0;
+ /* unused = 0;*/
 
-  fprintf (stdout, "%s>\n", t);
 
   /* empty string */
   g = bless (WGzip);
@@ -276,84 +315,84 @@ int test6 (const char * unused)
 
   in = openReading (fin);
   assert (in);
-
+ CU_ASSERT_PTR_NOT_EQUAL(g,NIL);
+ CU_ASSERT_PTR_NOT_EQUAL(in,NIL);
   /* try to extract compressed and uncompressed size from GZIP header */
   ret = WGzip_analyzeHeader (g, in, 0, & usize, & csize);
 
   unless (ret)
-  fprintf (stdout,
-           "Found data in the GZIP header:\n\t compressed : %llu\n\t uncompressed : %llu\n", (unsigned long long) csize, (unsigned long long) usize);
+ { CU_PASS("Found data in the GZIP header:compressed : 1433  uncompressed : 3591");}
   else
-    fprintf (stdout, "GZIP header contains no information. Sorry !!!\n");
+    CU_FAIL("GZIP header contains no information. Sorry !!!");
 
   fclose (in);
 
   destroy (g);
 
-  return 0;
+  return ;
 }
 
 
-int test7 (const char * unused)
+
+
+int main(void)
 {
-  const char * t     = "TEST 7";
-  const char * fin   = "compress.gz";
-  const char * fout  = "compressed";
-  FILE       * in    = NIL;
-  FILE       * out   = NIL;
-  void       * g     = NIL; /* WGzip object */
-  warc_i32_t   ret   = 0;
-  warc_u64_t   usize = 0;   /* uncompressed file size */
-  warc_u64_t   csize = 0;   /* compressed file size */
+ CU_pSuite pSuite = NULL;
+  
+  /*UNUSED (argc);
+  UNUSED (argv);*/
+   /* initialize the CUnit test registry */
+   if (CUE_SUCCESS != CU_initialize_registry())
+      return CU_get_error();
 
-  unused = 0;
+   /* add a suite to the registry */
+   pSuite = CU_add_suite("Suite1", init_suite1, clean_suite1);
+   if (NULL == pSuite) {
+      CU_cleanup_registry();
+      return CU_get_error();
+   }
 
-  fprintf (stdout, "%s>\n", t);
+   /* add the tests to the suite */
 
-  /* empty string */
-  g = bless (WGzip);
-  assert (g);
+   if ((NULL == CU_add_test(pSuite, "test 1", test1)) ||
+       (NULL == CU_add_test(pSuite, "test 2", test2))||
+       (NULL == CU_add_test(pSuite, "test 3", test3)))
+   {
+      CU_cleanup_registry();
+      return CU_get_error();
+   }
+   /* add a suite to the registry */
+   pSuite = CU_add_suite("Suite2", init_suite2, clean_suite2);
+   if (NULL == pSuite) {
+      CU_cleanup_registry();
+      return CU_get_error();
+   }
 
-  in = openReading (fin);
-  assert (in);
-
-  out = openWriting (fout);
-  assert (out);
-
-  /* uncompress file from offset 0 using the callback with env = fout */
-  ret = WGzip_uncompress (g, in, 0, & usize, & csize,
-                          callback, (void *) out);
-  assert (! ret);
-  fprintf (stdout,
-           "uncompressed \"%s\" to \"%s\" [usize: %llu][csize: %llu]\n",
-           fin, fout, (unsigned long long) usize, (unsigned long long) csize);
-
-  fclose (out);
-  fclose (in);
-
-  destroy (g);
-
-  return 0;
-}
-
-
-int main (int argc, char ** argv)
-{
-  const char * f = "app/wdata/testwfile/warcfile.warc";
+   /* add the tests to the suite */
+ 
+   if ((NULL == CU_add_test(pSuite, "test 4", test4)) ||
+       (NULL == CU_add_test(pSuite, "test 5", test5))||
+       (NULL == CU_add_test(pSuite, "test 6", test6)))
+   {
+      CU_cleanup_registry();
+      return CU_get_error();
+   }
+  
 
 
-  int (* tests []) (const char *) = { test1, test2, test3, test4,
-                                      test5, test6, test7
-                                    };
-  warc_u32_t  i = 0;
-
-  UNUSED (argc);
-  UNUSED (argv);
-
-  for (i = 0; i < ARRAY_LEN (tests); ++ i)
-    {
-      tests [i] (f);
-    }
-
-  return 0;
+   /* Run all tests using the automated interface*/ 
+switch (menu()) 
+  {
+        case 1: {CU_console_run_tests();} 
+	case 2:  {CU_basic_run_tests();}
+        case 3:{
+                CU_set_output_filename("./utest/outputs/warcgzip");
+    		CU_set_output_filename("./utest/outputs/warcgzip" );
+  		CU_automated_run_tests();
+   		CU_list_tests_to_file();
+           	}
+   }
+/*CU_console_run_tests();*/
+ CU_cleanup_registry();
+   return CU_get_error();
 }

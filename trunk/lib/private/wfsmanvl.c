@@ -100,7 +100,19 @@ struct WFsmANVL
 warc_bool_t WFsmANVL_isSpace   (void *), WFsmANVL_isText    (void *),
 WFsmANVL_isVdots (void *), WFsmANVL_isCR      (void *),
 WFsmANVL_isLF      (void *), WFsmANVL_isUnknown (void *),
-WFsmANVL_isSharp (void *), WFsmANVL_isCtlChar (void *);
+WFsmANVL_isSharp (void *), WFsmANVL_isCtlChar (void *),
+WFsmANVL_isOpenPar (void *), WFsmANVL_isClosePar (void * ),
+WFsmANVL_isLow (void *), WFsmANVL_isHigher (void * ),
+WFsmANVL_isArobase (void *), WFsmANVL_isComma (void * ),
+WFsmANVL_isSlash (void *), WFsmANVL_isASlash (void * ),
+WFsmANVL_isOpenBar (void *), WFsmANVL_isCloseBar (void *),
+WFsmANVL_isQMarc (void *), WFsmANVL_isEqual (void *),
+WFsmANVL_isOpenBrace (void *), WFsmANVL_isCloseBrace (void *),
+WFsmANVL_isQuot (void *) , WFsmANVL_isSComma (void * );
+
+
+
+
 
 /* prototypes of all actions in the FSM (defined below) */
 void WFsmANVL_setKey         (void *), WFsmANVL_setValue  (void *),
@@ -164,7 +176,6 @@ State WANT_ANVL_KEYFIRST =
   {WFsmANVL_isText ,        WFsmANVL_setKey    ,   WANT_ANVL_KEY       },
   {WFsmANVL_isCR   ,        NIL                ,   WANT_ANVL_ENDLF     },
   {WFsmANVL_isSharp,        NIL                ,   ANVL_IGNORE_COMMENT },
-  {WFsmANVL_isCtlChar,      WFsmANVL_raiseError,   NIL},
   {WFsmANVL_isUnknown,      WFsmANVL_raiseError,   NIL},
 };
 
@@ -174,8 +185,7 @@ State WANT_ANVL_KEY =
 
   {WFsmANVL_isText,         WFsmANVL_setKey,        WANT_ANVL_KEY  },
   {WFsmANVL_isSharp,        WFsmANVL_setKey,        WANT_ANVL_KEY  },
-  {WFsmANVL_isVdots,        NIL,                    WANT_ANVL_VALUE},
-  {WFsmANVL_isCtlChar,      WFsmANVL_raiseError,    NIL},
+  {WFsmANVL_isVdots,        NIL,                    WANT_ANVL_VALUE}, 
   {WFsmANVL_isUnknown,      WFsmANVL_raiseError,    NIL}
 };
 
@@ -190,6 +200,22 @@ State WANT_ANVL_VALUE =
   {WFsmANVL_isLF,           WFsmANVL_setValue,       WANT_ANVL_VALUE},
   {WFsmANVL_isSharp,        WFsmANVL_setValue,       WANT_ANVL_VALUE},
   {WFsmANVL_isCtlChar,      WFsmANVL_setValue,       WANT_ANVL_VALUE},
+  {WFsmANVL_isOpenPar,      WFsmANVL_setValue,       WANT_ANVL_VALUE},
+  {WFsmANVL_isClosePar,     WFsmANVL_setValue,       WANT_ANVL_VALUE},
+  {WFsmANVL_isLow,          WFsmANVL_setValue,       WANT_ANVL_VALUE},
+  {WFsmANVL_isHigher,       WFsmANVL_setValue,       WANT_ANVL_VALUE},
+  {WFsmANVL_isArobase,      WFsmANVL_setValue,       WANT_ANVL_VALUE},
+  {WFsmANVL_isComma,        WFsmANVL_setValue,       WANT_ANVL_VALUE},
+  {WFsmANVL_isSComma,       WFsmANVL_setValue,       WANT_ANVL_VALUE},
+  {WFsmANVL_isSlash,        WFsmANVL_setValue,       WANT_ANVL_VALUE},
+  {WFsmANVL_isASlash,       WFsmANVL_setValue,       WANT_ANVL_VALUE},
+  {WFsmANVL_isOpenBar,      WFsmANVL_setValue,       WANT_ANVL_VALUE},
+  {WFsmANVL_isCloseBar,     WFsmANVL_setValue,       WANT_ANVL_VALUE},
+  {WFsmANVL_isQMarc,        WFsmANVL_setValue,       WANT_ANVL_VALUE},
+  {WFsmANVL_isEqual,        WFsmANVL_setValue,       WANT_ANVL_VALUE},
+  {WFsmANVL_isOpenBrace,    WFsmANVL_setValue,       WANT_ANVL_VALUE},
+  {WFsmANVL_isCloseBrace,   WFsmANVL_setValue,       WANT_ANVL_VALUE},
+  {WFsmANVL_isQuot,         WFsmANVL_setValue,       WANT_ANVL_VALUE},
   {WFsmANVL_isUnknown,      WFsmANVL_raiseError,     NIL}
 };
 
@@ -204,6 +230,22 @@ State WANT_ANVL_LF =
   {WFsmANVL_isVdots,        WFsmANVL_setValue,      WANT_ANVL_VALUE},
   {WFsmANVL_isCR,           WFsmANVL_setValue,      WANT_ANVL_VALUE},
   {WFsmANVL_isCtlChar,      WFsmANVL_setValue,      WANT_ANVL_VALUE},
+  {WFsmANVL_isOpenPar,      WFsmANVL_setValue,      WANT_ANVL_VALUE},
+  {WFsmANVL_isClosePar,     WFsmANVL_setValue,      WANT_ANVL_VALUE},
+  {WFsmANVL_isLow,          WFsmANVL_setValue,      WANT_ANVL_VALUE},
+  {WFsmANVL_isHigher,       WFsmANVL_setValue,      WANT_ANVL_VALUE},
+  {WFsmANVL_isArobase,      WFsmANVL_setValue,      WANT_ANVL_VALUE},
+  {WFsmANVL_isComma,        WFsmANVL_setValue,      WANT_ANVL_VALUE},
+  {WFsmANVL_isSComma,       WFsmANVL_setValue,      WANT_ANVL_VALUE},
+  {WFsmANVL_isSlash,        WFsmANVL_setValue,      WANT_ANVL_VALUE},
+  {WFsmANVL_isASlash,       WFsmANVL_setValue,      WANT_ANVL_VALUE},
+  {WFsmANVL_isOpenBar,      WFsmANVL_setValue,      WANT_ANVL_VALUE},
+  {WFsmANVL_isCloseBar,     WFsmANVL_setValue,      WANT_ANVL_VALUE},
+  {WFsmANVL_isQMarc,        WFsmANVL_setValue,      WANT_ANVL_VALUE},
+  {WFsmANVL_isEqual,        WFsmANVL_setValue,      WANT_ANVL_VALUE},
+  {WFsmANVL_isOpenBrace,    WFsmANVL_setValue,      WANT_ANVL_VALUE},
+  {WFsmANVL_isCloseBrace,   WFsmANVL_setValue,      WANT_ANVL_VALUE},
+  {WFsmANVL_isQuot,         WFsmANVL_setValue,      WANT_ANVL_VALUE},
   {WFsmANVL_isUnknown,      WFsmANVL_raiseError,    NIL}
 };
 
@@ -229,6 +271,22 @@ State WANT_ANVL_TEXT =
   {WFsmANVL_isVdots,        WFsmANVL_setValue,       WANT_ANVL_VALUE},
   {WFsmANVL_isSharp,        WFsmANVL_setValue,       WANT_ANVL_VALUE},
   {WFsmANVL_isCtlChar,      WFsmANVL_setValue,       WANT_ANVL_VALUE},
+  {WFsmANVL_isOpenPar,      WFsmANVL_setValue,       WANT_ANVL_VALUE},
+  {WFsmANVL_isClosePar,     WFsmANVL_setValue,       WANT_ANVL_VALUE},
+  {WFsmANVL_isLow,          WFsmANVL_setValue,       WANT_ANVL_VALUE},
+  {WFsmANVL_isHigher,       WFsmANVL_setValue,       WANT_ANVL_VALUE},
+  {WFsmANVL_isArobase,      WFsmANVL_setValue,       WANT_ANVL_VALUE},
+  {WFsmANVL_isComma,        WFsmANVL_setValue,       WANT_ANVL_VALUE},
+  {WFsmANVL_isSComma,       WFsmANVL_setValue,       WANT_ANVL_VALUE},
+  {WFsmANVL_isSlash,        WFsmANVL_setValue,       WANT_ANVL_VALUE},
+  {WFsmANVL_isASlash,       WFsmANVL_setValue,       WANT_ANVL_VALUE},
+  {WFsmANVL_isOpenBar,      WFsmANVL_setValue,       WANT_ANVL_VALUE},
+  {WFsmANVL_isCloseBar,     WFsmANVL_setValue,       WANT_ANVL_VALUE},
+  {WFsmANVL_isQMarc,        WFsmANVL_setValue,       WANT_ANVL_VALUE},
+  {WFsmANVL_isEqual,        WFsmANVL_setValue,       WANT_ANVL_VALUE},
+  {WFsmANVL_isOpenBrace,    WFsmANVL_setValue,       WANT_ANVL_VALUE},
+  {WFsmANVL_isCloseBrace,   WFsmANVL_setValue,       WANT_ANVL_VALUE},
+  {WFsmANVL_isQuot,         WFsmANVL_setValue,       WANT_ANVL_VALUE},
   {WFsmANVL_isUnknown,      WFsmANVL_raiseError,     NIL}
 };
 
@@ -322,7 +380,16 @@ warc_bool_t WFsmANVL_isText (void * _as)
   return ( (as -> c != ' ')  && (as -> c != '\t') &&
            (as -> c != '\r') && (as -> c != '\n') &&
            (as -> c != ':') && (as -> c != '#') &&
-           (as -> c > 31) && (as -> c != 127) );
+           (as -> c > 31) && (as -> c != 127)  &&
+           (as -> c != '(') && (as -> c != ')') &&
+           (as -> c != '<') && (as -> c != '>') &&
+           (as -> c != '@') && (as -> c != ',') &&
+           (as -> c != ';') && (as -> c != '\\') &&
+           (as -> c != '/') && (as -> c != '[') &&
+           (as -> c != ']') && (as -> c != '?') &&
+           (as -> c != '=') && (as -> c != '{') &&
+           (as -> c != '}') && (as -> c != '"') 
+           );
 }
 
 warc_bool_t WFsmANVL_isVdots (void * _as)
@@ -361,6 +428,155 @@ warc_bool_t  WFsmANVL_isSharp (void * _as)
   assert (as);
 
   return (as -> c == '#');
+}
+
+warc_bool_t  WFsmANVL_isOpenPar (void * _as)
+{
+  const ANVLState * const as = _as;
+
+  assert (as);
+
+  return (as -> c == '(');
+}
+
+warc_bool_t  WFsmANVL_isClosePar (void * _as)
+{
+  const ANVLState * const as = _as;
+
+  assert (as);
+
+  return (as -> c == ')');
+}
+
+warc_bool_t  WFsmANVL_isLow (void * _as)
+{
+  const ANVLState * const as = _as;
+
+  assert (as);
+
+  return (as -> c == '<');
+}
+
+warc_bool_t  WFsmANVL_isHigher (void * _as)
+{
+  const ANVLState * const as = _as;
+
+  assert (as);
+
+  return (as -> c == '>');
+}
+
+warc_bool_t  WFsmANVL_isArobase (void * _as)
+{
+  const ANVLState * const as = _as;
+
+  assert (as);
+
+  return (as -> c == '@');
+}
+
+
+warc_bool_t  WFsmANVL_isComma (void * _as)
+{
+  const ANVLState * const as = _as;
+
+  assert (as);
+
+  return (as -> c == ',');
+}
+
+warc_bool_t  WFsmANVL_isSComma (void * _as)
+{
+  const ANVLState * const as = _as;
+
+  assert (as);
+
+  return (as -> c == ';');
+}
+
+
+warc_bool_t  WFsmANVL_isSlash (void * _as)
+{
+  const ANVLState * const as = _as;
+
+  assert (as);
+
+  return (as -> c == '\\');
+}
+
+
+warc_bool_t  WFsmANVL_isASlash (void * _as)
+{
+  const ANVLState * const as = _as;
+
+  assert (as);
+
+  return (as -> c == '/');
+}
+
+
+warc_bool_t  WFsmANVL_isOpenBar (void * _as)
+{
+  const ANVLState * const as = _as;
+
+  assert (as);
+
+  return (as -> c == '[');
+}
+
+warc_bool_t  WFsmANVL_isCloseBar (void * _as)
+{
+  const ANVLState * const as = _as;
+
+  assert (as);
+
+  return (as -> c == ']');
+}
+
+warc_bool_t  WFsmANVL_isQMarc (void * _as)
+{
+  const ANVLState * const as = _as;
+
+  assert (as);
+
+  return (as -> c == '?');
+}
+
+
+warc_bool_t  WFsmANVL_isEqual (void * _as)
+{
+  const ANVLState * const as = _as;
+
+  assert (as);
+
+  return (as -> c == '=');
+}
+
+warc_bool_t  WFsmANVL_isOpenBrace (void * _as)
+{
+  const ANVLState * const as = _as;
+
+  assert (as);
+
+  return (as -> c == '{');
+}
+
+warc_bool_t  WFsmANVL_isCloseBrace (void * _as)
+{
+  const ANVLState * const as = _as;
+
+  assert (as);
+
+  return (as -> c == '}');
+}
+
+warc_bool_t  WFsmANVL_isQuot (void * _as)
+{
+  const ANVLState * const as = _as;
+
+  assert (as);
+
+  return (as -> c == '"');
 }
 
 warc_bool_t WFsmANVL_isUnknown (void * _as)

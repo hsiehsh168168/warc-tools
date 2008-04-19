@@ -101,7 +101,7 @@ do
   $a2w -a $i $acomp -f $wf $ccomp -t $wdir &>/dev/null
   if [ $? -ne 0 ]; then
       echo ">> error when converting \"$i\"" >&2
-      exit 2
+      #exit 2
   fi
 done 
 

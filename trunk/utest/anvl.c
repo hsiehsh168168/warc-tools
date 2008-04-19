@@ -27,69 +27,73 @@
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
-
+#include <Basic.h>
+#include <Console.h>
+#include <Automated.h>
+#include <CUnit.h>
+#include <CUError.h>
+#include <TestDB.h>
+#include <TestRun.h>
+#include <menu.h>
 #include <warc.h>
 
 #include <wfsmanvl.h>
 
 #define makeS(s) ((warc_u8_t *) s), w_strlen((warc_u8_t *) (s))
 
+int init_suite1(void) { return 0; }
+int clean_suite1(void) { return 0; }
+int init_suite2(void) { return 0; }
+int clean_suite2(void) { return 0; }
 
-int test1 (void)
+void test1 (void)
 {
-  const char * t = "TEST 1";
   void       * a = bless (WAnvl, makeS ("key1"), makeS ("value1") );
-
+  
   assert (a);
-
-  fprintf (stderr, "%s>\n", t);
-
-  fprintf (stdout, "key  : %s\n", WAnvl_getKey   (a) );
-  fprintf (stdout, "value: %s\n", WAnvl_getValue (a) );
-
+  CU_ASSERT_PTR_NOT_EQUAL(a,NIL);  
+  CU_ASSERT_STRING_EQUAL("key1",WAnvl_getKey   (a) ); 
+  CU_ASSERT_STRING_EQUAL("value1",WAnvl_getValue   (a) ); 
   destroy (a);
-
-  return 0;
+  return ;
 }
 
 
 
-int test2 (void)
-{
-  const char * t = "TEST 2";
+void test2 (void)
+{ 
   void       * a = bless (WAnvl, makeS ("key2"), makeS ("value2") );
-
   assert (a);
-
-  fprintf (stderr, "%s>\n", t);
-
+  
+  CU_ASSERT_PTR_NOT_EQUAL(a,NIL);  
   WAnvl_setKey   (a, makeS ("CCCC") );
   WAnvl_setValue (a, makeS ("1234") );
-
-  fprintf (stdout, "key  : %s\n", WAnvl_getKey   (a) );
-  fprintf (stdout, "value: %s\n", WAnvl_getValue (a) );
-
+  CU_ASSERT_STRING_EQUAL("CCCC",WAnvl_getKey   (a) ); 
+  CU_ASSERT_STRING_EQUAL("1234",WAnvl_getValue   (a) ); 
   destroy (a);
-
-  return 0;
+  return ;
 }
 
 
-int test3 (void)
+void test3 (void)
 {
-  const char * t        = "TEST 3 a valid anvl";
+  
   const char * filename = "app/wdata/testanvl/anvl-1";
   void       * fin      = NIL;
   void       * afsm     = NIL;
   void       * anvl     = NIL;
   warc_bool_t  more     = WARC_TRUE;
 
-  fprintf (stdout, "%s>\n", t);
-
+  warc_u32_t  i      = 1;
   /* open a valid WARC header file */
+
   fin = fopen (filename, "r");
   unless (fin)
-  return (1);
+       {
+  CU_FAIL("ERROR YOU CAN NOT OPEN FILE ");
+  return ;
+       }
+  else CU_PASS("file ready to read ");
 
   do
     {
@@ -103,9 +107,34 @@ int test3 (void)
 
         if (anvl)
           {
-            fprintf (stdout, "ANVL Key: %s\n",   WAnvl_getKey   (anvl) );
-            fprintf (stdout, "ANVL Value: %s\n", WAnvl_getValue (anvl) );
-
+         /* fprintf (stdout, "ANVL Key: %s\n",   WAnvl_getKey   (anvl) );*/
+            /*fprintf (stdout, "ANVL Value: %s\n", WAnvl_getValue (anvl) );*/
+	 if (i==1)
+         {
+	CU_ASSERT_STRING_EQUAL("color",WAnvl_getKey   (anvl));
+       /*CU_ASSERT_STRING_EQUAL("red, yellow\x0d\x0a        green,white",WAnvl_getValue (anvl));
+       fprintf (stdout, "red,yellow\x0d\x0a        green,white"	);*/	
+	
+	}
+	if (i==2)
+         {
+	CU_ASSERT_STRING_EQUAL("height",WAnvl_getKey   (anvl));
+       CU_ASSERT_STRING_EQUAL(" 200",WAnvl_getValue (anvl));		
+	
+	}
+	if (i==3)
+         {
+	CU_ASSERT_STRING_EQUAL("width",WAnvl_getKey   (anvl));
+       CU_ASSERT_STRING_EQUAL("300",WAnvl_getValue (anvl));		
+	
+	}
+	if (i==5)
+         {
+	CU_ASSERT_STRING_EQUAL("ip",WAnvl_getKey   (anvl));
+       CU_ASSERT_STRING_EQUAL("adress:122.12.34",WAnvl_getValue (anvl));		
+	
+	}
+            
             destroy (anvl);
           }
 
@@ -117,13 +146,13 @@ int test3 (void)
       else
         {
           /* error when parsing the WARC header line */
-          fprintf (stderr,  "error in FSM state address %p, at offset %ld in \"%s\"\n",
-                   WFsmANVL_state (afsm), ftell (fin), filename);
+       CU_FAIL(   fprintf (stderr,  "error in FSM state address %p, at offset %ld in \"%s\"\n",
+                   WFsmANVL_state (afsm), ftell (fin), filename));
           more = WARC_FALSE;
         }
 
       destroy (afsm);
-
+i++;
     }
 
   while (more);
@@ -132,25 +161,27 @@ int test3 (void)
 
   fclose  (fin);
 
-  return 0;
+  return ;
 }
 
 
-int test4 (void)
+void test4 (void)
 {
-  const char * t        = "TEST 4 a corrupted anvl";
   const char * filename = "app/wdata/testanvl/anvl-err";
   void       * fin      = NIL;
   void       * afsm     = NIL;
   void       * anvl     = NIL;
   warc_bool_t  more     = WARC_TRUE;
-
-  fprintf (stdout, "%s>\n", t);
+  warc_u32_t  i      = 1; 
 
   /* open a valid WARC header file */
   fin = fopen (filename, "r");
   unless (fin)
-  return (1);
+   {
+CU_FAIL("ERROR YOU CAN NOT OPEN FILE ");
+
+  return ;}
+else CU_PASS("file ready to read ");
 
 
   do
@@ -165,8 +196,20 @@ int test4 (void)
 
         if (anvl)
           {
-            fprintf (stdout, "ANVL Key: %s\n", WAnvl_getKey (anvl) );
-            fprintf (stdout, "ANVL Value: %s\n", WAnvl_getValue (anvl) );
+            if (i==2)
+         {
+	CU_ASSERT_STRING_EQUAL("text",WAnvl_getKey   (anvl));
+       CU_ASSERT_STRING_EQUAL(" cliq",WAnvl_getValue (anvl));	
+	
+	}
+	if (i==3)
+         {
+	CU_ASSERT_STRING_EQUAL("kloipmllkjj",WAnvl_getKey   (anvl));
+       CU_ASSERT_STRING_EQUAL("nbhjklpmoiuytre",WAnvl_getValue (anvl));		
+	
+	}
+	
+	
 
             destroy (anvl);
           }
@@ -178,40 +221,45 @@ int test4 (void)
       else
         {
           /* error when parsing the WARC header line */
-          fprintf (stderr,  "error in FSM state address %p, at offset %ld in \"%s\"\n",
-                   WFsmANVL_state (afsm), ftell (fin), filename);
+        
+       /* CU_ASSERT_STRING_EQUAL("ipadress",WAnvl_getKey   (anvl));
+         CU_ASSERT_STRING_EQUAL("0.0.0.0",WAnvl_getValue (anvl));	*/	
+	
+        CU_PASS( error in FSM state address 0x804cc00 at offset 117 in "app/wdata/testanvl/anvl-err" );
 
           more = WARC_FALSE;
         }
 
 
       destroy (afsm);
-
+i++;
     }
 
   while (more);
 
   fclose  (fin);
 
-  return 0;
+  return ;
 }
 
 
-int test5 (void)
+void test5 (void)
 {
-  const char * t        = "TEST 5 a valid anvl";
   const char * filename = "app/wdata/testanvl/anvl-2";
   void       * fin      = NIL;
   void       * afsm     = NIL;
   void       * anvl     = NIL;
   warc_bool_t  more     = WARC_TRUE;
-
-  fprintf (stdout, "%s>\n", t);
+warc_u32_t  i      = 1; 
 
   /* open a valid WARC header file */
   fin = fopen (filename, "r");
   unless (fin)
-  return (1);
+  {
+CU_FAIL("ERROR YOU CAN NOT OPEN FILE ");
+
+  return ;}
+else CU_PASS("file ready to read ");
 
   do
     {
@@ -225,9 +273,18 @@ int test5 (void)
 
         if (anvl)
           {
-            fprintf (stdout, "ANVL Key: %s\n",   WAnvl_getKey   (anvl) );
-            fprintf (stdout, "ANVL Value: %s\n", WAnvl_getValue (anvl) );
-
+           if (i==2)
+         {
+	CU_ASSERT_STRING_EQUAL("tool",WAnvl_getKey   (anvl));
+       CU_ASSERT_STRING_EQUAL(" guitar",WAnvl_getValue (anvl));	
+	
+	}
+	if (i==3)
+         {
+	CU_ASSERT_STRING_EQUAL("ipadress",WAnvl_getKey   (anvl));
+       CU_ASSERT_STRING_EQUAL("192.168.4.1",WAnvl_getValue (anvl));		
+	
+	}
             destroy (anvl);
           }
 
@@ -238,16 +295,16 @@ int test5 (void)
       else
         {
           /* error when parsing the WARC header line */
-          fprintf (stderr,
+         CU_FAIL( fprintf (stderr,
                    "error in FSM state address %p, at offset %ld in \"%s\"\n",
-                   WFsmANVL_state (afsm), ftell (fin), filename);
+                   WFsmANVL_state (afsm), ftell (fin), filename));
 
           more = WARC_FALSE;
         }
 
 
       destroy (afsm);
-
+i++;
     }
 
   while (more);
@@ -255,26 +312,27 @@ int test5 (void)
 
   fclose (fin);
 
-  return 0;
+  return ;
 }
 
 
-int test6 (void)
+void test6 (void)
 {
-  const char * t        = "TEST 6";
+  
   const char * filename = "app/wdata/testanvl/anvl-ctlkey.anvl";
   void       * fin      = NIL;
   void       * afsm     = NIL;
   void       * anvl     = NIL;
   warc_bool_t  more     = WARC_TRUE;
 
-  fprintf (stdout, "%s>\n", t);
-
   /* open a valid WARC header file */
   fin = fopen (filename, "r");
   unless (fin)
-  return (1);
+   {
+CU_FAIL("ERROR YOU CAN NOT OPEN FILE ");
 
+  return ;}
+else CU_PASS("file ready to read ");
   do
     {
       /* init ANVL FSM */
@@ -287,8 +345,8 @@ int test6 (void)
 
         if (anvl)
           {
-            fprintf (stdout, "ANVL Key: %s\n",   WAnvl_getKey   (anvl) );
-            fprintf (stdout, "ANVL Value: %s\n", WAnvl_getValue (anvl) );
+          CU_FAIL(  fprintf (stdout, "ANVL Key: %s\n",   WAnvl_getKey   (anvl) ));
+            CU_FAIL(fprintf (stdout, "ANVL Value: %s\n", WAnvl_getValue (anvl) ));
 
             destroy (anvl);
           }
@@ -300,9 +358,7 @@ int test6 (void)
       else
         {
           /* error when parsing the WARC header line */
-          fprintf (stderr,
-                   "error in FSM state address %p, at offset %ld in \"%s\"\n",
-                   WFsmANVL_state (afsm), ftell (fin), filename);
+       CU_PASS(   error in FSM state address 0x804c980 at offset 3 in "app/wdata/testanvl/anvl-ctlkey.anvl");
 
           more = WARC_FALSE;
         }
@@ -317,77 +373,118 @@ int test6 (void)
 
   fclose (fin);
 
-  return 0;
+  return ;
 }
 
 
-int test7 (void)
+void test7 (void)
 {
-  const char * t = "TEST 7";
   void       * a = bless (WAnvl, makeS ("key2"), makeS ("value2") );
 
   assert (a);
-
-  fprintf (stderr, "%s>\n", t);
-
+CU_ASSERT_PTR_NOT_EQUAL(a,NIL);
   if (WAnvl_setKey (a, makeS ("C\x7F") ) )
     {
-      fprintf (stderr, ("Invalid key\n") );
+      CU_PASS(Invalid key);
       destroy (a);
-      return 1;
+      return ;
     }
 
   WAnvl_setValue (a, makeS ("DDDD") );
 
-  fprintf (stdout, "key  : %s\n", WAnvl_getKey   (a) );
-  fprintf (stdout, "value: %s\n", WAnvl_getValue (a) );
+CU_FAIL(  fprintf (stdout, "key  : %s\n", WAnvl_getKey   (a) ));
+  CU_FAIL(fprintf (stdout, "value: %s\n", WAnvl_getValue (a) ));
 
   destroy (a);
 
-  return 0;
+  return ;
 }
 
 
-int test8 (void)
+void test8 (void)
 {
-  const char * t = "TEST 8";
+
   void       * a = bless (WAnvl, makeS ("key2"), makeS ("value2") );
 
   assert (a);
-
-  fprintf (stderr, "%s>\n", t);
-
+CU_ASSERT_PTR_NOT_EQUAL(a,NIL);
   if (WAnvl_setKey (a, makeS ("C\x0Ausing") ) )
     {
-      fprintf (stderr, ("An other invalid key\n") );
+     CU_PASS( An other invalid key);
       destroy (a);
-      return 1;
+      return ;
     }
 
   WAnvl_setValue (a, makeS ("DDDD") );
 
-  fprintf (stdout, "key  : %s\n", WAnvl_getKey   (a) );
-  fprintf (stdout, "value: %s\n", WAnvl_getValue (a) );
+CU_FAIL(  fprintf (stdout, "key  : %s\n", WAnvl_getKey   (a) ));
+ CU_FAIL( fprintf (stdout, "value: %s\n", WAnvl_getValue (a) ));
 
   destroy (a);
 
-  return 0;
+  return ;
 }
 
 
 
 int main (void)
 {
-  int (* tests []) () = { test1, test2, test3, test4,
-                          test5, test6, test7, test8
-                        };
+     CU_pSuite pSuite = NULL; 
 
-  warc_u32_t  i      = 0;
+   /* initialize the CUnit test registry */
+   if (CUE_SUCCESS != CU_initialize_registry())
+      return CU_get_error();
 
-  for (i = 0; i < ARRAY_LEN (tests); ++ i)
-    {
-      tests[i] ();
-    }
+   /* add a suite to the registry */
+   pSuite = CU_add_suite("Suite1", init_suite1, clean_suite1);
+   if (NULL == pSuite) {
+      CU_cleanup_registry();
+      return CU_get_error();
+                        }
 
-  return 0;
+   /* add the tests to the suite */
+
+   if ((NULL == CU_add_test(pSuite, " 1: ", test1)) ||
+       (NULL == CU_add_test(pSuite, " 2: ", test2))||
+       (NULL == CU_add_test(pSuite, " 3: a valid anvl", test3))||
+	(NULL == CU_add_test(pSuite, " 4: a corrupted anvl", test4)))
+      
+   {
+      CU_cleanup_registry();
+      return CU_get_error();
+   } 
+
+   /* add a suite to the registry */
+   pSuite = CU_add_suite("Suite2", init_suite2, clean_suite2);
+   if (NULL == pSuite) {
+      CU_cleanup_registry();
+      return CU_get_error();
+                        }
+
+   /* add the tests to the suite */
+
+   if ((NULL == CU_add_test(pSuite, " 5: a valid anvl", test5)) ||
+       (NULL == CU_add_test(pSuite, " 6:   ", test6))||
+ (NULL == CU_add_test(pSuite, " 7: Invalid key ", test7))||
+(NULL == CU_add_test(pSuite, " 8: n other invalid key ", test8)))
+ 
+         {
+      CU_cleanup_registry();
+      return CU_get_error();
+          }
+
+switch (menu()) 
+  {
+        case 1: {CU_console_run_tests();} 
+	case 2:  {CU_basic_run_tests();}
+        case 3:{
+                CU_set_output_filename("./utest/outputs/anvl");
+    		CU_set_output_filename("./utest/outputs/anvl" );
+  		CU_automated_run_tests();
+   		CU_list_tests_to_file();
+           	}
+     
+   }
+   CU_cleanup_registry();
+   return CU_get_error();
 }

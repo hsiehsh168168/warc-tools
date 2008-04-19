@@ -27,15 +27,23 @@
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
-
+#include <Basic.h>
+#include <Console.h>
+#include <Automated.h>
+#include <CUnit.h>
+#include <CUError.h>
+#include <TestDB.h>
+#include <TestRun.h>
+#include <menu.h>
 #include <warc.h>
 
 #define makeS(s) ((warc_u8_t *) s), w_strlen((warc_u8_t *) (s))
-
-
-int test1 (void)
+int init_suite1(void) { return 0; }
+int clean_suite1(void) { return 0; }
+int init_suite2(void) { return 0; }
+int clean_suite2(void) { return 0; }
+void test1 (void)
 {
-  const char * t     = "TEST 1";
   void       * g     = NIL;
   const warc_u8_t * flags = (unsigned char *) "abc:";
   const char * _av[] = { "test1", "-a", "-b" };
@@ -43,59 +51,65 @@ int test1 (void)
   const char ** av   = _av;
   warc_i32_t   c;
   warc_i32_t   i;
-
-  fprintf (stdout, "%s>\n", t);
-
+  warc_i32_t   j;
 
   g = bless (WGetOpt, makeS (flags) );
   assert (g);
-
-  fprintf (stdout, "flags : %s\n", flags);
-  fprintf (stdout, "params: ");
-
+  CU_ASSERT_PTR_NOT_NULL(g);
+    CU_ASSERT_STRING_EQUAL("abc:",flags);
+ 
+  j=1;
   for (i = 0; i < ac; ++ i)
     {
-      fprintf (stdout, "%s ", av [i]);
+	if(j==1)  CU_ASSERT_STRING_EQUAL("test1",av[i]);
+	if(j==2)  CU_ASSERT_STRING_EQUAL("-a",av[i]);
+	if(j==3)  CU_ASSERT_STRING_EQUAL("-b",av[i]);  
+   	 j++;    
+	/*fprintf (stdout, "%s ", av [i]);*/
     }
 
-  fprintf (stdout, "\n");
-
   /* print flags */
-
+  j=1;
   while ( (c = WGetOpt_parse (g, ac, av) ) != -1)
     {
       if (c == '?') /* illegal option or missing argument */
         {
           destroy (g);
-          return (1);
+        return;
         }
-
-      fprintf (stdout, "-%c %s ", c,
-
-               w_index (flags, c) [1] == ':' ? WGetOpt_argument (g) : "");
-    }
+      if (j==1)
+	{  
+           CU_ASSERT_PTR_NULL((const char *)WGetOpt_argument (g));
+           CU_ASSERT_EQUAL('a',c);
+ 	}  
+	if (j==2)
+	{
+           CU_ASSERT_PTR_NULL((const char *)WGetOpt_argument (g));
+           CU_ASSERT_EQUAL('b',c);
+ 	}  
+  
+	j++;   
+}
 
   /* end of flags; print the rest of options. */
-  fprintf (stdout, "-- ");
 
   i = WGetOpt_indice (g);
 
   if (i < ac)
     {
       for (; i < ac; ++ i)
-        fprintf (stdout, "%s ", * (av + i) );
+	CU_FAIL(fprintf (stdout, "%s dans for ", * (av + i) ));
     }
-
-  fprintf (stdout, "\n");
+   
 
   destroy (g);
 
-  return (0);
+return;
 }
 
-int test2 (void)
+void test2 (void)
 {
-  const char * t     = "TEST 2";
+  
   void       * g     = NIL;
   const warc_u8_t * flags = (unsigned char *) "a:";
   const char * _av[] = { "test2", "-a", "15" };
@@ -103,60 +117,63 @@ int test2 (void)
   const char ** av   = _av;
   warc_i32_t   c;
   warc_i32_t   i;
+  warc_i32_t   j;
 
-  fprintf (stdout, "%s>\n", t);
 
 
   g = bless (WGetOpt, makeS (flags) );
   assert (g);
-
-  fprintf (stdout, "flags : %s\n", flags);
-  fprintf (stdout, "params: ");
-
+  CU_ASSERT_PTR_NOT_NULL(g);
+ 
+  j=1;
   for (i = 0; i < ac; ++ i)
     {
-      fprintf (stdout, "%s ", av [i]);
+     /* fprintf (stdout, "%s ", av [i]);*/
+	if(j==1)  CU_ASSERT_STRING_EQUAL("test2",av[i]);
+	if(j==2)  CU_ASSERT_STRING_EQUAL("-a",av[i]);
+	if(j==3)  CU_ASSERT_STRING_EQUAL("15",av[i]);  
+   	 j++;
     }
 
-  fprintf (stdout, "\n");
-
+ 
   /* print flags */
-
+  j=1;
   while ( (c = WGetOpt_parse (g, ac, av) ) != -1)
     {
       if (c == '?') /* illegal option or missing argument */
         {
           destroy (g);
-          return (1);
+        return;
         }
 
-      fprintf (stdout, "-%c %s ", c,
-
-               w_index (flags, c) [1] == ':' ? WGetOpt_argument (g) : "");
+      if (j==1)
+	{  /*fprintf (stdout, " pointeur ====== %s ",(const char *)WGetOpt_argument (g) );*/
+           CU_ASSERT_PTR_EQUAL("15",(const char *)WGetOpt_argument (g));
+           CU_ASSERT_EQUAL('a',c);
+ 	}  
+	
+	j++; 
     }
-
-  /* end of flags; print the rest of options. */
-  fprintf (stdout, "-- ");
 
   i = WGetOpt_indice (g);
 
   if (i < ac)
     {
       for (; i < ac; ++ i)
-        fprintf (stdout, "%s ", * (av + i) );
+        CU_FAIL(fprintf (stdout, " %s ", * (av + i) ));
     }
 
-  fprintf (stdout, "\n");
+ 
 
   destroy (g);
 
-  return (0);
+return;
 }
 
 
-int test3 (void)
+void test3 (void)
 {
-  const char * t     = "TEST 3";
+ 
   void       * g     = NIL;
   const warc_u8_t * flags = (unsigned char *) "ab:";
   const char * _av[] = { "test3", "-a", "15", "-b", "true" };
@@ -164,60 +181,89 @@ int test3 (void)
   const char ** av   = _av;
   warc_i32_t   c;
   warc_i32_t   i;
-
-  fprintf (stdout, "%s>\n", t);
+  warc_i32_t   j;
+ 
 
 
   g = bless (WGetOpt, makeS (flags) );
   assert (g);
+  CU_ASSERT_PTR_NOT_NULL(g);
 
-  fprintf (stdout, "flags : %s\n", flags);
-  fprintf (stdout, "params: ");
-
+j=1;
   for (i = 0; i < ac; ++ i)
     {
-      fprintf (stdout, "%s ", av [i]);
+     /* fprintf (stdout, "%s ", av [i]);*/
+	if(j==1)  CU_ASSERT_STRING_EQUAL("test3",av[i]);
+	if(j==2)  CU_ASSERT_STRING_EQUAL("-a",av[i]);
+	if(j==3)  CU_ASSERT_STRING_EQUAL("15",av[i]); 
+	if(j==4)  CU_ASSERT_STRING_EQUAL("-b",av[i]);
+	if(j==5)  CU_ASSERT_STRING_EQUAL("true",av[i]);   
+   	 j++;
     }
 
-  fprintf (stdout, "\n");
+
 
   /* print flags */
-
+  j=1;
   while ( (c = WGetOpt_parse (g, ac, av) ) != -1)
     {
       if (c == '?') /* illegal option or missing argument */
         {
           destroy (g);
-          return (1);
+        return;
         }
+  	if (j==1)
+	{  /*fprintf (stdout, " pointeur ====== %s ",(const char *)WGetOpt_argument (g) );*/
+           CU_ASSERT_PTR_NULL((const char *)WGetOpt_argument (g));
+           CU_ASSERT_EQUAL('a',c);
+ 	}  
+	
+	j++; 
 
-      fprintf (stdout, "-%c %s ", c,
+      /*fprintf (stdout, "dans whilec== -%c s==  %s ", c,
 
-               w_index (flags, c) [1] == ':' ? WGetOpt_argument (g) : "");
+               w_index (flags, c) [1] == ':' ? WGetOpt_argument (g) : "");*/
     }
 
   /* end of flags; print the rest of options. */
-  fprintf (stdout, "-- ");
+/*  fprintf (stdout, "-- ");*/
 
   i = WGetOpt_indice (g);
-
+   j=1;
   if (i < ac)
     {
       for (; i < ac; ++ i)
-        fprintf (stdout, "%s ", * (av + i) );
+        {
+       /* fprintf (stdout, "dans for %s ", * (av + i) );*/
+         if (j==1)
+	{  /*fprintf (stdout, " pointeur ====== %s ",(const char *)WGetOpt_argument (g) );*/
+           CU_ASSERT_PTR_EQUAL("15",* (av + i));
+ 	}  
+       if (j==2)
+	{  /*fprintf (stdout, " pointeur ====== %s ",(const char *)WGetOpt_argument (g) );*/
+           CU_ASSERT_PTR_EQUAL("-b",* (av + i));
+ 	}  
+	if (j==3)
+	{  /*fprintf (stdout, " pointeur ====== %s ",(const char *)WGetOpt_argument (g) );*/
+           CU_ASSERT_PTR_EQUAL("true",* (av + i));
+ 	}  
+	
+	
+	j++; 
+        }
     }
 
-  fprintf (stdout, "\n");
+
 
   destroy (g);
 
-  return (0);
+return;
 }
 
 
-int test4 (void)
+void test4 (void)
 {
-  const char * t     = "TEST 4";
+
   void       * g     = NIL;
   const warc_u8_t * flags = (unsigned char *) "ab";
   const char * _av[] = { "test4", "-ab" };
@@ -225,59 +271,65 @@ int test4 (void)
   const char ** av   = _av;
   warc_i32_t   c;
   warc_i32_t   i;
+  warc_i32_t   j;
 
-  fprintf (stdout, "%s>\n", t);
 
 
   g = bless (WGetOpt, makeS (flags) );
   assert (g);
-
-  fprintf (stdout, "flags : %s\n", flags);
-  fprintf (stdout, "params: ");
-
+  CU_ASSERT_PTR_NOT_NULL(g);
+j=1;
   for (i = 0; i < ac; ++ i)
     {
-      fprintf (stdout, "%s ", av [i]);
+      /*fprintf (stdout, "%s ", av [i]);*/
+	if(j==1)  CU_ASSERT_STRING_EQUAL("test4",av[i]);
+	if(j==2)  CU_ASSERT_STRING_EQUAL("-ab",av[i]); 
+   	 j++;
     }
 
-  fprintf (stdout, "\n");
 
   /* print flags */
-
+  j=1;
   while ( (c = WGetOpt_parse (g, ac, av) ) != -1)
     {
       if (c == '?') /* illegal option or missing argument */
         {
           destroy (g);
-          return (1);
+        return;
         }
 
-      fprintf (stdout, "-%c %s ", c,
-
-               w_index (flags, c) [1] == ':' ? WGetOpt_argument (g) : "");
+     if (j==1)
+	{  
+           CU_ASSERT_PTR_NULL((const char *)WGetOpt_argument (g));
+           CU_ASSERT_EQUAL('a',c);
+ 	}  
+	if (j==2)
+	{
+           CU_ASSERT_PTR_NULL((const char *)WGetOpt_argument (g));
+           CU_ASSERT_EQUAL('b',c);
+ 	}  
+  
+	j++;   
     }
 
   /* end of flags; print the rest of options. */
-  fprintf (stdout, "-- ");
+ /* fprintf (stdout, "-- ");*/
 
   i = WGetOpt_indice (g);
 
   if (i < ac)
     {
       for (; i < ac; ++ i)
-        fprintf (stdout, "%s ", * (av + i) );
+       CU_FAIL( fprintf (stdout, "dans for %s ", * (av + i) ));
     }
-
-  fprintf (stdout, "\n");
 
   destroy (g);
 
-  return (0);
+return;
 }
 
-int test5 (void)
+void test5 (void)
 {
-  const char * t     = "TEST 5";
   void       * g     = NIL;
   const warc_u8_t * flags = (unsigned char *) "ab:";
   const char * _av[] = { "test5", "-ab" };
@@ -285,59 +337,64 @@ int test5 (void)
   const char ** av   = _av;
   warc_i32_t   c;
   warc_i32_t   i;
-
-  fprintf (stdout, "%s>\n", t);
-
+  warc_i32_t   j;
+   fprintf (stdout, "/////////////// test5 /////////////////////////\n");
 
   g = bless (WGetOpt, makeS (flags) );
   assert (g);
-
-  fprintf (stdout, "flags : %s\n", flags);
-  fprintf (stdout, "params: ");
-
+  CU_ASSERT_PTR_NOT_NULL(g);
+j=1;
   for (i = 0; i < ac; ++ i)
     {
-      fprintf (stdout, "%s ", av [i]);
+     /* fprintf (stdout, "%s ", av [i]);*/
+	if(j==1)  CU_ASSERT_STRING_EQUAL("test5",av[i]);
+	if(j==2)  CU_ASSERT_STRING_EQUAL("-ab",av[i]); 
+   	 j++;
     }
 
-  fprintf (stdout, "\n");
-
+  
   /* print flags */
-
+   j =1;
   while ( (c = WGetOpt_parse (g, ac, av) ) != -1)
     {
       if (c == '?') /* illegal option or missing argument */
         {
           destroy (g);
-          return (1);
+        return;
         }
+	 if (j==1)
+	{  
+           CU_ASSERT_PTR_NULL((const char *)WGetOpt_argument (g));
+           CU_ASSERT_EQUAL('a',c);
+ 	}  
+  
+        j++;
+      /*fprintf (stdout, "dans while C==-%c S == %s ", c,
 
-      fprintf (stdout, "-%c %s ", c,
-
-               w_index (flags, c) [1] == ':' ? WGetOpt_argument (g) : "");
+               w_index (flags, c) [1] == ':' ? WGetOpt_argument (g) : "");*/
     }
 
   /* end of flags; print the rest of options. */
-  fprintf (stdout, "-- ");
+
 
   i = WGetOpt_indice (g);
 
   if (i < ac)
     {
       for (; i < ac; ++ i)
-        fprintf (stdout, "%s ", * (av + i) );
+       CU_FAIL( fprintf (stdout, " dans for %s ", * (av + i) ));
     }
 
   fprintf (stdout, "\n");
 
   destroy (g);
 
-  return (0);
+return;
 }
 
-int test6 (void)
+void test6 (void)
 {
-  const char * t     = "TEST 6";
+  
   void       * g     = NIL;
   const warc_u8_t * flags = (unsigned char *) "ab";
   const char * _av[] = { "test6", "-a", "--b" };
@@ -345,67 +402,114 @@ int test6 (void)
   const char ** av   = _av;
   warc_i32_t   c;
   warc_i32_t   i;
-
-  fprintf (stdout, "%s>\n", t);
-
+  warc_i32_t   j;
+  fprintf (stdout, "///////////// TEST 6 /////////////////\n");
 
   g = bless (WGetOpt, makeS (flags) );
   assert (g);
-
-  fprintf (stdout, "flags : %s\n", flags);
-  fprintf (stdout, "params: ");
-
+  CU_ASSERT_PTR_NOT_NULL(g);
+   j=1;
   for (i = 0; i < ac; ++ i)
     {
-      fprintf (stdout, "%s ", av [i]);
+     /* fprintf (stdout, "%s ", av [i]);*/
+	if(j==1)  CU_ASSERT_STRING_EQUAL("test6",av[i]);
+	if(j==2)  CU_ASSERT_STRING_EQUAL("-a",av[i]);
+	if(j==3)  CU_ASSERT_STRING_EQUAL("--b",av[i]);  
+   	 j++;
     }
-
-  fprintf (stdout, "\n");
-
   /* print flags */
-
+  j = 1;
   while ( (c = WGetOpt_parse (g, ac, av) ) != -1)
     {
       if (c == '?') /* illegal option or missing argument */
         {
           destroy (g);
-          return (1);
+        return;
         }
 
-      fprintf (stdout, "-%c %s ", c,
-
-               w_index (flags, c) [1] == ':' ? WGetOpt_argument (g) : "");
+       if (j==1)
+	{  
+           CU_ASSERT_PTR_NULL((const char *)WGetOpt_argument (g));
+           CU_ASSERT_EQUAL('a',c);
+ 	}  
+       
+        j++;
     }
 
   /* end of flags; print the rest of options. */
-  fprintf (stdout, "-- ");
+ 
 
   i = WGetOpt_indice (g);
 
   if (i < ac)
     {
       for (; i < ac; ++ i)
-        fprintf (stdout, "%s ", * (av + i) );
+       CU_FAIL( fprintf (stdout, "dans for %s ", * (av + i) ));
     }
-
-  fprintf (stdout, "\n");
 
   destroy (g);
 
-  return (0);
+return;
 }
 
 
 int main (void)
-{
-  int (* tests []) () = { test1, test2, test3, test4, test5, test6 };
+{ 
+ CU_pSuite pSuite = NULL;   
+   /* initialize the CUnit test registry */
+   if (CUE_SUCCESS != CU_initialize_registry())
+      return CU_get_error();
 
-  warc_u32_t  i      = 0;
+   /* add a suite to the registry */
+   pSuite = CU_add_suite("Suite1", init_suite1, clean_suite1);
+   if (NULL == pSuite) {
+      CU_cleanup_registry();
+      return CU_get_error();
+                        }
 
-  for (i = 0; i < ARRAY_LEN (tests); ++ i)
-    {
-      tests [i] ();
-    }
+   /* add the tests to the suite */
 
-  return 0;
+   if ((NULL == CU_add_test(pSuite, "TEST 1: ", test1)) ||
+       (NULL == CU_add_test(pSuite, "TEST 2:  ", test2))||
+       (NULL == CU_add_test(pSuite, "TEST 3:", test3)))
+      
+   {
+      CU_cleanup_registry();
+      return CU_get_error();
+   } 
+
+   /* add a suite to the registry */
+   pSuite = CU_add_suite("Suite2", init_suite2, clean_suite2);
+   if (NULL == pSuite) {
+      CU_cleanup_registry();
+      return CU_get_error();
+                        }
+
+   /* add the tests to the suite */
+
+   if ((NULL == CU_add_test(pSuite, "TEST 4: ", test4)) ||
+       (NULL == CU_add_test(pSuite, "TEST 5:  ", test5))||
+       (NULL == CU_add_test(pSuite, "TEST 6: ", test6)))   
+         {
+      CU_cleanup_registry();
+      return CU_get_error();
+          }
+
+
+
+switch (menu()) 
+  {
+        case 1: {CU_console_run_tests();} 
+	case 2:  {CU_basic_run_tests();}
+        case 3:{
+                CU_set_output_filename("./utest/outputs/getopt");
+    		CU_set_output_filename("./utest/outputs/getopt" );
+  		CU_automated_run_tests();
+   		CU_list_tests_to_file();
+           	}
+     
+   }
+   CU_cleanup_registry();
+   return CU_get_error();
+  
 }

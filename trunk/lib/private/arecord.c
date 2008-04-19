@@ -626,6 +626,7 @@ WIPUBLIC warc_bool_t ARecord_transferContent (void * _self, void * wrec,
       return  (WARC_TRUE);
     }
 
+
   objatfile = bless (WTempFile, WString_getText(WORKING_DIR), WString_getLength(WORKING_DIR));
   assert (objatfile);
 

@@ -48,7 +48,8 @@ extern "C"
                   WARC_FILE_COMPRESSED_GZIP_DEFAULT_COMPRESSION,
                   WARC_FILE_COMPRESSED_GZIP_NO_COMPRESSION,
                   WARC_FILE_COMPRESSED_GZIP_BEST_SPEED,
-                  WARC_FILE_COMPRESSED_GZIP_BEST_COMPRESSION
+                  WARC_FILE_COMPRESSED_GZIP_BEST_COMPRESSION,
+                  WARC_FILE_DETECT_COMPRESSION
                  } wfile_comp_t;
 
     typedef enum {WARC_FILE_INVALID = 0,
