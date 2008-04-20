@@ -2144,7 +2144,13 @@ request, esource, responce and revisit", test2))||
 switch (menu()) 
   {
         case 1: {CU_console_run_tests();break;} 
-	case 2:  {CU_basic_run_tests();break;}
+	case 2:  {
+                       
+                           case 21: {CU_basic_set_mode(CU_BRM_NORMAL); CU_basic_run_tests(); break;}
+                            case 22:{CU_basic_set_mode(CU_BRM_VERBOSE ); CU_basic_run_tests(); break;}
+                             case 23:{CU_basic_set_mode(CU_BRM_SILENT); CU_basic_run_tests(); break;}  
+
+                              }
         case 3:{
                 CU_set_output_filename("./utest/outputs/record");
     		CU_set_output_filename("./utest/outputs/record" );
