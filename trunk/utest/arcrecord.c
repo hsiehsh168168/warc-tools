@@ -630,14 +630,14 @@ wdir = bless (WString, ".", 1);
 
 switch (menu()) 
   {
-        case 1: {CU_console_run_tests();} 
-	case 2:  {CU_basic_run_tests();}
+        case 1: {CU_console_run_tests();break;} 
+	case 2:  {CU_basic_run_tests();break;}
         case 3:{
                 CU_set_output_filename("./utest/outputs/arcrecord");
     		CU_set_output_filename("./utest/outputs/arcrecord" );
   		CU_automated_run_tests();
    		CU_list_tests_to_file();
-           	}
+           	break;}
      
    }
    CU_cleanup_registry();

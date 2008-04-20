@@ -304,6 +304,11 @@ o Add the following Apache directives to the configuration file:
 	Allow from 127.0.0.1
 </Location>
 
+o You can now test mod_warc and get data from server by typing the following url
+
+  http://localhost:9898/(url in rest format).
+
+  Url in rest format is described later in this document.
 
 
 * Lighttpd "mod_cgi":
@@ -412,21 +417,71 @@ o To use warc-tools as "FCGI", uncomment the following in your "lighttpd.conf":
        "bin-path" => "/var/www/warc.fcgi"
      ))
 
-o Start Lighttpd and try it WARC-tools:
+o Start/Stop Lighttpd with:
 
    # /usr/local/sbin/lighttpd -f /usr/local/etc/lighttpd.conf
+   # kill `cat /var/run/lighttpd.pid`
 
-   Point your browser to:
+   If you have installed Lighttpd as a service "/etc/init.d/lighttpd",
+   you can start/stop it with:
+
+   # /etc/init.d/lighttpd start
+   # /etc/init.d/lighttpd stop
+
+ o Point your browser to:
 
    CFG:  http://localhost:3000/warc.cgi/(url in rest format).
    FCGI: http://localhost:3000/warc.fcgi/(url in rest format).
 
-Note: to stop Lighttpd, type:
+* Supported REST queries format:
 
-   # kill `cat /var/run/lighttpd.pid`
+  To retrieve information from a remote WARC file, we use the following 
+  REST queries:
+
+  (1) http://host:port/WARC/0.17/req_nat/comp_mod/offset/fname
+
+   where:
+
+   -  host and port: are the remote server host name (or IP address) 
+      and port number
+
+   -  WARC and 0.17: are constants which reference the WARC specification
+
+   -  req_nat: is a parameter with 3 possible values:
+       -> file: this tells the WARC server to return a WARC file starting 
+          from a certain offset (offset equals to 0 means returns the 
+          entire WARC file).
+       -> record: this tell the WARC server to return a specific WARC record at
+          a particular offset. The offset must corresponds to a valid 
+          offset in the WARC file.
+       -> list: this tells the WARC server to dump all records headers 
+          starting from an offset.
+
+   -  comp_mod: a parameter with 2 possible values:
+       -> uncompressed : indicates that the WARC file is not compressed.
+       -> gzip : indicates that the WARC file is GZIP compressed.
+
+   -  offset: a positive integer position in a WARC file (previously described)
+
+   -  fname: a WARC pathname file name on the server.
+
+  (2) http://host:port/WARC/0.17/filter/comp_mod/offset/fileld_to_filter/value_filter/fname
+
+   where:
+
+   - filter_field: is the name of field on which you want to filter. Valid 
+      values are:
+     -> uri
+     -> contenttype
+     -> recordtype
+ 
+  - filter_string: a string to filter on
 
 
+       
 
+        
+      
 
 
 

@@ -55,18 +55,18 @@ int clean_suite5(void) {return 0; }
 warc_bool_t callback (void * env, const char* buff, const warc_u32_t size)
 {
   UNUSED (env);
-
+UNUSED (buff);
   if (size)
     {
-      warc_u32_t  i = 0;
+    /*  warc_u32_t  i = 0;*/
 
-      while (i < size)
+    /*  while (i < size)
         {
           fprintf(stdout, "%c", buff[i]);
           ++i;
         }
 
-      fprintf(stdout, "\n");
+      fprintf(stdout, "\n");*/
     }
 
   return (WARC_TRUE); /* return WARC_FALSE to stop extraction */
@@ -82,7 +82,7 @@ void test1 (void)
   void * r = bless (WRecord);
   void * w = bless (WFile, "./awanvl.warc", 600 * 1024 * 1024,  WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED, ".");
   void * u = NIL;
-fprintf(stdout,"////////////////////////////test 1 /////////////////////////////////\n");
+
   
 
 
@@ -366,7 +366,7 @@ void test3 (void)
   void * r = bless (WRecord);
   void * w = bless (WFile, "./awarcmlp.warc", 600 * 1024 * 1024,  WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED, ".");
   void * u = NIL;
-fprintf(stdout,"////////////////////////////test 3 /////////////////////////////////\n");
+
  
 
 
@@ -636,7 +636,7 @@ void test4 (void)
   void * r = bless (WRecord);
   void * w = bless (WFile, "./awarfdt.warc", 600 * 1024 * 1024, WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED, ".");
   void * u = NIL;
-fprintf(stdout,"////////////////////////////test 4 /////////////////////////////////\n");
+
  
 
   if (WRecord_setTargetUri (r, makeS ("test://anunknownplace") ) )
@@ -1035,7 +1035,6 @@ void test5 (void)
   void * r = bless (WRecord);
   void * w = bless (WFile, "./awarcfdt.warc", 600 * 1024 * 1024, WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED, ".");
   void * u = NIL;
-fprintf(stdout,"////////////////////////////test 5 /////////////////////////////////\n");
 
   if (WRecord_setTargetUri (r, makeS ("test://anunknownplace") ) )
     {
@@ -1433,7 +1432,7 @@ void test6 (void)
   void * r = bless (WRecord);
   void * w = bless (WFile, "./awarfldt.warc", 600 * 1024 * 1024, WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED, ".");
   void * u = NIL;
-fprintf(stdout,"////////////////////////////test 6 /////////////////////////////////\n");
+
 
 
   if (WRecord_setTargetUri (r, makeS ("test://anunknownplace") ) )
@@ -1639,8 +1638,7 @@ void test7 (void)
   void * r = bless (WRecord);
   void * w = bless (WFile, "./awarfldt.warc", 600 * 1024 * 1024, WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED, ".");
   void * u = NIL;
-fprintf(stdout,"////////////////////////////test 7 /////////////////////////////////\n");
-  
+
 
   if (WRecord_setTargetUri (r, makeS ("test://anunknownplace") ) )
     {
@@ -2050,7 +2048,7 @@ void test9 (void)
   void * r = bless (WRecord);
   void * w = bless (WFile, "./awarfldt.warc", 600 * 1024 * 1024, WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED, ".");
   void * u = NIL;
-fprintf(stdout,"////////////////////////////test 9 /////////////////////////////////\n");
+
  
 
   if (WRecord_setTargetUri (r, makeS ("test://anunknownplace") ) )
@@ -2256,7 +2254,7 @@ void test10 (void)
   void * r = bless (WRecord);
   void * w = bless (WFile, "./awarfldt.warc", 600 * 1024 * 1024, WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED, ".");
   void * u = NIL;
-fprintf(stdout,"////////////////////////////test 10 /////////////////////////////////\n");
+
  
 
   if (WRecord_setTargetUri (r, makeS ("test://anunknownplace") ) )
@@ -2462,7 +2460,7 @@ void test11 (void)
   void * r = bless (WRecord);
   void * w = bless (WFile, "./awarfldt.warc", 600 * 1024 * 1024, WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED, ".");
   void * u = NIL;
-fprintf(stdout,"////////////////////////////test 11 /////////////////////////////////\n");
+
  
   if (WRecord_setTargetUri (r, makeS ("test://anunknownplace") ) )
     {
@@ -2668,7 +2666,7 @@ void test12 (void)
   void * r = bless (WRecord);
   void * w = bless (WFile, "./awarfldt.warc", 600 * 1024 * 1024, WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED, ".");
   void * u = NIL;
-fprintf(stdout,"////////////////////////////test 12 /////////////////////////////////\n");
+
   
 
   if (WRecord_setTargetUri (r, makeS ("test://anunknownplace") ) )
@@ -2874,7 +2872,7 @@ void test13 (void)
   void * r = bless (WRecord);
   void * w = bless (WFile, "./awarfldt.warc", 600 * 1024 * 1024, WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED, ".");
   void * u = NIL;
-fprintf(stdout,"////////////////////////////test 13 /////////////////////////////////\n");
+
   
 
   if (WRecord_setTargetUri (r, makeS ("test://anunknownplace") ) )
@@ -3081,7 +3079,7 @@ void test14 (void)
   void * r = NIL;
   void * w = NIL;
   void * u = NIL;
-fprintf(stdout,"////////////////////////////test 14 /////////////////////////////////\n");
+
   
 
   r = bless (WRecord);
@@ -3223,7 +3221,7 @@ void test15 (void)
   void * r = NIL;
   void * w = NIL;
   void * u = NIL;
-fprintf(stdout,"////////////////////////////test 15 /////////////////////////////////\n");
+
 
 
   r = bless (WRecord);
@@ -3483,7 +3481,7 @@ void test16 (void)
   void * w =  NIL;  /*warc file object */
   void * r = NIL;  /*to recover records */
   char  env[20];
-fprintf(stdout,"////////////////////////////test 16 /////////////////////////////////\n");
+
   
 
   w = bless (WFile, "./awanvl.warc", 600 * 1024 * 1024,
@@ -3564,7 +3562,7 @@ void test17 (void)
   void * w =  NIL;  /*warc file object */
   void * r = NIL;  /*to recover records */
  warc_u32_t  i      = 1;
-fprintf(stdout,"////////////////////////////test 17 /////////////////////////////////\n");  
+
  
 
   w = bless (WFile, "./awarcmlp.warc", 600 * 1024 * 1024,
@@ -3757,7 +3755,6 @@ void test18 (void)
   void * r = NIL;  /*to recover records */
   char  env[20]; 
 warc_u32_t  i      = 1;
-fprintf(stdout,"////////////////////////////test 18 /////////////////////////////////\n");
 
 
   w = bless (WFile, "./2cwarc.warc.gz", 600 * 1024 * 1024,
@@ -4350,14 +4347,14 @@ int main (void)
 
 switch (menu()) 
   {
-        case 1: {CU_console_run_tests();} 
-	case 2:  {CU_basic_run_tests();}
+        case 1: {CU_console_run_tests(); break;} 
+	case 2:  {CU_basic_run_tests();break;}
         case 3:{
                 CU_set_output_filename("./utest/outputs/file");
     		CU_set_output_filename("./utest/outputs/file" );
   		CU_automated_run_tests();
    		CU_list_tests_to_file();
-           	}
+           	break;}
      
    }
    CU_cleanup_registry();

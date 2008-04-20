@@ -56,7 +56,7 @@ int main (int argc, const char ** argv)
   void           * r       = NIL;  /* to recover records */
   warc_u32_t       ret     = 0;
   warc_i32_t       c       = 0;
-  warc_u8_t      * flags   = (warc_u8_t *) "cvf:t:";
+  warc_u8_t      * flags   = (warc_u8_t *) "vf:t:";
   char           * fname   = NIL;
   char           * wdir    = ".";
   wfile_comp_t     cmode   = WARC_FILE_DETECT_COMPRESSION;
@@ -65,7 +65,7 @@ int main (int argc, const char ** argv)
   if (argc < 3 || argc > 7)
     {
       fprintf (stderr, "Check WARC file consistency\n");
-      fprintf (stderr, "Usage: %s -f <file.warc> [-c] [-v] [-t <working_dir>]\n", argv [0]);
+      fprintf (stderr, "Usage: %s -f <file.warc> [-v] [-t <working_dir>]\n", argv [0]);
       fprintf (stderr, "\t-f    : valid WARC file name\n");
       fprintf (stderr, "\t[-v]  : verbose mode (default no)\n");
       fprintf (stderr, "\t[-t]  : temporary working directory (default \".\")\n");

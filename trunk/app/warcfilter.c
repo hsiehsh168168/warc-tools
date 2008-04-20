@@ -63,7 +63,7 @@ int main (int argc, const char ** argv)
   void            * w        = NIL; /* warc file object */
   void            * r        = NIL; /* to recover records */
   const warc_u8_t * string   = NIL;
-  warc_u8_t       * flags    = uS ("vcf:u:m:r:t:");
+  warc_u8_t       * flags    = uS ("vf:u:m:r:t:");
   char            * fname    = NIL;
   char            * wdir     = ".";
   char            * uri      = NIL;
@@ -78,7 +78,7 @@ int main (int argc, const char ** argv)
   if (argc < 5 || argc > 13)
     {
       fprintf (stderr, "Filter WARC records based on MIME, URI and record type\n");
-      fprintf (stderr, "Usage: %s -f <file.warc> [-c] [-u <uri>] [-m <mime>] [-r <rtype>] [-v] [-t <working_dir>]\n", argv [0]);
+      fprintf (stderr, "Usage: %s -f <file.warc> [-u <uri>] [-m <mime>] [-r <rtype>] [-v] [-t <working_dir>]\n", argv [0]);
       fprintf (stderr, "\t-f    : valid WARC file name\n");
       fprintf (stderr, "\t[-u]  : compare with URI\n");
       fprintf (stderr, "\t[-m]  : compare with MIME\n");

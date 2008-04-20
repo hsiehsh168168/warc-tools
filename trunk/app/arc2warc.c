@@ -101,10 +101,10 @@ int main (int argc, const char ** argv)
   void           * w        = NIL; /* a WARC file object */
   void           * u        = NIL; /* a UUID object */
   char           * aname    = NIL;
-  afile_comp_t     amode    = ARC_FILE_UNCOMPRESSED;
+  afile_comp_t     amode    = ARC_FILE_DETECT_COMPRESSION;
   warc_bool_t      b        = WARC_FALSE;
   warc_i32_t       c        = 0;
-  warc_u8_t      * flags    = uS ("bca:f:t:");
+  warc_u8_t      * flags    = uS ("ca:f:t:");
   char           * fname    = NIL;
   char           * wdir     = ".";
   wfile_comp_t     cmode    = WARC_FILE_UNCOMPRESSED;
@@ -113,7 +113,7 @@ int main (int argc, const char ** argv)
   if (argc < 5 || argc > 9)
     {
       fprintf (stderr, "ARC to WARC convertor\n");
-      fprintf (stderr, "Usage: %s -a <file.arc> [-b] -f <file.warc> [-c] [-t <working_dir>]\n",
+      fprintf (stderr, "Usage: %s -a <file.arc> -f <file.warc> [-c] [-t <working_dir>]\n",
                argv [0]);
       fprintf (stderr, "\t-a    : valid ARC file name\n");
       fprintf (stderr, "\t-f    : valid WARC file name\n");
