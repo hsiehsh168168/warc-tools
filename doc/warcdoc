@@ -6,14 +6,14 @@
 DOXYFILE_ENCODING      = UTF-8
 PROJECT_NAME           = libwarc
 PROJECT_NUMBER         = 0.9
-OUTPUT_DIRECTORY       = /home/kamel/warc-tools-experimental/doc/
+OUTPUT_DIRECTORY       = /home/kamel/warc-06-04-2008/warc-tools-0.17/doc/
 CREATE_SUBDIRS         = NO
 OUTPUT_LANGUAGE        = English
 BRIEF_MEMBER_DESC      = YES
 REPEAT_BRIEF           = YES
-ABBREVIATE_BRIEF       = "The $name class   " \
-                         "The $name widget   " \
-                         "The $name file   " \
+ABBREVIATE_BRIEF       = "The $name class    " \
+                         "The $name widget    " \
+                         "The $name file    " \
                          is \
                          provides \
                          specifies \
@@ -80,12 +80,12 @@ WARNINGS               = YES
 WARN_IF_UNDOCUMENTED   = YES
 WARN_IF_DOC_ERROR      = YES
 WARN_NO_PARAMDOC       = NO
-WARN_FORMAT            = "$file:$line: $text   "
+WARN_FORMAT            = "$file:$line: $text    "
 WARN_LOGFILE           = 
 #---------------------------------------------------------------------------
 # configuration options related to the input files
 #---------------------------------------------------------------------------
-INPUT                  = /home/kamel/warc-tools-experimental/lib/private/
+INPUT                  = /home/kamel/warc-06-04-2008/warc-tools-0.17/lib/private/
 INPUT_ENCODING         = UTF-8
 FILE_PATTERNS          = *.c \
                          *.cc \

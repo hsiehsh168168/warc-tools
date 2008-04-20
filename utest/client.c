@@ -48,7 +48,8 @@ int clean_suite1(void) { return 0; }
 void test1 (void)
 { 
   void * c = bless (WClient, makeS("127.0.0.1"), 8080, makeS ("warcserver"));
- fprintf(stdout,"////////// test 1//////////\n"); 
+ 
+fprintf(stdout,"\n////////// test 1//////////\n"); 
   CU_ASSERT_PTR_NOT_EQUAL(c,NIL);
 
  if (WClient_getWRecord (c,makeS("gzip"), 0, 
@@ -65,7 +66,7 @@ void test1 (void)
 void test2 (void)
 {
   void * c = bless (WClient, makeS("127.0.0.1"), 8080, makeS ("warcserver"));
-fprintf(stdout,"////////// test 2//////////\n");  
+fprintf(stdout,"\n////////// test 2//////////\n");  
 CU_ASSERT_PTR_NOT_EQUAL(c,NIL);
 
   if (WClient_getWFile (c, makeS ("gzip"), 0, makeS("app/wdata/testwfile/cwarc.warc.gz"),
@@ -83,7 +84,7 @@ void test3 (void)
 {
 
   void * c = bless (WClient, makeS("127.0.0.1"), 8080, makeS ("warcserver"));
-fprintf(stdout,"////////// test 3//////////\n");
+fprintf(stdout,"\n////////// test 3//////////\n");
   
 CU_ASSERT_PTR_NOT_EQUAL(c,NIL);
 
@@ -103,7 +104,7 @@ void test4 (void)
 {
 
   void * c = bless (WClient, makeS("127.0.0.1"), 8080, makeS ("warcserver"));
-fprintf(stdout,"////////// test 4//////////\n");
+fprintf(stdout,"\n////////// test 4//////////\n");
   CU_ASSERT_PTR_NOT_EQUAL(c,NIL);
   if (WClient_getFiltredWFile (c, makeS("uncompressed"), 0, makeS ("uri"), makeS (""), makeS("app/wdata/testwfile/warcfile.warc"),
                         uS("./out3.warc")))
@@ -135,10 +136,10 @@ CU_pSuite pSuite = NULL;
 
    /* add the tests to the suite */
 
-   if ((NULL == CU_add_test(pSuite, "TEST 1: Requesting a single record in a compressed warc file", test1)) ||
-       (NULL == CU_add_test(pSuite, "TEST 2: Requesting a whole warc file", test2))||
-       (NULL == CU_add_test(pSuite, "TEST 3: sending a bad request", test3))||
-       (NULL == CU_add_test(pSuite,"TEST 4: sending a filter request", test4)))
+   if ((NULL == CU_add_test(pSuite, " 1: Requesting a single record in a compressed warc file", test1)) ||
+       (NULL == CU_add_test(pSuite, " 2: Requesting a whole warc file", test2))||
+       (NULL == CU_add_test(pSuite, " 3: sending a bad request", test3))||
+       (NULL == CU_add_test(pSuite,"  4: sending a filter request", test4)))
    {
       CU_cleanup_registry();
       return CU_get_error();
@@ -147,16 +148,19 @@ CU_pSuite pSuite = NULL;
    /* Run all tests using the automated interface*/ 
     switch (menu()) 
   {
-        case 1: {CU_console_run_tests();} 
-	case 2:  {CU_basic_run_tests();}
+        case 1: {CU_console_run_tests(); break;} 
+	case 2:  {/*CU_basic_set_mode(CU_BRM_VERBOSE );*/
+                   CU_basic_set_mode(CU_BRM_NORMAL);
+                  /* CU_basic_set_mode(CU_BRM_SILENT);*/
+                     CU_basic_run_tests(); break;}
         case 3:{
                 CU_set_output_filename("./utest/outputs/client");
     		CU_set_output_filename("./utest/outputs/client" );
   		CU_automated_run_tests();
    		CU_list_tests_to_file();
-           	}
+           	break;}
    }
- /*CU_console_run_tests();*/
+
    CU_cleanup_registry();
    return CU_get_error();
 }

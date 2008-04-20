@@ -692,14 +692,44 @@ int main()
     void         *   objmode;
     void         *   objrec;
     void         *   objnature;
+
+    void            *  objwrc;
+    const warc_u8_t *  wrc;
+    void            *  objver;
+    const warc_u8_t *  version;
    
     warc_i32_t       offset    = -1;
 
     while(FCGI_Accept() >= 0) {
 
-    warc_u32_t pos             = w_strlen (uS(WARC_VERSION)) + 1 + w_strlen (uS (getenv ("SCRIPT_NAME")));
+    warc_u32_t   pos             = w_strlen (uS (getenv ("SCRIPT_NAME"))) + 1;
     warc_u8_t         *   prefix    = uS (getenv ("DOCUMENT_ROOT"));
     const    char  * r = getenv ("REQUEST_URI");
+
+    objwrc   = recoverUriField (r, & pos);
+    wrc      = WString_getText (objwrc);
+    if ( w_strcmp (wrc, uS ("WARC")))
+       {
+          fprintf (stdout, "content-type: text/html\n\n");
+          fprintf (stdout, "<html>\n<body>\n");
+          fprintf (stdout, "<FONT SIZE = 4 COLOR = blue> The first parameter of request must be constant 'WARC' </FONT>\n<br>");
+          fprintf (stdout, "</body>\n</html>\n");
+          return 1;
+       }
+    destroy (objwrc);
+
+    objver   = recoverUriField (r, & pos);
+    version      = WString_getText (objver);
+    if ( w_strcmp (version, uS ("0.17")))
+       {
+          fprintf (stdout, "content-type: text/html\n\n");
+          fprintf (stdout, "<html>\n<body>\n");
+          fprintf (stdout, "<FONT SIZE = 4 COLOR = blue> The second parameter of request must be a constant '0.17' actual version of warc format </FONT>\n<br>");
+          fprintf (stdout, "</body>\n</html>\n");
+          return 1;
+       }
+    destroy (objver);
+    
    
     objnature = recoverUriField (r, & pos);
     reqnature = WString_getText (objnature);
@@ -886,4 +916,3 @@ int main()
 }
  return 0;
 }
-

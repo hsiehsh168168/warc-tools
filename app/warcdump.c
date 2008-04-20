@@ -45,7 +45,7 @@ int main (int argc, const char ** argv)
   void           * w       = NIL; /* WARC file object */
   void           * r       = NIL; /* WARC record object */
   warc_i32_t       c       = 0;
-  warc_u8_t      * flags   = uS ("vcf:t:");
+  warc_u8_t      * flags   = uS ("vf:t:");
   char           * fname   = NIL;
   char           * wdir    = ".";
   warc_bool_t      amode   = WARC_FALSE;
@@ -56,7 +56,7 @@ int main (int argc, const char ** argv)
   if (argc < 2 || argc > 7)
     {
       fprintf (stderr, "Dump a WARC file\n");
-      fprintf (stderr, "Usage: %s -f <file.warc> [-c] [-v] [-t <working_dir>]\n", argv [0]);
+      fprintf (stderr, "Usage: %s -f <file.warc> [-v] [-t <working_dir>]\n", argv [0]);
       fprintf (stderr, "\t-f    : valid WARC file name\n");
       fprintf (stderr, "\t[-v]  : dump ANVL (default false)\n");
       fprintf (stderr, "\t[-t]  : temporary working directory (default \".\")\n");

@@ -499,14 +499,14 @@ int main (void)
 
 switch (menu()) 
   {
-        case 1: {CU_console_run_tests();} 
-	case 2:  {CU_basic_run_tests();}
+        case 1: {CU_console_run_tests();break;} 
+	case 2:  {CU_basic_run_tests();break;}
         case 3:{
                 CU_set_output_filename("./utest/outputs/getopt");
     		CU_set_output_filename("./utest/outputs/getopt" );
   		CU_automated_run_tests();
    		CU_list_tests_to_file();
-           	}
+           	break;}
      
    }
    CU_cleanup_registry();
