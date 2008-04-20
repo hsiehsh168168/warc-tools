@@ -32,5 +32,6 @@ WPUBLIC int menu (void)
     if (choix==4)
       choix = 21;
 
+
     return choix;
 }   
