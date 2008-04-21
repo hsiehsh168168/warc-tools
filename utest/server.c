@@ -34,7 +34,7 @@ int test1 (void)
 {
 
   void * s = bless (WServer, makeS ("0.0.0.0"), 8080,
-                    makeS ("iipc"), makeS (".") );
+                    makeS ("iipc"), makeS ("."), makeS ("./") );
 
   assert (s);
 

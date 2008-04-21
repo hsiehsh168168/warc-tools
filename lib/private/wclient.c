@@ -230,8 +230,6 @@ WPRIVATE warc_bool_t WClient_end (void * _self)
 
 /**
  * @param _self: a WClient object instance
- * @param comp: The compession mode of the warc file
- * @param complen: the length of the comp string
  * @param offset: The offset of the reclaimed record
  * @param path: The patrh where the warc file is stored
  * @param pathlen: the length of the path string
@@ -243,8 +241,6 @@ WPRIVATE warc_bool_t WClient_end (void * _self)
  */
 
 WPUBLIC warc_bool_t WClient_getWRecord (void * const _self,
-                                        const warc_u8_t * comp,
-                                        warc_u32_t complen,
                                         warc_i64_t offset,
                                         const warc_u8_t * path,
                                         warc_u32_t pathlen,
@@ -288,10 +284,6 @@ WPUBLIC warc_bool_t WClient_getWRecord (void * const _self,
   WString_append (rest_request, makeS ((const warc_u8_t *) WARC_VERSION) );
 
   WString_append (rest_request, makeS ((const warc_u8_t *) "/record"));
-
-  WString_append (rest_request, (const warc_u8_t *) "/", 1);
-
-  WString_append (rest_request, comp, complen);
 
   WString_append (rest_request, (const warc_u8_t *) "/", 1);
 
@@ -347,8 +339,6 @@ WPUBLIC warc_bool_t WClient_getWRecord (void * const _self,
 
 /**
  * @param _self: a WClient object instance
- * @param comp: the compression mode of the warc file
- * @param complen: the length of the comp string
  * @param offset: the offset from where the transfert must be done
  * @param path: The patrh where the warc file is stored
  * @param pathlen: the length of the path string
@@ -359,9 +349,8 @@ WPUBLIC warc_bool_t WClient_getWRecord (void * const _self,
  * Warc Client warc file reclaiming function
  */
 
-WPUBLIC warc_bool_t WClient_getWFile (void * const _self, const warc_u8_t * comp,
-                                      warc_u32_t complen, 
-                                      warc_u32_t offset,
+WPUBLIC warc_bool_t WClient_getWFile (void * const _self, 
+                                      warc_i64_t offset,
                                       const warc_u8_t * path,
                                       warc_u32_t pathlen,
                                       const warc_u8_t * outf)
@@ -401,10 +390,6 @@ WPUBLIC warc_bool_t WClient_getWFile (void * const _self, const warc_u8_t * comp
   WString_append (rest_request, makeS ( (const warc_u8_t *) WARC_VERSION) );
 
   WString_append (rest_request, (const warc_u8_t *) "/file", 5);
-
-  WString_append (rest_request, (const warc_u8_t *) "/", 1);
-
-  WString_append (rest_request, comp, complen);
 
   WString_append (rest_request, (const warc_u8_t *) "/", 1);
 
@@ -461,8 +446,6 @@ WPUBLIC warc_bool_t WClient_getWFile (void * const _self, const warc_u8_t * comp
 
 /**
  * @param _self: a WClient object instance
- * @param comp: The compession mode of the warc file
- * @param complen: the length of the comp string
  * @param offset: The offset of the reclaimed record
  * @param what: on each field the filter will be done
  * @param whatlen: the length of the what string
@@ -478,8 +461,6 @@ WPUBLIC warc_bool_t WClient_getWFile (void * const _self, const warc_u8_t * comp
  */
 
 WPUBLIC warc_bool_t WClient_getFiltredWFile (void * const _self,
-                                            const warc_u8_t * comp,
-                                            warc_u32_t complen,
                                             warc_i64_t offset,
                                             const warc_u8_t * what,
                                             warc_u32_t whatlen,
@@ -527,10 +508,6 @@ WPUBLIC warc_bool_t WClient_getFiltredWFile (void * const _self,
   WString_append (rest_request, makeS ( (const warc_u8_t *) WARC_VERSION) );
 
   WString_append (rest_request, makeS ((const warc_u8_t *) "/filter"));
-
-  WString_append (rest_request, (const warc_u8_t *) "/", 1);
-
-  WString_append (rest_request, comp, complen);
 
   WString_append (rest_request, (const warc_u8_t *) "/", 1);
 

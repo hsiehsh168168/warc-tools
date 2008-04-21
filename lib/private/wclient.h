@@ -47,18 +47,15 @@ extern "C"
 
     extern const void * WClient;
 
-    extern warc_bool_t WClient_getWRecord (void * const, const warc_u8_t *, 
-                                           warc_u32_t, warc_i64_t, 
+    extern warc_bool_t WClient_getWRecord (void * const, warc_i64_t, 
                                            const warc_u8_t *, warc_u32_t,
                                            const warc_u8_t * outf);
 
-    extern warc_bool_t WClient_getWFile   (void * const, const warc_u8_t *,
-                                           warc_u32_t, warc_u32_t,
+    extern warc_bool_t WClient_getWFile   (void * const, warc_i64_t,
                                            const warc_u8_t *, warc_u32_t,
                                            const warc_u8_t *);
 
     extern warc_bool_t WClient_getFiltredWFile (void * const _self,
-                                               const warc_u8_t * , warc_u32_t,
                                                warc_i64_t , const warc_u8_t *,
                                                warc_u32_t , const warc_u8_t *,
                                                warc_u32_t , const warc_u8_t *,

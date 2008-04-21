@@ -438,7 +438,7 @@ o Start/Stop Lighttpd with:
   To retrieve information from a remote WARC file, we use the following 
   REST queries:
 
-  (1) http://host:port/WARC/0.17/req_nat/comp_mod/offset/fname
+  (1) http://host:port/WARC/0.17/req_nat/offset/fname
 
    where:
 
@@ -457,15 +457,11 @@ o Start/Stop Lighttpd with:
        -> list: this tells the WARC server to dump all records headers 
           starting from an offset.
 
-   -  comp_mod: a parameter with 2 possible values:
-       -> uncompressed : indicates that the WARC file is not compressed.
-       -> gzip : indicates that the WARC file is GZIP compressed.
-
    -  offset: a positive integer position in a WARC file (previously described)
 
    -  fname: a WARC pathname file name on the server.
 
-  (2) http://host:port/WARC/0.17/filter/comp_mod/offset/fileld_to_filter/value_filter/fname
+  (2) http://host:port/WARC/0.17/filter/offset/fileld_to_filter/value_filter/fname
 
    where:
 

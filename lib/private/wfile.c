@@ -278,6 +278,23 @@ WIPUBLIC warc_bool_t WFile_hasMoreRecords (const void * const _self)
 
 
 /**
+ * @param _self: a WFile object instance
+ * 
+ * 
+ * @return the compression mode as a wfile_comp_t
+ *
+ * Returtns the compression mode of the WARC File
+ */
+
+WIPUBLIC wfile_comp_t WFile_getCompressionMode (const void * const _self)
+{
+    const struct WFile * const self = _self;
+
+  return (COMP);
+}
+
+
+/**
  * @param _self WFile object instance
  * @param wtfile the temporary file to fill
  * @param size the size of data to write
