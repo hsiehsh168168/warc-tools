@@ -1185,8 +1185,6 @@ WPRIVATE warc_bool_t WSend_distantFilterResponse (void * fname, void * tmp, warc
    warc_i32_t        soffset   = offset;
    
 
-  fprintf (stdout, "%s\n", WString_getText (fname));
-
    /* 100 isn't used inside the bless below because of reading */
    wfile = bless (WFile, WString_getText (fname), 100, 
                   WARC_FILE_READER, WARC_FILE_DETECT_COMPRESSION, WString_getText (tmp), WString_getLength(tmp));
