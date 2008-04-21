@@ -52,13 +52,13 @@ void test1 (void)
 fprintf(stdout,"\n////////// test 1//////////\n"); 
   CU_ASSERT_PTR_NOT_EQUAL(c,NIL);
 
- if (WClient_getWRecord (c,makeS("gzip"), 0, 
-                          makeS("app/wdata/testwfile/file.warc.gz"), 
+ if (WClient_getWRecord (c, 0, 
+                          makeS("cwarc.warc.gz"), 
                           uS("./out1.warc.gz")))
   {
-   CU_PASS   ( "request not satisfied");
+   CU_FAIL   ( "request not satisfied");
   }
-  else CU_FAIL("request satisfied");
+  else CU_PASS("request satisfied");
   destroy (c);
 }
 
@@ -69,12 +69,13 @@ void test2 (void)
 fprintf(stdout,"\n////////// test 2//////////\n");  
 CU_ASSERT_PTR_NOT_EQUAL(c,NIL);
 
-  if (WClient_getWFile (c, makeS ("gzip"), 0, makeS("app/wdata/testwfile/cwarc.warc.gz"),
+  if (WClient_getWFile (c, 0, makeS("cwarc.warc.gz"),
                         uS("./out2.warc.gz")))
-  {
-   CU_PASS   ( "request not satisfied");
-  }
-  else CU_FAIL("request satisfied");
+     {
+     CU_FAIL   ( "request not satisfied");
+     }
+  else
+   CU_PASS ("request satisfied");
   destroy (c);
 
 }
@@ -89,12 +90,12 @@ fprintf(stdout,"\n////////// test 3//////////\n");
 CU_ASSERT_PTR_NOT_EQUAL(c,NIL);
 
 
-  if (WClient_getWFile (c, makeS ("gzip"), 0, makeS("app/wdata/testwfile/cwarc.warc.gz"),
+  if (WClient_getWFile (c, 0, makeS("../cwarc.warc.gz"),
                         uS("./out2.warc.gz")))
   {
    CU_PASS   ( "request not satisfied");
   }
-  else CU_FAIL("request satisfied");
+  else CU_FAIL ("request satisfied");
   destroy (c);
 
 }
@@ -106,13 +107,14 @@ void test4 (void)
   void * c = bless (WClient, makeS("127.0.0.1"), 8080, makeS ("warcserver"));
 fprintf(stdout,"\n////////// test 4//////////\n");
   CU_ASSERT_PTR_NOT_EQUAL(c,NIL);
-  if (WClient_getFiltredWFile (c, makeS("uncompressed"), 0, makeS ("uri"), makeS (""), makeS("app/wdata/testwfile/warcfile.warc"),
+  if (WClient_getFiltredWFile (c, 0, makeS ("recordtype"), makeS ("warcinfo"), makeS("awarcmlp.warc"),
                         uS("./out3.warc")))
               
   {
-   CU_PASS   ( "request not satisfied");
+   fprintf (stdout, "--------------\n");
+   CU_FAIL   ( "request not satisfied");
   }
-  else CU_FAIL("request satisfied");
+  else CU_PASS ("request satisfied");
   destroy (c);
   
 }

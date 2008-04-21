@@ -71,6 +71,7 @@ struct Callbacks_arg
   struct event_base * base;
   void              * server_name;
   void              * server_prefix;
+  void              * server_tdir;
   warc_bool_t         shoot_down;
 };
 
@@ -131,6 +132,7 @@ WPRIVATE void * WServer_getUriNextItem (const warc_u8_t * uri, warc_u32_t pos)
       destroy (item);
       return (NIL);
     }
+
   ++ i;
   
   while ((uri [i] != '/') && (uri [i] != '\0'))
@@ -178,13 +180,6 @@ WPRIVATE void * WServer_getUriFileName (const warc_u8_t * uri,
       return (NIL);
     }
 
-  /* reject any suspicious request */
-  if (w_strstr (WString_getText (item), ".."))
-   {
-      destroy (item);
-      return (NIL);
-   }
-
   while (uri [i] != '\0')
     {
       achar [0] = uri [i];
@@ -196,6 +191,15 @@ WPRIVATE void * WServer_getUriFileName (const warc_u8_t * uri,
       ++ i;
     }
 
+  /* reject any suspicious request */
+  if ((w_strstr (WString_getText (item), "..")) || (w_strstr (WString_getText (item), "/.")))
+   {
+      destroy (item);
+      return (NIL);
+   }
+
+
+
   return (item);
 }
 
@@ -206,7 +210,6 @@ WPRIVATE void * WServer_getUriFileName (const warc_u8_t * uri,
 /**
  * @param uri: the uri to parse
  * @param fname: the requested warc file name as a WString (must be blessed before calling, will be filled in the function)
- * @param comp: the compression mode
  * @param offset: the offset of the record in the warc file
  * @param what: if the we have a filter request, it indicates on what we have to filter
  * @param value: the value with which we will compare for the filter as a WString 
@@ -219,7 +222,6 @@ WPRIVATE void * WServer_getUriFileName (const warc_u8_t * uri,
 
 WPRIVATE warc_bool_t WServer_parseRequest (const warc_u8_t * uri, 
                                            void            * fname, 
-                                           wfile_comp_t    * comp, 
                                            warc_i32_t      * offset, 
                                            warc_filters_t  * what,
                                            void            * value,
@@ -276,30 +278,6 @@ WPRIVATE warc_bool_t WServer_parseRequest (const warc_u8_t * uri,
      pos = pos + WString_getLength (item)+1;
      destroy (item);
 
-     /* recovering the compression mode */
-     item = WServer_getUriNextItem (uri, pos);
-     unless (item)
-         return (WARC_TRUE);
-
-     unless (w_strcmp (WString_getText(item),
-                       (const warc_u8_t *) "gzip"))
-         {
-          *comp = WARC_FILE_COMPRESSED_GZIP;
-         }
-     else 
-       unless (w_strcmp (WString_getText (item), 
-                         (const warc_u8_t *) "uncompressed"))
-         {
-           * comp = WARC_FILE_UNCOMPRESSED;
-         }
-     else
-       {
-         destroy (item);
-         return (WARC_TRUE);
-       }
-
-      pos    = pos + WString_getLength (item) + 1;
-      destroy (item);
       
      /*recovering the record offset*/
      item = WServer_getUriNextItem (uri, pos);
@@ -348,30 +326,6 @@ WPRIVATE warc_bool_t WServer_parseRequest (const warc_u8_t * uri,
       pos    = pos + WString_getLength (item) + 1;
       destroy (item);
       
-     /* recovering the compression mode */
-     item = WServer_getUriNextItem (uri, pos);
-     unless (item)
-         return (WARC_TRUE);
-
-     unless (w_strcmp (WString_getText(item),
-                       (const warc_u8_t *) "gzip"))
-         {
-          *comp = WARC_FILE_COMPRESSED_GZIP;
-         }
-     else 
-       unless (w_strcmp (WString_getText (item), 
-                         (const warc_u8_t *) "uncompressed"))
-         {
-           * comp = WARC_FILE_UNCOMPRESSED;
-         }
-     else
-       {
-         destroy (item);
-         return (WARC_TRUE);
-       }
-
-     pos = pos + WString_getLength (item)+1;
-     destroy (item);
 
      /*recovering the record offset*/
      item = WServer_getUriNextItem (uri, pos);
@@ -416,29 +370,7 @@ WPRIVATE warc_bool_t WServer_parseRequest (const warc_u8_t * uri,
      pos    = pos + WString_getLength (item) + 1;
      destroy (item);
   
-     /* detecting the compression mode */
-
-    item = WServer_getUriNextItem (uri, pos);
-     unless (w_strcmp (WString_getText (item), 
-                       (const warc_u8_t *) "gzip"))
-       {
-         * comp = WARC_FILE_COMPRESSED_GZIP;
-       }
-     else 
-     unless (w_strcmp (WString_getText (item), 
-                      (const warc_u8_t *) "uncompressed"))
-       {
-        * comp = WARC_FILE_UNCOMPRESSED;
-       }
-    else
-      {
-      destroy (item);
-      return (WARC_TRUE);
-      }
-
     * kind = WARC_ONE_RECORD_REQUEST;
-    pos = pos + WString_getLength (item)+1;
-    destroy (item);
   
     /*recovering the record offset*/
     item = WServer_getUriNextItem (uri, pos);
@@ -487,29 +419,7 @@ WPRIVATE warc_bool_t WServer_parseRequest (const warc_u8_t * uri,
      pos    = pos + WString_getLength (item) + 1;
      destroy (item);
   
-     /* detecting the compression mode */
-
-    item = WServer_getUriNextItem (uri, pos);
-     unless (w_strcmp (WString_getText (item), 
-                       (const warc_u8_t *) "gzip"))
-       {
-         * comp = WARC_FILE_COMPRESSED_GZIP;
-       }
-     else 
-     unless (w_strcmp (WString_getText (item), 
-                      (const warc_u8_t *) "uncompressed"))
-       {
-        * comp = WARC_FILE_UNCOMPRESSED;
-       }
-    else
-      {
-      destroy (item);
-      return (WARC_TRUE);
-      }
-
     * kind = WARC_DISTANT_FILTER_REQUEST;
-    pos = pos + WString_getLength (item)+1;
-    destroy (item);
   
     /*recovering the record offset*/
     item = WServer_getUriNextItem (uri, pos);
@@ -618,7 +528,7 @@ return (WARC_TRUE);
 
 /**
  * @param fname: the name of the warc file to be sent as a WString
- * @param comp_mode: the compression mode, only for header sending
+ * @param tmp: the temporary files directory
  * @param offset: the offset in the warc file from where we start the transfert
  * @param server_name: the name of the server machine as a WString
  * @param req: the request object which will be used to send the response
@@ -629,16 +539,19 @@ return (WARC_TRUE);
  * Send the response to a full warc file request
  */
 
-WPRIVATE warc_bool_t WSend_fullResponse (void * fname, wfile_comp_t comp_mode, warc_i32_t offset, const void * server_name, 
+WPRIVATE warc_bool_t WSend_fullResponse (void * fname, void * tmp, warc_i32_t offset, const void * server_name, 
                                                      struct evhttp_request * req, struct evbuffer * buf)
 {
    char         *   buffer         = NIL ;
    FILE         *   full_file      = NIL ;
+   wfile_comp_t     comp_mode      = WARC_FILE_UNCOMPRESSED;
    warc_u32_t       size           = 0   ;
    warc_u32_t       rsize          = 0   ;
    warc_u8_t        char_size[26]        ;
    warc_u8_t        content_type[25]     ;
+   void         *   wfile          = NIL;
    
+
    full_file = w_fopen_rb ((const char *) WString_getText(fname));
 
    unless (full_file)
@@ -711,13 +624,38 @@ WPRIVATE warc_bool_t WSend_fullResponse (void * fname, wfile_comp_t comp_mode, w
    evhttp_add_header (req -> output_headers, 
                       "Content-Length", (const char *) char_size);
 
+   wfile = bless (WFile, WString_getText (fname), 100, 
+                  WARC_FILE_READER, WARC_FILE_DETECT_COMPRESSION , WString_getText (tmp), WString_getLength(tmp));
+   unless (wfile)
+     {
+      evbuffer_add_printf (buf, "<center><font color=darkred>File %s not Found\r\n</font></center><br>", WString_getText (fname));
+
+      evhttp_add_header (req -> output_headers, 
+                       "Server", (const char *) WString_getText(server_name));
+      
+      evhttp_add_header (req -> output_headers, 
+                       "Warc-Version", (const char *) WARC_VERSION);
+
+      evhttp_send_reply (req, HTTP_NOTFOUND, "File not found", buf);
+
+      w_fclose (full_file);
+
+      return (WARC_TRUE);
+     }
+
+
+   comp_mode = WFile_getCompressionMode (wfile);
+   destroy (wfile);
+
    content_type[0] = '\0';
+
    if (comp_mode == WARC_FILE_COMPRESSED_GZIP)
       w_strncpy (content_type, (warc_u8_t *) "application/x-gzip", 18);
    else if (comp_mode == WARC_FILE_UNCOMPRESSED)
       w_strncpy (content_type, (warc_u8_t *) "text/plain", 10);
    else 
       w_strncpy (content_type, (warc_u8_t *) "", 0);
+
 
    evhttp_add_header (req -> output_headers, 
                       "Content-Type", (const char *)content_type);
@@ -769,8 +707,7 @@ WPRIVATE warc_bool_t WSend_fullResponse (void * fname, wfile_comp_t comp_mode, w
 
 /**
  * @param fname: the name of the concerned warc file as a WString
- * @param pref: the prefix to add to the file name to be opened as a WString
- * @param comp_mode: the warc file compression mode
+ * @param tmp: the temporary files directory
  * @param offset: the offset of the wanted record
  * @param server_name: the server_name as a WString
  * @param req: the request object used in the response
@@ -781,21 +718,22 @@ WPRIVATE warc_bool_t WSend_fullResponse (void * fname, wfile_comp_t comp_mode, w
  * send a response to a specified record request
  */
 
-WPRIVATE warc_bool_t WSend_record (void * fname, void * pref, wfile_comp_t comp_mode, warc_i32_t offset, const void * server_name, 
+WPRIVATE warc_bool_t WSend_record (void * fname, void * tmp, warc_i32_t offset, const void * server_name, 
                                           struct evhttp_request * req, struct evbuffer * buf)
 {
-   char         *    buffer   = NIL  ;
-   void         *    wfile    = NIL  ;
-   void         *    wrecord  = NIL  ;
-   warc_u32_t        size     = 0    ;
-   warc_u32_t        rsize    = 0    ;
+   char         *    buffer    = NIL  ;
+   void         *    wfile     = NIL  ;
+   void         *    wrecord   = NIL  ;
+   wfile_comp_t      comp_mode = WARC_FILE_UNCOMPRESSED;
+   warc_u32_t        size      = 0    ;
+   warc_u32_t        rsize     = 0    ;
    warc_u8_t         char_size[26]   ;
    warc_u8_t         content_type[25];
       
 
    /* 100 isn't used inside the bless below because of reading */
    wfile = bless (WFile, WString_getText (fname), 100, 
-                  WARC_FILE_READER, comp_mode, WString_getText (pref), WString_getLength(pref));
+                  WARC_FILE_READER, WARC_FILE_DETECT_COMPRESSION, WString_getText (tmp), WString_getLength(tmp));
    unless (wfile)
      {
       evbuffer_add_printf (buf, "<center><font color=darkred>File %s not Found\r\n</font></center><br>", WString_getText (fname));
@@ -883,6 +821,8 @@ WPRIVATE warc_bool_t WSend_record (void * fname, void * pref, wfile_comp_t comp_
    evhttp_add_header (req -> output_headers, 
                       "Content-Length", (const char *)char_size);
 
+   comp_mode = WFile_getCompressionMode (wfile);
+
    content_type[0] = '\0';
    if (comp_mode == WARC_FILE_COMPRESSED_GZIP)
       w_strncpy (content_type, (warc_u8_t *) "application/x-gzip", 18);
@@ -938,8 +878,7 @@ WPRIVATE warc_bool_t WSend_record (void * fname, void * pref, wfile_comp_t comp_
 
 /**
  * @param fname: the name of the warc file as a WString
- * @param pref: the prefix to add to the file name to be opened as a WString
- * @param comp_mode: the warc file compression mode
+ * @param tmp: the temporary files directory
  * @param offset: the offset of the wanted record
  * @param server_name: the server_name as a WString
  * @param req: the request object used in the response
@@ -950,7 +889,7 @@ WPRIVATE warc_bool_t WSend_record (void * fname, void * pref, wfile_comp_t comp_
  * Send informations about a warc file from a specified offset
  */
 
-WPRIVATE warc_bool_t WSend_distantDumpResponse (void * fname, void * pref, wfile_comp_t comp_mode, warc_i32_t offset, const void * server_name, 
+WPRIVATE warc_bool_t WSend_distantDumpResponse (void * fname, void * tmp, warc_i32_t offset, const void * server_name, 
                                                             struct evhttp_request * req, struct evbuffer * buf)
 {
     void        *    wfile     = NIL ;
@@ -959,7 +898,7 @@ WPRIVATE warc_bool_t WSend_distantDumpResponse (void * fname, void * pref, wfile
 
    /* 100 isn't used inside the bless below because of reading */
    wfile = bless (WFile, WString_getText (fname), 100, 
-                  WARC_FILE_READER, comp_mode, WString_getText (pref), WString_getLength(pref));
+                  WARC_FILE_READER, WARC_FILE_DETECT_COMPRESSION, WString_getText (tmp), WString_getLength (tmp));
    unless (wfile)
      {
       evbuffer_add_printf (buf, "<center><font color=darkred>File %s not Found\r\n</font></center><br>", WString_getText (fname));
@@ -1217,8 +1156,7 @@ WPRIVATE warc_bool_t WSend_distantDumpResponse (void * fname, void * pref, wfile
 
 /**
  * @param fname: the name of the concerned warc file as a WString
- * @param pref: the prefix to add to the file name to be opened as a WString
- * @param comp_mode: the warc file compression mode
+ * @param tmp: the temporary files directory
  * @param offset: the offset of the wanted record
  * @param what: on what the filter will be done
  * @param value: the value of the filter as a WString
@@ -1231,25 +1169,27 @@ WPRIVATE warc_bool_t WSend_distantDumpResponse (void * fname, void * pref, wfile
  * send a response to a specified record request
  */
 
-WPRIVATE warc_bool_t WSend_distantFilterResponse (void * fname, void * pref, wfile_comp_t comp_mode, warc_i32_t offset, warc_filters_t what, void * value,
+WPRIVATE warc_bool_t WSend_distantFilterResponse (void * fname, void * tmp, warc_i32_t offset, warc_filters_t what, void * value,
                                                    const void * server_name, struct evhttp_request * req, struct evbuffer * buf)
 {
-   char         *    buffer   = NIL  ;
-   void         *    wfile    = NIL  ;
-   void         *    wrecord  = NIL  ;
-   warc_u32_t        size     = 0    ;
-   warc_u32_t        rsize    = 0    ;
+   char         *    buffer    = NIL  ;
+   void         *    wfile     = NIL  ;
+   void         *    wrecord   = NIL  ;
+   wfile_comp_t      comp_mode = WARC_FILE_UNCOMPRESSED;
+   warc_u32_t        size      = 0    ;
+   warc_u32_t        rsize     = 0    ;
    warc_u8_t         content_type[25];
-   warc_bool_t       found    = WARC_TRUE ;
-   const warc_u8_t   * string = NIL ;
-   warc_rec_t        rtype    = WARC_UNKNOWN_RECORD;
-   warc_i32_t        soffset  = offset;
+   warc_bool_t       found     = WARC_TRUE ;
+   const warc_u8_t   * string  = NIL ;
+   warc_rec_t        rtype     = WARC_UNKNOWN_RECORD;
+   warc_i32_t        soffset   = offset;
    
 
-   /* 100 isn't used inside the bless below because of reading */
+  fprintf (stdout, "%s\n", WString_getText (fname));
 
+   /* 100 isn't used inside the bless below because of reading */
    wfile = bless (WFile, WString_getText (fname), 100, 
-                  WARC_FILE_READER, comp_mode, WString_getText (pref), WString_getLength(pref));
+                  WARC_FILE_READER, WARC_FILE_DETECT_COMPRESSION, WString_getText (tmp), WString_getLength(tmp));
    unless (wfile)
      {
       evbuffer_add_printf (buf, "<center><font color=darkred>File %s not Found\r\n</font></center><br>", WString_getText (fname));
@@ -1308,6 +1248,8 @@ WPRIVATE warc_bool_t WSend_distantFilterResponse (void * fname, void * pref, wfi
     }
 
 
+   comp_mode = WFile_getCompressionMode (wfile);
+
    content_type[0] = '\0';
    if (comp_mode == WARC_FILE_COMPRESSED_GZIP)
       w_strncpy (content_type, (warc_u8_t *) "application/x-gzip", 18);
@@ -1332,6 +1274,8 @@ WPRIVATE warc_bool_t WSend_distantFilterResponse (void * fname, void * pref, wfi
       unless (wrecord)
         {
          evbuffer_add_printf (buf, "<center><font color=darkred>Bad offset or Bad record\r\n</font></center><br>");
+         evhttp_add_header (req -> output_headers, 
+                           "Content-Type", "text/html");
 
          evhttp_send_reply_end (req);
          wfree (buffer);
@@ -1495,19 +1439,21 @@ WPRIVATE void WAccess_callback (struct evhttp_request * req, void * _arg)
   struct Callbacks_arg * arg = _arg;
 
   const void       * server_name = NIL;
-  void       * pref        = NIL;
+  void             * pref        = NIL;
   void             * fname       = NIL;
+  void             * total_fname  = NIL;
+  void             * tmp         = NIL;
   void             * cvalue      = NIL;
   const  warc_u8_t * uri         = NIL;
   struct evbuffer  * buf         = NIL;
   warc_i32_t         offset      = -1;
-  wfile_comp_t       comp_mode;
   warc_request_t     req_kind;
   warc_filters_t     what;
 
 
   server_name = arg -> server_name;
   pref        = arg -> server_prefix;
+  tmp         = arg -> server_tdir;
   uri = (const warc_u8_t *) evhttp_request_uri (req);
 
   buf = evbuffer_new ();
@@ -1575,14 +1521,13 @@ WPRIVATE void WAccess_callback (struct evhttp_request * req, void * _arg)
     return ;
   }
 
-  if (WServer_parseRequest (uri, fname, & comp_mode, 
-                            & offset, &what, cvalue, & req_kind))
+  if (WServer_parseRequest (uri, fname, & offset, &what, cvalue, & req_kind))
     {
       evbuffer_add_printf (buf, "<center> <b> <font color=darkblue size=2> Bad request format\r\n </font> </b> </center><br>");
-      evbuffer_add_printf (buf, "The correct format is:<br>/WARC/version/record/compression_mode/record_offset/warc_file_path\r\n<br>");
-      evbuffer_add_printf (buf, "Or:<br>/WARC/version/file/compression_mode/offset/warc_file_path\r\n<br>");
-      evbuffer_add_printf (buf, "Or:<br>/WARC/version/list/compression_mode/offset/warc_file_path\r\n<br>");
-      evbuffer_add_printf (buf, "Or:<br>/WARC/version/filter/compression_mode/offset/what_to_filter_on/filter_value/warc_file_path\r\n<br>");
+      evbuffer_add_printf (buf, "The correct format is:<br>/WARC/version/record/record_offset/warc_file_path\r\n<br>");
+      evbuffer_add_printf (buf, "Or:<br>/WARC/version/file/offset/warc_file_path\r\n<br>");
+      evbuffer_add_printf (buf, "Or:<br>/WARC/version/list/offset/warc_file_path\r\n<br>");
+      evbuffer_add_printf (buf, "Or:<br>/WARC/version/filter/offset/what_to_filter_on/filter_value/warc_file_path\r\n<br>");
 
       evhttp_add_header (req -> output_headers, 
                          "Server", (const char *) WString_getText(server_name));
@@ -1597,6 +1542,29 @@ WPRIVATE void WAccess_callback (struct evhttp_request * req, void * _arg)
       return;
     }
   
+  total_fname = bless (WString, WString_getText(pref), WString_getLength(pref));
+  unless (total_fname)
+     {
+      WarcDebugMsg ("Can't create a string object to hold the warc file name\n");
+      evbuffer_add_printf (buf, "<center><font color=darkblue size=2>Internal error, can't stisfy the request. Please retry\r\n</font></center><br>");
+
+      evhttp_add_header (req -> output_headers, 
+                         "Server", (const char *) WString_getText(server_name));
+      
+      evhttp_add_header (req -> output_headers, 
+                         "Warc-Version", (const char *) WARC_VERSION);
+
+      evhttp_send_reply (req, HTTP_NOCONTENT, "No String", buf);
+      evbuffer_free (buf);
+      destroy (fname);
+      destroy (cvalue);
+      return;
+     }
+
+
+   WString_concat (total_fname, fname);
+   destroy (fname);
+
   /* testing what is requested */
   switch (req_kind)
     {
@@ -1604,8 +1572,8 @@ WPRIVATE void WAccess_callback (struct evhttp_request * req, void * _arg)
 
         /* here a full warc file is requested */
         destroy (cvalue);
-        WSend_fullResponse (fname, comp_mode, offset, server_name, req, buf);
-        destroy (fname);
+        WSend_fullResponse (total_fname, tmp, offset, server_name, req, buf);
+        destroy (total_fname);
         evbuffer_free (buf);
 
         break;
@@ -1614,9 +1582,9 @@ WPRIVATE void WAccess_callback (struct evhttp_request * req, void * _arg)
 
         /* here, only one record is requested */
         destroy (cvalue);
-        WSend_record (fname, pref, comp_mode, offset, server_name, req, buf);
+        WSend_record (total_fname, tmp, offset, server_name, req, buf);
 
-        destroy (fname);
+        destroy (total_fname);
         evbuffer_free (buf);
 
         break;
@@ -1624,9 +1592,9 @@ WPRIVATE void WAccess_callback (struct evhttp_request * req, void * _arg)
 
         /* here we list informations about the warc file records */
         destroy (cvalue);
-        WSend_distantDumpResponse (fname, pref, comp_mode, offset, server_name, req, buf);
+        WSend_distantDumpResponse (total_fname, tmp, offset, server_name, req, buf);
 
-        destroy (fname);
+        destroy (total_fname);
         evbuffer_free (buf);
 
         break;
@@ -1634,10 +1602,10 @@ WPRIVATE void WAccess_callback (struct evhttp_request * req, void * _arg)
     case WARC_DISTANT_FILTER_REQUEST :
 
        /* here, we send records filtred in a particular criteria */
-       WSend_distantFilterResponse (fname, pref, comp_mode, offset, what, cvalue, server_name, req, buf);
+       WSend_distantFilterResponse (total_fname, tmp, offset, what, cvalue, server_name, req, buf);
 
        destroy (cvalue);
-       destroy (fname);
+       destroy (total_fname);
        evbuffer_free (buf);
 
     default: break;
@@ -1721,6 +1689,7 @@ struct WServer
     /*@{*/
     void * listening_uri; /**< The Uri wher the server is listening for requests */
     void * prefix; /**< directory prefix to append to any request */
+    void * temp_dir; /**< The directory of the temporary files */
     warc_u16_t listening_port; /**< The listening port */
     void * server_name; /**< Server name in the HTTP header */
     struct event_base * base_event; /**< The base event associated with the server */
@@ -1733,6 +1702,7 @@ struct WServer
 
 #define   URI           (self -> listening_uri)
 #define   PREFIX        (self -> prefix)
+#define   TMPDIR        (self -> temp_dir)
 #define   PORT          (self -> listening_port)
 #define   BASE          (self -> base_event)
 #define   SERV          (self -> server_instance)
@@ -1795,6 +1765,7 @@ WPUBLIC warc_bool_t WServer_start (void * _self)
   arg . shoot_down    = WARC_FALSE;
   arg . server_name   = SERVER_NAME;
   arg . server_prefix = PREFIX;
+  arg . server_tdir   = TMPDIR;
 
   evhttp_set_cb    (SERV, "/" WARC_VERSION "/stop", STOPCB, & arg);
   evhttp_set_gencb (SERV, ACCESSH, & arg);
@@ -1859,6 +1830,8 @@ WPRIVATE void * WServer_constructor (void * _self, va_list * app)
   warc_u32_t        servername_len = va_arg (*app, warc_u32_t);
   const char *      prefix         = va_arg (*app, const char *);
   warc_u32_t        prefix_len     = va_arg (*app, warc_u32_t);
+  const char *      tmpdir         = va_arg (*app, const char *);
+  warc_u32_t        tmpdir_len     = va_arg (*app, warc_u32_t);
 
   URI = bless (WString, uri, uri_len);
   unless (URI)
@@ -1869,6 +1842,13 @@ WPRIVATE void * WServer_constructor (void * _self, va_list * app)
   
   PREFIX = bless (WString, prefix, prefix_len);
   unless (PREFIX)
+	{
+      destroy (self);
+      return (NIL);
+    }
+
+  TMPDIR = bless (WString, tmpdir, tmpdir_len);
+  unless (TMPDIR)
 	{
       destroy (self);
       return (NIL);
@@ -1923,6 +1903,9 @@ WPRIVATE void * WServer_destructor (void * _self)
 
   if (PREFIX)
     destroy (PREFIX), PREFIX = NIL;
+
+  if (TMPDIR)
+    destroy (TMPDIR), TMPDIR = NIL;
 
   if (SERVER_NAME)
     destroy (SERVER_NAME), SERVER_NAME = NIL;

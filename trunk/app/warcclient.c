@@ -40,7 +40,7 @@ int main (int argc, const char ** argv)
 {
   void           * s       = NIL; /* WClient object */
   void           * p       = NIL; /* WGetOpt object */
-  warc_u8_t      * flags   = uS("i:p:s:o:u:n:d:crf:t:");
+  warc_u8_t      * flags   = uS("i:p:s:o:u:n:d:rf:t:");
   warc_u8_t      * ip      = uS("0.0.0.0");
   warc_u8_t      * ps      = NIL;
   warc_u8_t      * off     = NIL;
@@ -51,7 +51,6 @@ int main (int argc, const char ** argv)
   warc_u8_t        what [12];
   warc_bool_t      request = WARC_FALSE;
   warc_bool_t      filter  = WARC_FALSE;
-  warc_u8_t      * comp    = uS("uncompressed");
   warc_u32_t       port    = 0;
   warc_u32_t       offset  = 0;
   warc_i32_t       c       = 0;
@@ -69,7 +68,6 @@ int main (int argc, const char ** argv)
       fprintf (stderr, "\t[-d]  : filter file on Record type value (deefault unkown)\n");
       fprintf (stderr, "\t[-t]  : remote WARC filename\n");
       fprintf (stderr, "\t[-o]  : output WARC filename\n");
-      fprintf (stderr, "\t[-c]  : assume GZIP compressed WARC file (default no)\n");
       fprintf (stderr, "\t[-f]  : WARC offset (default 0)\n");
       fprintf (stderr, "\t[-r]  : get all the WARC file (default no)\n");
       return (1);
@@ -107,10 +105,6 @@ int main (int argc, const char ** argv)
           if (w_index (flags, c) [1] == ':')
             wfn = (warc_u8_t *) WGetOpt_argument (p);
 
-          break;
-          
-        case 'c' :
-          comp = uS("gzip");
           break;
           
         case 'f' :
@@ -203,7 +197,7 @@ int main (int argc, const char ** argv)
         free_obj (s,10);
        }
      else
-       if (WClient_getWFile (s, makeS(comp), offset, makeS(target), wfn))
+       if (WClient_getWFile (s, offset, makeS(target), wfn))
          {
            fprintf (stderr, "WClient_getWFile error : request not satisfied\n");
            free_obj(s, 8);
@@ -218,7 +212,7 @@ int main (int argc, const char ** argv)
           }
         else
           {
-           if (WClient_getFiltredWFile (s, makeS (comp), offset, makeS (what), makeS (pattern), makeS (target), wfn))
+           if (WClient_getFiltredWFile (s, offset, makeS (what), makeS (pattern), makeS (target), wfn))
              {
               fprintf (stderr, "WClient_getFiltredWFile error: request not satisfied\n");
               free_obj(s, 11);
@@ -227,7 +221,7 @@ int main (int argc, const char ** argv)
       }
     else
       {
-        if (WClient_getWRecord (s, makeS(comp), offset, makeS(target), wfn))
+        if (WClient_getWRecord (s, offset, makeS(target), wfn))
           {
             fprintf (stderr, "WClient_getWRecord error: request not satisfied\n");
             free_obj(s, 9);

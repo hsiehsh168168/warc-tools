@@ -108,20 +108,22 @@ WPRIVATE void  * recoverFName ( const char * uri,warc_u32_t * position)
 /**
  * @param fname: the name of the wanted file
  * @param offset: the offset from where the data will be sent
+ * @param prefix: the directory to create temporary file
  *
  * @return False if succeed, True otherwise
  *
  * Sends a full file response to the client
  */
 
-WPRIVATE warc_bool_t WSend_fullResponse (const warc_u8_t * fname, wfile_comp_t cmode, warc_u32_t offset)
+WPRIVATE warc_bool_t WSend_fullResponse (const warc_u8_t * fname, const warc_u8_t * prefix,warc_u32_t offset)
 {
    FILE          *   f        = NIL;
    warc_u8_t     *   buffer   = NIL;
    warc_u32_t        fsize    = 0  ;
    warc_u32_t        filled   = 0  ;
    warc_u32_t        sentsize = 0  ;
-
+   void          *    w = NIL;
+   wfile_comp_t      cmode    = WARC_FILE_UNCOMPRESSED;
 
   buffer = wmalloc (MAX_BUFFER_SIZE);
   
@@ -145,6 +147,24 @@ WPRIVATE warc_bool_t WSend_fullResponse (const warc_u8_t * fname, wfile_comp_t c
     
     return (WARC_TRUE);
     }
+
+    w = bless (WFile, fname, WARC_MAX_SIZE,
+               WARC_FILE_READER, WARC_FILE_DETECT_COMPRESSION, prefix);
+
+
+    unless (w)
+      {
+      fprintf (stdout, "content-type: text/html\n\n");
+      fprintf (stdout, "<html>\n<body>\n"); 
+      fprintf (stdout, "<font color=red size = 4>File not found</font><br>");
+      w_fclose (f);
+      return (WARC_TRUE);
+      }
+
+   cmode = WFile_getCompressionMode (w);
+
+   destroy (w);
+
 
    if (cmode == WARC_FILE_COMPRESSED_GZIP)
           fprintf (stdout, "content-type: application/x-gzip, \r\n\r\n");
@@ -183,7 +203,6 @@ WPRIVATE warc_bool_t WSend_fullResponse (const warc_u8_t * fname, wfile_comp_t c
 /**
  * @param fname: the name of the wanted file
  * @param prefix: the directory leading to the file location
- * @param cmode: the compression mode
  * @param offset: the offset from where the data will be sent
  *
  * @return False if succeed, True otherwise
@@ -191,7 +210,7 @@ WPRIVATE warc_bool_t WSend_fullResponse (const warc_u8_t * fname, wfile_comp_t c
  * Sends a Warc Record Response
  */
 
-WPRIVATE warc_bool_t WSend_record (const warc_u8_t * fname, const warc_u8_t * prefix, wfile_comp_t cmode, warc_u32_t offset)
+WPRIVATE warc_bool_t WSend_record (const warc_u8_t * fname, const warc_u8_t * prefix, warc_u32_t offset)
 {
     void        *     w         = NIL;
     void        *     record    = NIL;
@@ -199,10 +218,11 @@ WPRIVATE warc_bool_t WSend_record (const warc_u8_t * fname, const warc_u8_t * pr
     warc_u32_t        rsize     = 0  ;
     warc_u32_t        sentsize  = 0  ;
     warc_i32_t        filled    = 0  ;
+    wfile_comp_t      cmode    = WARC_FILE_UNCOMPRESSED;
 
 
     w = bless (WFile, fname, WARC_MAX_SIZE,
-               WARC_FILE_READER, cmode, prefix);
+               WARC_FILE_READER, WARC_FILE_DETECT_COMPRESSION, prefix);
 
     unless (w)
       {
@@ -247,6 +267,7 @@ WPRIVATE warc_bool_t WSend_record (const warc_u8_t * fname, const warc_u8_t * pr
       return (WARC_TRUE);
      }
     
+    cmode = WFile_getCompressionMode (w);
     
     if (cmode == WARC_FILE_COMPRESSED_GZIP)
           fprintf (stdout, "content-type: application/x-gzip, \r\n\r\n");
@@ -287,7 +308,6 @@ WPRIVATE warc_bool_t WSend_record (const warc_u8_t * fname, const warc_u8_t * pr
 /**
  * @param fname: the name of the wanted file
  * @param prefix: the directory leading to the file location
- * @param cmode: the compression mode
  * @param offset: the offset from where the data will be sent
  * @param fdfilter: fileld to filter (uri or content type)
  * @param filter: value of filter
@@ -298,7 +318,7 @@ WPRIVATE warc_bool_t WSend_record (const warc_u8_t * fname, const warc_u8_t * pr
  */
 
 
-WPRIVATE warc_bool_t WSend_filtredResponse (const warc_u8_t * fname, const warc_u8_t * prefix, wfile_comp_t cmode, warc_u32_t offset,
+WPRIVATE warc_bool_t WSend_filtredResponse (const warc_u8_t * fname, const warc_u8_t * prefix, warc_u32_t offset,
                                 const warc_u8_t * fdfilter,const warc_u8_t * filter)
 {
   void         *    w         = NIL;
@@ -309,10 +329,10 @@ WPRIVATE warc_bool_t WSend_filtredResponse (const warc_u8_t * fname, const warc_
   warc_u32_t        sentsize  = 0  ;
   warc_i32_t        filled    = 0  ;
   warc_u32_t        rectype = 0;
- 
+  wfile_comp_t      cmode    = WARC_FILE_UNCOMPRESSED;
  
   w = bless (WFile, fname, WARC_MAX_SIZE,
-               WARC_FILE_READER, cmode, prefix);
+               WARC_FILE_READER, WARC_FILE_DETECT_COMPRESSION, prefix);
 
   unless (w)
       {
@@ -330,6 +350,8 @@ WPRIVATE warc_bool_t WSend_filtredResponse (const warc_u8_t * fname, const warc_
        destroy (w);
        return (WARC_TRUE);
       }
+   
+   cmode = WFile_getCompressionMode (w);
 
    if (cmode == WARC_FILE_COMPRESSED_GZIP)
                fprintf (stdout, "content-type: application/x-gzip, \r\n\r\n");
@@ -459,14 +481,13 @@ WPRIVATE warc_bool_t WSend_filtredResponse (const warc_u8_t * fname, const warc_
 /**
  * @param fname: the name of the wanted file
  * @param prefix: the directory leading to the file location
- * @param cmode: the compression mode
  * @param offset: the offset from where the data will be sent
 
  * 
  * Sends a distant listing of the records in the warc file
  */
 
-WPRIVATE warc_bool_t WSend_distantDumpResponse (const warc_u8_t * fname, const warc_u8_t * prefix, wfile_comp_t cmode,
+WPRIVATE warc_bool_t WSend_distantDumpResponse (const warc_u8_t * fname, const warc_u8_t * prefix,
                                                                                      warc_u32_t offset)
 {
   void      *     w      = NIL;
@@ -479,7 +500,7 @@ WPRIVATE warc_bool_t WSend_distantDumpResponse (const warc_u8_t * fname, const w
  
 
    w = bless (WFile, fname, WARC_MAX_SIZE,
-                WARC_FILE_READER, cmode, prefix);
+                WARC_FILE_READER, WARC_FILE_DETECT_COMPRESSION, prefix);
 
   
    unless (w)
@@ -683,13 +704,10 @@ WPRIVATE warc_bool_t WSend_distantDumpResponse (const warc_u8_t * fname, const w
 int main()
 {
 
-    wfile_comp_t     cmode;
     const warc_u8_t   *   reqnature;
-    const warc_u8_t   *   cpmod ;
     const warc_u8_t   *   fname ;
     const warc_u8_t   *   ofrec;
     void         *   objfile;
-    void         *   objmode;
     void         *   objrec;
     void         *   objnature;
 
@@ -747,34 +765,13 @@ int main()
                       fprintf (stdout, "</body>\n</html>\n");
                       return 1;
                       }
-    objmode = recoverUriField (r, & pos);
-    cpmod = WString_getText (objmode);
    
-    if ( w_strcmp (cpmod, uS ("uncompressed")))
-      {
-       if (  w_strcmp (cpmod, uS ("gzip")))
-          {
-             destroy (objnature);
-             destroy (objmode);
-             fprintf (stdout, "content-type: text/html\n\n");
-             fprintf (stdout, "<html>\n<body>\n");
-             fprintf (stdout, "<FONT SIZE = 4 COLOR = blue> mode of compression not recognized </FONT>\n<br>");
-             fprintf (stdout, "</body>\n</html>\n");
-             return 1;
-          }
-       else
-         cmode = WARC_FILE_COMPRESSED_GZIP;
-      }
-        
-    else
-        cmode = WARC_FILE_UNCOMPRESSED;
          
    objrec = recoverUriField (r, & pos);
    ofrec  = WString_getText(objrec);
     
    if ( w_atou(ofrec, w_strlen (ofrec), (warc_u32_t *) & offset))
       {
-        destroy (objmode);
         destroy (objrec);
         destroy (objnature);
         fprintf (stdout, "content-type: text/html\n\n");
@@ -802,7 +799,6 @@ int main()
                         {
                         fprintf (stdout, "content-type: text/html\n\n");
                         fprintf (stdout, "<html>\n<body>\n");
-                        destroy (objmode);
                         destroy (objrec);
                         destroy (objnature);
                         destroy (objfdfilter);
@@ -818,7 +814,7 @@ int main()
         fname =   WString_getText(objfile);
 
      
-      if (WSend_filtredResponse (fname, prefix, cmode, offset, fdfilter, filter))
+      if (WSend_filtredResponse (fname, prefix, offset, fdfilter, filter))
          {
          fprintf (stdout, "<font color=red size=4>Filtred File sending aborted</font><br>");
          fprintf (stdout, "</body>\n</html>\n");
@@ -828,7 +824,6 @@ int main()
      
 
       destroy (objfile);
-      destroy (objmode);
       destroy (objrec);
       destroy (objnature);
       destroy (objfilter);
@@ -847,7 +842,7 @@ int main()
  
       
    
-      if (WSend_distantDumpResponse (fname, prefix, cmode, offset))
+      if (WSend_distantDumpResponse (fname, prefix, offset))
 
          {
          fprintf (stdout, "<font color=red size=4> Records listing aborted</font><br>");
@@ -855,7 +850,6 @@ int main()
          }
 
     destroy (objrec);
-    destroy (objmode);
     destroy (objfile);
     destroy (objnature);
     return 1;
@@ -868,7 +862,7 @@ int main()
          
      
       
-      if (WSend_fullResponse (fname, cmode, offset))
+      if (WSend_fullResponse (fname, prefix, offset))
          {
           
           fprintf (stdout, "<font color=red size=4> File sending aborted</font><br>");
@@ -876,7 +870,6 @@ int main()
          }
 
     destroy (objrec);
-    destroy (objmode);
     destroy (objfile);
     destroy (objnature);
     return 1;
@@ -889,7 +882,7 @@ int main()
     {
      
 
-    if (WSend_record (fname, prefix, cmode, offset))
+    if (WSend_record (fname, prefix, offset))
          {
 
           fprintf (stdout, "<font color=red size=4> Record sending aborted</font><br>");
@@ -898,7 +891,6 @@ int main()
          }
 
     destroy (objfile);
-    destroy (objmode);
     destroy (objrec);
     destroy (objnature);
 
@@ -909,7 +901,6 @@ int main()
   
 
  destroy (objrec);
- destroy (objmode);
  destroy (objfile);
  destroy (objnature); 
 

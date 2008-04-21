@@ -44,6 +44,7 @@ extern "C"
     extern FILE *      WFile_getFile     (const void * const);
     extern warc_i32_t  WFile_fileno      (void *);
     extern warc_bool_t WFile_fillBuffer  (void *, char *, warc_u32_t, warc_i32_t *);
+    extern wfile_comp_t WFile_getCompressionMode (const void * const );
 
 #ifdef __cplusplus
   }

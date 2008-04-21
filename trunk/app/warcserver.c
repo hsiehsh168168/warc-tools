@@ -130,7 +130,7 @@ int main (int argc, const char ** argv)
     }
 
   s = bless (WServer, makeS (ip), port, makeS (sn), 
-             makeS (prefix), wdir);
+             makeS (prefix), makeS (wdir));
 
   unless (s)
   {
