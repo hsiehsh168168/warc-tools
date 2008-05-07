@@ -101,7 +101,7 @@ mod_apache    =$(APACHE)/mod_warc
 
 MAKE	  = make
 
-AR		  = AR
+AR		  = ar
 RANLIB	  = ranlib
 
 GCC       = gcc
