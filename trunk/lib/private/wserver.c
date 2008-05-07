@@ -49,6 +49,7 @@
 #include <wlist.h>    /* for class's prototypes */
 #include <wfile.x>    /* WFile_getFile */
 #include <wversion.h> /* the warc version */
+#include <wregexp.h>  /* for cla&ss's prototypes */
 
 #include <event.h>    /* event structures and functions */
 #include <evhttp.h>   /* evhttp structures and functions */
@@ -66,6 +67,10 @@
 
 #define makeS(s) (s), w_strlen ((s))
 
+/**
+ * Argument for the events callback functions
+ */
+
 struct Callbacks_arg 
 {
   struct event_base * base;
@@ -74,6 +79,10 @@ struct Callbacks_arg
   void              * server_tdir;
   warc_bool_t         shoot_down;
 };
+
+/**
+ * The requests kinds
+ */
 
 typedef enum 
   {
@@ -84,16 +93,31 @@ typedef enum
   } warc_request_t;
 
 
+/**
+ * types for the filter request targeted field
+ */
+
 typedef enum
   {
-    WARC_URI = 0,
+    WARC_URI = 0, /* for  */
     WARC_MIME,
     WARC_RTYPE
   } warc_filters_t;
 
 
+/**
+ * types for list request output formats
+ */
+typedef enum
+   {
+   WARC_XML = 0,
+   WARC_JSON,
+   WARC_HTML,
+   WARC_TEXT
+   } warc_list_output;
+
 /* function for matching little string in a big string */
-WPRIVATE warc_bool_t match (const warc_u8_t * bigstring, warc_u32_t   bigstringlen,
+/*WPRIVATE warc_bool_t match (const warc_u8_t * bigstring, warc_u32_t   bigstringlen,
                    const warc_u8_t * pattern,   warc_u32_t   patternlen)
 {
   unless (bigstring)
@@ -106,6 +130,85 @@ WPRIVATE warc_bool_t match (const warc_u8_t * bigstring, warc_u32_t   bigstringl
     return (WARC_TRUE);
 
   return (WARC_FALSE);
+}*/
+
+/**
+ * @param src_string: the origin string to convert
+ * @param srclen: the length of the source string
+ * @param xml_string: the de output XML string
+ *
+ * @return a warc_u8_t * if succeed, NIL otherwise
+ *
+ * Recode the XML special characters in the source string 
+ * by their equivalent XML encoding string
+ */
+
+
+WPRIVATE warc_u8_t * xml_recode (const warc_u8_t * src_string, warc_u32_t srclen, warc_u8_t * xml_string)
+{
+    warc_u32_t i = 0;
+    warc_u32_t j = 0;
+    warc_u8_t  c = ' ';
+
+  unless (src_string || srclen)
+    return (NIL);
+
+  xml_string[0] = 0;
+
+  for (i = 0; (i < srclen && src_string[i] != 0); i++)
+    {
+    c = src_string[i];
+    switch (c)
+        {
+        case '&': xml_string[j]='&';
+                  xml_string[j+1]='a';
+                  xml_string[j+2]='m';
+                  xml_string[j+3]='p';
+                  xml_string[j+4]=';';
+                  j = j+5;
+                  break;
+
+        case '<': xml_string[j]='&';
+                  xml_string[j+1]='l';
+                  xml_string[j+2]='t';
+                  xml_string[j+3]=';';
+                  j = j+4;
+                  break;
+
+        case '>': xml_string[j]='&';
+                  xml_string[j+1]='g';
+                  xml_string[j+2]='t';
+                  xml_string[j+3]=';';
+                  j = j+4;
+                  break;
+
+        case '"': xml_string[j]='&';
+                  xml_string[j+1]='q';
+                  xml_string[j+2]='u';
+                  xml_string[j+3]='o';
+                  xml_string[j+4]='t';
+                  xml_string[j+5]=';';
+                  j = j+6;
+                  break;
+
+        case '\'': xml_string[j]='&';
+                   xml_string[j+1]='a';
+                   xml_string[j+2]='q';
+                   xml_string[j+3]='u';
+                   xml_string[j+4]='o';
+                   xml_string[j+5]='t';
+                   xml_string[j+6]=';';
+                  j = j+7;
+                  break;
+
+        default: xml_string[j] = src_string[i];
+                 j++;
+        }
+    }
+xml_string [j] = '\0';
+
+return (xml_string);
+
 }
 
 
@@ -209,10 +312,11 @@ WPRIVATE void * WServer_getUriFileName (const warc_u8_t * uri,
 
 /**
  * @param uri: the uri to parse
- * @param fname: the requested warc file name as a WString (must be blessed before calling, will be filled in the function)
- * @param offset: the offset of the record in the warc file
- * @param what: if the we have a filter request, it indicates on what we have to filter
- * @param value: the value with which we will compare for the filter as a WString 
+ * @param fname[out]: the requested warc file name as a WString (must be blessed before calling, will be filled in the function)
+ * @param offset[out]: the offset of the record in the warc file
+ * @param what[out]: if the we have a filter request, it indicates on what we have to filter
+ * @param value[out]: the value with which we will compare for the filter as a WString 
+ * @param out[out]: if we have a list request, it will contain the output format indicator
  * @param kind: what is requested
  * 
  * @return False if succeeds, True otherwise
@@ -225,6 +329,7 @@ WPRIVATE warc_bool_t WServer_parseRequest (const warc_u8_t * uri,
                                            warc_i32_t      * offset, 
                                            warc_filters_t  * what,
                                            void            * value,
+                                           warc_list_output  * out,
                                            warc_request_t  * kind)
 {
   void       * item      = NIL;
@@ -343,7 +448,52 @@ WPRIVATE warc_bool_t WServer_parseRequest (const warc_u8_t * uri,
              (warc_u32_t *) offset);
      pos = pos + WString_getLength (item) + 1;
      destroy (item);
-  
+
+    item = WServer_getUriNextItem (uri, pos);
+
+    unless (item)
+      return (WARC_TRUE);
+
+    unless (w_strcmp (WString_getText (item), 
+                    (const warc_u8_t *) "xml"))
+      {
+      * out = WARC_XML;
+
+      pos = pos + WString_getLength (item)+1;
+      destroy (item);
+
+      }
+    else
+    unless (w_strcmp (WString_getText (item), 
+            (const warc_u8_t * ) "html"))
+      {
+      * out = WARC_HTML;
+
+      pos = pos + WString_getLength (item)+1;
+      destroy (item);
+
+      }
+    else
+    unless (w_strcmp (WString_getText (item), 
+            (const warc_u8_t * ) "text"))
+      {
+      * out = WARC_TEXT;
+
+      pos = pos + WString_getLength (item)+1;
+      destroy (item);
+
+      }
+    else
+    unless (w_strcmp (WString_getText (item), 
+            (const warc_u8_t * ) "json"))
+      {
+      * out = WARC_JSON;
+
+      pos = pos + WString_getLength (item)+1;
+      destroy (item);
+
+      }
+
      item = WServer_getUriFileName (uri, pos);
      unless (item)
        return (WARC_TRUE);
@@ -877,60 +1027,261 @@ WPRIVATE warc_bool_t WSend_record (void * fname, void * tmp, warc_i32_t offset, 
 
 
 /**
- * @param fname: the name of the warc file as a WString
- * @param tmp: the temporary files directory
- * @param offset: the offset of the wanted record
+ * @param fname: the name of the concerned warc file as a WString
  * @param server_name: the server_name as a WString
+ * @param wfile: the warc file to dump
  * @param req: the request object used in the response
  * @param buf: the buffer object used in the response
- * 
+ *
  * @return False if succeeds, True otherwise
  *
- * Send informations about a warc file from a specified offset
+ * Builds an XML output to be sent by the list request
  */
 
-WPRIVATE warc_bool_t WSend_distantDumpResponse (void * fname, void * tmp, warc_i32_t offset, const void * server_name, 
-                                                            struct evhttp_request * req, struct evbuffer * buf)
+WPRIVATE warc_bool_t WBuildXmlOutput (void * fname, const void * server_name, void * wfile, 
+                                     struct evhttp_request * req, struct evbuffer * buf)
 {
-    void        *    wfile     = NIL ;
-    void        *    wrecord   = NIL ;
-    warc_u32_t       cpt       = 0   ;
+    void * wrecord     =  NIL;
+    warc_u32_t cpt     =  0;
+    warc_u8_t        xmlstr[256];
 
-   /* 100 isn't used inside the bless below because of reading */
-   wfile = bless (WFile, WString_getText (fname), 100, 
-                  WARC_FILE_READER, WARC_FILE_DETECT_COMPRESSION, WString_getText (tmp), WString_getLength (tmp));
-   unless (wfile)
-     {
-      evbuffer_add_printf (buf, "<center><font color=darkred>File %s not Found\r\n</font></center><br>", WString_getText (fname));
 
-      evhttp_add_header (req -> output_headers, 
-                       "Server", (const char *) WString_getText(server_name));
-      
-      evhttp_add_header (req -> output_headers, 
-                       "Warc-Version", (const char *) WARC_VERSION);
+   evbuffer_add_printf (buf, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n");
+   evbuffer_add_printf (buf, "<warcfile name=\"%s\" size=\"%llu\">\r\n", (const char *) WString_getText (fname), 
+                                                                 (unsigned long long)WFile_getFileSize (wfile)); 
 
-      evhttp_send_reply (req, HTTP_NOTFOUND, "File not found", buf);
+  while (WFile_hasMoreRecords (wfile) )
+    {
+      const void * al  = NIL; /* ANVL list object */
+      warc_bool_t  m   = WARC_FALSE;
+      const warc_u8_t * string = NIL;
+      warc_u32_t   tlen = 0;
 
-      return (WARC_TRUE);
-     }
-      
-   /* Seeking the requird record*/
-   if (WFile_seek (wfile, offset))
-     {
-       evbuffer_add_printf (buf, "<center><font color=darkred>Offset can not be reached\r\n</font></center><br>");
+      unless ( (wrecord = WFile_nextRecord (wfile) ) )
+          {
+          evhttp_add_header (req -> output_headers, 
+                         "Content-Type", "text/html");
+          evbuffer_add_printf (buf, "<center><font color=darkred>Bad record found!\r\n</font></center><br>");
 
-       evhttp_add_header (req -> output_headers, 
-                      "Server", (const char *) WString_getText(server_name));
+          evhttp_add_header (req -> output_headers, 
+                         "Server", (const char *) WString_getText(server_name));
      
-       evhttp_add_header (req -> output_headers, 
+          evhttp_add_header (req -> output_headers, 
+                         "Warc-Version", (const char *) WARC_VERSION);
+
+          evhttp_send_reply (req, HTTP_NOTFOUND, "Bad Record", buf);
+
+          break;
+         }
+
+      cpt ++;
+      /* dump WRecord */
+      evbuffer_add_printf (buf, "<warc-record rank=\"%d\" ", cpt );
+
+      evbuffer_add_printf (buf, "offset=\"%llu\" ", (unsigned long long) WRecord_getOffset (wrecord) );
+
+      evbuffer_add_printf (buf, "compressed-size=\"%llu\" ", (unsigned long long) WRecord_getCompressedSize (wrecord) );
+
+      evbuffer_add_printf (buf, "uncompressed-size=\"%llu\" ", (unsigned long long) WRecord_getUncompressedSize (wrecord) );
+
+      /* Preprocessing for xml viewing */
+      xml_recode (makeS (WRecord_getWarcId (wrecord)), xmlstr);
+      evbuffer_add_printf (buf, "warc-id=\"%s\" ", (const char *) xmlstr);
+
+      evbuffer_add_printf (buf, "content-length=\"%u\" ", WRecord_getContentLength  (wrecord) );
+
+      evbuffer_add_printf (buf, "warc-type=\"%u\" ", WRecord_getRecordType  (wrecord) );
+
+      xml_recode (makeS (WRecord_getDate (wrecord)), xmlstr);
+      evbuffer_add_printf (buf, "warc-date=\"%s\" ", (const char *) xmlstr );
+
+      xml_recode ( makeS (WRecord_getRecordId (wrecord)), xmlstr);
+      evbuffer_add_printf (buf, "warc-record-id=\"%s\">\r\n", (const char *) xmlstr);
+
+      string = WRecord_getContentType (wrecord);
+      if (string)
+         {
+         xml_recode ( makeS (string), xmlstr);
+         evbuffer_add_printf (buf, "<content-type value=\"%s\"/>\r\n", (const char *) xmlstr);
+         m = WARC_TRUE;
+         }
+
+      string = WRecord_getConcurrentTo (wrecord);
+      if (string)
+         {
+         xml_recode ( makeS (string), xmlstr);
+         evbuffer_add_printf (buf, "<warc-concurrent-to value=\"%s\"/>\r\n", (const char *) xmlstr);
+         m = WARC_TRUE;
+         }
+
+      string = WRecord_getBlockDigest (wrecord);
+      if (string)
+         {
+         xml_recode ( makeS (string), xmlstr);
+         evbuffer_add_printf (buf, "<warc-block-digest value=\"%s\"/>\r\n", (const char *) xmlstr);
+         m = WARC_TRUE;
+         }
+
+      string = WRecord_getPayloadDigest (wrecord);
+      if (string)
+         {
+         xml_recode ( makeS (string), xmlstr);
+         evbuffer_add_printf (buf, "<warc-payload-digest value=\"%s\"/>\r\n", (const char *) xmlstr);
+         m = WARC_TRUE;
+         }
+
+      string = WRecord_getIpAddress (wrecord);
+      if (string)
+         {
+         xml_recode ( makeS (string), xmlstr);
+         evbuffer_add_printf (buf, "<warc-ip-address value=\"%s\"/>\r\n", (const char *) xmlstr);
+         m = WARC_TRUE;
+         }
+
+      string = WRecord_getRefersTo (wrecord);
+      if (string)
+         {
+         xml_recode ( makeS (string), xmlstr);
+         evbuffer_add_printf (buf, "<warc-refers-to value=\"%s\"/>\r\n", (const char *) xmlstr);
+         m = WARC_TRUE;
+         }
+
+      string = WRecord_getTargetUri (wrecord);
+      if (string)
+        {
+         xml_recode ( makeS (string), xmlstr);
+         evbuffer_add_printf (buf, "<warc-taget-uri value=\"%s\"/>\r\n", (const char *) xmlstr );
+         m = WARC_TRUE;
+        }
+
+      string = WRecord_getTruncated (wrecord);
+      if (string)
+         {
+         xml_recode ( makeS (string), xmlstr);
+         evbuffer_add_printf (buf, "<warc-truncated value=\"%s\"/>\r\n", (const char *) xmlstr);
+         m = WARC_TRUE;
+         }
+
+      string = WRecord_getWarcInfoId (wrecord);
+      if (string)
+         {
+         xml_recode ( makeS (string), xmlstr);
+         evbuffer_add_printf (buf, "<warc-info-id value=\"%s\"/>\r\n", (const char *) xmlstr);
+         m = WARC_TRUE;
+         }
+
+      string = WRecord_getFilename (wrecord);
+      if (string)
+         {
+         xml_recode ( makeS (string), xmlstr);
+         evbuffer_add_printf (buf, "<warc-filename value=\"%s\"/>\r\n", (const char *) xmlstr);
+         m = WARC_TRUE;
+         }
+
+      string = WRecord_getProfile (wrecord);
+      if (string)
+         {
+         xml_recode ( makeS (string), xmlstr);
+         evbuffer_add_printf (buf, "<warc-profile value=\"%s\"/>\r\n", (const char *) xmlstr);
+         m = WARC_TRUE;
+         }
+
+      string = WRecord_getPayloadType (wrecord);
+      if (string)
+         {
+         xml_recode ( makeS (string), xmlstr);
+         evbuffer_add_printf (buf, "<warc-identrified-payload-type value=\"%s\"/>\r\n", (const char *) xmlstr);
+         m = WARC_TRUE;
+         }
+
+      string = WRecord_getSegmentOriginId (wrecord);
+      if (string)
+         {
+         xml_recode ( makeS (string), xmlstr);
+         evbuffer_add_printf (buf, "<warc-segment-origin-id value=\"%s\"/>\r\n", (const char *) xmlstr);
+
+         evbuffer_add_printf (buf, "<warc-segment-nummber value=\"%d\"/>\r\n",  WRecord_getSegmentNumber (wrecord));
+         m = WARC_TRUE;
+         }
+
+      tlen = WRecord_getSegTotalLength (wrecord);
+      if (tlen)
+         {
+         evbuffer_add_printf (buf, "<warc-segment-total-length value=\"%d\"/>\r\n", tlen);
+         m = WARC_TRUE;
+         }
+
+
+      /* dump ANVLs */
+
+      if ((al = WRecord_getAnvl (wrecord) ))
+        {
+
+          warc_u32_t  i = 0;
+          warc_u32_t  j = WList_size (al); /* how many ANVL are there? */
+
+
+         if (j)
+           {
+           evbuffer_add_printf (buf, "<extra-fields>\r\n");
+           while ( i < j )
+               {
+                 const void  * a = WList_get (al, i); /* ANVL record */
+   
+                 /* we assume here that the ANVL value was in ASCII. */
+                 /* use your own encoding to print it otherwise. */
+
+                 evbuffer_add_printf (buf , "<field key=\"%s\" value=\"%s\"/>", (char *) xml_recode (makeS (WAnvl_getKey (a)), xmlstr), 
+                                      (char *) xml_recode (makeS (WAnvl_getValue (a)), xmlstr) );
+
+                 ++ i;
+               }
+          evbuffer_add_printf (buf, "</extra-fields>\r\n");
+           }
+        }
+
+      destroy (wrecord);
+      evbuffer_add_printf (buf, "</warc-record>\r\n");
+    }
+   
+   evbuffer_add_printf (buf, "</warcfile>\r\n");
+
+
+   evhttp_add_header (req -> output_headers, 
+                      "Server", (const char *) WString_getText(server_name));
+      
+   evhttp_add_header (req -> output_headers, 
                       "Warc-Version", (const char *) WARC_VERSION);
 
-       evhttp_send_reply (req, HTTP_NOTFOUND, "Bad offset", buf);
-       destroy (wfile);
+   evhttp_add_header (req -> output_headers, 
+                      "Content-Type", "text/xml");
 
-       return (WARC_TRUE);
-     }
-      
+  return (WARC_FALSE);
+}
+
+
+/**
+ * @param fname: the name of the concerned warc file as a WString
+ * @param server_name: the server_name as a WString
+ * @param wfile: the warc file to dump
+ * @param req: the request object used in the response
+ * @param buf: the buffer object used in the response
+ *
+ * @return False if succeeds, True otherwise
+ *
+ * Builds an HtML output to be sent by the list request
+ */
+
+WPRIVATE warc_bool_t WBuildHtmlOutput (void * fname, const void * server_name, void * wfile, 
+                                     struct evhttp_request * req, struct evbuffer * buf)
+{
+    void * wrecord     =  NIL;
+    warc_u32_t cpt     =  0;
+/*    warc_u8_t        xmlstr[256]; */
+
+
+   evbuffer_add_printf (buf, "<font size=5><b>warcfile:</B></font><font size=3> name=\"%s\" size=\"%llu\"\r\n</font><BR><br>", (const char *) WString_getText (fname), 
+                                                                 (unsigned long long)WFile_getFileSize (wfile));
 
   while (WFile_hasMoreRecords (wfile) )
     {
@@ -958,25 +1309,25 @@ WPRIVATE warc_bool_t WSend_distantDumpResponse (void * fname, void * tmp, warc_i
       /* dump WRecord */
       evbuffer_add_printf (buf, "<font color=darkblue size = 5> <b> Warc Record: %d</b> </font>", cpt);
       evbuffer_add_printf (buf, "<blockquote> <table BORDER = 2 bgcolor=lightgray>");
-      evbuffer_add_printf (buf, "<tr><td><font color=darkgreen size = 3> Offset </font></td><td>%-10llu</td></tr>",
+      evbuffer_add_printf (buf, "<tr><td><font color=darkgreen size = 3> Offset </font></td><td>%llu</td></tr>",
                               (unsigned long long) WRecord_getOffset (wrecord) );
 
-      evbuffer_add_printf (buf, "<tr><td><font color=darkgreen size = 3> Compressed size </font></td><td>%-10llu</td></tr>",
+      evbuffer_add_printf (buf, "<tr><td><font color=darkgreen size = 3> Compressed size </font></td><td>%llu</td></tr>",
                               (unsigned long long) WRecord_getCompressedSize (wrecord) );
 
-      evbuffer_add_printf (buf, "<tr><td><font color=darkgreen size = 3> Warc ID </font></td><td>%-10s</td></tr> ",
+      evbuffer_add_printf (buf, "<tr><td><font color=darkgreen size = 3> Warc ID </font></td><td>%s</td></tr> ",
                               (const char *) WRecord_getWarcId      (wrecord) );
 
-      evbuffer_add_printf (buf, "<tr><td><font color=darkgreen size = 3> Content-Length </font></td><td>%-10u</td></tr>",
+      evbuffer_add_printf (buf, "<tr><td><font color=darkgreen size = 3> Content-Length </font></td><td>%u</td></tr>",
                               WRecord_getContentLength  (wrecord) );
 
-      evbuffer_add_printf (buf, "<tr><td><font color=darkgreen size = 3> WARC-Type </font></td><td>%-15u</td></tr>",
+      evbuffer_add_printf (buf, "<tr><td><font color=darkgreen size = 3> WARC-Type </font></td><td>%u</td></tr>",
                               WRecord_getRecordType  (wrecord) );
 
-      evbuffer_add_printf (buf, "<tr><td><font color=darkgreen size = 3> WARC-Date </font></td><td>%-14s</td></tr>",
+      evbuffer_add_printf (buf, "<tr><td><font color=darkgreen size = 3> WARC-Date </font></td><td>%s</td></tr>",
                               (const char *) WRecord_getDate (wrecord) );
 
-      evbuffer_add_printf (buf, "<tr><td><font color=darkgreen size = 3> WARC-Record-ID </font></td><td>%-56s</td></tr>",
+      evbuffer_add_printf (buf, "<tr><td><font color=darkgreen size = 3> WARC-Record-ID </font></td><td>%s</td></tr>",
                               (const char *) WRecord_getRecordId    (wrecord) );
 
       evbuffer_add_printf (buf, "</table></blockquote><br>");
@@ -987,7 +1338,7 @@ WPRIVATE warc_bool_t WSend_distantDumpResponse (void * fname, void * tmp, warc_i
       string = WRecord_getContentType (wrecord);
       if (string)
          {
-         evbuffer_add_printf (buf, "<tr><td><font color=darkgreen size = 3> Content-Type </font></td><td>%-20s</td></tr>",
+         evbuffer_add_printf (buf, "<tr><td><font color=darkgreen size = 3> Content-Type </font></td><td>%s</td></tr>",
                               (const char *) string);
          m = WARC_TRUE;
          }
@@ -995,7 +1346,7 @@ WPRIVATE warc_bool_t WSend_distantDumpResponse (void * fname, void * tmp, warc_i
       string = WRecord_getConcurrentTo (wrecord);
       if (string)
          {
-         evbuffer_add_printf (buf, "<tr><td><font color=darkgreen size = 3> WARC-Concurrent-To </font></td><td>%-20s</td></tr>",
+         evbuffer_add_printf (buf, "<tr><td><font color=darkgreen size = 3> WARC-Concurrent-To </font></td><td>%s</td></tr>",
                               (const char *) string);
          m = WARC_TRUE;
          }
@@ -1003,7 +1354,7 @@ WPRIVATE warc_bool_t WSend_distantDumpResponse (void * fname, void * tmp, warc_i
       string = WRecord_getBlockDigest (wrecord);
       if (string)
          {
-         evbuffer_add_printf (buf, "<tr><td><font color=darkgreen size = 3> WARC-Block-Digest </font></td><td>%-20s</td></tr>",
+         evbuffer_add_printf (buf, "<tr><td><font color=darkgreen size = 3> WARC-Block-Digest </font></td><td>%s</td></tr>",
                               (const char *) string);
          m = WARC_TRUE;
          }
@@ -1011,7 +1362,7 @@ WPRIVATE warc_bool_t WSend_distantDumpResponse (void * fname, void * tmp, warc_i
       string = WRecord_getPayloadDigest (wrecord);
       if (string)
          {
-         evbuffer_add_printf (buf, "<tr><td><font color=darkgreen size = 3> WARC-Payload-Digest </font></td><td>%-20s</td></tr>",
+         evbuffer_add_printf (buf, "<tr><td><font color=darkgreen size = 3> WARC-Payload-Digest </font></td><td>%s</td></tr>",
                               (const char *) string);
          m = WARC_TRUE;
          }
@@ -1019,7 +1370,7 @@ WPRIVATE warc_bool_t WSend_distantDumpResponse (void * fname, void * tmp, warc_i
       string = WRecord_getIpAddress (wrecord);
       if (string)
          {
-         evbuffer_add_printf (buf, "<tr><td><font color=darkgreen size = 3> WARC-IP-Address </font></td><td>%-20s</td></tr>",
+         evbuffer_add_printf (buf, "<tr><td><font color=darkgreen size = 3> WARC-IP-Address </font></td><td>%s</td></tr>",
                               (const char *) string);
          m = WARC_TRUE;
          }
@@ -1027,7 +1378,7 @@ WPRIVATE warc_bool_t WSend_distantDumpResponse (void * fname, void * tmp, warc_i
       string = WRecord_getRefersTo (wrecord);
       if (string)
          {
-         evbuffer_add_printf (buf, "<tr><td><font color=darkgreen size = 3> WARC-Refers-To </font></td><td>%-20s</td></tr>",
+         evbuffer_add_printf (buf, "<tr><td><font color=darkgreen size = 3> WARC-Refers-To </font></td><td>%s</td></tr>",
                               (const char *) string);
          m = WARC_TRUE;
          }
@@ -1035,7 +1386,7 @@ WPRIVATE warc_bool_t WSend_distantDumpResponse (void * fname, void * tmp, warc_i
       string = WRecord_getTargetUri (wrecord);
       if (string)
         {
-         evbuffer_add_printf (buf, "<tr><td><font color=darkgreen size = 3> WARC-Target-URI </font></td><td>%-100s</td></tr>",
+         evbuffer_add_printf (buf, "<tr><td><font color=darkgreen size = 3> WARC-Target-URI </font></td><td>%s</td></tr>",
                               (const char *) string );
          m = WARC_TRUE;
          }
@@ -1043,7 +1394,7 @@ WPRIVATE warc_bool_t WSend_distantDumpResponse (void * fname, void * tmp, warc_i
       string = WRecord_getTruncated (wrecord);
       if (string)
          {
-         evbuffer_add_printf (buf, "<tr><td><font color=darkgreen size = 3> WARC-Truncated </font></td><td>%-20s</td></tr>",
+         evbuffer_add_printf (buf, "<tr><td><font color=darkgreen size = 3> WARC-Truncated </font></td><td>%s</td></tr>",
                               (const char *) string);
          m = WARC_TRUE;
          }
@@ -1051,7 +1402,7 @@ WPRIVATE warc_bool_t WSend_distantDumpResponse (void * fname, void * tmp, warc_i
       string = WRecord_getWarcInfoId (wrecord);
       if (string)
          {
-         evbuffer_add_printf (buf, "<tr><td><font color=darkgreen size = 3> WARC-warcinfo-ID </font></td><td>%-20s</td></tr>",
+         evbuffer_add_printf (buf, "<tr><td><font color=darkgreen size = 3> WARC-warcinfo-ID </font></td><td>%s</td></tr>",
                               (const char *) string);
          m = WARC_TRUE;
          }
@@ -1059,7 +1410,7 @@ WPRIVATE warc_bool_t WSend_distantDumpResponse (void * fname, void * tmp, warc_i
       string = WRecord_getFilename (wrecord);
       if (string)
          {
-         evbuffer_add_printf (buf, "<tr><td><font color=darkgreen size = 3> WARC-Filename </font></td><td>%-20s</td></tr>",
+         evbuffer_add_printf (buf, "<tr><td><font color=darkgreen size = 3> WARC-Filename </font></td><td>%s</td></tr>",
                               (const char *) string);
          m = WARC_TRUE;
          }
@@ -1067,7 +1418,7 @@ WPRIVATE warc_bool_t WSend_distantDumpResponse (void * fname, void * tmp, warc_i
       string = WRecord_getProfile (wrecord);
       if (string)
          {
-         evbuffer_add_printf (buf, "<tr><td><font color=darkgreen size = 3> WARC-Profile </font></td><td>%-20s</td></tr>",
+         evbuffer_add_printf (buf, "<tr><td><font color=darkgreen size = 3> WARC-Profile </font></td><td>%s</td></tr>",
                               (const char *) string);
          m = WARC_TRUE;
          }
@@ -1075,7 +1426,7 @@ WPRIVATE warc_bool_t WSend_distantDumpResponse (void * fname, void * tmp, warc_i
       string = WRecord_getPayloadType (wrecord);
       if (string)
          {
-         evbuffer_add_printf (buf, "<tr><td><font color=darkgreen size = 3> WARC-Identified-Payload-Type </font></td><td>%-20s</td></tr>",
+         evbuffer_add_printf (buf, "<tr><td><font color=darkgreen size = 3> WARC-Identified-Payload-Type </font></td><td>%s</td></tr>",
                               (const char *) string);
          m = WARC_TRUE;
          }
@@ -1083,10 +1434,10 @@ WPRIVATE warc_bool_t WSend_distantDumpResponse (void * fname, void * tmp, warc_i
       string = WRecord_getSegmentOriginId (wrecord);
       if (string)
          {
-         evbuffer_add_printf (buf, "<tr><td><font color=darkgreen size = 3> WARC-Segment-Origin-ID </font></td><td>%-20s</td></tr>",
+         evbuffer_add_printf (buf, "<tr><td><font color=darkgreen size = 3> WARC-Segment-Origin-ID </font></td><td>%s</td></tr>",
                               (const char *) string);
 
-         evbuffer_add_printf (buf, "<tr><td><font color=darkgreen size = 3> WARC-Segment-Number </font></td><td>%-20d</td></tr>",
+         evbuffer_add_printf (buf, "<tr><td><font color=darkgreen size = 3> WARC-Segment-Number </font></td><td>%d</td></tr>",
                              WRecord_getSegmentNumber (wrecord));
          m = WARC_TRUE;
          }
@@ -1094,7 +1445,7 @@ WPRIVATE warc_bool_t WSend_distantDumpResponse (void * fname, void * tmp, warc_i
       tlen = WRecord_getSegTotalLength (wrecord);
       if (tlen)
          {
-         evbuffer_add_printf (buf, "<tr><td><font color=darkgreen size = 3> WARC-Segment-Total-Length </font></td><td>%-20d</td></tr>",
+         evbuffer_add_printf (buf, "<tr><td><font color=darkgreen size = 3> WARC-Segment-Total-Length </font></td><td>%d</td></tr>",
                               tlen);
          m = WARC_TRUE;
          }
@@ -1146,14 +1497,706 @@ WPRIVATE warc_bool_t WSend_distantDumpResponse (void * fname, void * tmp, warc_i
    evhttp_add_header (req -> output_headers, 
                       "Content-Type", "text/html");
 
-   evhttp_send_reply (req, HTTP_OK, "OK", buf);
 
-   destroy (wfile);
 
   return (WARC_FALSE);
 }
 
 
+
+/**
+ * @param fname: the name of the concerned warc file as a WString
+ * @param server_name: the server_name as a WString
+ * @param wfile: the warc file to dump
+ * @param req: the request object used in the response
+ * @param buf: the buffer object used in the response
+ *
+ * @return False if succeeds, True otherwise
+ *
+ * Builds a Plain text output to be sent by the list request
+ */
+
+WPRIVATE warc_bool_t WBuildTextOutput (void * fname, const void * server_name, void * wfile, 
+                                     struct evhttp_request * req, struct evbuffer * buf)
+{
+    void * wrecord     =  NIL;
+    warc_u32_t cpt     =  0;
+/*    warc_u8_t        xmlstr[256]; */
+
+
+   evbuffer_add_printf (buf, "warcfile: name=\"%s\" size=\"%llu\"\r\n", (const char *) WString_getText (fname), 
+                                                                 (unsigned long long)WFile_getFileSize (wfile));
+
+  while (WFile_hasMoreRecords (wfile) )
+    {
+      const void * al  = NIL; /* ANVL list object */
+      warc_bool_t  m   = WARC_FALSE;
+      const warc_u8_t * string = NIL;
+      warc_u32_t   tlen = 0;
+
+      unless ( (wrecord = WFile_nextRecord (wfile) ) )
+          {
+          evbuffer_add_printf (buf, "<center><font color=darkred>Bad record found!\r\n</font></center><br>");
+
+          evhttp_add_header (req -> output_headers, 
+                         "Server", (const char *) WString_getText(server_name));
+     
+          evhttp_add_header (req -> output_headers, 
+                         "Warc-Version", (const char *) WARC_VERSION);
+
+          evhttp_send_reply (req, HTTP_NOTFOUND, "Bad Record", buf);
+
+          break;
+         }
+
+      cpt ++;
+      /* dump WRecord */
+      evbuffer_add_printf (buf, "- Warc Record: %d\r\n", cpt);
+      evbuffer_add_printf (buf, "\t* Offset: %llu\r\n",
+                              (unsigned long long) WRecord_getOffset (wrecord) );
+
+      evbuffer_add_printf (buf, "\t* Compressed size: %llu\r\n",
+                              (unsigned long long) WRecord_getCompressedSize (wrecord) );
+
+      evbuffer_add_printf (buf, "\t* Warc ID: %s\r\n",
+                              (const char *) WRecord_getWarcId      (wrecord) );
+
+      evbuffer_add_printf (buf, "\t* Content-Length: %u\r\n",
+                              WRecord_getContentLength  (wrecord) );
+
+      evbuffer_add_printf (buf, "\t* WARC-Type: %u\r\n",
+                              WRecord_getRecordType  (wrecord) );
+
+      evbuffer_add_printf (buf, "\t* WARC-Date: %s\r\n",
+                              (const char *) WRecord_getDate (wrecord) );
+
+      evbuffer_add_printf (buf, "\t* WARC-Record-ID: %s\r\n",
+                              (const char *) WRecord_getRecordId    (wrecord) );
+
+      evbuffer_add_printf (buf, "\r\n\t* Other Fields:\r\n");
+
+      string = WRecord_getContentType (wrecord);
+      if (string)
+         {
+         evbuffer_add_printf (buf, "\t\t@ Content-Type: %s\r\n",
+                              (const char *) string);
+         m = WARC_TRUE;
+         }
+
+      string = WRecord_getConcurrentTo (wrecord);
+      if (string)
+         {
+         evbuffer_add_printf (buf, "\t\t@ WARC-Concurrent-To: %s\r\n",
+                              (const char *) string);
+         m = WARC_TRUE;
+         }
+
+      string = WRecord_getBlockDigest (wrecord);
+      if (string)
+         {
+         evbuffer_add_printf (buf, "\t\t@ WARC-Block-Digest: %s\r\n",
+                              (const char *) string);
+         m = WARC_TRUE;
+         }
+
+      string = WRecord_getPayloadDigest (wrecord);
+      if (string)
+         {
+         evbuffer_add_printf (buf, "\t\t@ WARC-Payload-Digest: %s\r\n",
+                              (const char *) string);
+         m = WARC_TRUE;
+         }
+
+      string = WRecord_getIpAddress (wrecord);
+      if (string)
+         {
+         evbuffer_add_printf (buf, "\t\t@ WARC-IP-Address: %s\r\n",
+                              (const char *) string);
+         m = WARC_TRUE;
+         }
+
+      string = WRecord_getRefersTo (wrecord);
+      if (string)
+         {
+         evbuffer_add_printf (buf, "\t\t@ WARC-Refers-To: %s\r\n",
+                              (const char *) string);
+         m = WARC_TRUE;
+         }
+
+      string = WRecord_getTargetUri (wrecord);
+      if (string)
+        {
+         evbuffer_add_printf (buf, "\t\t@ WARC-Target-URI: %s\r\n",
+                              (const char *) string );
+         m = WARC_TRUE;
+         }
+
+      string = WRecord_getTruncated (wrecord);
+      if (string)
+         {
+         evbuffer_add_printf (buf, "\t\t@ WARC-Truncated: %s\r\n",
+                              (const char *) string);
+         m = WARC_TRUE;
+         }
+
+      string = WRecord_getWarcInfoId (wrecord);
+      if (string)
+         {
+         evbuffer_add_printf (buf, "\t\t@ WARC-Warcinfo-ID: %s\r\n",
+                              (const char *) string);
+         m = WARC_TRUE;
+         }
+
+      string = WRecord_getFilename (wrecord);
+      if (string)
+         {
+         evbuffer_add_printf (buf, "\t\t@ WARC-Filename: %s\r\n",
+                              (const char *) string);
+         m = WARC_TRUE;
+         }
+
+      string = WRecord_getProfile (wrecord);
+      if (string)
+         {
+         evbuffer_add_printf (buf, "\t\t@ WARC-Profile: %s\r\n",
+                              (const char *) string);
+         m = WARC_TRUE;
+         }
+
+      string = WRecord_getPayloadType (wrecord);
+      if (string)
+         {
+         evbuffer_add_printf (buf, "\t\t@ WARC-Identified-Payload-Type: %s\r\n",
+                              (const char *) string);
+         m = WARC_TRUE;
+         }
+
+      string = WRecord_getSegmentOriginId (wrecord);
+      if (string)
+         {
+         evbuffer_add_printf (buf, "\t\t@ WARC-Segment-Origin-ID: %s\r\n",
+                              (const char *) string);
+
+         evbuffer_add_printf (buf, "\t\t@ WARC-Segment-Number: %d\r\n",
+                             WRecord_getSegmentNumber (wrecord));
+         m = WARC_TRUE;
+         }
+
+      tlen = WRecord_getSegTotalLength (wrecord);
+      if (tlen)
+         {
+         evbuffer_add_printf (buf, "\t\t@ WARC-Segment-Total-Length: %d\r\n",
+                              tlen);
+         m = WARC_TRUE;
+         }
+
+     unless (m)
+        evbuffer_add_printf (buf, "---No One---\r\n");
+
+
+
+      /* dump ANVLs */
+
+      if ((al = WRecord_getAnvl (wrecord) ))
+        {
+          warc_u32_t  i = 0;
+          warc_u32_t  j = WList_size (al); /* how many ANVL are there? */
+        
+         if (j)
+           {
+           evbuffer_add_printf (buf, "\r\n* More information:\r\n");
+       
+           while ( i < j )
+               {
+                 const void  * a = WList_get (al, i); /* ANVL record */
+   
+                 /* we assume here that the ANVL value was in ASCII. */
+                 /* use your own encoding to print it otherwise. */
+                 evbuffer_add_printf (buf , "\t\t@ %s: %s\r\n",
+                                          (const char *) WAnvl_getKey (a), (const char *) WAnvl_getValue (a) );
+
+                 ++ i;
+               }
+           }
+
+        }
+
+      destroy (wrecord);
+    }
+
+   evhttp_add_header (req -> output_headers, 
+                      "Server", (const char *) WString_getText(server_name));
+      
+   evhttp_add_header (req -> output_headers, 
+                      "Warc-Version", (const char *) WARC_VERSION);
+
+   evhttp_add_header (req -> output_headers, 
+                      "Content-Type", "text/plain");
+
+
+
+  return (WARC_FALSE);
+}
+
+
+
+/**
+ * @param fname: the name of the concerned warc file as a WString
+ * @param server_name: the server_name as a WString
+ * @param wfile: the warc file to dump
+ * @param req: the request object used in the response
+ * @param buf: the buffer object used in the response
+ *
+ * @return False if succeeds, True otherwise
+ *
+ * Builds a Json output to be sent by the list request
+ */
+
+WPRIVATE warc_bool_t WBuildJsonOutput (void * fname, const void * server_name, void * wfile, 
+                                     struct evhttp_request * req, struct evbuffer * buf)
+{
+    void       *   wrecord     =  NIL;
+    warc_u32_t     cpt         =  0;
+    warc_u8_t      comma[2]    = {'\0','\0'};
+    warc_bool_t    first       = WARC_TRUE;
+    warc_bool_t    firstr      = WARC_TRUE;
+/*    warc_u8_t        xmlstr[256]; */
+
+
+   evbuffer_add_printf (buf, "{\"warcfile\":[{\"name\":\"%s\"},{\"size\":\"%llu\"},{\"records\":[", (const char *) WString_getText (fname), 
+                                                                 (unsigned long long)WFile_getFileSize (wfile));
+
+  while (WFile_hasMoreRecords (wfile) )
+    {
+      const void * al  = NIL; /* ANVL list object */
+      const warc_u8_t * string = NIL;
+      warc_u32_t   tlen = 0;
+
+      unless ( (wrecord = WFile_nextRecord (wfile) ) )
+          {
+          evbuffer_add_printf (buf, "<center><font color=darkred>Bad record found!\r\n</font></center><br>");
+
+          evhttp_add_header (req -> output_headers, 
+                         "Server", (const char *) WString_getText(server_name));
+     
+          evhttp_add_header (req -> output_headers, 
+                         "Warc-Version", (const char *) WARC_VERSION);
+
+          evhttp_send_reply (req, HTTP_NOTFOUND, "Bad Record", buf);
+
+          break;
+         }
+
+      cpt ++;
+      /* dump WRecord */
+      if (!firstr)
+         evbuffer_add_printf (buf, ",");
+      else
+         firstr = WARC_FALSE;
+      evbuffer_add_printf (buf, "{\"Warc Record\":[{\"rank\":%d}", cpt);
+      evbuffer_add_printf (buf, ",{\"Offset\":%llu}",
+                              (unsigned long long) WRecord_getOffset (wrecord) );
+
+      evbuffer_add_printf (buf, ",{\"Compressed size\":%llu}",
+                              (unsigned long long) WRecord_getCompressedSize (wrecord) );
+
+      evbuffer_add_printf (buf, ",{\"fields\":[{\"Warc ID\":\"%s\"}",
+                              (const char *) WRecord_getWarcId      (wrecord) );
+
+      evbuffer_add_printf (buf, ",{\"Content-Length\":%u}",
+                              WRecord_getContentLength  (wrecord) );
+
+      evbuffer_add_printf (buf, ",{\"WARC-Type\":%u}",
+                              WRecord_getRecordType  (wrecord) );
+
+      evbuffer_add_printf (buf, ",{\"WARC-Date\":\"%s\"}",
+                              (const char *) WRecord_getDate (wrecord) );
+
+      evbuffer_add_printf (buf, ",{\"WARC-Record-ID\":\"%s\"}",
+                              (const char *) WRecord_getRecordId    (wrecord) );
+
+      evbuffer_add_printf (buf, ",{\"Other Fields\":[");
+
+      string = WRecord_getContentType (wrecord);
+      if (string)
+         {
+         evbuffer_add_printf (buf, "%s{\"Content-Type\":\"%s\"}",
+                              (const char *) comma, (const char *) string);
+         if (first)
+            {
+            first = WARC_FALSE;
+            comma [0] = ',';
+            }
+         }
+
+      string = WRecord_getConcurrentTo (wrecord);
+      if (string)
+         {
+         evbuffer_add_printf (buf, "%s{\"WARC-Concurrent-To\":\"%s\"}",
+                              (const char *) comma, (const char *) string);
+         if (first)
+            {
+            first = WARC_FALSE;
+            comma [0] = ',';
+            }
+         }
+
+      string = WRecord_getBlockDigest (wrecord);
+      if (string)
+         {
+         evbuffer_add_printf (buf, "%s{\"WARC-Block-Digest\":\"%s\"}",
+                              (const char *) comma, (const char *) string);
+         if (first)
+            {
+            first = WARC_FALSE;
+            comma [0] = ',';
+            }
+         }
+
+      string = WRecord_getPayloadDigest (wrecord);
+      if (string)
+         {
+         evbuffer_add_printf (buf, "%s{\"WARC-Payload-Digest\":\"%s\"}",
+                              (const char *) comma, (const char *) string);
+         if (first)
+            {
+            first = WARC_FALSE;
+            comma [0] = ',';
+            }
+         }
+
+      string = WRecord_getIpAddress (wrecord);
+      if (string)
+         {
+         evbuffer_add_printf (buf, "%s{\"WARC-Ip-Address\":\"%s\"}",
+                              (const char *) comma, (const char *) string);
+         if (first)
+            {
+            first = WARC_FALSE;
+            comma [0] = ',';
+            }
+         }
+
+      string = WRecord_getRefersTo (wrecord);
+      if (string)
+         {
+         evbuffer_add_printf (buf, "%s{\"WARC-Refers-To\":\"%s\"}",
+                              (const char *) comma, (const char *) string);
+         if (first)
+            {
+            first = WARC_FALSE;
+            comma [0] = ',';
+            }
+         }
+
+      string = WRecord_getTargetUri (wrecord);
+      if (string)
+         {
+         evbuffer_add_printf (buf, "%s{\"WARC-Target-URI\":\"%s\"}",
+                              (const char *) comma, (const char *) string);
+         if (first)
+            {
+            first = WARC_FALSE;
+            comma [0] = ',';
+            }
+         }
+
+      string = WRecord_getTruncated (wrecord);
+      if (string)
+         {
+         evbuffer_add_printf (buf, "%s{\"WARC-Truncated\":\"%s\"}",
+                              (const char *) comma, (const char *) string);
+         if (first)
+            {
+            first = WARC_FALSE;
+            comma [0] = ',';
+            }
+         }
+
+      string = WRecord_getWarcInfoId (wrecord);
+      if (string)
+         {
+         evbuffer_add_printf (buf, "%s{\"WARC-Warcinfo-ID\":\"%s\"}",
+                              (const char *) comma, (const char *) string);
+         if (first)
+            {
+            first = WARC_FALSE;
+            comma [0] = ',';
+            }
+         }
+
+      string = WRecord_getFilename (wrecord);
+      if (string)
+         {
+         evbuffer_add_printf (buf, "%s{\"WARC-Filename\":\"%s\"}",
+                              (const char *) comma, (const char *) string);
+         if (first)
+            {
+            first = WARC_FALSE;
+            comma [0] = ',';
+            }
+         }
+
+      string = WRecord_getProfile (wrecord);
+      if (string)
+         {
+         evbuffer_add_printf (buf, "%s{\"WARC-Profile\":\"%s\"}",
+                              (const char *) comma, (const char *) string);
+         if (first)
+            {
+            first = WARC_FALSE;
+            comma [0] = ',';
+            }
+         }
+
+      string = WRecord_getPayloadType (wrecord);
+      if (string)
+         {
+         evbuffer_add_printf (buf, "%s{\"WARC-Payload-Type\":\"%s\"}",
+                              (const char *) comma, (const char *) string);
+         if (first)
+            {
+            first = WARC_FALSE;
+            comma [0] = ',';
+            }
+         }
+
+      string = WRecord_getSegmentOriginId (wrecord);
+      if (string)
+         {
+         evbuffer_add_printf (buf, "%s{\"WARC-Segment-Origin-ID\":\"%s\"},",
+                              (const char *) comma, (const char *) string);
+
+         evbuffer_add_printf (buf, "{\"WARC-Segment-Number\":%d}",
+                             WRecord_getSegmentNumber (wrecord));
+         if (first)
+            {
+            first = WARC_FALSE;
+            comma [0] = ',';
+            }
+         }
+
+      tlen = WRecord_getSegTotalLength (wrecord);
+      if (tlen)
+         {
+         evbuffer_add_printf (buf, "%s{\"WARC-Segment-Total-Length\":%d}",
+                              (const char *) comma, tlen);
+         if (first)
+            {
+            first = WARC_FALSE;
+            comma [0] = ',';
+            }
+         }
+
+      evbuffer_add_printf (buf, "]}");
+
+
+      /* dump ANVLs */
+
+      if ((al = WRecord_getAnvl (wrecord) ))
+        {
+          warc_u32_t  i = 0;
+          warc_u32_t  j = WList_size (al); /* how many ANVL are there? */
+        
+         if (j)
+           {
+           evbuffer_add_printf (buf, ",{\"Extra Fields\":[");
+
+           first = WARC_TRUE;
+           comma[0] = '\0';
+       
+           while ( i < j )
+               {
+                 const void  * a = WList_get (al, i); /* ANVL record */
+   
+                 /* we assume here that the ANVL value was in ASCII. */
+                 /* use your own encoding to print it otherwise. */
+                 evbuffer_add_printf (buf , "%s{\"%s\":\"%s\"}",
+                                          (const char *) comma, (const char *) WAnvl_getKey (a), (const char *) WAnvl_getValue (a) );
+                 if (first)
+                   {
+                   first = WARC_FALSE;
+                   comma[0] = ',';
+                   }
+
+                 ++ i;
+               }
+           evbuffer_add_printf (buf, "]}");
+           }
+
+        }
+      evbuffer_add_printf (buf, "]}]}");
+      first = WARC_TRUE;
+      comma[0] = '\0';
+      destroy (wrecord);
+    }
+
+   evbuffer_add_printf (buf, "]}]}");
+
+   evhttp_add_header (req -> output_headers, 
+                      "Server", (const char *) WString_getText(server_name));
+      
+   evhttp_add_header (req -> output_headers, 
+                      "Warc-Version", (const char *) WARC_VERSION);
+
+   evhttp_add_header (req -> output_headers, 
+                      "Content-Type", "text/plain");
+
+
+
+  return (WARC_FALSE);
+}
+
+
+
+/**
+ * @param fname: the name of the warc file as a WString
+ * @param tmp: the temporary files directory
+ * @param offset: the offset of the wanted record
+ * @param server_name: the server_name as a WString
+ * @param how: The output format of the request
+ * @param req: the request object used in the response
+ * @param buf: the buffer object used in the response
+ * 
+ * @return False if succeeds, True otherwise
+ *
+ * Send informations about a warc file from a specified offset
+ */
+
+WPRIVATE warc_bool_t WSend_distantDumpResponse (void * fname, void * tmp, warc_i32_t offset, const void * server_name, warc_list_output how, 
+                                                            struct evhttp_request * req, struct evbuffer * buf)
+{
+    void        *    wfile     = NIL ;
+
+
+   /* 100 isn't used inside the bless below because of reading */
+   wfile = bless (WFile, WString_getText (fname), 100, 
+                  WARC_FILE_READER, WARC_FILE_DETECT_COMPRESSION, WString_getText (tmp), WString_getLength (tmp));
+   unless (wfile)
+     {
+      evbuffer_add_printf (buf, "<center><font color=darkred>File %s not Found\r\n</font></center><br>", WString_getText (fname));
+
+      evhttp_add_header (req -> output_headers, 
+                       "Server", (const char *) WString_getText(server_name));
+      
+      evhttp_add_header (req -> output_headers, 
+                       "Warc-Version", (const char *) WARC_VERSION);
+
+      evhttp_send_reply (req, HTTP_NOTFOUND, "File not found", buf);
+
+      return (WARC_TRUE);
+     }
+      
+   /* Seeking the requird record*/
+   if (WFile_seek (wfile, offset))
+     {
+       evbuffer_add_printf (buf, "<center><font color=darkred>Offset can not be reached\r\n</font></center><br>");
+
+       evhttp_add_header (req -> output_headers, 
+                      "Server", (const char *) WString_getText(server_name));
+     
+       evhttp_add_header (req -> output_headers, 
+                      "Warc-Version", (const char *) WARC_VERSION);
+
+       evhttp_send_reply (req, HTTP_NOTFOUND, "Bad offset", buf);
+       destroy (wfile);
+
+       return (WARC_TRUE);
+     }
+      
+
+  switch (how)
+     {
+     case WARC_XML : if (WBuildXmlOutput (fname, server_name, wfile, req, buf))
+                        {
+                        evbuffer_add_printf (buf, "<center><font color=darkred>Can not display information about the file\r\n</font></center><br>");
+
+                        evhttp_add_header (req -> output_headers, 
+                               "Server", (const char *) WString_getText(server_name));
+     
+                        evhttp_add_header (req -> output_headers, 
+                               "Warc-Version", (const char *) WARC_VERSION);
+
+                        evhttp_send_reply (req, HTTP_NOTFOUND, "Bad offset", buf);
+                                destroy (wfile);
+
+                        return (WARC_TRUE);
+                        }
+                     break;
+
+     case WARC_HTML : if (WBuildHtmlOutput (fname, server_name, wfile, req, buf))
+                        {
+                        evbuffer_add_printf (buf, "<center><font color=darkred>Can not display information about the file\r\n</font></center><br>");
+
+                        evhttp_add_header (req -> output_headers, 
+                               "Server", (const char *) WString_getText(server_name));
+     
+                        evhttp_add_header (req -> output_headers, 
+                               "Warc-Version", (const char *) WARC_VERSION);
+
+                        evhttp_send_reply (req, HTTP_NOTFOUND, "Bad offset", buf);
+                                destroy (wfile);
+
+                        return (WARC_TRUE);
+                        }
+                     break;
+
+     case WARC_TEXT : if (WBuildTextOutput (fname, server_name, wfile, req, buf))
+                        {
+                        evbuffer_add_printf (buf, "<center><font color=darkred>Can not display information about the file\r\n</font></center><br>");
+
+                        evhttp_add_header (req -> output_headers, 
+                               "Server", (const char *) WString_getText(server_name));
+     
+                        evhttp_add_header (req -> output_headers, 
+                               "Warc-Version", (const char *) WARC_VERSION);
+
+                        evhttp_send_reply (req, HTTP_NOTFOUND, "Bad offset", buf);
+                                destroy (wfile);
+
+                        return (WARC_TRUE);
+                        }
+                     break;
+
+     case WARC_JSON : if (WBuildJsonOutput (fname, server_name, wfile, req, buf))
+                        {
+                        evbuffer_add_printf (buf, "<center><font color=darkred>Can not display information about the file\r\n</font></center><br>");
+
+                        evhttp_add_header (req -> output_headers, 
+                               "Server", (const char *) WString_getText(server_name));
+     
+                        evhttp_add_header (req -> output_headers, 
+                               "Warc-Version", (const char *) WARC_VERSION);
+
+                        evhttp_send_reply (req, HTTP_NOTFOUND, "Bad offset", buf);
+                                destroy (wfile);
+
+                        return (WARC_TRUE);
+                        }
+                     break;
+
+     default : evbuffer_add_printf (buf, "<center><font color=darkred>Unkown output format\r\n</font></center><br>");
+
+               evhttp_add_header (req -> output_headers, 
+                                "Server", (const char *) WString_getText(server_name));
+     
+               evhttp_add_header (req -> output_headers, 
+                                  "Warc-Version", (const char *) WARC_VERSION);
+
+               evhttp_send_reply (req, HTTP_NOTFOUND, "Bad offset", buf);
+               destroy (wfile);
+
+               return (WARC_TRUE);
+     }
+
+   evhttp_send_reply (req, HTTP_OK, "OK", buf);
+               
+   destroy (wfile);
+               
+  return (WARC_FALSE);
+}
+               
+               
 /**
  * @param fname: the name of the concerned warc file as a WString
  * @param tmp: the temporary files directory
@@ -1183,6 +2226,9 @@ WPRIVATE warc_bool_t WSend_distantFilterResponse (void * fname, void * tmp, warc
    const warc_u8_t   * string  = NIL ;
    warc_rec_t        rtype     = WARC_UNKNOWN_RECORD;
    warc_i32_t        soffset   = offset;
+   void         *    uexpr     = NIL;
+   void         *    mexpr     = NIL;
+
    
 
    /* 100 isn't used inside the bless below because of reading */
@@ -1288,8 +2334,13 @@ WPRIVATE warc_bool_t WSend_distantFilterResponse (void * fname, void * tmp, warc
          {
          case WARC_URI:
              string = WRecord_getTargetUri (wrecord);
-             if (string)
-               found  = match (makeS (string), WString_getText (value), WString_getLength (value));
+             uexpr = bless (WRegexp, WString_getText (value), WString_getLength (value));
+             if (uexpr && string)
+               {
+                found  = ! (WRegexp_search (uexpr, makeS (string)));
+                destroy (uexpr);
+                uexpr = NIL;
+               }
              else
                found = WARC_TRUE;
 
@@ -1297,8 +2348,13 @@ WPRIVATE warc_bool_t WSend_distantFilterResponse (void * fname, void * tmp, warc
 
          case WARC_MIME:
              string = WRecord_getContentType (wrecord);
-             if (string)
-                found  = match (makeS (string), WString_getText (value), WString_getLength (value));
+             mexpr = bless (WRegexp, WString_getText (value), WString_getLength (value));
+             if (mexpr && string)
+                {
+                 found  = ! (WRegexp_search (mexpr, makeS (string)));
+                 destroy (mexpr);
+                 mexpr = NIL;
+                }
              else
                 found = WARC_TRUE;
 
@@ -1447,6 +2503,7 @@ WPRIVATE void WAccess_callback (struct evhttp_request * req, void * _arg)
   warc_i32_t         offset      = -1;
   warc_request_t     req_kind;
   warc_filters_t     what;
+  warc_list_output   out;
 
 
   server_name = arg -> server_name;
@@ -1519,12 +2576,12 @@ WPRIVATE void WAccess_callback (struct evhttp_request * req, void * _arg)
     return ;
   }
 
-  if (WServer_parseRequest (uri, fname, & offset, &what, cvalue, & req_kind))
+  if (WServer_parseRequest (uri, fname, & offset, &what, cvalue, & out, & req_kind))
     {
       evbuffer_add_printf (buf, "<center> <b> <font color=darkblue size=2> Bad request format\r\n </font> </b> </center><br>");
       evbuffer_add_printf (buf, "The correct format is:<br>/WARC/version/record/record_offset/warc_file_path\r\n<br>");
       evbuffer_add_printf (buf, "Or:<br>/WARC/version/file/offset/warc_file_path\r\n<br>");
-      evbuffer_add_printf (buf, "Or:<br>/WARC/version/list/offset/warc_file_path\r\n<br>");
+      evbuffer_add_printf (buf, "Or:<br>/WARC/version/list/offset/output_format/warc_file_path\r\n<br>");
       evbuffer_add_printf (buf, "Or:<br>/WARC/version/filter/offset/what_to_filter_on/filter_value/warc_file_path\r\n<br>");
 
       evhttp_add_header (req -> output_headers, 
@@ -1590,7 +2647,7 @@ WPRIVATE void WAccess_callback (struct evhttp_request * req, void * _arg)
 
         /* here we list informations about the warc file records */
         destroy (cvalue);
-        WSend_distantDumpResponse (total_fname, tmp, offset, server_name, req, buf);
+        WSend_distantDumpResponse (total_fname, tmp, offset, server_name, out, req, buf);
 
         destroy (total_fname);
         evbuffer_free (buf);

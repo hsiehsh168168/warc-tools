@@ -44,16 +44,17 @@ GZIP     = $(PLUGIN)/gzip
 TIGER    = $(PLUGIN)/tiger
 EVENT    = $(PLUGIN)/event
 EVENT_COMPACT = $(EVENT)/compat
+REGEX    = $(PLUGIN)/regex
 OSDEP    = $(PRIVATE)/os
 MINGW_DEP= $(OSDEP)/mingw
 OUT      = $(TST)/outputs
 HEADERS  = -I. -I$(PRIVATE) -I$(PUBLIC) -I$(GZIP) \
 		   -I$(CUNIT)       -I$(TIGER)  -I$(EVENT) \
-		   -I$(EVENT_COMPACT)
+		   -I$(EVENT_COMPACT) -I$(REGEX)
 
 MAJOR     = 0
 MINOR     = 17
-RELEASE   = 93
+RELEASE   = 94
 
 LIBSUFFIX = so
 LIBNAME   = libwarc
@@ -99,6 +100,8 @@ mod_apache    =$(APACHE)/mod_warc
 ###############
 
 MAKE	  = make
+
+AR		  = AR
 RANLIB	  = ranlib
 
 GCC       = gcc
@@ -108,6 +111,10 @@ DFLAG     = -g
 
 CFLAGS    = -Wall -W -Wunused -ansi -pedantic -Werror -Wno-long-long \
 			-Wunused-function -std=gnu89 $(OPT)
+
+DEFS      =  -DSTDC_HEADERS=1 -DHAVE_STRING_H=1 -DHAVE_ALLOCA_H=1 -DEBUG=1
+
+
 
 #CFLAGS  += -Wunreachable-code 
 #CFLAGS  += -Wconversion -Wtraditional -Wmissing-prototypes -Wshadow
@@ -198,6 +205,7 @@ ifeq ($(UNAME_S),NetBSD)
 endif
 ifeq ($(UNAME_S),Darwin)
 	CFLAGS 		+= -pedantic
+	LDFLAGS		 = -Wl,-flat_namespace
 	EV_OS        = $(EVENT)/os/osx
 	HEADERS     += -I$(OSDEP) -I$(EV_OS) -I$(CUNIT)/os/osx
 	EV_SRC		+= $(EVENT)/kqueue.c $(EVENT)/poll.c
@@ -259,7 +267,8 @@ endif
 CFLAGS += $(GCC_EXTRA)
 CFLAGS += $(S_CFLAGS)
 
-
+RFLAGS = $(CFLAGS)
+CFLAGS += $(DEFS)
 ###############
 # sources
 ###############
@@ -270,7 +279,8 @@ b	= $(PRIVATE)/wstring.c   $(PRIVATE)/wclass.c  $(PRIVATE)/wlist.c \
       ${CSAFE}.c             $(PRIVATE)/wgetopt.c $(PRIVATE)/arecord.c \
       $(PRIVATE)/afile.c     ${MKTEMP}.c          $(PRIVATE)/wendian.c \
       $(PRIVATE)/wuuid.c     $(PRIVATE)/wserver.c $(PRIVATE)/whash.c \
-      $(PRIVATE)/wkv.c	     $(PRIVATE)/wgzip.c   $(PRIVATE)/wclient.c
+      $(PRIVATE)/wkv.c	     $(PRIVATE)/wgzip.c   $(PRIVATE)/wclient.c \
+      $(PRIVATE)/wregexp.c   
 
 b	+= $(GZIP)/adler32.c     $(GZIP)/crc32.c      $(GZIP)/deflate.c \
 	  $(GZIP)/infback.c      $(GZIP)/inffast.c    $(GZIP)/inflate.c \
@@ -283,6 +293,8 @@ b	+= $(CUNIT)/Automated.c  $(CUNIT)/Basic.c     $(CUNIT)/CUError.c \
 
 b	+= $(TIGER)/tiger.c
 
+b   += $(REGEX)/regex.c
+
 b	+=$(EV_SRC)
 
 c	= $(b) \
@@ -291,7 +303,7 @@ c	= $(b) \
       $(TST)/warcgzip.c      $(TST)/warcgunzip.c  $(TST)/arcfile.c \
       $(TST)/a2w.c           $(TST)/uuid.c        $(TST)/getopt.c \
       $(TST)/object.c        $(TST)/hash.c 	      $(EV_UTEST_SRC) \
-      $(TST)/header.c 
+      $(TST)/header.c        $(TST)/regexp.c
 
 
 c	+= $(APP)/arc2warc.c     $(APP)/warcdump.c    $(APP)/warcfilter.c \
@@ -305,7 +317,7 @@ h	= $(PUBLIC)/wclass.h     $(PUBLIC)/warc.h      $(PRIVATE)/wstring.h \
       $(PRIVATE)/afsmhdl.h   $(PRIVATE)/arecord.h  $(PRIVATE)/afile.h \
       ${MKTEMP}.h            $(PRIVATE)/arecord.h  $(PRIVATE)/wendian.h \
       $(PRIVATE)/whash.h     $(PRIVATE)/wserver.h  $(PRIVATE)/wclient.h \
-	  $(PUBLIC)/wgzip.h $(PUBLIC)/wheader.h
+	  $(PUBLIC)/wgzip.h $(PUBLIC)/wheader.h $(PRIVATE)/wregexp.h
 
 h   += $(GZIP)/crc32.h       $(GZIP)/deflate.h    $(GZIP)/inffast.h \
 	  $(GZIP)/inffixed.h     $(GZIP)/inflate.h    $(GZIP)/inftrees.h \
@@ -320,6 +332,8 @@ h	+= $(TIGER)/tiger.h
 
 h   += $(MENU)/menu.h
 
+h   += $(REGEX)/regex.h
+
 h   += $(EVENT)/log.h	  $(EVENT)/event-internal.h	  $(EVENT)/evdns.h \
 	  $(EVENT)/event.h	  $(EVENT)/event-config.h	  $(EVENT)/evrpc.h \
 	  $(EVENT)/min_heap.h $(EVENT)/strlcpy-internal.h $(EVENT_CONFIG) \
@@ -331,7 +345,8 @@ u	= $(TST)/string       $(TST)/list            $(TST)/anvl \
 	  $(TST)/record       $(TST)/uuid            $(TST)/warcgzip \
       $(TST)/warcgunzip   $(TST)/file    	     $(TST)/arcrecord \
       $(TST)/arcfile      $(TST)/a2w 	         $(TST)/getopt \
-      $(TST)/hash         $(TST)/object          $(TST)/header
+      $(TST)/hash         $(TST)/object          $(TST)/header \
+      $(TST)/regexp
 
 u  += $(EV_UTEST_BIN)
 
@@ -369,10 +384,12 @@ cunit	= $(CUNIT)/Automated.o  $(CUNIT)/Basic.o     $(CUNIT)/CUError.o \
 
 evlib   = $(EV_SRC:.c=.o)
 
+regex   = $(REGEX)/regex.o
+
 
 all:  	$t
 
-static:	$(libwarc)	; ar cvr $(LIBNAME).a $(libwarc); $(RANLIB) $(LIBNAME).a
+static:	$(libwarc)	; $(AR) cvr $(LIBNAME).a $(libwarc); $(RANLIB) $(LIBNAME).a
 
 # http://rute.2038bug.com/node26.html.gz (Unix, Unix-like)
 shared_unix: clean $(libwarc)
@@ -481,13 +498,14 @@ mod_apache:mod_apache_clean
 		-c $(mod_apache).c 
 
 
-mod_lighttp_install: install mod_lighttpd
+mod_lighttpd_install: install mod_lighttpd
 		@echo
 		@echo "------------------------------------------------------------"
 		@echo "Install \"mod_warc\" for Lighttpd web server."
 		@echo "YOU MUST BE \"root\"."
 		@echo "------------------------------------------------------------"
-		cp -f $(LIGHTTPD)/{warc.cgi,warc.fcgi} $(LIGHTY_DESTDIR)
+		cp -f $(LIGHTTPD)/warc.cgi $(LIGHTY_DESTDIR)
+		cp -f $(LIGHTTPD)/warc.fcgi $(LIGHTY_DESTDIR)
 mod_lighttpd:mod_lighty_clean $(LIGHTTPD)/warc.cgi $(LIGHTTPD)/warc.fcgi
 
 
@@ -576,7 +594,7 @@ server =  $(PRIVATE)/wclass.o	 $(PRIVATE)/wstring.o   $(PRIVATE)/wlist.o \
 	      $(PRIVATE)/wfile.o	 $(PRIVATE)/wuuid.o     $(PRIVATE)/wfsmanvl.o \
 		  $(PRIVATE)/wserver.o	 ${CSAFE}.o             $(gzlib) \
 		  ${MKTEMP}.o 			 $(TIGER)/tiger.o       $(evlib) \
-		  $(TST)/server.o
+		  $(TST)/server.o        $(PRIVATE)/wregexp.o   $(regex)
 
 client =  $(PRIVATE)/wclass.o	 $(PRIVATE)/wstring.o  $(PRIVATE)/wlist.o \
 		  $(PRIVATE)/wanvl.o     $(PRIVATE)/wrecord.o  $(PRIVATE)/wheader.o \
@@ -584,6 +602,9 @@ client =  $(PRIVATE)/wclass.o	 $(PRIVATE)/wstring.o  $(PRIVATE)/wlist.o \
 		  $(PRIVATE)/wclient.o 	 ${CSAFE}.o            $(gzlib) \
 		  ${MKTEMP}.o 			 $(TIGER)/tiger.o      $(evlib) \
 		  $(TST)/client.o		 $(cunit)
+
+regexp =  $(PRIVATE)/wclass.o    $(PRIVATE)/wregexp.o   $(TST)/regexp.o \
+		  ${CSAFE}.o	         $(cunit)               $(regex)
 
 
 
@@ -605,9 +626,10 @@ $(TST)/arcfile:   $(arcfile);    $(CC) $(CFLAGS)   -o $@ $(arcfile)
 $(TST)/uuid:	  $(uuid);       $(CC) $(CFLAGS)   -o $@ $(uuid)
 $(TST)/getopt:	  $(getopt);     $(CC) $(CFLAGS)   -o $@ $(getopt)
 $(TST)/hash:	  $(hash);       $(CC) $(CFLAGS)   -o $@ $(hash)
-$(TST)/server:	  $(server);	 $(CC) ${CFLAGS}   -o $@ $(server) $(EV_LIB)
+$(TST)/server:	  $(server);	 $(CC) ${RFLAGS}   -o $@ $(server) $(EV_LIB)
 $(TST)/client:	  $(client);	 $(CC) ${CFLAGS}   -o $@ $(client) $(EV_LIB)
 $(TST)/header:	  $(header);     $(CC) $(CFLAGS)   -o $@ $(header)
+$(TST)/regexp:	  $(regexp);     $(CC) $(RFLAGS)   -o $@ $(regexp) 
 
 
 ######################
@@ -618,11 +640,12 @@ modcgi   = $(PRIVATE)/wclass.o	  $(PRIVATE)/wstring.o  $(PRIVATE)/wlist.o \
 		   $(PRIVATE)/wanvl.o 	  $(PRIVATE)/wrecord.o  $(PRIVATE)/wheader.o \
 	       $(PRIVATE)/wfile.o	  $(PRIVATE)/wuuid.o    ${MKTEMP}.o \
 		   $(PRIVATE)/wfsmanvl.o  ${CSAFE}.o	        $(gzlib) \
-		   $(PRIVATE)/wgetopt.o   $(TIGER)/tiger.o	    $(LIGHTTPD)/modcgi.o
+		   $(PRIVATE)/wgetopt.o   $(TIGER)/tiger.o	    $(LIGHTTPD)/modcgi.o \
+           $(PRIVATE)/wregexp.o
 
 
 $(LIGHTTPD)/warc.cgi:  $(modcgi)
-			$(CC) $(CFLAGS) $(INC_LIGHTY) -o $@ $(modcgi)
+			$(CC) $(RFLAGS) $(INC_LIGHTY) -o $@ $(modcgi)
 
 
 ######################
@@ -633,10 +656,11 @@ modfcgi   = $(PRIVATE)/wclass.o	  $(PRIVATE)/wstring.o $(PRIVATE)/wlist.o \
 		   $(PRIVATE)/wanvl.o 	  $(PRIVATE)/wrecord.o $(PRIVATE)/wheader.o \
 	       $(PRIVATE)/wfile.o	  $(PRIVATE)/wuuid.o   $(PRIVATE)/wfsmanvl.o \
 		   ${CSAFE}.o	          $(gzlib)             ${MKTEMP}.o \
-		   $(PRIVATE)/wgetopt.o   $(TIGER)/tiger.o     $(LIGHTTPD)/modfcgi.o
+		   $(PRIVATE)/wgetopt.o   $(TIGER)/tiger.o     $(LIGHTTPD)/modfcgi.o \
+           $(PRIVATE)/wregexp.o
 
 $(LIGHTTPD)/warc.fcgi:  $(modfcgi)
-			$(CC) $(CFLAGS) $(INC_LIGHTY) -o $@ $(modfcgi) $(LIB_FCGI)
+			$(CC) $(RFLAGS) $(INC_LIGHTY) -o $@ $(modfcgi) $(LIB_FCGI)
 
 
 ####################
@@ -654,13 +678,13 @@ arc2warc = $(PRIVATE)/wclass.o      $(PRIVATE)/wstring.o $(PRIVATE)/wlist.o \
 	       $(PRIVATE)/wfile.o       $(PRIVATE)/afile.o   $(PRIVATE)/afsmhdl.o \
            $(PRIVATE)/wfsmanvl.o    ${CSAFE}.o           $(PRIVATE)/arecord.o \
            ${MKTEMP}.o              $(TIGER)/tiger.o     $(PRIVATE)/wuuid.o \
-		   $(PRIVATE)/wgetopt.o     $(APP)/arc2warc.o    $(gzlib) \
+		   $(PRIVATE)/wgetopt.o     $(APP)/arc2warc.o    $(gzlib) 
 
 warcfilter  = $(PRIVATE)/wclass.o   $(PRIVATE)/wstring.o  $(PRIVATE)/wlist.o \
 		   $(PRIVATE)/wanvl.o       $(PRIVATE)/wrecord.o  $(PRIVATE)/wheader.o \
 		   $(PRIVATE)/wfile.o       $(PRIVATE)/wgetopt.o  ${MKTEMP}.o \
            $(PRIVATE)/wfsmanvl.o    ${CSAFE}.o            $(gzlib) \
-           $(APP)/warcfilter.o        
+           $(APP)/warcfilter.o      $(PRIVATE)/wregexp.o  $(regex)
 
 warcvalidator = $(PRIVATE)/wclass.o $(PRIVATE)/wstring.o $(PRIVATE)/wlist.o \
 		   $(PRIVATE)/wanvl.o       $(PRIVATE)/wrecord.o $(PRIVATE)/wheader.o \
@@ -673,7 +697,8 @@ warcserver = $(PRIVATE)/wclass.o	$(PRIVATE)/wstring.o $(PRIVATE)/wlist.o \
 	       $(PRIVATE)/wfile.o	    $(PRIVATE)/wuuid.o   $(PRIVATE)/wfsmanvl.o \
 		   ${MKTEMP}.o           	${CSAFE}.o	         $(gzlib) \
 		   $(PRIVATE)/wserver.o     $(PRIVATE)/wgetopt.o $(TIGER)/tiger.o \
-		   $(APP)/warcserver.o	 $(evlib)
+		   $(APP)/warcserver.o	    $(evlib)             $(PRIVATE)/wregexp.o \
+           $(regex)
 
 warcclient = $(PRIVATE)/wclass.o	$(PRIVATE)/wstring.o $(PRIVATE)/wlist.o \
 		   $(PRIVATE)/wanvl.o 	    $(PRIVATE)/wrecord.o $(PRIVATE)/wheader.o\
@@ -691,7 +716,7 @@ $(APP)/warcdump:      $(warcdump);       $(CC) $(CFLAGS) -o $@ $(warcdump)
 $(APP)/arc2warc:      $(arc2warc);       $(CC) $(CFLAGS) -o $@ $(arc2warc)
 $(APP)/warcfilter:    $(warcfilter);     $(CC) $(CFLAGS) -o $@ $(warcfilter)
 $(APP)/warcvalidator: $(warcvalidator);  $(CC) $(CFLAGS) -o $@ $(warcvalidator)
-$(APP)/warcserver: 	  $(warcserver);  	 $(CC) $(CFLAGS) -o $@ $(warcserver) \
+$(APP)/warcserver: 	  $(warcserver);  	 $(CC) $(RFLAGS) -o $@ $(warcserver) \
 				      $(EV_LIB)
 $(APP)/warcclient: 	  $(warcclient);  	 $(CC) $(CFLAGS) -o $@ $(warcclient) \
 					  $(EV_LIB)
@@ -717,13 +742,14 @@ clean:		tclean	mod_apache_clean mod_lighty_clean
 			       *.log          *.gz              $(PUBLIC)/*~ \
 			       $(PLUGIN)/*~   $(GZIP)/*~        $(APP)/*~ \
 				   $(APP)/*.exe   $(TST)/*~         $(TST)/*.exe \
-                   $(DOC)/*~      $(MINGW_DEP)/*~    $(TIGER)/*~ \
+                   $(DOC)/*~      $(MINGW_DEP)/*~   $(TIGER)/*~ \
 			       $(MISC)/*~     $(MISC)/DEBIAN/*~ $(PRIVATE)/*~ \
 				   semantic.cache depend            *.dylib* \
 				   *.bak		  *.stackdump*		*core*	\
 				   $(EVENT)/*~	  $(EVENT)/*.o      $(MENU)/*~	\
                    $(OUT)/*.xml   $(OUT)/*~		    $(CUNIT)/*~ \
-				   ${OSDEP}/*.o   ${OSDEP}/*~      ${MINGW_DEP}/*.o
+                   $(CUNIT)/*.o   $(REGEX)/*~       $(REGEX)/*.o \
+				   ${OSDEP}/*.o   ${OSDEP}/*~       ${MINGW_DEP}/*.o
 			@rm -rf $(DOC)/html    warc-tools*
 
 .PHONY: all static clean tclean doc source tgz rpm deb mod_apache_clean mod_lighty_clean

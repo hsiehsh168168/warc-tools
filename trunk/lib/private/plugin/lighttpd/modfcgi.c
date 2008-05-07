@@ -105,6 +105,89 @@ WPRIVATE void  * recoverFName ( const char * uri,warc_u32_t * position)
   return item;
 }
 
+
+
+/**
+ * @param src_string: the origin string to convert
+ * @param srclen: the length of the source string
+ * @param xml_string: the de output XML string
+ *
+ * @return a warc_u8_t * if succeed, NIL otherwise
+ *
+ * Recode the XML special characters in the source string 
+ * by their equivalent XML encoding string
+ */
+
+
+WPRIVATE warc_u8_t * xml_recode (const warc_u8_t * src_string, warc_u32_t srclen, warc_u8_t * xml_string)
+{
+    warc_u32_t i = 0;
+    warc_u32_t j = 0;
+    warc_u8_t  c = ' ';
+
+  unless (src_string || srclen)
+    return (NIL);
+
+  xml_string[0] = 0;
+
+  for (i = 0; (i < srclen && src_string[i] != 0); i++)
+    {
+    c = src_string[i];
+    switch (c)
+        {
+        case '&': xml_string[j]='&';
+                  xml_string[j+1]='a';
+                  xml_string[j+2]='m';
+                  xml_string[j+3]='p';
+                  xml_string[j+4]=';';
+                  j = j+5;
+                  break;
+
+        case '<': xml_string[j]='&';
+                  xml_string[j+1]='l';
+                  xml_string[j+2]='t';
+                  xml_string[j+3]=';';
+                  j = j+4;
+                  break;
+
+        case '>': xml_string[j]='&';
+                  xml_string[j+1]='g';
+                  xml_string[j+2]='t';
+                  xml_string[j+3]=';';
+                  j = j+4;
+                  break;
+
+        case '"': xml_string[j]='&';
+                  xml_string[j+1]='q';
+                  xml_string[j+2]='u';
+                  xml_string[j+3]='o';
+                  xml_string[j+4]='t';
+                  xml_string[j+5]=';';
+                  j = j+6;
+                  break;
+
+        case '\'': xml_string[j]='&';
+                   xml_string[j+1]='a';
+                   xml_string[j+2]='q';
+                   xml_string[j+3]='u';
+                   xml_string[j+4]='o';
+                   xml_string[j+5]='t';
+                   xml_string[j+6]=';';
+                  j = j+7;
+                  break;
+
+        default: xml_string[j] = src_string[i];
+                 j++;
+        }
+    }
+xml_string [j] = '\0';
+
+return (xml_string);
+
+}
+
+
+
 /**
  * @param fname: the name of the wanted file
  * @param offset: the offset from where the data will be sent
@@ -323,6 +406,7 @@ WPRIVATE warc_bool_t WSend_filtredResponse (const warc_u8_t * fname, const warc_
 {
   void         *    w         = NIL;
   void         *    record    = NIL;
+  void         *    rexpr     = NIL;
   warc_u8_t    *    buffer    = NIL;
   const warc_u8_t    *    hofld     = NIL;
   warc_u32_t        rsize     = 0  ;
@@ -342,12 +426,23 @@ WPRIVATE warc_bool_t WSend_filtredResponse (const warc_u8_t * fname, const warc_
       return (WARC_TRUE);
       }
 
+  rexpr = bless (WRegexp, makeS (filter));
+  unless (rexpr)
+      {
+      fprintf (stdout, "content-type: text/html\n\n");
+      fprintf (stdout, "<html>\n<body>\n");
+      fprintf (stdout,  "<font color=red size = 4>Bad filter string</font><br>");
+      destroy (w);
+      return (WARC_TRUE);
+      }
+
    if (WFile_seek (w, offset))
       {
        fprintf (stdout, "content-type: text/html\n\n");
        fprintf (stdout, "<html>\n<body>\n");
        fprintf (stdout, "<font color = red size = 4 > Can not reach the reclaimed offset </font><br>");
        destroy (w);
+       destroy (rexpr);
        return (WARC_TRUE);
       }
    
@@ -370,6 +465,7 @@ WPRIVATE warc_bool_t WSend_filtredResponse (const warc_u8_t * fname, const warc_
           fprintf (stdout, "<FONT SIZE = 4 COLOR = red>Bad record found</FONT><br>");
           wfree (buffer);
           destroy (w);
+          destroy (rexpr);
           return (WARC_TRUE);
          }
 
@@ -431,7 +527,7 @@ WPRIVATE warc_bool_t WSend_filtredResponse (const warc_u8_t * fname, const warc_
        }
 
 
-       if ( (hofld) && (w_strcasestr (hofld, filter)))
+       if ( (hofld) && (WRegexp_search (rexpr, makeS (hofld))))
           {
            WFile_seek (w, offset);
            offset += rsize;          
@@ -443,6 +539,7 @@ WPRIVATE warc_bool_t WSend_filtredResponse (const warc_u8_t * fname, const warc_
                  fprintf (stdout,  "<font color = red size = 4 >Failed in allocation of memory for respponse sending </font><br>");
                  destroy (w);
                  destroy (record);
+                 destroy (rexpr);
                  wfree (buffer);
                  return (WARC_TRUE);
                  }
@@ -473,6 +570,7 @@ WPRIVATE warc_bool_t WSend_filtredResponse (const warc_u8_t * fname, const warc_
 
   wfree (buffer);
   destroy (w);
+  destroy (rexpr);
   return (WARC_FALSE);
 }
 
@@ -487,7 +585,7 @@ WPRIVATE warc_bool_t WSend_filtredResponse (const warc_u8_t * fname, const warc_
  * Sends a distant listing of the records in the warc file
  */
 
-WPRIVATE warc_bool_t WSend_distantDumpResponse (const warc_u8_t * fname, const warc_u8_t * prefix,
+WPRIVATE warc_bool_t WSend_distantHDumpResponse (const warc_u8_t * fname, const warc_u8_t * prefix,
                                                                                      warc_u32_t offset)
 {
   void      *     w      = NIL;
@@ -699,6 +797,752 @@ WPRIVATE warc_bool_t WSend_distantDumpResponse (const warc_u8_t * fname, const w
   return (WARC_FALSE);
 }
 
+/**
+ * @param fname: the name of the wanted file
+ * @param prefix: the directory leading to the file location
+ * @param offset: the offset from where the data will be sent
+
+ * 
+ * Sends a distant listing of the records in the warc file in xml format
+ */
+
+WPRIVATE warc_bool_t WSend_distantXDumpResponse (const warc_u8_t * fname, const warc_u8_t * prefix,
+                                                                                     warc_u32_t offset)
+{
+  void      *     w      = NIL;
+  void      *     record = NIL;
+  warc_u8_t        xmlstr[256];
+  warc_u32_t cpt     =  0;
+ 
+
+   w = bless (WFile, fname, WARC_MAX_SIZE,
+                WARC_FILE_READER,  WARC_FILE_DETECT_COMPRESSION, prefix);
+
+  
+
+  
+   unless (w)
+      {
+      fprintf (stdout, "content-type: text/html\n\n");
+      fprintf (stdout, "<html>\n<body>\n");
+      fprintf (stdout, "<FONT SIZE = 4 COLOR = red>  File  not found  </FONT><br>");
+      return (WARC_TRUE);
+      }
+   
+
+ 
+
+   if (WFile_seek (w, offset))
+      {
+       destroy (w);
+       fprintf (stdout, "content-type: text/html\n\n");
+       fprintf (stdout, "<html>\n<body>\n");
+       fprintf (stdout, "<FONT SIZE = 4 COLOR = red>Bad offset</FONT><br>");
+       return (WARC_TRUE);
+      }
+
+ 
+
+  fprintf (stdout, "content-type : text/xml, \r\n\r\n");
+  fprintf (stdout, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n");
+  
+  fprintf (stdout, "<warcfile name=\"%s\" size=\"%d\">\r\n", (const char *) fname, (int)WFile_getFileSize (w) );   
+   
+    
+   while (WFile_hasMoreRecords (w) )
+      {
+       const void * al = NIL;
+       const warc_u8_t * string = NIL;
+       warc_u32_t  tlen   = 0  ;
+       warc_bool_t m      = WARC_FALSE;
+
+       unless ( (record = WFile_nextRecord (w) ) )
+         {
+          fprintf (stdout, "content-type: text/html\n\n");
+          fprintf (stdout, "<html>\n<body>\n");   
+          fprintf (stdout, "<FONT SIZE = 4 COLOR = red>Bad record found</FONT><br>");
+          destroy (w);
+          return (WARC_TRUE);
+         }
+      cpt ++;
+      fprintf ( stdout, "<warc-record rank=\"%d\" ", cpt );
+      fprintf (stdout, "offset=\"%d\" ", (int) WRecord_getOffset (record) );
+      fprintf (stdout,  "compressed-size=\"%d\" ", (int) WRecord_getCompressedSize (record) );
+      fprintf (stdout, "uncompressed-size=\"%d\" ", (int) WRecord_getUncompressedSize (record) );
+      xml_recode (makeS (WRecord_getWarcId (record)), xmlstr);
+      fprintf (stdout, "warc-id=\"%s\" ", (const char *) xmlstr);
+      fprintf (stdout, "content-length=\"%u\" ", WRecord_getContentLength  (record) );
+      fprintf (stdout,  "warc-type=\"%u\" ", WRecord_getRecordType  (record) );
+      xml_recode (makeS (WRecord_getDate (record)), xmlstr);
+      fprintf (stdout, "warc-date=\"%s\" ", (const char *) xmlstr );
+      xml_recode ( makeS (WRecord_getRecordId (record)), xmlstr);
+      fprintf (stdout, "warc-record-id=\"%s\">\r\n", (const char *) xmlstr);
+      
+      string = WRecord_getContentType (record);
+      if (string)
+        {
+         xml_recode ( makeS (string), xmlstr);
+         fprintf (stdout, "<content-type value=\"%s\"/>\r\n", (const char *) xmlstr);
+         m = WARC_TRUE;
+        }
+
+      string = WRecord_getConcurrentTo (record);
+      if (string)
+        {
+         xml_recode ( makeS (string), xmlstr);
+         fprintf (stdout,  "<warc-concurrent-to value=\"%s\"/>\r\n", (const char *) xmlstr);
+         m = WARC_TRUE;
+        }
+
+      string = WRecord_getBlockDigest (record);
+      if (string)
+        {
+         xml_recode ( makeS (string), xmlstr);
+         fprintf (stdout, "<warc-block-digest value=\"%s\"/>\r\n", (const char *) xmlstr);
+         m = WARC_TRUE;
+        }
+
+      string = WRecord_getPayloadDigest (record);
+      if (string)
+        {
+         xml_recode ( makeS (string), xmlstr);
+         fprintf (stdout, "<warc-payload-digest value=\"%s\"/>\r\n", (const char *) xmlstr);
+         m = WARC_TRUE;
+        }
+
+      string = WRecord_getIpAddress (record);
+      if (string)
+        {
+         xml_recode ( makeS (string), xmlstr);
+         fprintf (stdout,  "<warc-ip-address value=\"%s\"/>\r\n", (const char *) xmlstr);
+         m = WARC_TRUE;
+        }
+
+      string = WRecord_getRefersTo (record);
+      if (string)
+        {
+         xml_recode ( makeS (string), xmlstr);
+         fprintf (stdout,  "<warc-refers-to value=\"%s\"/>\r\n", (const char *) xmlstr);
+         m = WARC_TRUE;
+        }
+
+      string = WRecord_getTargetUri (record);
+      if (string)
+        {
+         xml_recode ( makeS (string), xmlstr);
+         fprintf (stdout, "<warc-taget-uri value=\"%s\"/>\r\n", (const char *) xmlstr );
+         m = WARC_TRUE;
+        }
+
+      string = WRecord_getTruncated (record);
+      if (string)
+        {
+         xml_recode ( makeS (string), xmlstr);
+         fprintf (stdout, "<warc-truncated value=\"%s\"/>\r\n", (const char *) xmlstr);
+         m = WARC_TRUE; 
+        }
+
+      string = WRecord_getWarcInfoId (record);
+      if (string)
+        {
+         xml_recode ( makeS (string), xmlstr);
+         fprintf (stdout, "<warc-filename value=\"%s\"/>\r\n", (const char *) xmlstr);
+         m = WARC_TRUE;
+        }
+
+      string = WRecord_getFilename (record);
+      if (string)
+        {
+         xml_recode ( makeS (string), xmlstr);
+         fprintf (stdout,  "<warc-filename value=\"%s\"/>\r\n", (const char *) xmlstr);
+         m = WARC_TRUE;
+        }
+
+      string = WRecord_getProfile (record);
+      if (string)
+        {
+         xml_recode ( makeS (string), xmlstr); 
+         fprintf (stdout, "<warc-profile value=\"%s\"/>\r\n", (const char *) xmlstr);
+         m = WARC_TRUE;
+        }
+
+      string = WRecord_getPayloadType (record);
+      if (string)
+        {
+         xml_recode ( makeS (string), xmlstr); 
+         fprintf (stdout, "<warc-identrified-payload-type value=\"%s\"/>\r\n", (const char *) xmlstr);
+         m = WARC_TRUE;
+        }
+
+      string = WRecord_getSegmentOriginId (record);
+      if (string)
+        {
+         xml_recode ( makeS (string), xmlstr); 
+         fprintf (stdout, "<warc-segment-origin-id value=\"%s\"/>\r\n", (const char *) xmlstr);
+
+         fprintf (stdout, "<warc-segment-nummber value=\"%d\"/>\r\n",  WRecord_getSegmentNumber (record));
+
+         m = WARC_TRUE;
+        }
+
+      tlen = WRecord_getSegTotalLength (record);
+      if (tlen)
+        {
+         fprintf (stdout, "<warc-segment-total-length value=\"%d\"/>\r\n", tlen);
+
+         m = WARC_TRUE;
+        }
+
+     
+      
+
+          
+      /* dump ANVLs */
+
+      if ((al = WRecord_getAnvl (record) ))
+         {
+          warc_u32_t  i = 0;
+          warc_u32_t  j = WList_size (al); /* how many ANVL are there? */
+        
+         if (j)
+           {
+            fprintf(stdout, "<extra-fields>\r\n");
+            while ( i < j )
+               {
+                 const void  * a = WList_get (al, i); /* ANVL record */
+   
+                 /* we assume here that the ANVL value was in ASCII. */
+                /* use your own encoding to print it otherwise. */
+                fprintf (stdout, "<field key=\"%s\" value=\"%s\"/>", (char *) xml_recode (makeS (WAnvl_getKey (a)), xmlstr), 
+                                      (char *) xml_recode (makeS (WAnvl_getValue (a)), xmlstr) );
+
+                ++ i;
+               }
+            fprintf (stdout, "</extra-fields>\r\n");
+           }
+        }
+
+     destroy (record);
+     fprintf (stdout, "</warc-record>\r\n");
+    }
+  fprintf (stdout, "</warcfile>\r\n");
+  return (WARC_FALSE);
+}
+
+/**
+ * @param fname: the name of the wanted file
+ * @param prefix: the directory leading to the file location
+ * @param offset: the offset from where the data will be sent
+
+ * 
+ * Sends a distant listing of the records in the warc file in text format
+ */
+
+WPRIVATE warc_bool_t WSend_distantTDumpResponse (const warc_u8_t * fname, const warc_u8_t * prefix,
+                                                                                     warc_u32_t offset)
+{
+  void      *     w      = NIL;
+  void      *     record = NIL;
+ 
+  warc_u32_t cpt     =  0;
+ 
+
+   w = bless (WFile, fname, WARC_MAX_SIZE,
+                WARC_FILE_READER,  WARC_FILE_DETECT_COMPRESSION, prefix);
+
+  
+
+  
+   unless (w)
+      {
+      fprintf (stdout, "content-type: text/html\n\n");
+      fprintf (stdout, "<html>\n<body>\n");
+      fprintf (stdout, "<FONT SIZE = 4 COLOR = red>  File  not found  </FONT><br>");
+      return (WARC_TRUE);
+      }
+   
+
+ 
+
+   if (WFile_seek (w, offset))
+      {
+       destroy (w);
+       fprintf (stdout, "content-type: text/html\n\n");
+       fprintf (stdout, "<html>\n<body>\n");
+       fprintf (stdout, "<FONT SIZE = 4 COLOR = red>Bad offset</FONT><br>");
+       return (WARC_TRUE);
+      }
+
+ 
+
+  fprintf (stdout, "content-type : text/plain, \r\n\r\n");
+  fprintf (stdout, "warcfile : name=\"%s\" size=\"%d\" \r\n", (const char *) fname , (int)WFile_getFileSize (w) );   
+   
+    
+   while (WFile_hasMoreRecords (w) )
+      {
+       const void * al = NIL;
+       const warc_u8_t * string = NIL;
+       warc_u32_t  tlen   = 0  ;
+       warc_bool_t m      = WARC_FALSE;
+
+       unless ( (record = WFile_nextRecord (w) ) )
+         {
+          fprintf (stdout, "content-type: text/html\n\n");
+          fprintf (stdout, "<html>\n<body>\n");   
+          fprintf (stdout, "<FONT SIZE = 4 COLOR = red>Bad record found</FONT><br>");
+          destroy (w);
+          return (WARC_TRUE);
+         }
+      cpt ++;
+      fprintf ( stdout, "- Warc Record: %d\r\n", cpt);
+      fprintf (stdout,  "\t* Offset: %d\r\n" , (int) WRecord_getOffset (record) );
+      fprintf (stdout,  "\t* Compressed size: %d\r\n", (int) WRecord_getCompressedSize (record) );
+      fprintf (stdout,  "\t* Warc ID: %s\r\n", (const char *)  WRecord_getWarcId (record));
+      fprintf (stdout,  "\t* Content-Length: %u\r\n", WRecord_getContentLength  (record) );
+      fprintf (stdout,  "\t* WARC-Type: %u\r\n", WRecord_getRecordType  (record) );
+      fprintf (stdout,  "\t* WARC-Date: %s\r\n", (const char *)  WRecord_getDate (record) );
+      fprintf (stdout,  "\t* WARC-Record-ID: %s\r\n", (const char *) WRecord_getRecordId (record)  );
+      
+      string = WRecord_getContentType (record);
+      if (string)
+        {
+         fprintf (stdout, "\t\t@ Content-Type: %s\r\n", (const char *) string);
+         m = WARC_TRUE;
+        }
+
+      string = WRecord_getConcurrentTo (record);
+      if (string)
+        {
+         fprintf (stdout,  "\t\t@ WARC-Concurrent-To: %s\r\n", (const char *) string);
+         m = WARC_TRUE;
+        }
+
+      string = WRecord_getBlockDigest (record);
+      if (string)
+        {
+         fprintf (stdout,  "\t\t@ WARC-Block-Digest: %s\r\n", (const char *) string);
+         m = WARC_TRUE;
+        }
+
+      string = WRecord_getPayloadDigest (record);
+      if (string)
+        {
+         fprintf (stdout,"\t\t@ WARC-Block-Digest: %s\r\n" , (const char *) string);
+         m = WARC_TRUE;
+        }
+
+      string = WRecord_getIpAddress (record);
+      if (string)
+        {
+         fprintf (stdout, "\t\t@ WARC-Payload-Digest: %s\r\n"  , (const char *) string);
+         m = WARC_TRUE;
+        }
+
+      string = WRecord_getRefersTo (record);
+      if (string)
+        {
+         fprintf (stdout,  "\t\t@ WARC-Refers-To: %s\r\n", (const char *) string);
+         m = WARC_TRUE;
+        }
+
+      string = WRecord_getTargetUri (record);
+      if (string)
+        {
+         fprintf (stdout, "\t\t@ WARC-Target-URI: %s\r\n", (const char *) string );
+         m = WARC_TRUE;
+        }
+
+      string = WRecord_getTruncated (record);
+      if (string)
+        {
+         fprintf (stdout,  "\t\t@ WARC-Truncated: %s\r\n", (const char *) string);
+         m = WARC_TRUE; 
+        }
+
+      string = WRecord_getWarcInfoId (record);
+      if (string)
+        {
+         fprintf (stdout, "\t\t@ WARC-Warcinfo-ID: %s\r\n", (const char *) string);
+         m = WARC_TRUE;
+        }
+
+      string = WRecord_getFilename (record);
+      if (string)
+        {
+         fprintf (stdout,  "\t\t@ WARC-Filename: %s\r\n", (const char *) string);
+         m = WARC_TRUE;
+        }
+
+      string = WRecord_getProfile (record);
+      if (string)
+        {
+         fprintf (stdout, "\t\t@ WARC-Profile: %s\r\n", (const char *) string);
+         m = WARC_TRUE;
+        }
+
+      string = WRecord_getPayloadType (record);
+      if (string)
+        {
+         fprintf (stdout,  "\t\t@ WARC-Identified-Payload-Type: %s\r\n", (const char *) string);
+         m = WARC_TRUE;
+        }
+
+      string = WRecord_getSegmentOriginId (record);
+      if (string)
+        {
+         fprintf (stdout, "\t\t@ WARC-Segment-Origin-ID: %s\r\n", (const char *) string);
+
+         fprintf (stdout, "\t\t@ WARC-Segment-Number: %d\r\n",  WRecord_getSegmentNumber (record));
+
+         m = WARC_TRUE;
+        }
+
+      tlen = WRecord_getSegTotalLength (record);
+      if (tlen)
+        {
+         fprintf (stdout, "\t\t@ WARC-Segment-Total-Length: %d\r\n", tlen);
+
+         m = WARC_TRUE;
+        }
+      
+      unless (m)
+         fprintf (stdout,  "---No One---\r\n");
+
+          
+      /* dump ANVLs */
+
+      if ((al = WRecord_getAnvl (record) ))
+         {
+          warc_u32_t  i = 0;
+          warc_u32_t  j = WList_size (al); /* how many ANVL are there? */
+        
+         if (j)
+           {
+            fprintf (stdout, "\r\n* More information:\r\n");
+            while ( i < j )
+               {
+                const void  * a = WList_get (al, i); /* ANVL record */
+   
+                 /* we assume here that the ANVL value was in ASCII. */
+                /* use your own encoding to print it otherwise. */
+                fprintf (stdout , "\t\t@ %s: %s\r\n",
+                                          (const char *) WAnvl_getKey (a), (const char *) WAnvl_getValue (a) );
+                ++ i;
+               }
+           
+           }
+        }
+
+     destroy (record);
+     
+    }
+  return (WARC_FALSE);
+}
+
+/**
+ * @param fname: the name of the wanted file
+ * @param prefix: the directory leading to the file location
+ * @param offset: the offset from where the data will be sent
+
+ * 
+ * Sends a distant listing of the records in the warc file in json format
+ */
+
+WPRIVATE warc_bool_t WSend_distantJDumpResponse (const warc_u8_t * fname, const warc_u8_t * prefix,
+                                                                                     warc_u32_t offset)
+{
+  void      *     w      = NIL;
+  void      *     record = NIL;
+  warc_u8_t      comma[2]    = {'\0','\0'};
+  warc_bool_t    first       = WARC_TRUE;
+  warc_bool_t    firstr      = WARC_TRUE;
+  warc_u32_t cpt     =  0;
+ 
+
+   w = bless (WFile, fname, WARC_MAX_SIZE,
+                WARC_FILE_READER,  WARC_FILE_DETECT_COMPRESSION, prefix);
+
+  
+
+  
+   unless (w)
+      {
+      fprintf (stdout, "content-type: text/html\n\n");
+      fprintf (stdout, "<html>\n<body>\n");
+      fprintf (stdout, "<FONT SIZE = 4 COLOR = red>  File  not found  </FONT><br>");
+      return (WARC_TRUE);
+      }
+   
+
+ 
+
+   if (WFile_seek (w, offset))
+      {
+       destroy (w);
+       fprintf (stdout, "content-type: text/html\n\n");
+       fprintf (stdout, "<html>\n<body>\n");
+       fprintf (stdout, "<FONT SIZE = 4 COLOR = red>Bad offset</FONT><br>");
+       return (WARC_TRUE);
+      }
+
+ 
+
+  fprintf (stdout, "content-type : text/json\r\n\r\n");   
+  fprintf (stdout, "{\"warcfile\":[{\"name\":\"%s\"},{\"size\":\"%d\"},{\"records\":[", (const char *) (fname), 
+                                                                 (int)WFile_getFileSize (w)); 
+    
+   while (WFile_hasMoreRecords (w) )
+      {
+       const void * al = NIL;
+       const warc_u8_t * string = NIL;
+       warc_u32_t  tlen   = 0  ;
+
+       unless ( (record = WFile_nextRecord (w) ) )
+         {
+          fprintf (stdout, "content-type: text/html\n\n");
+          fprintf (stdout, "<html>\n<body>\n");   
+          fprintf (stdout, "<FONT SIZE = 4 COLOR = red>Bad record found</FONT><br>");
+          destroy (w);
+          return (WARC_TRUE);
+         }
+      cpt ++;
+      if (!firstr)
+         fprintf (stdout, ",");
+      else
+         firstr = WARC_FALSE;
+      fprintf (stdout, "{\"Warc Record\":[{\"rank\":%d}", cpt);
+      fprintf (stdout,  ",{\"Offset\":%d}" , (int) WRecord_getOffset (record) );
+      fprintf (stdout,  ",{\"Compressed size\":%d}", (int) WRecord_getCompressedSize (record) );
+      fprintf (stdout,  ",{\"fields\":[{\"Warc ID\":\"%s\"}", (const char *)  WRecord_getWarcId (record));
+      fprintf (stdout,  ",{\"Content-Length\":%u}", WRecord_getContentLength  (record) );
+      fprintf (stdout,  ",{\"WARC-Type\":%u}", WRecord_getRecordType  (record) );
+      fprintf (stdout,  ",{\"WARC-Date\":\"%s\"}", (const char *)  WRecord_getDate (record) );
+      fprintf (stdout,  ",{\"WARC-Record-ID\":\"%s\"}", (const char *) WRecord_getRecordId (record)  );
+      fprintf (stdout,  ",{\"Other Fields\":[");
+      string = WRecord_getContentType (record);
+      
+      if (string)
+         {
+         fprintf (stdout, "%s{\"Content-Type\":\"%s\"}",
+                              (const char *) comma, (const char *) string);
+         if (first)
+            {
+            first = WARC_FALSE;
+            comma [0] = ',';
+            }
+         }
+
+
+      string = WRecord_getConcurrentTo (record);
+      
+      if (string)
+         {
+         fprintf (stdout, "%s{\"WARC-Concurrent-To\":\"%s\"}",
+                              (const char *) comma, (const char *) string);
+         if (first)
+            {
+            first = WARC_FALSE;
+            comma [0] = ',';
+            }
+         }
+
+      string = WRecord_getBlockDigest (record);
+      if (string)
+         {
+         fprintf (stdout, "%s{\"WARC-Block-Digest\":\"%s\"}",
+                              (const char *) comma, (const char *) string);
+         if (first)
+            {
+            first = WARC_FALSE;
+            comma [0] = ',';
+            }
+         }
+
+      string = WRecord_getPayloadDigest (record);
+       if (string)
+         {
+         fprintf (stdout, "%s{\"WARC-Payload-Digest\":\"%s\"}",
+                              (const char *) comma, (const char *) string);
+         if (first)
+            {
+            first = WARC_FALSE;
+            comma [0] = ',';
+            }
+         }
+
+      string = WRecord_getIpAddress (record);
+      if (string)
+         {
+         fprintf (stdout,"%s{\"WARC-Ip-Address\":\"%s\"}" ,
+                              (const char *) comma, (const char *) string);
+         if (first)
+            {
+            first = WARC_FALSE;
+            comma [0] = ',';
+            }
+         }
+
+      string = WRecord_getRefersTo (record);
+       if (string)
+         {
+         fprintf (stdout, "%s{\"WARC-Refers-To\":\"%s\"}",
+                              (const char *) comma, (const char *) string);
+         if (first)
+            {
+            first = WARC_FALSE;
+            comma [0] = ',';
+            }
+         }
+
+      string = WRecord_getTargetUri (record);
+      if (string)
+         {
+         fprintf (stdout, "%s{\"WARC-Target-URI\":\"%s\"}",
+                              (const char *) comma, (const char *) string);
+         if (first)
+            {
+            first = WARC_FALSE;
+            comma [0] = ',';
+            }
+         }
+
+      string = WRecord_getTruncated (record);
+      if (string)
+         {
+         fprintf (stdout, "%s{\"WARC-Truncated\":\"%s\"}",
+                              (const char *) comma, (const char *) string);
+         if (first)
+            {
+            first = WARC_FALSE;
+            comma [0] = ',';
+            }
+         }
+
+      string = WRecord_getWarcInfoId (record);
+      if (string)
+         {
+         fprintf (stdout, "%s{\"WARC-Warcinfo-ID\":\"%s\"}",
+                              (const char *) comma, (const char *) string);
+         if (first)
+            {
+            first = WARC_FALSE;
+            comma [0] = ',';
+            }
+         }
+
+      string = WRecord_getFilename (record);
+      if (string)
+         {
+         fprintf (stdout, "%s{\"WARC-Filename\":\"%s\"}",
+                              (const char *) comma, (const char *) string);
+         if (first)
+            {
+            first = WARC_FALSE;
+            comma [0] = ',';
+            }
+         }
+      string = WRecord_getProfile (record);
+       if (string)
+         {
+         fprintf (stdout, "%s{\"WARC-Profile\":\"%s\"}",
+                              (const char *) comma, (const char *) string);
+         if (first)
+            {
+            first = WARC_FALSE;
+            comma [0] = ',';
+            }
+         }
+
+     string = WRecord_getPayloadType (record);
+     if (string)
+         {
+         fprintf (stdout, "%s{\"WARC-Payload-Type\":\"%s\"}",
+                              (const char *) comma, (const char *) string);
+         if (first)
+            {
+            first = WARC_FALSE;
+            comma [0] = ',';
+            }
+         }
+
+
+     string = WRecord_getSegmentOriginId (record);
+     if (string)
+         {
+         fprintf (stdout, "%s{\"WARC-Segment-Origin-ID\":\"%s\"},",
+                              (const char *) comma, (const char *) string);
+
+         fprintf (stdout, "{\"WARC-Segment-Number\":%d}",
+                             WRecord_getSegmentNumber (record));
+         if (first)
+            {
+            first = WARC_FALSE;
+            comma [0] = ',';
+            }
+         } 
+        
+
+      tlen = WRecord_getSegTotalLength (record);
+      if (tlen)
+         {
+         fprintf (stdout, "%s{\"WARC-Segment-Total-Length\":%d}",
+                              (const char *) comma, tlen);
+         if (first)
+            {
+            first = WARC_FALSE;
+            comma [0] = ',';
+            }
+         }
+      
+       fprintf (stdout, "]}");
+
+          
+      /* dump ANVLs */
+
+      if ((al = WRecord_getAnvl (record) ))
+         {
+          warc_u32_t  i = 0;
+          warc_u32_t  j = WList_size (al); /* how many ANVL are there? */
+        
+         if (j)
+           {
+            fprintf (stdout, ",{\"Extra Fields\":[");
+            first = WARC_TRUE;
+             comma[0] = '\0';
+
+            while ( i < j )
+               {
+                const void  * a = WList_get (al, i); /* ANVL record */
+   
+                 /* we assume here that the ANVL value was in ASCII. */
+                /* use your own encoding to print it otherwise. */
+                 fprintf (stdout , "%s{\"%s\":\"%s\"}",
+                                          (const char *) comma, (const char *) WAnvl_getKey (a), (const char *) WAnvl_getValue (a) );
+
+                if (first)
+                   {
+                   first = WARC_FALSE;
+                   comma[0] = ',';
+                   }
+                ++ i;
+               }
+             fprintf (stdout, "]}");
+           }
+        }
+     fprintf (stdout, "]}]}");
+     first = WARC_TRUE;
+     comma[0] = '\0';
+     
+     destroy (record);
+     
+    }
+  fprintf (stdout, "]}]}");
+  return (WARC_FALSE);
+}
+
+
+
 
 
 int main()
@@ -831,30 +1675,92 @@ int main()
       return 0;
 
       }  
+   unless ( w_strcmp (reqnature, uS ("list")))
+      {
+     
+      void         *   objoutpout;
+      const warc_u8_t   *   outpout;
 
+      objoutpout =  recoverUriField (r, & pos);
+      outpout =     WString_getText (objoutpout);
+
+        if (w_strcmp (outpout, uS ("text")))
+              if (w_strcmp (outpout, uS ("html")))
+                    if (w_strcmp (outpout, uS ("xml")))
+                        if (w_strcmp (outpout, uS ("json")))
+                             {
+                             fprintf (stdout, "content-type: text/html\n\n");
+                             fprintf (stdout, "<html>\n<body>\n");
+                      
+                             destroy (objrec);
+                             destroy (objnature);
+                             destroy (objoutpout);
+                             fprintf (stdout, "<FONT SIZE = 4 COLOR = red> The format of outpout is text, html, json or xml </font>\n<br>");
+                             fprintf (stdout, "</body>\n</html>\n");
+                             return 1;
+                             }
+             
+       
+        objfile = recoverFName (r, & pos);
+        fname =   WString_getText(objfile);
+      unless ( w_strcmp (outpout, uS ("html")))
+         {
+
+         if (WSend_distantHDumpResponse (fname, prefix, offset))
+
+           {
+              fprintf (stdout, "<font color=red size=4> Records listing aborted</font><br>");
+              fprintf (stdout, "</body>\n</html>\n");
+           }
+          }
+
+
+      unless (w_strcmp (outpout, uS ("text")))
+         {
+          if (WSend_distantTDumpResponse (fname, prefix, offset))
+
+           {
+              fprintf (stdout, "<font color=red size=4> Records listing aborted</font><br>");
+              fprintf (stdout, "</body>\n</html>\n");
+           }
+         
+         }
+
+       unless (w_strcmp (outpout, uS ("xml")))
+         {
+          if (WSend_distantXDumpResponse (fname, prefix, offset))
+
+           {
+              fprintf (stdout, "<font color=red size=4> Records listing aborted</font><br>");
+              fprintf (stdout, "</body>\n</html>\n");
+           }
+         
+         }
+
+       unless (w_strcmp (outpout, uS ("json")))
+         {
+          if (WSend_distantJDumpResponse (fname, prefix, offset))
+
+           {
+              fprintf (stdout, "<font color=red size=4> Records listing aborted</font><br>");
+              fprintf (stdout, "</body>\n</html>\n");
+           }
+         
+         }
+
+
+     destroy (objrec);
+   
+     destroy (objfile);
+     destroy (objnature);
+     return 1;
+    
+       } 
  
   objfile = recoverFName (r , & pos);
   fname =   WString_getText(objfile);
  
-  unless ( w_strcmp (reqnature, uS ("list")))
-     {
-      /*ap_set_content_type (r, "text/html");*/
- 
-      
-   
-      if (WSend_distantDumpResponse (fname, prefix, offset))
-
-         {
-         fprintf (stdout, "<font color=red size=4> Records listing aborted</font><br>");
-         fprintf (stdout, "</body>\n</html>\n");
-         }
-
-    destroy (objrec);
-    destroy (objfile);
-    destroy (objnature);
-    return 1;
-    
-   } 
+  
 
  /* we want here te recover a whole warc file */
   unless (w_strcmp (reqnature, uS ("file")))
