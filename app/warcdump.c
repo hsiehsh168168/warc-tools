@@ -157,7 +157,8 @@ int main (int argc, const char ** argv)
       if (string)
         {
         fprintf (stdout, "%-35s: %-20s\n", "Content-Type",  string);
-        m1 = WARC_TRUE;
+
+       m1 = WARC_TRUE;
         }
 
 

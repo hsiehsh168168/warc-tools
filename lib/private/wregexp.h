@@ -24,8 +24,9 @@
 /*     http://code.google.com/p/warc-tools/                            */
 /* ------------------------------------------------------------------- */
 
-#ifndef __WARC_FILE_X__
-#define __WARC_FILE_X__
+#ifndef	__WARC_REGEXP_H__
+#define	__WARC_REGEXP_H__
+
 
 /* to mix C and C++ */
 #ifdef __cplusplus
@@ -33,23 +34,24 @@ extern "C"
   {
 #endif
 
+
     /**
      * Portability header file
      */
 
 #include <wport.h>
-#include <wmisc.h>
-#include <event.h>
 
-    extern FILE *       WFile_getFile     (const void * const);
-    extern warc_i32_t   WFile_fileno      (void *);
-    extern warc_bool_t  WFile_fillBuffer  (void *, char *, warc_u32_t, warc_i32_t *);
-    extern wfile_comp_t WFile_getCompressionMode (const void * const );
-    extern warc_u64_t   WFile_getFileSize (const void * const );
+
+    extern const void * WRegexp;
+
+    extern warc_bool_t WRegexp_match (void * const , const warc_u8_t * , warc_u32_t );
+    extern warc_bool_t WRegexp_search (void * const , const warc_u8_t * , warc_u32_t );
+
 
 #ifdef __cplusplus
   }
 
 #endif
 
-#endif /* __WARC_FILE_X__ */
+
+#endif /* __WARC_REGEXP_H__ */

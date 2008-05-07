@@ -368,11 +368,12 @@ WPRIVATE warc_bool_t WSend_record (const warc_u8_t * fname, const warc_u8_t * pr
  */
 
 
-WPRIVATE WSend_filtredResponse (const warc_u8_t * fname, const warc_u8_t * prefix, warc_u32_t offset,
+WPRIVATE warc_bool_t WSend_filtredResponse (const warc_u8_t * fname, const warc_u8_t * prefix, warc_u32_t offset,
                                 const warc_u8_t * fdfilter,const warc_u8_t * filter, request_rec * r)
 {
   void         *    w         = NIL;
   void         *    record    = NIL;
+  void         *    rexpr     = NIL;
   warc_u8_t    *    buffer    = NIL;
   const char   *    hofld     = NIL;
   wfile_comp_t      cmode     = WARC_FILE_UNCOMPRESSED;
@@ -407,6 +408,14 @@ WPRIVATE WSend_filtredResponse (const warc_u8_t * fname, const warc_u8_t * prefi
   else
        ap_set_content_type (r, "text/random");
  
+  rexpr = bless (WRegexp, makeS (filter));
+  unless (rexpr)
+     {
+      r->content_type = "text/html";
+      ap_rprintf (r, "<font color = red size = 4 >Bad filter string</font><br>");
+      destroy (w);
+      return (WARC_TRUE);
+     }
 
    buffer = wmalloc (MAX_BUFFER_SIZE);
     
@@ -418,6 +427,7 @@ WPRIVATE WSend_filtredResponse (const warc_u8_t * fname, const warc_u8_t * prefi
           ap_rprintf (r, "<FONT SIZE = 4 COLOR = red>Bad record found</FONT><br>");
           wfree (buffer);
           destroy (w);
+          destroy (rexpr);
           return (WARC_TRUE);
          }
 
@@ -478,7 +488,7 @@ WPRIVATE WSend_filtredResponse (const warc_u8_t * fname, const warc_u8_t * prefi
           }
        }
 
-       if ( (hofld) && (w_strcasestr (hofld, filter)))
+       if ( (hofld) && WRegexp_search (rexpr, makeS (hofld)))
           {
            WFile_seek (w, offset);
            offset += rsize;          
@@ -489,6 +499,7 @@ WPRIVATE WSend_filtredResponse (const warc_u8_t * fname, const warc_u8_t * prefi
                  ap_rprintf (r, "<font color = red size = 4 >Failed in allocation of memory for respponse sending </font><br>");
                  destroy (w);
                  destroy (record);
+                 destroy (rexpr);
                  wfree (buffer);
                  return (WARC_TRUE);
                  }
@@ -512,15 +523,1037 @@ WPRIVATE WSend_filtredResponse (const warc_u8_t * fname, const warc_u8_t * prefi
        else
           offset += rsize;
 
+    
     destroy (record);
     }
-
+  destroy (rexpr);
   wfree (buffer);
   destroy (w);
   return (WARC_FALSE);
 }
 
+
+/**
+ * @param src_string: the origin string to convert
+ * @param srclen: the length of the source string
+ * @param xml_string: the de output XML string
+ *
+ * @return a warc_u8_t * if succeed, NIL otherwise
+ *
+ * Recode the XML special characters in the source string 
+ * by their equivalent XML encoding string
+ */
+
+
+WPRIVATE warc_u8_t * xml_recode (const warc_u8_t * src_string, warc_u32_t srclen, warc_u8_t * xml_string)
+{
+    warc_u32_t i = 0;
+    warc_u32_t j = 0;
+    warc_u8_t  c = ' ';
+
+  unless (src_string || srclen)
+    return (NIL);
+
+  xml_string[0] = 0;
+
+  for (i = 0; (i < srclen && src_string[i] != 0); i++)
+    {
+    c = src_string[i];
+    switch (c)
+        {
+        case '&': xml_string[j]='&';
+                  xml_string[j+1]='a';
+                  xml_string[j+2]='m';
+                  xml_string[j+3]='p';
+                  xml_string[j+4]=';';
+                  j = j+5;
+                  break;
+
+        case '<': xml_string[j]='&';
+                  xml_string[j+1]='l';
+                  xml_string[j+2]='t';
+                  xml_string[j+3]=';';
+                  j = j+4;
+                  break;
+
+        case '>': xml_string[j]='&';
+                  xml_string[j+1]='g';
+                  xml_string[j+2]='t';
+                  xml_string[j+3]=';';
+                  j = j+4;
+                  break;
+
+        case '"': xml_string[j]='&';
+                  xml_string[j+1]='q';
+                  xml_string[j+2]='u';
+                  xml_string[j+3]='o';
+                  xml_string[j+4]='t';
+                  xml_string[j+5]=';';
+                  j = j+6;
+                  break;
+
+        case '\'': xml_string[j]='&';
+                   xml_string[j+1]='a';
+                   xml_string[j+2]='q';
+                   xml_string[j+3]='u';
+                   xml_string[j+4]='o';
+                   xml_string[j+5]='t';
+                   xml_string[j+6]=';';
+                  j = j+7;
+                  break;
+
+        default: xml_string[j] = src_string[i];
+                 j++;
+        }
+    }
+xml_string [j] = '\0';
+
+return (xml_string);
+
+}
+
+
   
+/**
+ * @param fname: the name of the concerned warc file
+ * @param wfile: the warc file to dump
+ * @param req: the request object used in the response
+ *
+ * @return False if succeeds, True otherwise
+ *
+ * Builds an XML output to be sent by the list request
+ */
+
+WPRIVATE warc_bool_t WBuildXmlOutput (const warc_u8_t * fname, void * wfile, request_rec * req)
+{
+    void * wrecord     =  NIL;
+    warc_u32_t cpt     =  0;
+    warc_u8_t        xmlstr[256];
+
+
+   ap_rprintf (req, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n");
+   ap_rprintf (req, "<warcfile name=\"%s\" size=\"%llu\">\r\n", (const char *) fname, (unsigned long long) WFile_getFileSize (wfile)); 
+
+  while (WFile_hasMoreRecords (wfile) )
+    {
+      const void * al  = NIL; /* ANVL list object */
+      warc_bool_t  m   = WARC_FALSE;
+      const warc_u8_t * string = NIL;
+      warc_u32_t   tlen = 0;
+
+      unless ( (wrecord = WFile_nextRecord (wfile) ) )
+          {
+          req -> content_type = "text/html";
+          ap_rprintf (req, "<center><font color=darkred>Bad record found!\r\n</font></center><br>");
+
+          break;
+         }
+
+      cpt ++;
+      /* dump WRecord */
+      ap_rprintf (req, "<warc-record rank=\"%d\" ", cpt );
+
+      ap_rprintf (req, "offset=\"%llu\" ", (unsigned long long) WRecord_getOffset (wrecord) );
+
+      ap_rprintf (req, "compressed-size=\"%llu\" ", (unsigned long long) WRecord_getCompressedSize (wrecord) );
+
+      ap_rprintf (req, "uncompressed-size=\"%llu\" ", (unsigned long long) WRecord_getUncompressedSize (wrecord) );
+
+      /* Preprocessing for xml viewing */
+      xml_recode (makeS (WRecord_getWarcId (wrecord)), xmlstr);
+      ap_rprintf (req, "warc-id=\"%s\" ", (const char *) xmlstr);
+
+      ap_rprintf (req, "content-length=\"%u\" ", WRecord_getContentLength  (wrecord) );
+
+      ap_rprintf (req, "warc-type=\"%u\" ", WRecord_getRecordType  (wrecord) );
+
+      xml_recode (makeS (WRecord_getDate (wrecord)), xmlstr);
+      ap_rprintf (req, "warc-date=\"%s\" ", (const char *) xmlstr );
+
+      xml_recode ( makeS (WRecord_getRecordId (wrecord)), xmlstr);
+      ap_rprintf (req, "warc-record-id=\"%s\">\r\n", (const char *) xmlstr);
+
+      string = WRecord_getContentType (wrecord);
+      if (string)
+         {
+         xml_recode ( makeS (string), xmlstr);
+         ap_rprintf (req, "<content-type value=\"%s\"/>\r\n", (const char *) xmlstr);
+         m = WARC_TRUE;
+         }
+
+      string = WRecord_getConcurrentTo (wrecord);
+      if (string)
+         {
+         xml_recode ( makeS (string), xmlstr);
+         ap_rprintf (req, "<warc-concurrent-to value=\"%s\"/>\r\n", (const char *) xmlstr);
+         m = WARC_TRUE;
+         }
+
+      string = WRecord_getBlockDigest (wrecord);
+      if (string)
+         {
+         xml_recode ( makeS (string), xmlstr);
+         ap_rprintf (req, "<warc-block-digest value=\"%s\"/>\r\n", (const char *) xmlstr);
+         m = WARC_TRUE;
+         }
+
+      string = WRecord_getPayloadDigest (wrecord);
+      if (string)
+         {
+         xml_recode ( makeS (string), xmlstr);
+         ap_rprintf (req, "<warc-payload-digest value=\"%s\"/>\r\n", (const char *) xmlstr);
+         m = WARC_TRUE;
+         }
+
+      string = WRecord_getIpAddress (wrecord);
+      if (string)
+         {
+         xml_recode ( makeS (string), xmlstr);
+         ap_rprintf (req, "<warc-ip-address value=\"%s\"/>\r\n", (const char *) xmlstr);
+         m = WARC_TRUE;
+         }
+
+      string = WRecord_getRefersTo (wrecord);
+      if (string)
+         {
+         xml_recode ( makeS (string), xmlstr);
+         ap_rprintf (req, "<warc-refers-to value=\"%s\"/>\r\n", (const char *) xmlstr);
+         m = WARC_TRUE;
+         }
+
+      string = WRecord_getTargetUri (wrecord);
+      if (string)
+        {
+         xml_recode ( makeS (string), xmlstr);
+         ap_rprintf (req, "<warc-taget-uri value=\"%s\"/>\r\n", (const char *) xmlstr );
+         m = WARC_TRUE;
+        }
+
+      string = WRecord_getTruncated (wrecord);
+      if (string)
+         {
+         xml_recode ( makeS (string), xmlstr);
+         ap_rprintf (req, "<warc-truncated value=\"%s\"/>\r\n", (const char *) xmlstr);
+         m = WARC_TRUE;
+         }
+
+      string = WRecord_getWarcInfoId (wrecord);
+      if (string)
+         {
+         xml_recode ( makeS (string), xmlstr);
+         ap_rprintf (req, "<warc-info-id value=\"%s\"/>\r\n", (const char *) xmlstr);
+         m = WARC_TRUE;
+         }
+
+      string = WRecord_getFilename (wrecord);
+      if (string)
+         {
+         xml_recode ( makeS (string), xmlstr);
+         ap_rprintf (req, "<warc-filename value=\"%s\"/>\r\n", (const char *) xmlstr);
+         m = WARC_TRUE;
+         }
+
+      string = WRecord_getProfile (wrecord);
+      if (string)
+         {
+         xml_recode ( makeS (string), xmlstr);
+         ap_rprintf (req, "<warc-profile value=\"%s\"/>\r\n", (const char *) xmlstr);
+         m = WARC_TRUE;
+         }
+
+      string = WRecord_getPayloadType (wrecord);
+      if (string)
+         {
+         xml_recode ( makeS (string), xmlstr);
+         ap_rprintf (req, "<warc-identrified-payload-type value=\"%s\"/>\r\n", (const char *) xmlstr);
+         m = WARC_TRUE;
+         }
+
+      string = WRecord_getSegmentOriginId (wrecord);
+      if (string)
+         {
+         xml_recode ( makeS (string), xmlstr);
+         ap_rprintf (req, "<warc-segment-origin-id value=\"%s\"/>\r\n", (const char *) xmlstr);
+
+         ap_rprintf (req, "<warc-segment-nummber value=\"%d\"/>\r\n",  WRecord_getSegmentNumber (wrecord));
+         m = WARC_TRUE;
+         }
+
+      tlen = WRecord_getSegTotalLength (wrecord);
+      if (tlen)
+         {
+         ap_rprintf (req, "<warc-segment-total-length value=\"%d\"/>\r\n", tlen);
+         m = WARC_TRUE;
+         }
+
+
+      /* dump ANVLs */
+
+      if ((al = WRecord_getAnvl (wrecord) ))
+        {
+
+          warc_u32_t  i = 0;
+          warc_u32_t  j = WList_size (al); /* how many ANVL are there? */
+
+
+         if (j)
+           {
+           ap_rprintf (req, "<extra-fields>\r\n");
+           while ( i < j )
+               {
+                 const void  * a = WList_get (al, i); /* ANVL record */
+   
+                 /* we assume here that the ANVL value was in ASCII. */
+                 /* use your own encoding to print it otherwise. */
+
+                 ap_rprintf (req , "<field key=\"%s\" value=\"%s\"/>", (char *) xml_recode (makeS (WAnvl_getKey (a)), xmlstr), 
+                                      (char *) xml_recode (makeS (WAnvl_getValue (a)), xmlstr) );
+
+                 ++ i;
+               }
+          ap_rprintf (req, "</extra-fields>\r\n");
+           }
+        }
+
+      destroy (wrecord);
+      ap_rprintf (req, "</warc-record>\r\n");
+    }
+   
+   ap_rprintf (req, "</warcfile>\r\n");
+
+
+  return (WARC_FALSE);
+}
+
+
+
+/**
+ * @param fname: the name of the concerned warc file
+ * @param wfile: the warc file to dump
+ * @param req: the request object used in the response
+ *
+ * @return False if succeeds, True otherwise
+ *
+ * Builds an HtML output to be sent by the list request
+ */
+
+WPRIVATE warc_bool_t WBuildHtmlOutput (const warc_u8_t * fname, void * wfile, request_rec * req)
+{
+    void * wrecord     =  NIL;
+    warc_u32_t cpt     =  0;
+/*    warc_u8_t        xmlstr[256]; */
+
+
+   ap_rprintf (req, "<font size=5><b>warcfile:</B></font><font size=3> name=\"%s\" size=\"%llu\"\r\n</font><BR><br>", (const char *) fname, 
+                                                                 (unsigned long long)WFile_getFileSize (wfile));
+
+  while (WFile_hasMoreRecords (wfile) )
+    {
+      const void * al  = NIL; /* ANVL list object */
+      warc_bool_t  m   = WARC_FALSE;
+      const warc_u8_t * string = NIL;
+      warc_u32_t   tlen = 0;
+
+      unless ( (wrecord = WFile_nextRecord (wfile) ) )
+          {
+          ap_rprintf (req, "<center><font color=darkred>Bad record found!\r\n</font></center><br>");
+
+          req -> content_type = "text/html";
+     
+          break;
+         }
+
+      cpt ++;
+      /* dump WRecord */
+      ap_rprintf (req, "<font color=darkblue size = 5> <b> Warc Record: %d</b> </font>", cpt);
+      ap_rprintf (req, "<blockquote> <table BORDER = 2 bgcolor=lightgray>");
+      ap_rprintf (req, "<tr><td><font color=darkgreen size = 3> Offset </font></td><td>%llu</td></tr>",
+                              (unsigned long long) WRecord_getOffset (wrecord) );
+
+      ap_rprintf (req, "<tr><td><font color=darkgreen size = 3> Compressed size </font></td><td>%llu</td></tr>",
+                              (unsigned long long) WRecord_getCompressedSize (wrecord) );
+
+      ap_rprintf (req, "<tr><td><font color=darkgreen size = 3> Warc ID </font></td><td>%s</td></tr> ",
+                              (const char *) WRecord_getWarcId      (wrecord) );
+
+      ap_rprintf (req, "<tr><td><font color=darkgreen size = 3> Content-Length </font></td><td>%u</td></tr>",
+                              WRecord_getContentLength  (wrecord) );
+
+      ap_rprintf (req, "<tr><td><font color=darkgreen size = 3> WARC-Type </font></td><td>%u</td></tr>",
+                              WRecord_getRecordType  (wrecord) );
+
+      ap_rprintf (req, "<tr><td><font color=darkgreen size = 3> WARC-Date </font></td><td>%s</td></tr>",
+                              (const char *) WRecord_getDate (wrecord) );
+
+      ap_rprintf (req, "<tr><td><font color=darkgreen size = 3> WARC-Record-ID </font></td><td>%s</td></tr>",
+                              (const char *) WRecord_getRecordId    (wrecord) );
+
+      ap_rprintf (req, "</table></blockquote><br>");
+
+      ap_rprintf (req, "<font color=darkgreen size = 4> <b> Other Fields </b> </font>");
+      ap_rprintf (req, "<blockquote> <table BORDER = 2 bgcolor=lightgray>");
+
+      string = WRecord_getContentType (wrecord);
+      if (string)
+         {
+         ap_rprintf (req, "<tr><td><font color=darkgreen size = 3> Content-Type </font></td><td>%s</td></tr>",
+                              (const char *) string);
+         m = WARC_TRUE;
+         }
+
+      string = WRecord_getConcurrentTo (wrecord);
+      if (string)
+         {
+         ap_rprintf (req, "<tr><td><font color=darkgreen size = 3> WARC-Concurrent-To </font></td><td>%s</td></tr>",
+                              (const char *) string);
+         m = WARC_TRUE;
+         }
+
+      string = WRecord_getBlockDigest (wrecord);
+      if (string)
+         {
+         ap_rprintf (req, "<tr><td><font color=darkgreen size = 3> WARC-Block-Digest </font></td><td>%s</td></tr>",
+                              (const char *) string);
+         m = WARC_TRUE;
+         }
+
+      string = WRecord_getPayloadDigest (wrecord);
+      if (string)
+         {
+         ap_rprintf (req, "<tr><td><font color=darkgreen size = 3> WARC-Payload-Digest </font></td><td>%s</td></tr>",
+                              (const char *) string);
+         m = WARC_TRUE;
+         }
+
+      string = WRecord_getIpAddress (wrecord);
+      if (string)
+         {
+         ap_rprintf (req, "<tr><td><font color=darkgreen size = 3> WARC-IP-Address </font></td><td>%s</td></tr>",
+                              (const char *) string);
+         m = WARC_TRUE;
+         }
+
+      string = WRecord_getRefersTo (wrecord);
+      if (string)
+         {
+         ap_rprintf (req, "<tr><td><font color=darkgreen size = 3> WARC-Refers-To </font></td><td>%s</td></tr>",
+                              (const char *) string);
+         m = WARC_TRUE;
+         }
+
+      string = WRecord_getTargetUri (wrecord);
+      if (string)
+        {
+         ap_rprintf (req, "<tr><td><font color=darkgreen size = 3> WARC-Target-URI </font></td><td>%s</td></tr>",
+                              (const char *) string );
+         m = WARC_TRUE;
+         }
+
+      string = WRecord_getTruncated (wrecord);
+      if (string)
+         {
+         ap_rprintf (req, "<tr><td><font color=darkgreen size = 3> WARC-Truncated </font></td><td>%s</td></tr>",
+                              (const char *) string);
+         m = WARC_TRUE;
+         }
+
+      string = WRecord_getWarcInfoId (wrecord);
+      if (string)
+         {
+         ap_rprintf (req, "<tr><td><font color=darkgreen size = 3> WARC-warcinfo-ID </font></td><td>%s</td></tr>",
+                              (const char *) string);
+         m = WARC_TRUE;
+         }
+
+      string = WRecord_getFilename (wrecord);
+      if (string)
+         {
+         ap_rprintf (req, "<tr><td><font color=darkgreen size = 3> WARC-Filename </font></td><td>%s</td></tr>",
+                              (const char *) string);
+         m = WARC_TRUE;
+         }
+
+      string = WRecord_getProfile (wrecord);
+      if (string)
+         {
+         ap_rprintf (req, "<tr><td><font color=darkgreen size = 3> WARC-Profile </font></td><td>%s</td></tr>",
+                              (const char *) string);
+         m = WARC_TRUE;
+         }
+
+      string = WRecord_getPayloadType (wrecord);
+      if (string)
+         {
+         ap_rprintf (req, "<tr><td><font color=darkgreen size = 3> WARC-Identified-Payload-Type </font></td><td>%s</td></tr>",
+                              (const char *) string);
+         m = WARC_TRUE;
+         }
+
+      string = WRecord_getSegmentOriginId (wrecord);
+      if (string)
+         {
+         ap_rprintf (req, "<tr><td><font color=darkgreen size = 3> WARC-Segment-Origin-ID </font></td><td>%s</td></tr>",
+                              (const char *) string);
+
+         ap_rprintf (req, "<tr><td><font color=darkgreen size = 3> WARC-Segment-Number </font></td><td>%d</td></tr>",
+                             WRecord_getSegmentNumber (wrecord));
+         m = WARC_TRUE;
+         }
+
+      tlen = WRecord_getSegTotalLength (wrecord);
+      if (tlen)
+         {
+         ap_rprintf (req, "<tr><td><font color=darkgreen size = 3> WARC-Segment-Total-Length </font></td><td>%d</td></tr>",
+                              tlen);
+         m = WARC_TRUE;
+         }
+
+     unless (m)
+        ap_rprintf (req, "<tr><td><font color=darkgreen size =3 > --No One-- </font></td></tr>");
+
+      ap_rprintf (req, "</table></blockquote><br>");
+
+
+
+      /* dump ANVLs */
+
+      if ((al = WRecord_getAnvl (wrecord) ))
+        {
+          warc_u32_t  i = 0;
+          warc_u32_t  j = WList_size (al); /* how many ANVL are there? */
+        
+         if (j)
+           {
+           ap_rprintf (req, "<font color=darkred size = 4> <b> More information </b> </font>");
+           ap_rprintf (req, "<blockquote> <table BORDER = 2 bgcolor=lightgray>");
+       
+           while ( i < j )
+               {
+                 const void  * a = WList_get (al, i); /* ANVL record */
+   
+                 /* we assume here that the ANVL value was in ASCII. */
+                 /* use your own encoding to print it otherwise. */
+                 ap_rprintf (req , "<tr><td><font color=darkgreen size = 3> %s </font></td><td>%s</td></tr>",
+                                          (const char *) WAnvl_getKey (a), (const char *) WAnvl_getValue (a) );
+
+                 ++ i;
+               }
+           ap_rprintf (req, "</table></blockquote><br><br>");
+           }
+
+        }
+
+      destroy (wrecord);
+    }
+
+  return (WARC_FALSE);
+}
+
+
+/**
+ * @param fname: the name of the concerned warc file
+ * @param wfile: the warc file to dump
+ * @param req: the request object used in the response
+ *
+ * @return False if succeeds, True otherwise
+ *
+ * Builds a Plain text output to be sent by the list request
+ */
+
+WPRIVATE warc_bool_t WBuildTextOutput (const warc_u8_t * fname, void * wfile, request_rec * req)
+{
+    void * wrecord     =  NIL;
+    warc_u32_t cpt     =  0;
+/*    warc_u8_t        xmlstr[256]; */
+
+
+   ap_rprintf (req, "warcfile: name=\"%s\" size=\"%llu\"\r\n", (const char *) fname, (unsigned long long)WFile_getFileSize (wfile));
+
+  while (WFile_hasMoreRecords (wfile) )
+    {
+      const void * al  = NIL; /* ANVL list object */
+      warc_bool_t  m   = WARC_FALSE;
+      const warc_u8_t * string = NIL;
+      warc_u32_t   tlen = 0;
+
+      unless ( (wrecord = WFile_nextRecord (wfile) ) )
+          {
+          ap_rprintf (req, "<center><font color=darkred>Bad record found!\r\n</font></center><br>");
+
+          req -> content_type = "text/html";
+          break;
+         }
+
+      cpt ++;
+      /* dump WRecord */
+      ap_rprintf (req, "- Warc Record: %d\r\n", cpt);
+      ap_rprintf (req, "\t* Offset: %llu\r\n",
+                              (unsigned long long) WRecord_getOffset (wrecord) );
+
+      ap_rprintf (req, "\t* Compressed size: %llu\r\n",
+                              (unsigned long long) WRecord_getCompressedSize (wrecord) );
+
+      ap_rprintf (req, "\t* Warc ID: %s\r\n",
+                              (const char *) WRecord_getWarcId      (wrecord) );
+
+      ap_rprintf (req, "\t* Content-Length: %u\r\n",
+                              WRecord_getContentLength  (wrecord) );
+
+      ap_rprintf (req, "\t* WARC-Type: %u\r\n",
+                              WRecord_getRecordType  (wrecord) );
+
+      ap_rprintf (req, "\t* WARC-Date: %s\r\n",
+                              (const char *) WRecord_getDate (wrecord) );
+
+      ap_rprintf (req, "\t* WARC-Record-ID: %s\r\n",
+                              (const char *) WRecord_getRecordId    (wrecord) );
+
+      ap_rprintf (req, "\r\n\t* Other Fields:\r\n");
+
+      string = WRecord_getContentType (wrecord);
+      if (string)
+         {
+         ap_rprintf (req, "\t\t@ Content-Type: %s\r\n",
+                              (const char *) string);
+         m = WARC_TRUE;
+         }
+
+      string = WRecord_getConcurrentTo (wrecord);
+      if (string)
+         {
+         ap_rprintf (req, "\t\t@ WARC-Concurrent-To: %s\r\n",
+                              (const char *) string);
+         m = WARC_TRUE;
+         }
+
+      string = WRecord_getBlockDigest (wrecord);
+      if (string)
+         {
+         ap_rprintf (req, "\t\t@ WARC-Block-Digest: %s\r\n",
+                              (const char *) string);
+         m = WARC_TRUE;
+         }
+
+      string = WRecord_getPayloadDigest (wrecord);
+      if (string)
+         {
+         ap_rprintf (req, "\t\t@ WARC-Payload-Digest: %s\r\n",
+                              (const char *) string);
+         m = WARC_TRUE;
+         }
+
+      string = WRecord_getIpAddress (wrecord);
+      if (string)
+         {
+         ap_rprintf (req, "\t\t@ WARC-IP-Address: %s\r\n",
+                              (const char *) string);
+         m = WARC_TRUE;
+         }
+
+      string = WRecord_getRefersTo (wrecord);
+      if (string)
+         {
+         ap_rprintf (req, "\t\t@ WARC-Refers-To: %s\r\n",
+                              (const char *) string);
+         m = WARC_TRUE;
+         }
+
+      string = WRecord_getTargetUri (wrecord);
+      if (string)
+        {
+         ap_rprintf (req, "\t\t@ WARC-Target-URI: %s\r\n",
+                              (const char *) string );
+         m = WARC_TRUE;
+         }
+
+      string = WRecord_getTruncated (wrecord);
+      if (string)
+         {
+         ap_rprintf (req, "\t\t@ WARC-Truncated: %s\r\n",
+                              (const char *) string);
+         m = WARC_TRUE;
+         }
+
+      string = WRecord_getWarcInfoId (wrecord);
+      if (string)
+         {
+         ap_rprintf (req, "\t\t@ WARC-Warcinfo-ID: %s\r\n",
+                              (const char *) string);
+         m = WARC_TRUE;
+         }
+
+      string = WRecord_getFilename (wrecord);
+      if (string)
+         {
+         ap_rprintf (req, "\t\t@ WARC-Filename: %s\r\n",
+                              (const char *) string);
+         m = WARC_TRUE;
+         }
+
+      string = WRecord_getProfile (wrecord);
+      if (string)
+         {
+         ap_rprintf (req, "\t\t@ WARC-Profile: %s\r\n",
+                              (const char *) string);
+         m = WARC_TRUE;
+         }
+
+      string = WRecord_getPayloadType (wrecord);
+      if (string)
+         {
+         ap_rprintf (req, "\t\t@ WARC-Identified-Payload-Type: %s\r\n",
+                              (const char *) string);
+         m = WARC_TRUE;
+         }
+
+      string = WRecord_getSegmentOriginId (wrecord);
+      if (string)
+         {
+         ap_rprintf (req, "\t\t@ WARC-Segment-Origin-ID: %s\r\n",
+                              (const char *) string);
+
+         ap_rprintf (req, "\t\t@ WARC-Segment-Number: %d\r\n",
+                             WRecord_getSegmentNumber (wrecord));
+         m = WARC_TRUE;
+         }
+
+      tlen = WRecord_getSegTotalLength (wrecord);
+      if (tlen)
+         {
+         ap_rprintf (req, "\t\t@ WARC-Segment-Total-Length: %d\r\n",
+                              tlen);
+         m = WARC_TRUE;
+         }
+
+     unless (m)
+        ap_rprintf (req, "---No One---\r\n");
+
+
+
+      /* dump ANVLs */
+
+      if ((al = WRecord_getAnvl (wrecord) ))
+        {
+          warc_u32_t  i = 0;
+          warc_u32_t  j = WList_size (al); /* how many ANVL are there? */
+        
+         if (j)
+           {
+           ap_rprintf (req, "\r\n* More information:\r\n");
+       
+           while ( i < j )
+               {
+                 const void  * a = WList_get (al, i); /* ANVL record */
+   
+                 /* we assume here that the ANVL value was in ASCII. */
+                 /* use your own encoding to print it otherwise. */
+                 ap_rprintf (req , "\t\t@ %s: %s\r\n",
+                                          (const char *) WAnvl_getKey (a), (const char *) WAnvl_getValue (a) );
+
+                 ++ i;
+               }
+           }
+
+        }
+
+      destroy (wrecord);
+    }
+
+
+
+  return (WARC_FALSE);
+}
+
+
+/**
+ * @param fname: the name of the concerned warc file
+ * @param wfile: the warc file to dump
+ * @param req: the request object used in the response
+ *
+ * @return False if succeeds, True otherwise
+ *
+ * Builds a Json output to be sent by the list request
+ */
+
+WPRIVATE warc_bool_t WBuildJsonOutput (const warc_u8_t * fname, void * wfile, request_rec * req)
+{
+    void       *   wrecord     =  NIL;
+    warc_u32_t     cpt         =  0;
+    warc_u8_t      comma[2]    = {'\0','\0'};
+    warc_bool_t    first       = WARC_TRUE;
+    warc_bool_t    firstr      = WARC_TRUE;
+/*    warc_u8_t        xmlstr[256]; */
+
+
+   ap_rprintf (req, "{\"warcfile\":[{\"name\":\"%s\"},{\"size\":\"%llu\"},{\"records\":[", (const char *) fname, 
+                        (unsigned long long)WFile_getFileSize (wfile));
+
+  while (WFile_hasMoreRecords (wfile) )
+    {
+      const void * al  = NIL; /* ANVL list object */
+      const warc_u8_t * string = NIL;
+      warc_u32_t   tlen = 0;
+
+      unless ( (wrecord = WFile_nextRecord (wfile) ) )
+          {
+          ap_rprintf (req, "<center><font color=darkred>Bad record found!\r\n</font></center><br>");
+
+          req -> content_type = "text/html";
+          break;
+         }
+
+      cpt ++;
+      /* dump WRecord */
+      if (!firstr)
+         ap_rprintf (req, ",");
+      else
+         firstr = WARC_FALSE;
+      ap_rprintf (req, "{\"Warc Record\":[{\"rank\":%d}", cpt);
+      ap_rprintf (req, ",{\"Offset\":%llu}",
+                              (unsigned long long) WRecord_getOffset (wrecord) );
+
+      ap_rprintf (req, ",{\"Compressed size\":%llu}",
+                              (unsigned long long) WRecord_getCompressedSize (wrecord) );
+
+      ap_rprintf (req, ",{\"fields\":[{\"Warc ID\":\"%s\"}",
+                              (const char *) WRecord_getWarcId      (wrecord) );
+
+      ap_rprintf (req, ",{\"Content-Length\":%u}",
+                              WRecord_getContentLength  (wrecord) );
+
+      ap_rprintf (req, ",{\"WARC-Type\":%u}",
+                              WRecord_getRecordType  (wrecord) );
+
+      ap_rprintf (req, ",{\"WARC-Date\":\"%s\"}",
+                              (const char *) WRecord_getDate (wrecord) );
+
+      ap_rprintf (req, ",{\"WARC-Record-ID\":\"%s\"}",
+                              (const char *) WRecord_getRecordId    (wrecord) );
+
+      ap_rprintf (req, ",{\"Other Fields\":[");
+
+      string = WRecord_getContentType (wrecord);
+      if (string)
+         {
+         ap_rprintf (req, "%s{\"Content-Type\":\"%s\"}",
+                              (const char *) comma, (const char *) string);
+         if (first)
+            {
+            first = WARC_FALSE;
+            comma [0] = ',';
+            }
+         }
+
+      string = WRecord_getConcurrentTo (wrecord);
+      if (string)
+         {
+         ap_rprintf (req, "%s{\"WARC-Concurrent-To\":\"%s\"}",
+                              (const char *) comma, (const char *) string);
+         if (first)
+            {
+            first = WARC_FALSE;
+            comma [0] = ',';
+            }
+         }
+
+      string = WRecord_getBlockDigest (wrecord);
+      if (string)
+         {
+         ap_rprintf (req, "%s{\"WARC-Block-Digest\":\"%s\"}",
+                              (const char *) comma, (const char *) string);
+         if (first)
+            {
+            first = WARC_FALSE;
+            comma [0] = ',';
+            }
+         }
+
+      string = WRecord_getPayloadDigest (wrecord);
+      if (string)
+         {
+         ap_rprintf (req, "%s{\"WARC-Payload-Digest\":\"%s\"}",
+                              (const char *) comma, (const char *) string);
+         if (first)
+            {
+            first = WARC_FALSE;
+            comma [0] = ',';
+            }
+         }
+
+      string = WRecord_getIpAddress (wrecord);
+      if (string)
+         {
+         ap_rprintf (req, "%s{\"WARC-Ip-Address\":\"%s\"}",
+                              (const char *) comma, (const char *) string);
+         if (first)
+            {
+            first = WARC_FALSE;
+            comma [0] = ',';
+            }
+         }
+
+      string = WRecord_getRefersTo (wrecord);
+      if (string)
+         {
+         ap_rprintf (req, "%s{\"WARC-Refers-To\":\"%s\"}",
+                              (const char *) comma, (const char *) string);
+         if (first)
+            {
+            first = WARC_FALSE;
+            comma [0] = ',';
+            }
+         }
+
+      string = WRecord_getTargetUri (wrecord);
+      if (string)
+         {
+         ap_rprintf (req, "%s{\"WARC-Target-URI\":\"%s\"}",
+                              (const char *) comma, (const char *) string);
+         if (first)
+            {
+            first = WARC_FALSE;
+            comma [0] = ',';
+            }
+         }
+
+      string = WRecord_getTruncated (wrecord);
+      if (string)
+         {
+         ap_rprintf (req, "%s{\"WARC-Truncated\":\"%s\"}",
+                              (const char *) comma, (const char *) string);
+         if (first)
+            {
+            first = WARC_FALSE;
+            comma [0] = ',';
+            }
+         }
+
+      string = WRecord_getWarcInfoId (wrecord);
+      if (string)
+         {
+         ap_rprintf (req, "%s{\"WARC-Warcinfo-ID\":\"%s\"}",
+                              (const char *) comma, (const char *) string);
+         if (first)
+            {
+            first = WARC_FALSE;
+            comma [0] = ',';
+            }
+         }
+
+      string = WRecord_getFilename (wrecord);
+      if (string)
+         {
+         ap_rprintf (req, "%s{\"WARC-Filename\":\"%s\"}",
+                              (const char *) comma, (const char *) string);
+         if (first)
+            {
+            first = WARC_FALSE;
+            comma [0] = ',';
+            }
+         }
+
+      string = WRecord_getProfile (wrecord);
+      if (string)
+         {
+         ap_rprintf (req, "%s{\"WARC-Profile\":\"%s\"}",
+                              (const char *) comma, (const char *) string);
+         if (first)
+            {
+            first = WARC_FALSE;
+            comma [0] = ',';
+            }
+         }
+
+      string = WRecord_getPayloadType (wrecord);
+      if (string)
+         {
+         ap_rprintf (req, "%s{\"WARC-Payload-Type\":\"%s\"}",
+                              (const char *) comma, (const char *) string);
+         if (first)
+            {
+            first = WARC_FALSE;
+            comma [0] = ',';
+            }
+         }
+
+      string = WRecord_getSegmentOriginId (wrecord);
+      if (string)
+         {
+         ap_rprintf (req, "%s{\"WARC-Segment-Origin-ID\":\"%s\"},",
+                              (const char *) comma, (const char *) string);
+
+         ap_rprintf (req, "{\"WARC-Segment-Number\":%d}",
+                             WRecord_getSegmentNumber (wrecord));
+         if (first)
+            {
+            first = WARC_FALSE;
+            comma [0] = ',';
+            }
+         }
+
+      tlen = WRecord_getSegTotalLength (wrecord);
+      if (tlen)
+         {
+         ap_rprintf (req, "%s{\"WARC-Segment-Total-Length\":%d}",
+                              (const char *) comma, tlen);
+         if (first)
+            {
+            first = WARC_FALSE;
+            comma [0] = ',';
+            }
+         }
+
+      ap_rprintf (req, "]}");
+
+
+      /* dump ANVLs */
+
+      if ((al = WRecord_getAnvl (wrecord) ))
+        {
+          warc_u32_t  i = 0;
+          warc_u32_t  j = WList_size (al); /* how many ANVL are there? */
+        
+         if (j)
+           {
+           ap_rprintf (req, ",{\"Extra Fields\":[");
+
+           first = WARC_TRUE;
+           comma[0] = '\0';
+       
+           while ( i < j )
+               {
+                 const void  * a = WList_get (al, i); /* ANVL record */
+   
+                 /* we assume here that the ANVL value was in ASCII. */
+                 /* use your own encoding to print it otherwise. */
+                 ap_rprintf (req , "%s{\"%s\":\"%s\"}",
+                                          (const char *) comma, (const char *) WAnvl_getKey (a), (const char *) WAnvl_getValue (a) );
+                 if (first)
+                   {
+                   first = WARC_FALSE;
+                   comma[0] = ',';
+                   }
+
+                 ++ i;
+               }
+           ap_rprintf (req, "]}");
+           }
+
+        }
+      ap_rprintf (req, "]}]}");
+      first = WARC_TRUE;
+      comma[0] = '\0';
+      destroy (wrecord);
+    }
+
+   ap_rprintf (req, "]}]}");
+
+   req -> content_type = "text/plain";
+
+
+
+  return (WARC_FALSE);
+}
 
 
 
@@ -528,17 +1561,16 @@ WPRIVATE WSend_filtredResponse (const warc_u8_t * fname, const warc_u8_t * prefi
  * @param fname: the name of the wanted file
  * @param prefix: the directory leading to the file location
  * @param offset: the offset from where the data will be sent
+ * @param output: the output format
  * @param r: a request object
  * 
  * Sends a distant listing of the records in the warc file
  */
 
-WPRIVATE warc_bool_t WSend_distantDumpResponse (const warc_u8_t * fname, const warc_u8_t * prefix, warc_u32_t offset, request_rec * r)
+WPRIVATE warc_bool_t WSend_distantDumpResponse (const warc_u8_t * fname, const warc_u8_t * prefix, warc_u32_t offset, 
+                                                const char* output, request_rec * r)
 {
   void      *     w      = NIL;
-  void      *     record = NIL;
-
-   ap_rprintf (r, "<center> <H2> <FONT COLOR = red>  extract  warc records from  warc file %s </FONT> </H2> </center><br>", fname); 
 
    w = bless (WFile, fname, WARC_MAX_SIZE,
                 WARC_FILE_READER, WARC_FILE_DETECT_COMPRESSION, prefix);
@@ -558,181 +1590,50 @@ WPRIVATE warc_bool_t WSend_distantDumpResponse (const warc_u8_t * fname, const w
        ap_rprintf (r, "<FONT SIZE = 4 COLOR = red>Bad offset</FONT><br>");
        return (WARC_TRUE);
       }
-     
-    
-   while (WFile_hasMoreRecords (w) )
-      {
-       const warc_u8_t * string = NIL;
-       warc_u32_t  tlen   = 0  ;
-       warc_bool_t m      = WARC_FALSE;
-
-       unless ( (record = WFile_nextRecord (w) ) )
-         {
+  unless (w_strcmp (output, "xml"))
+    {
+    r -> content_type = "text/xml";
+    if (WBuildXmlOutput (fname,  w, r)) 
+       {   
           r->content_type = "text/html";
-          ap_rprintf (r, "<FONT SIZE = 4 COLOR = red>Bad record found</FONT><br>");
+          ap_rprintf (r, "<FONT SIZE = 4 COLOR = red>Can not display information about the file</FONT><br>");
           destroy (w);
           return (WARC_TRUE);
-         }
-
-      r -> content_type = "text/html";
-
-      /*print WHDLine object for this WRecord */
-      ap_rprintf (r, "<I> <B> <FONT SIZE = 5  COLOR = blue> Warc record that begin at offset  %d  fields : </FONT> </B> </I>\n\n",
-                       WRecord_getOffset (record) );
-
-      ap_rprintf (r, "<p> <FONT SIZE = 4 COLOR = purple >  Header line field </FONT>  <p>\n");
-      ap_rprintf (r, "<BLOCKQUOTE> <TABLE BORDER = 2   BGCOLOR = gray>");
-      ap_rprintf (r, " <TR>  <TD> <B>  Warc ID  </B> </TD> <TD> %-20s </TD> </TR> \n",        WRecord_getWarcId      (record) );
-      ap_rprintf (r,"<TR> <TD> <B>  Content-Length  </B> </TD> <TD> %-20d </TD> </TR>\n",        WRecord_getContentLength  (record) );
-      ap_rprintf (r, "<TR> <TD> <B>  WARC-Type  </B> </TD> <TD> %-20d </TD> </TR>\n",       WRecord_getRecordType  (record) );
-      ap_rprintf (r, "<TR> <TD> <B>  WARC-Record-ID   </B>   </TD> <TD> %-20s </TD> </TR> \n",     WRecord_getRecordId    (record) );
-      ap_rprintf (r, "<TR> <TD> <B>  WARC-Date  </B> </TD> <TD> %-20s </TD> </TR>\n",     WRecord_getDate (record));
-      ap_rprintf (r, "</TABLE> </BLOCKQUOTE>");
-
-      ap_rprintf (r, "<font color = darkgreen size 3= > Other fields </font><br>");
-
-      ap_rprintf (r, "<BLOCKQUOTE> <TABLE BORDER = 2   BGCOLOR = gray>");
-
-      string = WRecord_getContentType (record);
-      if (string)
-        {
-         ap_rprintf (r, " <TR> <TD> <B> Content-Type </B> </TD> <TD> %-20s </TD> </TR>\n", string);
-         m = WARC_TRUE;
-        }
-
-      string = WRecord_getConcurrentTo (record);
-      if (string)
-        {
-         ap_rprintf (r, " <TR> <TD> <B> WARC-Concurrent-To </B> </TD> <TD> %-20s </TD> </TR>\n", string);
-         m = WARC_TRUE;
-        }
-
-      string = WRecord_getBlockDigest (record);
-      if (string)
-        {
-         ap_rprintf (r, " <TR> <TD> <B> WARC-Block-Digest </B> </TD> <TD> %-20s </TD> </TR>\n", string);
-         m = WARC_TRUE;
-        }
-
-      string = WRecord_getPayloadDigest (record);
-      if (string)
-        {
-         ap_rprintf (r, " <TR> <TD> <B> WARC-Payload-Digest </B> </TD> <TD> %-20s </TD> </TR>\n", string);
-         m = WARC_TRUE;
-        }
-
-      string = WRecord_getIpAddress (record);
-      if (string)
-        {
-         ap_rprintf (r, " <TR> <TD> <B> WARC-IP-Address </B> </TD> <TD> %-20s </TD> </TR>\n", string);
-         m = WARC_TRUE;
-        }
-
-      string = WRecord_getRefersTo (record);
-      if (string)
-        {
-         ap_rprintf (r, " <TR> <TD> <B> WARC-Refers-To </B> </TD> <TD> %-20s </TD> </TR>\n", string);
-         m = WARC_TRUE;
-        }
-
-      string = WRecord_getTargetUri (record);
-      if (string)
-        {
-         ap_rprintf (r, "<TR> <TD> <B>  WARC-target-URI  </B> </TD> <TD> %-20s </TD> </TR>\n", string);
-         m = WARC_TRUE;
-        }
-
-      string = WRecord_getTruncated (record);
-      if (string)
-        {
-         ap_rprintf (r, " <TR> <TD> <B> WARC-Truncated </B> </TD> <TD> %-20s </TD> </TR>\n", string);
-         m = WARC_TRUE;
-        }
-
-      string = WRecord_getWarcInfoId (record);
-      if (string)
-        {
-         ap_rprintf (r, " <TR> <TD> <B> WARC-Warcinfo-ID </B> </TD> <TD> %-20s </TD> </TR>\n", string);
-         m = WARC_TRUE;
-        }
-
-      string = WRecord_getFilename (record);
-      if (string)
-        {
-         ap_rprintf (r, " <TR> <TD> <B> WARC-Filename </B> </TD> <TD> %-20s </TD> </TR>\n", string);
-         m = WARC_TRUE;
-        }
-
-      string = WRecord_getProfile (record);
-      if (string)
-        {
-         ap_rprintf (r, " <TR> <TD> <B> WARC-Profile </B> </TD> <TD> %-20s </TD> </TR>\n", string);
-         m = WARC_TRUE;
-        }
-
-      string = WRecord_getPayloadType (record);
-      if (string)
-        {
-         ap_rprintf (r, " <TR> <TD> <B> WARC-Identified-Payload-Type </B> </TD> <TD> %-20s </TD> </TR>\n", string);
-         m = WARC_TRUE;
-        }
-
-      string = WRecord_getSegmentOriginId (record);
-      if (string)
-        {
-         ap_rprintf (r, " <TR> <TD> <B> WARC-Segment-Origin-ID </B> </TD> <TD> %-20s </TD> </TR>\n", string);
-
-         ap_rprintf (r, " <TR> <TD> <B> WARC-Segment-Number </B> </TD> <TD> %-20d </TD> </TR>\n",
-                     WRecord_getSegmentNumber (record));
-
-         m = WARC_TRUE;
-        }
-
-      tlen = WRecord_getSegTotalLength (record);
-      if (tlen)
-        {
-         ap_rprintf (r, " <TR> <TD> <B> WARC-Segment-Total-Length </B> </TD> <TD> %-20d </TD> </TR>\n", tlen);
-
-         m = WARC_TRUE;
-        }
-
-      unless (m)
-         ap_rprintf (r, " <TR><TD> --No One-- </TD> </TR>\n");
-
-      ap_rprintf (r, "</TABLE> </BLOCKQUOTE>");
-      
-
-          
-      const void * al = NIL;
-      /* dump ANVLs */
-
-      if ((al = WRecord_getAnvl (record) ))
-         {
-          warc_u32_t  i = 0;
-          warc_u32_t  j = WList_size (al); /* how many ANVL are there? */
-        
-         if (j)
-           {
-            ap_rprintf (r, "<font color=darkred size = 4> <b> More informations </b> </font>");
-            ap_rprintf (r, "<blockquote> <table BORDER = 2 bgcolor=lightgray>");
-       
-            while ( i < j )
-               {
-                 const void  * a = WList_get (al, i); /* ANVL record */
-   
-                 /* we assume here that the ANVL value was in ASCII. */
-                /* use your own encoding to print it otherwise. */
-                ap_rprintf (r, "<tr><td><font color=darkgreen size = 3> %s </font></td><td>%s</td></tr>",
-                                             (const char *) WAnvl_getKey (a), (const char *) WAnvl_getValue (a) );
-
-                ++ i;
-               }
-            ap_rprintf (r, "</table></blockquote><br><br>");
-           }
-        }
-
-     destroy (record);
-    }
+       }
+     }
+  else unless (w_strcmp (output, "html"))
+       {
+        r -> content_type = "text/html";
+        if (WBuildHtmlOutput (fname,  w, r)) 
+          {
+            r->content_type = "text/html";
+            ap_rprintf (r, "<FONT SIZE = 4 COLOR = red>Can not display information about the file</FONT><br>");
+            destroy (w);
+            return (WARC_TRUE);
+          }
+       }
+  else unless (w_strcmp (output, "text"))
+       {
+        r -> content_type = "text/plain";
+        if (WBuildTextOutput (fname,  w, r)) 
+          {
+            r->content_type = "text/html";
+            ap_rprintf (r, "<FONT SIZE = 4 COLOR = red>Can not display information about the file</FONT><br>");
+            destroy (w);
+            return (WARC_TRUE);
+          }
+       }
+  else unless (w_strcmp (output, "json"))
+       {
+        r -> content_type = "text/plain";
+        if (WBuildJsonOutput (fname,  w, r)) 
+          {
+            r->content_type = "text/html";
+            ap_rprintf (r, "<FONT SIZE = 4 COLOR = red>Can not display information about the file</FONT><br>");
+            destroy (w);
+            return (WARC_TRUE);
+          }
+       }
 
   return (WARC_FALSE);
 }
@@ -793,9 +1694,9 @@ static warc_i32_t warc_handler(request_rec * r)
   unless (w_strcmp (reqnature, "filter"))
       {
        void         *   objfdfilter;
-      void         *   objfilter;
-      const char   *   fdfilter;
-      const char   *   filter;    
+       void         *   objfilter;
+       const char   *   fdfilter;
+       const char   *   filter;
  
         
       objfdfilter =  recoverUriField (r -> uri, & pos);
@@ -839,13 +1740,13 @@ static warc_i32_t warc_handler(request_rec * r)
       }
       
       
-  objfile = recoverFName (r -> uri, & pos);
-  fname =   WString_getText(objfile);
 
  /* we want here te recover a whole warc file */
   unless (w_strcmp (reqnature, "file"))
       {
          
+      objfile = recoverFName (r -> uri, & pos);
+      fname =   WString_getText(objfile);
       
       if (WSend_fullResponse (fname, dname, offset, r))
          {
@@ -865,6 +1766,8 @@ static warc_i32_t warc_handler(request_rec * r)
 /* here, we wante only to send one record */
   unless (w_strcmp (reqnature, "record"))
     {
+      objfile = recoverFName (r -> uri, & pos);
+      fname =   WString_getText(objfile);
 
     if (WSend_record (fname, dname, offset, r))
          {
@@ -882,12 +1785,38 @@ static warc_i32_t warc_handler(request_rec * r)
 /* here, we want to list information about the warc file */
   unless ( w_strcmp (reqnature, "list"))
      {
-      ap_set_content_type (r, "text/html");
-   
-      if (WSend_distantDumpResponse (fname, dname, offset, r))
+
+     void       * objout = NIL;
+     const char * output = NIL;
+
+      objout =  recoverUriField (r -> uri, & pos);
+      output = WString_getText (objout);
+
+      if (w_strcmp (output, "xml"))
+             if (w_strcmp (output, "html"))
+                    if (w_strcmp (output, "text"))
+                        if (w_strcmp (output, "json"))
+                           {
+                           ap_set_content_type (r, "text/html");
+                           destroy (objrec);
+                           destroy (objnature);
+                           destroy (objout);
+                           ap_rprintf (r, "<FONT SIZE = 4 COLOR = red> Output format \"%s\" not supported </font>\n<br>", output);
+                           return OK;
+                          }
+
+      objfile = recoverFName (r -> uri, & pos);
+      fname =   WString_getText(objfile);
+
+      if (WSend_distantDumpResponse (fname, dname, offset, output, r))
+         {
+         r -> content_type = "text/html";
          ap_rprintf (r, "<font color=red size=4> Records listing aborted</font><br>");
+         }
+
 
     destroy (objrec);
+    destroy (objout);
     destroy (objfile);
     destroy (objnature);
     return OK;
@@ -900,7 +1829,7 @@ static warc_i32_t warc_handler(request_rec * r)
  return OK;
 }
 
-static void *  create_warc_dir_config(apr_pool_t *p, char *path) 
+static void *  create_warc_dir_config (apr_pool_t *p, char *path) 
 
 {
   warc_dir_config *conf;

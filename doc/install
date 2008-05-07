@@ -454,8 +454,7 @@ o Start/Stop Lighttpd with:
        -> record: this tell the WARC server to return a specific WARC record at
           a particular offset. The offset must corresponds to a valid 
           offset in the WARC file.
-       -> list: this tells the WARC server to dump all records headers 
-          starting from an offset.
+       
 
    -  offset: a positive integer position in a WARC file (previously described)
 
@@ -473,7 +472,16 @@ o Start/Stop Lighttpd with:
  
   - filter_string: a string to filter on
 
+  (3) http://host:port/WARC/0.17/list/offset/outpout_format/fname
 
+  where :
+
+  - outpout_format : is the format of outpout with 4 format possible :
+
+    -> html
+    -> xml
+    -> jason
+    -> text
        
 
         

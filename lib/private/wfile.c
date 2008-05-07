@@ -278,6 +278,26 @@ WIPUBLIC warc_bool_t WFile_hasMoreRecords (const void * const _self)
 
 
 /**
+ * @param _self: WFile object instance
+ * 
+ * @return the size of the warcfile
+ *
+ * Warc File size providing function
+ */
+
+WIPUBLIC warc_u64_t WFile_getFileSize (const void * const _self)
+{
+    const struct WFile * self = _self;
+
+  /*Preconditions*/
+  CASSERT (self);
+
+  return (FSIZE);
+
+}
+
+
+/**
  * @param _self: a WFile object instance
  * 
  * 
@@ -1928,6 +1948,7 @@ WFile_storeRecordGzipCompressed (void * _self,
       return (WARC_TRUE);
     }
 
+  FSIZE = w_ftell (FH);
 
   return (WARC_FALSE);
 }
@@ -1965,6 +1986,8 @@ WFile_storeRecordUncompressed (void* _self, const void * wrec,
       WarcDebugMsg ("couldn't add record to the warc file, maximum size reached");
       return (WARC_TRUE);
     }
+
+  FSIZE = w_ftell(FH);
 
   /* flushing the Warc Record Header Temporary file into
      the Warc File */

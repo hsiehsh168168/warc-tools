@@ -39,6 +39,13 @@
 #define uS(s)  ((warc_u8_t *) (s))
 #define makeS(s) uS(s), w_strlen (uS(s))
 
+#define free_expr(u,m) \
+do \
+  {\
+   if (u) destroy (u);\
+   if (m) destroy (m);\
+  }\
+while (0)
 
 warc_bool_t match (const warc_u8_t * bigstring, warc_u32_t   bigstringlen,
                    const warc_u8_t * pattern,   warc_u32_t   patternlen)
@@ -62,6 +69,8 @@ int main (int argc, const char ** argv)
   void            * p        = NIL; /* WGetOpt object */
   void            * w        = NIL; /* warc file object */
   void            * r        = NIL; /* to recover records */
+  void            * uexpr    = NIL; /* regular expression foruri filtering */
+  void            * mexpr    = NIL; /* regular expression for mime filtering */
   const warc_u8_t * string   = NIL;
   warc_u8_t       * flags    = uS ("vf:u:m:r:t:");
   char            * fname    = NIL;
@@ -108,13 +117,19 @@ int main (int argc, const char ** argv)
 
           case 'u' :
             if (w_index (flags, c) [1] == ':')
-              uri = WGetOpt_argument (p);
+              {
+               uri = WGetOpt_argument (p);
+               uexpr = bless (WRegexp, makeS (uri));
+              }
 
             break;
 
           case 'm' :
             if (w_index (flags, c) [1] == ':')
-              mime = WGetOpt_argument (p);
+              {
+               mime = WGetOpt_argument (p);
+               mexpr = bless (WRegexp, makeS (mime));
+              }
 
             break;
 
@@ -138,6 +153,7 @@ int main (int argc, const char ** argv)
 
           case '?' :  /* illegal option or missing argument */
             destroy (p);
+            free_expr (uexpr,mexpr);
 
             return (1);
         }
@@ -148,6 +164,7 @@ int main (int argc, const char ** argv)
   {
     fprintf (stderr, "missing WARC file name. Use -f option\n");
     destroy (p);
+    free_expr (uexpr,mexpr);
     return (1);
   }
 
@@ -155,16 +172,16 @@ int main (int argc, const char ** argv)
              WARC_FILE_READER, cmode, wdir);
   assert (w);
 
-  fprintf (stderr, "%-20s %-20s %-10s %-20s %-45s %-44s %-86s \n",
+  fprintf (stderr, "%-20s %-20s %-10s %-20s %-45s %-22s %-86s \n",
            "Offset", "CSize", "WarcId", "Content-Length",
            "WARC-Type", "WARC-Date",  "WARC-Record-ID");
 
   while (WFile_hasMoreRecords (w) )
     {
       const void * al   = NIL; /* ANVL list object */
-      warc_bool_t  m1   = WARC_TRUE;
-      warc_bool_t  m2   = WARC_TRUE;
-      warc_bool_t  m3   = WARC_TRUE;
+      warc_bool_t  m1   = WARC_FALSE;
+      warc_bool_t  m2   = WARC_FALSE;
+      warc_bool_t  m3   = WARC_FALSE;
       warc_u32_t   tlen = 0;
 
       unless ( (r = WFile_nextRecord (w) ) )
@@ -173,32 +190,32 @@ int main (int argc, const char ** argv)
         break;
       }
 
-      if (uri != NIL && * uri != '\0')
+      if (uri != NIL && * uri != '\0' && uexpr)
         {
           string = WRecord_getTargetUri (r);
           if (string)
-            m1 = match (makeS (string), makeS (uri) );
+            m1 = WRegexp_search (uexpr, makeS (string));
           else
-            m1 = WARC_TRUE;
+            m1 = WARC_FALSE;
         }
 
-      if (mime != NIL && * mime != '\0')
+      if (mime != NIL && * mime != '\0' && mexpr)
         {
           string = WRecord_getContentType (r);
           if (string)
-            m2     = match (makeS (string), makeS (mime) );
+            m2     = WRegexp_search (mexpr, makeS (string));
           else
-            m2 = WARC_TRUE;
+            m2 = WARC_FALSE;
         }
 
       if (rtype != WARC_UNKNOWN_RECORD && rtype == WRecord_getRecordType (r) )
         {
-          m3 = WARC_FALSE;
+          m3 = WARC_TRUE;
         }
 
       /* no match in any field */
 
-      if (m1 && m2 && m3)
+      if (!m1 && !m2 && !m3)
         {
           destroy (r);
           continue;
@@ -217,7 +234,7 @@ int main (int argc, const char ** argv)
 
       fprintf (stdout, "%-45u ",   WRecord_getRecordType    (r) );
 
-      fprintf (stdout, "%-44s ",   WRecord_getDate  (r) );
+      fprintf (stdout, "%-22s ",   WRecord_getDate  (r) );
 
       fprintf (stdout, "%-86s\n",   WRecord_getRecordId      (r) );
 
@@ -361,6 +378,6 @@ int main (int argc, const char ** argv)
   destroy (p);
 
   destroy (w);
-
+  free_expr (uexpr,mexpr);
   return (ret);
 }

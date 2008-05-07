@@ -51,6 +51,7 @@ extern "C"
 #include <wclient.h>     /* WClient */
 #include <wversion.h>    /* WARC_VERSION */
 #include <wrectype.h>    /* WRecord types (i.e. resource, revisit ...) */
+#include <wregexp.h>     /* WRegexp */
 
 
 

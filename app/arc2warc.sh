@@ -87,7 +87,14 @@ for i in `find $dn/ -name "*.arc*" -type "f"`;
 do
   dn=`dirname $i`
   bn=`basename $i`
-  wf=`echo "$bn" | sed -e "s|arc\(.*\)$|warc\1|"`
+  
+if [ "$ccomp" = "-c" ]; then
+  wf=`echo "$bn" | sed -e "s|\(.*\)\.arc.*$|\1.warc\.gz|"`
+
+else
+  wf=`echo "$bn" | sed -e "s|\(.*\)\.arc.*$|\1.warc|"`
+fi
+
   wf="$dn/$wf"
 
   echo "converting $i -> $wf"
