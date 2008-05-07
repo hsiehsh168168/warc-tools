@@ -3746,7 +3746,7 @@ re_match_2 (bufp, string1, size1, string2, size2, pos, regs, stop)
 		      EVER_MATCHED_SOMETHING (reg_info[*p]) = 0;
 
 		      /* Restore this and inner groups' (if any) registers.  */
-		      for (r = *p; r < *p + *(p + 1); r++)
+		      for (r = *p; r < (unsigned)(*p + *(p + 1)); r++)
 			{
 			  regstart[r] = old_regstart[r];
 
