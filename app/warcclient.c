@@ -40,10 +40,11 @@ int main (int argc, const char ** argv)
 {
   void           * s       = NIL; /* WClient object */
   void           * p       = NIL; /* WGetOpt object */
-  warc_u8_t      * flags   = uS("i:p:s:o:u:n:d:rf:t:");
+  warc_u8_t      * flags   = uS("i:p:s:o:u:n:d:rf:t:l:");
   warc_u8_t      * ip      = uS("0.0.0.0");
   warc_u8_t      * ps      = NIL;
   warc_u8_t      * off     = NIL;
+  warc_u8_t      * format  = NIL;
   warc_u8_t      * wfn     = NIL;
   warc_u8_t      * target  = NIL;
   warc_u8_t      * server  = NIL;
@@ -55,11 +56,11 @@ int main (int argc, const char ** argv)
   warc_u32_t       offset  = 0;
   warc_i32_t       c       = 0;
 
-  if (argc <= 7)
+  if (argc <= 6)
     {
       fprintf (stderr, "WARC client to access remote WARC resources\n");
       fprintf (stderr, "Usage: %s -i <ip> -p <port> -t <remote_warc> -o <local_warc> -s <server_name> [-f <offset>] -[u <uri_pattern>] \
-[-n <content_type_pattern>] [-d <record_type_string>] [-c] [-r]\n", argv [0]);
+[-n <content_type_pattern>] [-d <record_type_string>] [-c] [-r] [-l <output format>]\n", argv [0]);
       fprintf (stderr, "\t[-i]  : ip address\n");
       fprintf (stderr, "\t[-p]  : port number\n");
       fprintf (stderr, "\t[-s]  : server name\n");
@@ -70,6 +71,7 @@ int main (int argc, const char ** argv)
       fprintf (stderr, "\t[-o]  : output WARC filename\n");
       fprintf (stderr, "\t[-f]  : WARC offset (default 0)\n");
       fprintf (stderr, "\t[-r]  : get all the WARC file (default no)\n");
+      fprintf (stderr, "\t[-l]  : lists WARC's record using output formats {xml, json, text, html} (default no)\n");
       return (1);
     }
 
@@ -116,6 +118,15 @@ int main (int argc, const char ** argv)
                    fprintf (stderr, "invalid offset number: %s\n", off);
                    free_obj(p, 3);
                  }
+             }
+          
+          break;
+
+        case 'l' :
+          if (w_index (flags, c) [1] == ':')
+            {
+               format = (warc_u8_t *) WGetOpt_argument (p);
+
              }
           
           break;
@@ -167,6 +178,7 @@ int main (int argc, const char ** argv)
         }
     }
   
+
   if (ip == NIL || * ip == '\0')
     {
       fprintf (stderr, "error: empty IP address\n");
@@ -179,6 +191,17 @@ int main (int argc, const char ** argv)
       free_obj(p, 6);
     }
 
+ if (target == NIL || * target == '\0')
+    {
+      fprintf (stderr, "error: empty input WARC filename\n");
+      free_obj(p, 6);
+    }
+
+ if (server == NIL || * server == '\0')
+    {
+      fprintf (stderr, "error: empty server name\n");
+      free_obj(p, 6);
+    }
 
   s = bless (WClient, makeS(ip), port, makeS (server));
   unless (s)
@@ -191,7 +214,7 @@ int main (int argc, const char ** argv)
 
   if (request)
     {
-     if (filter)
+     if (filter || format)
        {
         fprintf (stderr, "Options conflict: can not send two requests once \n");
         free_obj (s,10);
@@ -205,7 +228,7 @@ int main (int argc, const char ** argv)
     }
   else if (filter)
       {
-        if (request)
+        if (request || format)
           {
            fprintf (stderr, "Options conflict: can not send two requests once \n");
            free_obj (s,10);
@@ -215,6 +238,22 @@ int main (int argc, const char ** argv)
            if (WClient_getFiltredWFile (s, offset, makeS (what), makeS (pattern), makeS (target), wfn))
              {
               fprintf (stderr, "WClient_getFiltredWFile error: request not satisfied\n");
+              free_obj(s, 11);
+             }
+          }
+      }
+  else if (format)
+      {
+        if (request || filter)
+          {
+           fprintf (stderr, "Options conflict: can not send two requests once \n");
+           free_obj (s,10);
+          }
+        else
+          {
+           if (WClient_getList (s, offset, makeS (format), makeS (target), wfn))
+             {
+              fprintf (stderr, "WClient_getList error: request not satisfied\n");
               free_obj(s, 11);
              }
           }

@@ -464,8 +464,7 @@ o Start/Stop Lighttpd with:
 
    where:
 
-   - filter_field: is the name of field on which you want to filter. Valid 
-      values are:
+   - filter_field: is the field name to filter on. Valid values are:
      -> uri
      -> contenttype
      -> recordtype
@@ -476,11 +475,11 @@ o Start/Stop Lighttpd with:
 
   where :
 
-  - outpout_format : is the format of outpout with 4 format possible :
+  - outpout_format : is the format of outpout with 4 possiblities:
 
     -> html
     -> xml
-    -> jason
+    -> json
     -> text
        
 

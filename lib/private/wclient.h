@@ -61,6 +61,14 @@ extern "C"
                                                warc_u32_t , const warc_u8_t *,
                                                warc_u32_t , const warc_u8_t *);
 
+    extern warc_bool_t WClient_getList (void * const , 
+                                        warc_i64_t ,
+                                        const warc_u8_t * ,
+                                        warc_u32_t ,
+                                        const warc_u8_t *,
+                                        warc_u32_t ,
+                                        const warc_u8_t * );
+
 #ifdef __cplusplus
   }
 

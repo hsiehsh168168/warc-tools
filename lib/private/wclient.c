@@ -53,12 +53,25 @@
 #define makeS(s) (s), w_strlen ((s))
 #define makeU(s) ((warc_u8_t *) (s))
 
+/**
+ * The requests kinds
+ */
+
+typedef enum 
+  {
+    WARC_ONE_RECORD_REQUEST = 0,
+    WARC_FULL_FILE_REQUEST,
+    WARC_DISTANT_DUMP_REQUEST,
+    WARC_DISTANT_FILTER_REQUEST
+  } warc_request_t;
+
 /* This structure that will be ginven to callback function as user argument*/
 
 struct Callbacks_arg
   {
     FILE       * file;
     warc_u32_t   size;
+    warc_request_t request;
   };
 
 WPRIVATE void WGetChunks_callback (struct evhttp_request * req, void * _arg)
@@ -98,20 +111,51 @@ WPRIVATE void WResponse_callback (struct evhttp_request * req, void * _arg)
       return ;
     }
 
-  /* testing if the size of the recovered data is the same
-     that the size sent by the server */
-  strsize = (warc_u8_t *) evhttp_find_header (req -> input_headers, "Content-Length");
-  
-  if (strsize)
-      w_atou (strsize, w_strlen (strsize), & sentsize);
-  else
-     sentsize = size;
-
-  if (sentsize != size)
+  if ( arg -> request == WARC_DISTANT_DUMP_REQUEST)
     {
-      WarcDebugMsg ("Error: transmitted data size isn't equals to the expected size\n");
-      event_loopexit (NIL);
-      return ;
+     #define WRITESIZE 1024
+     FILE * file = arg -> file;
+
+/*     sentsize = (warc_u32_t) req -> input_buffer -> totallen;*/
+     sentsize = w_strlen (makeU (req -> input_buffer -> orig_buffer));
+     arg -> size = sentsize;
+     size = WRITESIZE;
+
+     while (sentsize)
+         {
+          if (sentsize <= WRITESIZE)
+             sentsize -= WRITESIZE;
+          else
+            {
+             size = sentsize;
+             sentsize = 0;
+            }
+          if ((w_fwrite (req -> input_buffer -> orig_buffer, 1, size, file) != size))
+             {
+              w_fprintf (fprintf (stderr, "request result: %s\n", req -> response_code_line) );
+              arg -> size = 0;
+              event_loopexit (NIL);
+              return ;
+             }
+         }
+    }
+  else
+    {
+     /* testing if the size of the recovered data is the same
+        that the size sent by the server */
+     strsize = (warc_u8_t *) evhttp_find_header (req -> input_headers, "Content-Length");
+   
+     if (strsize)
+         w_atou (strsize, w_strlen (strsize), & sentsize);
+     else
+        sentsize = size;
+ 
+     if (sentsize != size )
+       {
+         WarcDebugMsg ("Error: transmitted data size isn't equals to the expected size\n");
+         event_loopexit (NIL);
+         return ;
+       }
     }
 
   /* Success we're done. Exit the dispatch loop */
@@ -279,6 +323,8 @@ WPUBLIC warc_bool_t WClient_getWRecord (void * const _self,
 
   arg . file = outfh;
 
+  arg . request = WARC_ONE_RECORD_REQUEST;
+
   WString_concat (rest_request, SERVER);
 
   WString_append (rest_request, makeS ((const warc_u8_t *) WARC_VERSION) );
@@ -384,6 +430,8 @@ WPUBLIC warc_bool_t WClient_getWFile (void * const _self,
   arg . size = 0;
 
   arg . file = outfh;
+
+  arg . request = WARC_FULL_FILE_REQUEST;
 
   WString_concat (rest_request, SERVER);
 
@@ -503,6 +551,8 @@ WPUBLIC warc_bool_t WClient_getFiltredWFile (void * const _self,
 
   arg . file = outfh;
 
+  arg . request = WARC_DISTANT_FILTER_REQUEST;
+
   WString_concat (rest_request, SERVER);
 
   WString_append (rest_request, makeS ( (const warc_u8_t *) WARC_VERSION) );
@@ -558,6 +608,129 @@ WPUBLIC warc_bool_t WClient_getFiltredWFile (void * const _self,
   event_base_dispatch (BASE);
 
   w_fclose (outfh);
+
+  unless (arg . size)
+  return (WARC_TRUE);
+
+  if (WClient_end (self) )
+    return (WARC_TRUE);
+
+  return (WARC_FALSE);
+}
+
+
+/**
+ * @param _self: a WClient object instance
+ * @param offset: the offset from where the transfert must be done
+ * @param format: the output format of the list
+ * @param format: the length of the  format stirng
+ * @param path: The patrh where the warc file is stored
+ * @param pathlen: the length of the path string
+ * @param outf the file where to put the result
+ *
+ * @return False if succeeds, True otherwise
+ *
+ * Warc Client WARC file Records list reclaiming function
+ */
+
+WPUBLIC warc_bool_t WClient_getList (void * const _self, 
+                                      warc_i64_t offset,
+                                      const warc_u8_t * format,
+                                      warc_u32_t        formatlen,
+                                      const warc_u8_t * path,
+                                      warc_u32_t pathlen,
+                                      const warc_u8_t * outf)
+{
+
+  struct WClient        * const self        = _self;
+  warc_u8_t                     char_offset [26];
+
+  struct evhttp_request *       request      = NIL;
+  void                  *       rest_request = NIL;
+  FILE *                        outfh;
+  void        (*oldcb) (struct evhttp_request *, void *) = NIL;
+
+  struct Callbacks_arg          arg;
+
+  /* Precondition */
+  CASSERT (self);
+
+  if (WClient_init (self) )
+    return (WARC_TRUE);
+
+  rest_request = bless (WString, "/", 1);
+
+  unless (rest_request)
+  return (WARC_TRUE);
+
+  outfh = w_fopen_wb ( (const char *) outf);
+
+  unless (outfh)
+  return (WARC_TRUE);
+
+  arg . size = 0;
+
+  arg . file = outfh;
+
+  arg . request = WARC_DISTANT_DUMP_REQUEST;
+
+  oldcb = CHUNKCB;
+  CHUNKCB = NIL;
+
+  WString_concat (rest_request, SERVER);
+
+  WString_append (rest_request, makeS ( (const warc_u8_t *) WARC_VERSION) );
+
+  WString_append (rest_request, (const warc_u8_t *) "/list", 5);
+
+  WString_append (rest_request, (const warc_u8_t *) "/", 1);
+
+  unless (w_numToString (offset, char_offset))
+    {
+    w_fclose (outfh);
+    destroy (rest_request);
+    return (WARC_TRUE);
+    }
+
+  WString_append (rest_request, makeS (char_offset) );
+
+  WString_append (rest_request, (const warc_u8_t *) "/", 1);
+
+  WString_append (rest_request, format, formatlen);
+
+  WString_append (rest_request, (const warc_u8_t *) "/", 1);
+
+  WString_append (rest_request, path, pathlen);
+
+
+  request = evhttp_request_new (READCB, &arg);
+
+  unless (request)
+    {
+    w_fclose (outfh);
+    destroy (rest_request);
+    return (WARC_TRUE);
+    }
+
+  evhttp_add_header (request -> output_headers, "Host", "Warc-client");
+
+  evhttp_request_set_chunked_cb (request, CHUNKCB);
+
+  if (evhttp_make_request (CONNECT, request, EVHTTP_REQ_GET, (const char *) WString_getText (rest_request) ) )
+    {
+      w_fclose (outfh);
+      evhttp_request_free (request);
+      destroy (rest_request);
+      return (WARC_TRUE);
+    }
+
+  destroy (rest_request);
+
+  event_base_dispatch (BASE);
+
+  w_fclose (outfh);
+
+  CHUNKCB = oldcb;
 
   unless (arg . size)
   return (WARC_TRUE);

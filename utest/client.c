@@ -90,8 +90,8 @@ fprintf(stdout,"\n////////// test 3//////////\n");
 CU_ASSERT_PTR_NOT_EQUAL(c,NIL);
 
 
-  if (WClient_getWFile (c, 0, makeS("../cwarc.warc.gz"),
-                        uS("./out2.warc.gz")))
+  if (WClient_getWFile (c, 0, makeS("x.warc.gz"),
+                        uS("./out3.warc.gz")))
   {
    CU_PASS   ( "request not satisfied");
   }
@@ -107,8 +107,8 @@ void test4 (void)
   void * c = bless (WClient, makeS("127.0.0.1"), 8080, makeS ("warcserver"));
 fprintf(stdout,"\n////////// test 4//////////\n");
   CU_ASSERT_PTR_NOT_EQUAL(c,NIL);
-  if (WClient_getFiltredWFile (c, 0, makeS ("recordtype"), makeS ("warcinfo"), makeS("awarcmlp.warc"),
-                        uS("./out3.warc")))
+  if (WClient_getFiltredWFile (c, 0, makeS ("recordtype"), makeS ("warcinfo"), makeS("ero1.warc"),
+                        uS("./out4.warc")))
               
   {
    fprintf (stdout, "--------------\n");
@@ -117,6 +117,50 @@ fprintf(stdout,"\n////////// test 4//////////\n");
   else CU_PASS ("request satisfied");
   destroy (c);
   
+}
+
+
+void test5 (void)
+{
+  void * c = bless (WClient, makeS("127.0.0.1"), 8080, makeS ("warcserver"));
+
+fprintf(stdout,"\n////////// test 5//////////\n");  
+CU_ASSERT_PTR_NOT_EQUAL(c,NIL);
+
+  if (WClient_getList (c, 0, makeS("cwarc.warc.gz"), makeS ("html"),
+                        uS("./out51.html")))
+     {
+     CU_FAIL   ( "request not satisfied");
+     }
+  else
+   CU_PASS ("request satisfied");
+
+  if (WClient_getList (c, 0, makeS("cwarc.warc.gz"), makeS ("xml"),
+                        uS("./out52.xml")))
+     {
+     CU_FAIL   ( "request not satisfied");
+     }
+  else
+   CU_PASS ("request satisfied");
+
+  if (WClient_getList (c, 0, makeS("cwarc.warc.gz"), makeS ("text"),
+                        uS("./out53.txt")))
+     {
+     CU_FAIL   ( "request not satisfied");
+     }
+  else
+   CU_PASS ("request satisfied");
+
+  if (WClient_getList (c, 0, makeS("cwarc.warc.gz"), makeS ("json"),
+                        uS("./out5.json")))
+     {
+     CU_FAIL   ( "request not satisfied");
+     }
+  else
+   CU_PASS ("request satisfied");
+
+  destroy (c);
+
 }
 
 
@@ -139,9 +183,10 @@ CU_pSuite pSuite = NULL;
    /* add the tests to the suite */
 
    if ((NULL == CU_add_test(pSuite, " 1: Requesting a single record in a compressed warc file", test1)) ||
-       (NULL == CU_add_test(pSuite, " 2: Requesting a whole warc file", test2))||
-       (NULL == CU_add_test(pSuite, " 3: sending a bad request", test3))||
-       (NULL == CU_add_test(pSuite,"  4: sending a filter request", test4)))
+       (NULL == CU_add_test(pSuite, " 2: Requesting a whole warc file", test2)) ||
+       (NULL == CU_add_test(pSuite, " 3: sending a bad request", test3)) ||
+       (NULL == CU_add_test(pSuite,"  4: sending a filter request", test4)) ||
+       (NULL == CU_add_test(pSuite,"  5: sending a List request with severral output format", test5)))
    {
       CU_cleanup_registry();
       return CU_get_error();
