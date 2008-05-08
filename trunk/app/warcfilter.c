@@ -89,9 +89,9 @@ int main (int argc, const char ** argv)
       fprintf (stderr, "Filter WARC records based on MIME, URI and record type\n");
       fprintf (stderr, "Usage: %s -f <file.warc> [-u <uri>] [-m <mime>] [-r <rtype>] [-v] [-t <working_dir>]\n", argv [0]);
       fprintf (stderr, "\t-f    : valid WARC file name\n");
-      fprintf (stderr, "\t[-u]  : compare with URI\n");
-      fprintf (stderr, "\t[-m]  : compare with MIME\n");
-      fprintf (stderr, "\t[-r]  : compare with record types (see \"public/wrectype.h\" for possible values)\n");
+      fprintf (stderr, "\t[-u]  : regular expression comparison with URI\n");
+      fprintf (stderr, "\t[-m]  : regular expression comparison with MIME\n");
+      fprintf (stderr, "\t[-r]  : regular expression comparison with record types (see \"public/wrectype.h\" for possible values)\n");
       fprintf (stderr, "\t[-v]  : dump ANVL (default no)\n");
       fprintf (stderr, "\t[-t]  : temporary working directory (default \".\")\n");
       return (2);

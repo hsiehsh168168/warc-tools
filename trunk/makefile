@@ -726,7 +726,7 @@ $(APP)/warcclient: 	  $(warcclient);  	 $(CC) $(CFLAGS) -o $@ $(warcclient) \
 # freshing
 ##############
 
-tclean:		;   @rm -f compress* uncompress* *.core out*.warc.gz *.warc.gz *.warc
+tclean:		;   @rm -f compress* uncompress* *.core out*.warc.gz *.warc.gz *.warc *.xml *.html *.txt *.json
 
 mod_apache_clean:	; @rm -rf $(mod_apache).la $(mod_apache).lo \
 					  $(mod_apache).o $(mod_apache).slo $(mod_apache).so \
