@@ -17,10 +17,10 @@
 #define HAVE_DLFCN_H 1
 
 /* Define if your system supports the epoll system calls */
-#define HAVE_EPOLL 1
+/* #undef HAVE_EPOLL */
 
 /* Define to 1 if you have the `epoll_ctl' function. */
-#define HAVE_EPOLL_CTL 1
+/* #undef HAVE_EPOLL_CTL */
 
 /* Define if your system supports event ports */
 /* #undef HAVE_EVENT_PORTS */
@@ -32,10 +32,10 @@
 #define HAVE_FCNTL_H 1
 
 /* Define to 1 if you have the `getaddrinfo' function. */
-#define HAVE_GETADDRINFO 1
+/* #undef HAVE_GETADDRINFO */
 
 /* Define to 1 if you have the `getnameinfo' function. */
-#define HAVE_GETNAMEINFO 1
+/* #undef HAVE_GETNAMEINFO */
 
 /* Define to 1 if you have the `gettimeofday' function. */
 #define HAVE_GETTIMEOFDAY 1
@@ -50,13 +50,13 @@
 /* #undef HAVE_KQUEUE */
 
 /* Define to 1 if you have the `nsl' library (-lnsl). */
-#define HAVE_LIBNSL 1
+/* #undef HAVE_LIBNSL */
 
 /* Define to 1 if you have the `resolv' library (-lresolv). */
 #define HAVE_LIBRESOLV 1
 
 /* Define to 1 if you have the `rt' library (-lrt). */
-#define HAVE_LIBRT 1
+/* #undef HAVE_LIBRT */
 
 /* Define to 1 if you have the `socket' library (-lsocket). */
 /* #undef HAVE_LIBSOCKET */
@@ -110,7 +110,7 @@
 #define HAVE_STRING_H 1
 
 /* Define to 1 if you have the `strlcpy' function. */
-/* #undef HAVE_STRLCPY */
+#define HAVE_STRLCPY 1
 
 /* Define to 1 if you have the `strsep' function. */
 #define HAVE_STRSEP 1
@@ -122,13 +122,13 @@
 #define HAVE_STRTOLL 1
 
 /* Define to 1 if the system has the type `struct in6_addr'. */
-#define HAVE_STRUCT_IN6_ADDR 1
+/* #undef HAVE_STRUCT_IN6_ADDR */
 
 /* Define to 1 if you have the <sys/devpoll.h> header file. */
 /* #undef HAVE_SYS_DEVPOLL_H */
 
 /* Define to 1 if you have the <sys/epoll.h> header file. */
-#define HAVE_SYS_EPOLL_H 1
+/* #undef HAVE_SYS_EPOLL_H */
 
 /* Define to 1 if you have the <sys/event.h> header file. */
 /* #undef HAVE_SYS_EVENT_H */

@@ -251,10 +251,10 @@ endif
 ifneq ($(findstring CYGWIN,$(UNAME_S)),)
 	EV_OS        = $(EVENT)/os/cygwin -I$(CUNIT)/os/cygwin
 	HEADERS     := $(HEADERS) -I$(OSDEP) -I$(EV_OS)
-	EV_SRC		:= $(EV_SRC) $(EVENT)/epoll.c $(EVENT)/poll.c
+	EV_SRC		:= $(EV_SRC) $(EVENT)/poll.c
 	EVENT_CONFIG = $(EV_OS)/config.h $(EV_OS)/event-config.h
-	EV_LIB		 = -lrt
-#-lnsl -lresolv
+	EV_LIB		 = -lresolv
+#-lnsl -lrt
 	SHARED_OS    = shared_cygwin
 	LIBSUFFIX    = dll
 	SHAREDNAME   = cyg$(LIBNAME).$(LIBSUFFIX)
