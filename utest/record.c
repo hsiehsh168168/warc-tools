@@ -52,6 +52,8 @@ int init_suite3(void) { return 0; }
 int clean_suite3(void) { return 0; }
 int init_suite4(void) { return 0; }
 int clean_suite4(void) { return 0; }
+int init_suite5(void) { return 0; }
+int clean_suite5(void) { return 0; }
 void test1 (void)
 {
   
@@ -2058,6 +2060,45 @@ CU_ASSERT_PTR_NOT_EQUAL(r,NIL);
 
 
 
+void test18 (void)
+{
+ 
+
+  void * r = bless (WRecord);
+  warc_u32_t  i = 0;
+  warc_u32_t n = 0;
+  struct WAnvlfield anvl;
+
+
+CU_ASSERT_PTR_NOT_EQUAL(r,NIL);
+
+  CU_ASSERT_FALSE (WRecord_addAnvl (r, makeS ("Host-Name"), makeS ("the-name")));
+  CU_ASSERT_FALSE (WRecord_addAnvl (r, makeS ("Owner"), makeS ("Only-me")));
+  CU_ASSERT_FALSE (WRecord_addAnvl (r, makeS ("Exit-Condition"), makeS ("EOF")));
+  CU_ASSERT_FALSE (WRecord_addAnvl (r, makeS ("Host-Location"), makeS ("Somwhere-Anywhere")));
+
+  n = WRecord_getAnvlFieldsNumber (r);
+ 
+  CU_ASSERT_EQUAL (n,4);
+
+  while (i < n)
+    {
+     CU_ASSERT_FALSE (WRecord_getAnvlField (r ,i, & anvl));
+     fprintf (stdout, "Key is: %s, ", (const char *) anvl . key);
+     fprintf (stdout, "Value is: %s\n", (const char *) anvl . value);
+
+    i++;
+    }
+
+CU_PASS( "OK\n");
+
+destroy (r);
+
+
+ return;
+}
+
+
 int main (void)
 {
   CU_pSuite pSuite = NULL; 
@@ -2141,6 +2182,24 @@ request, esource, responce and revisit", test2))||
       CU_cleanup_registry();
       return CU_get_error();
    }  
+
+/* add a suite to the registry */
+   pSuite = CU_add_suite("Suite5", init_suite5, clean_suite5);
+   if (NULL == pSuite) {
+      CU_cleanup_registry();
+      return CU_get_error();
+                        }
+
+   /* add the tests to the suite */
+
+  if ((NULL == CU_add_test(pSuite, "TEST 18: Testing the Anvl fields recovering function", test18)))
+      
+   {
+      CU_cleanup_registry();
+      return CU_get_error();
+   }  
+
+
 switch (menu()) 
   {
         case 1: {CU_console_run_tests();break;} 
