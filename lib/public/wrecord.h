@@ -138,7 +138,7 @@ extern "C"
                                                 const warc_u8_t * ,
                                                 const warc_u32_t );
 
-    extern warc_bool_t WRecord_getAnvlField (const void * const , const warc_u32_t , struct WAnvlfield *);
+    extern warc_bool_t WRecord_getAnvlField (const void * const , const warc_u32_t , const warc_u8_t **, const warc_u8_t **);
     extern warc_u32_t WRecord_getAnvlFieldsNumber (const void * const );
 
 

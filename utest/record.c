@@ -2067,7 +2067,8 @@ void test18 (void)
   void * r = bless (WRecord);
   warc_u32_t  i = 0;
   warc_u32_t n = 0;
-  struct WAnvlfield anvl;
+  const warc_u8_t *  key = NIL;
+  const warc_u8_t * value = NIL;
 
 
 CU_ASSERT_PTR_NOT_EQUAL(r,NIL);
@@ -2083,9 +2084,9 @@ CU_ASSERT_PTR_NOT_EQUAL(r,NIL);
 
   while (i < n)
     {
-     CU_ASSERT_FALSE (WRecord_getAnvlField (r ,i, & anvl));
-     fprintf (stdout, "Key is: %s, ", (const char *) anvl . key);
-     fprintf (stdout, "Value is: %s\n", (const char *) anvl . value);
+     CU_ASSERT_FALSE (WRecord_getAnvlField (r ,i, & key, & value));
+     fprintf (stdout, "Key is: %s, ", (const char *) key);
+     fprintf (stdout, "Value is: %s\n", (const char *) value);
 
     i++;
     }

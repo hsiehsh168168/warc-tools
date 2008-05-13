@@ -2237,14 +2237,16 @@ WIPUBLIC warc_bool_t WRecord_setContentFromArc (void * _self, void * arcontent)
 /**
  * @param _self: a WRecord object instance
  * @param rank: the rank of the wanted anvl
- * @param anvl[out]: a Anvlfield structure pointer, it will hold the field
+ * @param key[out]: the key of the wanted anvl
+ * @param value: the value of the wanted anvl
  * 
  * @return False if succeed, True otherwise
  *
  * Returns the anvl field corresponding to the rank in the WARC Record
  */
 
-WPUBLIC warc_bool_t WRecord_getAnvlField (const void * const _self, const warc_u32_t rank, struct WAnvlfield * anvl)
+WPUBLIC warc_bool_t WRecord_getAnvlField (const void * const _self, const warc_u32_t rank,
+                                          const warc_u8_t ** key, const warc_u8_t ** value)
 {
     const struct WRecord * const self  = _self;
     const void           * inner_anvl  = NIL; /* for the manipulation of the inner anvl fields lit */
@@ -2267,8 +2269,11 @@ WPUBLIC warc_bool_t WRecord_getAnvlField (const void * const _self, const warc_u
   unless (wanted_anvl)
      return (WARC_TRUE);
 
-  anvl -> key   = (warc_u8_t *) WAnvl_getKey (wanted_anvl);
-  anvl -> value = (warc_u8_t *) WAnvl_getValue (wanted_anvl);
+  * key   = (warc_u8_t *) WAnvl_getKey (wanted_anvl);
+  * value = (warc_u8_t *) WAnvl_getValue (wanted_anvl);
+
+  unless (* key)
+    return (WARC_TRUE);
 
   return (WARC_FALSE);
 }
