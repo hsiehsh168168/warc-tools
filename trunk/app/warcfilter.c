@@ -178,7 +178,6 @@ int main (int argc, const char ** argv)
 
   while (WFile_hasMoreRecords (w) )
     {
-      const void * al   = NIL; /* ANVL list object */
       warc_bool_t  m1   = WARC_FALSE;
       warc_bool_t  m2   = WARC_FALSE;
       warc_bool_t  m3   = WARC_FALSE;
@@ -349,25 +348,29 @@ int main (int argc, const char ** argv)
      fprintf (stdout, "\n");
      /* dump ANVLs */
 
-      if (amode == WARC_TRUE && (al = WRecord_getAnvl (r) ) != NIL)
+      if (amode == WARC_TRUE)
         {
           warc_u32_t  i = 0;
-          warc_u32_t  j = WList_size (al); /* how many ANVL are there? */
+          warc_u32_t  j = WRecord_getAnvlFieldsNumber (r); /* how many ANVL are there? */
+          struct WAnvlfield anvl ;
 
           if (j)
-             fprintf (stdout, "-- More Info--\n\n");
-
-          while (i < j)
             {
-              const void  * a = WList_get (al, i); /* ANVL record */
+              fprintf (stdout, "-- More Info--\n\n");
 
-              fprintf (stdout, "\tkey: %s\n", (char *) WAnvl_getKey   (a) );
+              while (i < j)
+                {
+                  if (WRecord_getAnvlField (r, i, & anvl))
+                     break;
 
-              /* we assume here that the ANVL value was in ASCII. */
-              /* use your own encoding to print it otherwise. */
-              fprintf (stdout, "\tval: %s\n", (char *) WAnvl_getValue (a) );
+                  fprintf (stdout, "key: %s\n", (char *) anvl . key );
 
-              ++ i;
+                  /* we assume here that the ANVL value was in ASCII. */
+                  /* use your own encoding to print it otherwise. */
+                  fprintf (stdout, "val: %s\n", (char *) anvl . value);
+
+                  ++ i;
+                }
             }
         }
 

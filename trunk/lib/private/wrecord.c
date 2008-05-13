@@ -44,6 +44,8 @@
 #include <wmisc.h>   /* unless */
 #include <wcsafe.h>  /*w_strcasestr  */
 #include <wheader.h>
+#include <wlist.h>
+#include <wanvl.h>
 #include <wcsafe.h>
 
 #define _GNU_SOURCE
@@ -2230,6 +2232,69 @@ WIPUBLIC warc_bool_t WRecord_setContentFromArc (void * _self, void * arcontent)
 
   return (WARC_FALSE);
 
+}
+
+/**
+ * @param _self: a WRecord object instance
+ * @param rank: the rank of the wanted anvl
+ * @param anvl[out]: a Anvlfield structure pointer, it will hold the field
+ * 
+ * @return False if succeed, True otherwise
+ *
+ * Returns the anvl field corresponding to the rank in the WARC Record
+ */
+
+WPUBLIC warc_bool_t WRecord_getAnvlField (const void * const _self, const warc_u32_t rank, struct WAnvlfield * anvl)
+{
+    const struct WRecord * const self  = _self;
+    const void           * inner_anvl  = NIL; /* for the manipulation of the inner anvl fields lit */
+    const void           * wanted_anvl = NIL; /* for the manipulation of the wanted anvl field */
+    warc_u32_t                   nbel  = 0;
+
+  /* Preconditions */
+  CASSERT (self);
+  
+
+  inner_anvl = WHeader_getAnvl (HDL);
+  unless (inner_anvl)
+     return (WARC_TRUE);
+
+  nbel = WList_size (inner_anvl);
+  if (nbel == 0 || nbel <= rank)
+     return (WARC_TRUE);
+
+  wanted_anvl = WList_get (inner_anvl, rank);
+  unless (wanted_anvl)
+     return (WARC_TRUE);
+
+  anvl -> key   = (warc_u8_t *) WAnvl_getKey (wanted_anvl);
+  anvl -> value = (warc_u8_t *) WAnvl_getValue (wanted_anvl);
+
+  return (WARC_FALSE);
+}
+
+
+/**
+ * @param _self: A WRecord object instance
+ *
+ * @return the number of anvl fields in the WRecord header as a warc_u32_t
+ *
+ * Returns the number of the Anvl fields of the WARC Record contained int its header
+ */
+
+WPUBLIC  warc_u32_t WRecord_getAnvlFieldsNumber (const void * const _self)
+{
+    const struct WRecord * const self = _self;
+    const void           * inner_anvl = NIL; /* For the manipulation of the Anvl fields list */
+
+  /*Preconditions*/
+  CASSERT (self);
+
+  inner_anvl = WHeader_getAnvl (HDL);
+  unless (inner_anvl)
+     return (0);
+
+  return (WList_size (inner_anvl));
 }
 
 
