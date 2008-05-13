@@ -55,16 +55,6 @@ extern "C"
     } warc_rec_t;
 
 
-/**
- * This structur will contain the anvl fields 
- * got from the function WRecord_getAnvlField
- */
-
-    struct WAnvlfield 
-   {
-    warc_u8_t * key; /**< The key of the field */
-    warc_u8_t * value; /**< The value of the field */
-   };
 
 #ifdef __cplusplus
   }

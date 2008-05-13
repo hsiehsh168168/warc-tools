@@ -265,7 +265,8 @@ int main (int argc, const char ** argv)
         {
           warc_u32_t  i = 0;
           warc_u32_t  j = WRecord_getAnvlFieldsNumber (r); /* how many ANVL are there? */
-          struct WAnvlfield anvl;
+          const warc_u8_t *  key = NIL;
+          const warc_u8_t *  value = NIL;
 
           if (j)
             {
@@ -273,13 +274,13 @@ int main (int argc, const char ** argv)
 
              while ( i < j )
                {
-                if (WRecord_getAnvlField (r, i, & anvl)) /* ANVL record */
+                if (WRecord_getAnvlField (r, i, & key, & value)) /* ANVL record */
 
-                fprintf (stdout, "key: %s\n", (const char *) anvl . key);
+                fprintf (stdout, "key: %s\n", (const char *) key);
 
                 /* we assume here that the ANVL value was in ASCII. */
                 /* use your own encoding to print it otherwise. */
-                fprintf (stdout, "val: %s\n", (const char *) anvl . value);
+                fprintf (stdout, "val: %s\n", (const char *) value);
 
                 ++ i;
                }
