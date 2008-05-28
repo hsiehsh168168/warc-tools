@@ -1784,8 +1784,9 @@ WPUBLIC warc_bool_t WRecord_makeDataFile (void * _self, const warc_u8_t * dir, c
   DATAF = bless (WTempFile, dir, dirlen);
 
   unless (DATAF)
+    
     return (WARC_TRUE);
-
+    
   return (WARC_FALSE);
 }
 
@@ -2265,7 +2266,7 @@ WPUBLIC warc_bool_t WRecord_getAnvlField (const void * const _self, const warc_u
   if (nbel == 0 || nbel <= rank)
      return (WARC_TRUE);
 
-  wanted_anvl = WList_get (inner_anvl, rank);
+  wanted_anvl = WList_getElement (inner_anvl, rank);
   unless (wanted_anvl)
      return (WARC_TRUE);
 

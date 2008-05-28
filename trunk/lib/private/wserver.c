@@ -1226,7 +1226,7 @@ WPRIVATE warc_bool_t WBuildXmlOutput (void * fname, const void * server_name, vo
            evbuffer_add_printf (buf, "<extra-fields>\r\n");
            while ( i < j )
                {
-                 const void  * a = WList_get (al, i); /* ANVL record */
+                 const void  * a = WList_getElement (al, i); /* ANVL record */
    
                  /* we assume here that the ANVL value was in ASCII. */
                  /* use your own encoding to print it otherwise. */
@@ -1471,7 +1471,7 @@ WPRIVATE warc_bool_t WBuildHtmlOutput (void * fname, const void * server_name, v
        
            while ( i < j )
                {
-                 const void  * a = WList_get (al, i); /* ANVL record */
+                 const void  * a = WList_getElement (al, i); /* ANVL record */
    
                  /* we assume here that the ANVL value was in ASCII. */
                  /* use your own encoding to print it otherwise. */
@@ -1708,7 +1708,7 @@ WPRIVATE warc_bool_t WBuildTextOutput (void * fname, const void * server_name, v
        
            while ( i < j )
                {
-                 const void  * a = WList_get (al, i); /* ANVL record */
+                 const void  * a = WList_getElement (al, i); /* ANVL record */
    
                  /* we assume here that the ANVL value was in ASCII. */
                  /* use your own encoding to print it otherwise. */
@@ -2007,7 +2007,7 @@ WPRIVATE warc_bool_t WBuildJsonOutput (void * fname, const void * server_name, v
        
            while ( i < j )
                {
-                 const void  * a = WList_get (al, i); /* ANVL record */
+                 const void  * a = WList_getElement (al, i); /* ANVL record */
    
                  /* we assume here that the ANVL value was in ASCII. */
                  /* use your own encoding to print it otherwise. */

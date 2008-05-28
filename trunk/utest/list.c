@@ -237,17 +237,17 @@ void test6 (void)
   CU_ASSERT_NOT_EQUAL(4, WList_size (l));
   CU_ASSERT_NOT_EQUAL(2, WList_size (l));
   i = 1;
-  s = (void *) WList_get (l, i);
+  s = (void *) WList_getElement (l, i);
   /*fprintf (stdout, "list index %d is : %s\n", i, WString_getText (s) );*/
   CU_ASSERT_STRING_EQUAL("BBBB",WString_getText (s));
   
   i = 0;
-  s = (void *) WList_get (l, i);
+  s = (void *) WList_getElement (l, i);
  /*fprintf (stdout, "list index %d is : %s\n", i, WString_getText (s) );*/
   CU_ASSERT_STRING_EQUAL("AAAA",WString_getText (s));
 
   i = 2;
-  s = (void *) WList_get (l, i);
+  s = (void *) WList_getElement (l, i);
  /* fprintf (stdout, "list index %d is : %s\n", i, WString_getText (s) );*/
   CU_ASSERT_STRING_EQUAL("CCCC",WString_getText (s));
   destroy (l);
@@ -272,7 +272,7 @@ void test7 (void)
   CU_ASSERT_NOT_EQUAL(4, WList_size (l));
  /* fprintf (stdout, "%s> list size: %d\n", t, WList_size (l) );*/
 
-  s = (void *) WList_set (l, i, o);
+  s = (void *) WList_setElement (l, i, o);
 /* fprintf (stdout, "replace %s at index %d by %s\n",*/
   /*         WString_getText (s), i, WString_getText (o) );*/
   CU_ASSERT_STRING_EQUAL("ZZZZZZZ", WString_getText (o));
@@ -309,7 +309,7 @@ void test8 (void)
   destroy (s);
   /*assurer que CCCC est supprimé*/
    i = 2;
-  s = (void *) WList_get (l, i);
+  s = (void *) WList_getElement (l, i);
   CU_ASSERT_STRING_NOT_EQUAL("CCCC",WString_getText (s));
   CU_ASSERT_STRING_EQUAL("DDDD",WString_getText (s));
 

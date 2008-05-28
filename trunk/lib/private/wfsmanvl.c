@@ -295,7 +295,7 @@ State WANT_ANVL_ENDLF =
 {
   /* TEST_EVENT             ACTION                   NEXT_STATE */
 
-  {WFsmANVL_isLF,           WFsmANVL_pushBack  ,     NIL},
+  {WFsmANVL_isLF,           NIL                ,     NIL},
   {WFsmANVL_isUnknown,      WFsmANVL_raiseError,     NIL}
 
 };

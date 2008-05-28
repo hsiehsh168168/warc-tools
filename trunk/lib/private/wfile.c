@@ -565,7 +565,6 @@ WPRIVATE void * WFile_nextRecordGzipCompressed (void * _self)
   warc_i64_t      offset   = 0;
   warc_u32_t      ret      = 0;
   FILE          * rectfile = NIL; /* to uncompress the WRecord */
-  void          * objrectfile = NIL;
 
 
   WTempFile_reset (TEMP_FILE);
@@ -583,14 +582,6 @@ WPRIVATE void * WFile_nextRecordGzipCompressed (void * _self)
   return (WFile_nextRecordGzipCompressedFast (self, 
           gzobj, offset, usize, csize) );
 
-   objrectfile = bless (WTempFile, WString_getText(WORKING_DIR), WString_getLength(WORKING_DIR));
-   unless (objrectfile) 
-   { 
-     WarcDebugMsg ("unable to create temporary space"); 
-     return (NIL); 
-   } 
-
-  rectfile = WTempFile_handle (TEMP_FILE);
 
 
   wobject = bless (WRecord);
@@ -600,16 +591,23 @@ WPRIVATE void * WFile_nextRecordGzipCompressed (void * _self)
     {
       destroy (wobject);
       destroy (gzobj);
-      destroy (objrectfile); 
       return (NIL);
     }
+
+  if (WRecord_makeDataFile (wobject, WString_getText(WORKING_DIR), WString_getLength(WORKING_DIR)))
+    {
+      destroy (wobject);
+      destroy (gzobj);
+      return (NIL);
+    }
+
+  rectfile = WTempFile_handle (WRecord_getDataFile (wobject));
 
   ret = WGzip_uncompress (gzobj, FH, w_ftell (FH), & usize, & csize,
                           wrecover, (void *) rectfile);
   if (ret)
     {
       WarcDebugMsg ("unable to read gzipped record");
-      destroy (objrectfile); 
       destroy (gzobj);
       destroy (wobject);
       return (NIL);
@@ -619,7 +617,6 @@ WPRIVATE void * WFile_nextRecordGzipCompressed (void * _self)
     {
       destroy (wobject);
       destroy (gzobj);
-      destroy (objrectfile); 
       return (NIL);
     }
 
@@ -628,7 +625,6 @@ WPRIVATE void * WFile_nextRecordGzipCompressed (void * _self)
     {
       destroy (wobject);
       destroy (gzobj);
-      destroy (objrectfile); 
       return (NIL);
     }
 
@@ -644,7 +640,6 @@ WPRIVATE void * WFile_nextRecordGzipCompressed (void * _self)
   unless (head)
     {
       destroy (wobject);
-      destroy (objrectfile); 
       return (NIL);
     }
 
@@ -652,7 +647,6 @@ WPRIVATE void * WFile_nextRecordGzipCompressed (void * _self)
     {
       destroy (head);
       destroy (wobject);
-      destroy (objrectfile); 
       return (NIL);
     }
 
@@ -669,11 +663,12 @@ WPRIVATE void * WFile_nextRecordGzipCompressed (void * _self)
   unless (WFile_checkEndCRLF (rectfile) )
   {
     WarcDebugMsg ("found a corrupted record");
-    destroy (objrectfile);
     destroy (head);
     destroy (wobject);
     return (NIL);
   }
+
+  w_ftruncate (w_fileno (rectfile), recend);
 
   w_fseek_start (rectfile);
 
@@ -686,7 +681,6 @@ WPRIVATE void * WFile_nextRecordGzipCompressed (void * _self)
 
   if (WRecord_setContentSize (wobject, datasize) )
     {
-      destroy (objrectfile); 
       destroy (wobject);
       return (NIL);
     }
@@ -694,7 +688,6 @@ WPRIVATE void * WFile_nextRecordGzipCompressed (void * _self)
   /* setting the offset of the data bloc in the WRecord */
   if (WRecord_setWoffset (wobject, blbegin) )
     {
-      destroy (objrectfile);
       destroy (wobject);
       return (NIL);
     }
@@ -702,15 +695,6 @@ WPRIVATE void * WFile_nextRecordGzipCompressed (void * _self)
   /* setting the pointer to the WFile in the WRecord */
   if (WRecord_setWfile (wobject, self) )
     {
-      destroy (objrectfile);
-      destroy (wobject);
-      return (NIL);
-    }
-
-  /* setting the data file in The Record (only in compressed mode )*/
-  if (WRecord_setContentFromFileHandle (wobject, objrectfile) )
-    {
-     destroy (objrectfile);
       destroy (wobject);
       return (NIL);
     }
@@ -999,13 +983,17 @@ WPUBLIC warc_bool_t WFile_register (void* _self, void * wrec,
             destroy (gzobj);
             w_fseek_from_end (wtfile, -4);
 
+            offset = w_ftell (wtfile);
+
             unless (WFile_checkEndCRLF (wtfile) )
             {
               WarcDebugMsg ("missing double CRLF");
               return (WARC_TRUE);
             }
 
-            w_fseek_from_here (wtfile, (-1 * WRecord_getDataSize (wrec) ) );
+            w_ftruncate (w_fileno (wtfile), offset);
+
+            w_fseek_from_here (wtfile, (-1 * WRecord_getDataSize (wrec) -4));
 
           }
 
@@ -1704,7 +1692,7 @@ WPRIVATE void WFile_writeAnvls (FILE * wtfile, const void * lanvl,
       while (i < size)
         {
           /* recovering an anvl field */
-          anvl = WList_get (lanvl, i);
+          anvl = WList_getElement (lanvl, i);
 
           /* writing anvl field */
 

@@ -316,7 +316,7 @@ extern "C"
 #ifndef w_ftruncate
 #define w_ftruncate(fd, size) \
   do { \
-      int ret = ftruncate (fd, 0); \
+      int ret = ftruncate (fd, size); \
       assert (! ret); \
       UNUSED (ret); \
     } while (0)
@@ -359,7 +359,6 @@ extern "C"
       st . st_size = 0; \
       fd = open ((s), O_RDWR | O_CREAT); \
       assert (fd != -1); \
-      assert (fstat(fd, & st) != -1); \
       if(st . st_size == 0) fchmod(fd, 0644); \
       fh=w_fdopen_wb(fd); \
     } while (0)
