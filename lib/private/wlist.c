@@ -398,7 +398,7 @@ WPRIVATE struct WLNode * gotoIndex (const void * const _self,
  * NIL is returned if empty list.
  */
 
-WPUBLIC const void * WList_get (const void * const _self,
+WPUBLIC const void * WList_getElement (const void * const _self,
                                 const warc_u32_t index)
 {
 
@@ -429,7 +429,7 @@ WPUBLIC const void * WList_get (const void * const _self,
  * NIL is returned if empty list.
  */
 
-WPUBLIC void * WList_set (void * const _self, const warc_u32_t index,
+WPUBLIC void * WList_setElement (void * const _self, const warc_u32_t index,
                           void * const o)
 {
 

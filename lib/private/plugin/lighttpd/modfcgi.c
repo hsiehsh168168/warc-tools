@@ -778,7 +778,7 @@ WPRIVATE warc_bool_t WSend_distantHDumpResponse (const warc_u8_t * fname, const 
        
             while ( i < j )
                {
-                 const void  * a = WList_get (al, i); /* ANVL record */
+                 const void  * a = WList_getElement (al, i); /* ANVL record */
    
                  /* we assume here that the ANVL value was in ASCII. */
                 /* use your own encoding to print it otherwise. */
@@ -1009,7 +1009,7 @@ WPRIVATE warc_bool_t WSend_distantXDumpResponse (const warc_u8_t * fname, const 
             fprintf(stdout, "<extra-fields>\r\n");
             while ( i < j )
                {
-                 const void  * a = WList_get (al, i); /* ANVL record */
+                 const void  * a = WList_getElement (al, i); /* ANVL record */
    
                  /* we assume here that the ANVL value was in ASCII. */
                 /* use your own encoding to print it otherwise. */
@@ -1222,7 +1222,7 @@ WPRIVATE warc_bool_t WSend_distantTDumpResponse (const warc_u8_t * fname, const 
             fprintf (stdout, "\r\n* More information:\r\n");
             while ( i < j )
                {
-                const void  * a = WList_get (al, i); /* ANVL record */
+                const void  * a = WList_getElement (al, i); /* ANVL record */
    
                  /* we assume here that the ANVL value was in ASCII. */
                 /* use your own encoding to print it otherwise. */
@@ -1513,7 +1513,7 @@ WPRIVATE warc_bool_t WSend_distantJDumpResponse (const warc_u8_t * fname, const 
 
             while ( i < j )
                {
-                const void  * a = WList_get (al, i); /* ANVL record */
+                const void  * a = WList_getElement (al, i); /* ANVL record */
    
                  /* we assume here that the ANVL value was in ASCII. */
                 /* use your own encoding to print it otherwise. */
