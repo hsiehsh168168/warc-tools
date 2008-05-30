@@ -43,18 +43,20 @@ CUNIT    = $(PLUGIN)/cunit
 GZIP     = $(PLUGIN)/gzip
 TIGER    = $(PLUGIN)/tiger
 EVENT    = $(PLUGIN)/event
+APPYTHON = $(APP)/python
 EVENT_COMPACT = $(EVENT)/compat
 REGEX    = $(PLUGIN)/regex
 OSDEP    = $(PRIVATE)/os
 MINGW_DEP= $(OSDEP)/mingw
 OUT      = $(TST)/outputs
+PYTHON   = $(PLUGIN)/python
 HEADERS  = -I. -I$(PRIVATE) -I$(PUBLIC) -I$(GZIP) \
 		   -I$(CUNIT)       -I$(TIGER)  -I$(EVENT) \
-		   -I$(EVENT_COMPACT) -I$(REGEX)
+		   -I$(EVENT_COMPACT) -I$(REGEX) -I$(PYTHON)
 
 MAJOR     = 0
 MINOR     = 17
-RELEASE   = 94
+RELEASE   = 96
 
 LIBSUFFIX = so
 LIBNAME   = libwarc
@@ -80,6 +82,8 @@ LIGHTY_SRC     = $(LIGHTTPD)/modcgi.c $(LIGHTTPD)/modfcgi.c
 INC_LIGHTY     = -I/usr/local/include
 LIB_FCGI       = -L/usr/local/lib -lfcgi
 
+
+
 ####################
 # Apache mod_warc
 ####################
@@ -93,6 +97,20 @@ APXS          =$(APACHE_DIR)/bin/apxs
 APACHECTL     =$(APACHE_DIR)/apachectl
 APACHE        =$(PLUGIN)/apache
 mod_apache    =$(APACHE)/mod_warc
+
+###################
+# python wrapper
+###################
+
+SWIG            = swig
+INC_PYTHON      = -I$(shell echo /usr/include/python*.*)
+WPYNAME   	= _warc
+WPYSONAME	=,$(WPYNAME).$(LIBSUFFIX).$(MAJOR)
+WPYSHAREDNAME   = $(WPYNAME).$(LIBSUFFIX)
+APYNAME   	= _arc
+APYSONAME	=,$(APYNAME).$(LIBSUFFIX).$(MAJOR)
+APYSHAREDNAME   = $(APYNAME).$(LIBSUFFIX)
+
 
 
 ###############
@@ -160,10 +178,16 @@ EV_SRC       = $(EVENT)/event.c		$(EVENT)/buffer.c    $(EVENT)/log.c \
 ##$(EVENT)/evbuffer.c $(EVENT)/event_tagging.c $(EVENT)/evrpc.c
 
 
+SHARED_OS    = shared_unix
+PYSHARED_OS	 = pyshared_unix
 
 # compile WARC as a shared library
-SHARED_OS = shared_unix
 ifeq ($(W_SHARED),on)
+	S_CFLAGS = -fPIC -DPIC
+endif
+
+# compile the Python wrapper as a shared library
+ifeq ($(W_PYSHARED),on)
 	S_CFLAGS = -fPIC -DPIC
 endif
 
@@ -184,6 +208,7 @@ ifeq ($(UNAME_S),FreeBSD)
 	EV_SRC		+= $(EVENT)/kqueue.c $(EVENT)/poll.c
 	EVENT_CONFIG = $(EV_OS)/config.h $(EV_OS)/event-config.h
 	EV_LIB		 = 
+	INC_PYTHON     = -I$(shell echo /usr/local/include/python*.*)
 endif
 ifeq ($(UNAME_S),OpenBSD)
 	MAKE         = gmake
@@ -194,6 +219,7 @@ ifeq ($(UNAME_S),OpenBSD)
 	EVENT_CONFIG = $(EV_OS)/config.h $(EV_OS)/event-config.h
 	EV_LIB		 = 
 	GCC_EXTRA    = 
+	INC_PYTHON     = -I$(shell echo /usr/local/include/python*.*)
 endif
 ifeq ($(UNAME_S),NetBSD)
 	MAKE         = gmake
@@ -202,6 +228,7 @@ ifeq ($(UNAME_S),NetBSD)
 	EV_SRC		+= $(EVENT)/kqueue.c $(EVENT)/poll.c
 	EVENT_CONFIG = $(EVENT)/config.h $(EVENT)/event-config.h
 	EV_LIB		 = 
+	INC_PYTHON     = -I$(shell echo /usr/local/include/python*.*)
 endif
 ifeq ($(UNAME_S),Darwin)
 	CFLAGS 		+= -pedantic
@@ -213,19 +240,28 @@ ifeq ($(UNAME_S),Darwin)
 	EV_LIB		 = 
 #-lresolv
 	SHARED_OS	 = shared_osx
+	PYSHARED_OS	 = pyshared_osx
 	LIBSUFFIX    = dylib
 	INSTALLNAME	 = $(LIBNAME).$(MAJOR).$(LIBSUFFIX)
 	SHAREDNAME	 = $(LIBNAME).$(MAJOR).$(MINOR).$(RELEASE).$(LIBSUFFIX)
 	S_CFLAGS     =
+#PYINSTALLNAME= $(PYNAME).$(MAJOR).$(LIBSUFFIX)
+	PYLIBSUFFIX	 = so
+	WPYSHAREDNAME = $(WPYNAME).$(PYLIBSUFFIX)
+	APYSHAREDNAME = $(APYNAME).$(PYLIBSUFFIX)
+	SWIG_CFLAGS  = -bundle -undefined suppress -flat_namespace
 endif
 ifeq ($(UNAME_S),SunOS)
+	CC	    += -R/usr/local/lib
 	EV_OS        = $(EVENT)/os/solaris
 	HEADERS     += -I$(OSDEP) -I$(EV_OS) -I$(CUNIT)/os/solaris
-	EV_SRC		+= $(EVENT)/devpoll.c $(EVENT)/poll.c $(EVENT)/evport.c $(EVENT)/strlcpy.c
+	EV_SRC	    += $(EVENT)/devpoll.c $(EVENT)/poll.c $(EVENT)/evport.c $(EVENT)/strlcpy.c
 	EVENT_CONFIG = $(EV_OS)/config.h $(EV_OS)/event-config.h
-	EV_LIB		 = -lrt -lsocket
+	EV_LIB	     = -lrt -lsocket
+	PYSHARED_OS  = pyshared_solaris
+	SWIG_LDFLAGS = -G
 #-lnsl -lresolv -lsocket
-	SONAME	     =
+	SONAME	     = 
 endif
 ifneq ($(findstring MINGW,$(UNAME_S)),)
 	MKTEMP       = $(MINGW_DEP)/wmktmp
@@ -237,8 +273,11 @@ ifneq ($(findstring MINGW,$(UNAME_S)),)
 	EVENT_CONFIG = $(EV_OS)/config.h $(EV_OS)/event-config.h
 	EV_LIB		 = -lws2_32
 	SHARED_OS    = shared_mingw
+	PYSHARED_OS  = pyshared_mingw
 	LIBSUFFIX    = dll
 	SHAREDNAME   = $(LIBNAME).$(LIBSUFFIX)
+	WPYSHAREDNAME = $(WPYNAME).$(LIBSUFFIX)
+	APYSHAREDNAME = $(APYNAME).$(LIBSUFFIX)
 	S_CFLAGS     = -DBUILD_DLL
 	BASH	     = sh
 	EV_SRC       =
@@ -256,8 +295,11 @@ ifneq ($(findstring CYGWIN,$(UNAME_S)),)
 	EV_LIB		 = -lresolv
 #-lnsl -lrt
 	SHARED_OS    = shared_cygwin
+	PYSHARED_OS  = pyshared_cygwin
 	LIBSUFFIX    = dll
 	SHAREDNAME   = cyg$(LIBNAME).$(LIBSUFFIX)
+	WPYSHAREDNAME = cyg$(WPYNAME).$(LIBSUFFIX)
+	APYSHAREDNAME = cyg$(APYNAME).$(LIBSUFFIX)
 	S_CFLAGS     = 
 endif
 
@@ -663,6 +705,80 @@ $(LIGHTTPD)/warc.fcgi:  $(modfcgi)
 			$(CC) $(RFLAGS) $(INC_LIGHTY) -o $@ $(modfcgi) $(LIB_FCGI)
 
 
+
+######################
+# python SWIG wrapper
+######################
+
+pylib   =  $(GZIP)/adler32.o     $(GZIP)/compress.o      $(GZIP)/crc32.o  \
+		   $(GZIP)/deflate.o     $(GZIP)/infback.o       $(GZIP)/inffast.o \
+		   $(GZIP)/inflate.o     $(GZIP)/inftrees.o      $(GZIP)/trees.o \
+		   $(GZIP)/uncompr.o     $(PRIVATE)/wendian.o    $(GZIP)/wgzipbit.o \
+	   	   $(GZIP)/zutil.o		 $(PRIVATE)/wgzip.o      $(TIGER)/tiger.o \
+		   $(PRIVATE)/wstring.o  $(PRIVATE)/wlist.o		 $(PRIVATE)/wclass.o \
+		   $(OSDEP)/wmktmp.o     $(PRIVATE)/whash.o      $(PRIVATE)/wkv.o \
+		   $(OSDEP)/wcsafe.o	 $(PRIVATE)/wuuid.o		 $(PRIVATE)/wrecord.o \
+		   $(PRIVATE)/wheader.o	 $(PRIVATE)/wanvl.o	     $(PRIVATE)/wfsmanvl.o
+
+wpylib   = $(PRIVATE)/wfile.o \
+		   $(PYTHON)/warc_wrap.o
+
+apylib   = $(PRIVATE)/arecord.o  $(PRIVATE)/afile.o 	 $(PRIVATE)/afsmhdl.o \
+		   $(PYTHON)/arc_wrap.o
+
+pyshared_unix: python_clean pyshared
+		$(CC) -shared -Wl,-soname$(WPYSONAME) -o $(APPYTHON)/$(WPYSHAREDNAME) \
+			   $(pylib) $(wpylib)
+		$(CC) -shared -Wl,-soname$(APYSONAME) -o $(APPYTHON)/$(APYSHAREDNAME) \
+			   $(pylib) $(apylib)
+
+pyshared_solaris: python_clean pyshared
+		$(LD) $(SWIG_LDFLAGS) $(pylib) $(wpylib) -o $(APPYTHON)/$(WPYSHAREDNAME)
+		$(CC) $(SWIG_LDFLAGS) $(pylib) $(apylib) -o $(APPYTHON)/$(APYSHAREDNAME)
+			   
+
+pyshared_osx: python_clean pyshared
+		$(CC) $(SWIG_CFLAGS) $(pylib) $(wpylib) -o $(APPYTHON)/$(WPYSHAREDNAME)
+		$(CC) $(SWIG_CFLAGS) $(pylib) $(apylib) -o $(APPYTHON)/$(APYSHAREDNAME) 
+
+
+pyshared_mingw: python_clean pyshared
+		$(CC) -shared -o $(APPYTHON)/$(WPYSHAREDNAME) $(pylib) $(wpylib) \
+		-Wl,--out-implib,$(WPYNAME)dll.a
+		$(CC) -shared -o $(APPYTHON)/$(APYSHAREDNAME) $(pylib) $(apylib) \
+		-Wl,--out-implib,$(APYNAME)dll.a
+
+
+pyshared_cygwin: python_clean pyshared
+		$(CC) -shared -o $(APPYTHON)/$(WPYSHAREDNAME) $(pylib) $(wpylib) \
+		-Wl,--out-implib,$(WPYNAME)dll.a \
+		-Wl,--export-all-symbols \
+		-Wl,--enable-auto-import \
+		-Wl,--no-whole-archive
+		$(CC) -shared -o $(APPYTHON)/$(APYSHAREDNAME) $(pylib) $(apylib) \
+		-Wl,--out-implib,$(APYNAME)dll.a \
+		-Wl,--export-all-symbols \
+		-Wl,--enable-auto-import \
+		-Wl,--no-whole-archive
+
+python:
+		@$(MAKE) W_PYSHARED=on $(PYSHARED_OS)
+
+pyshared : $(APPYTHON)/warc.py $(APPYTHON)/arc.py $(pylib) $(wpylib) $(apylib)
+
+$(APPYTHON)/warc.py $(PYTHON)/warc_wrap.c : 
+	$(SWIG) -python -outdir $(APPYTHON) $(PYTHON)/warc.i
+
+$(PYTHON)/warc_wrap.o : $(PYTHON)/warc_wrap.c
+	$(CC) $(INC_PYTHON)  -c $(PYTHON)/warc_wrap.c -o $(PYTHON)/warc_wrap.o
+
+$(APPYTHON)/arc.py $(PYTHON)/arc_wrap.c :
+	$(SWIG) -python -outdir $(APPYTHON) $(PYTHON)/arc.i
+
+$(PYTHON)/arc_wrap.o : $(PYTHON)/arc_wrap.c
+	$(CC) $(INC_PYTHON)  -c $(PYTHON)/arc_wrap.c -o $(PYTHON)/arc_wrap.o
+
+
 ####################
 # applications deps
 ####################
@@ -735,8 +851,12 @@ mod_apache_clean:	; @rm -rf $(mod_apache).la $(mod_apache).lo \
 mod_lighty_clean: ; @rm -rf $(LIGHTTPD)/*.o $(LIGHTTPD)/*~ \
 				    $(LIGHTTPD)/warc.cgi $(LIGHTTPD)/warc.fcgi
 
+python_clean: 	   ; @rm -f $(PYTHON)/*.c $(PYTHON)/*.o      
+					 rm -f $(APPYTHON)/*.so $(APPYTHON)/warc.py \
+					 $(APPYTHON)/arc.py $(APPYTHON)/*.pyc \
+					 $(APPYTHON)/*$(LIBSUFFIX)* $(APPYTHON)/_*
 
-clean:		tclean	mod_apache_clean mod_lighty_clean
+clean:		tclean	mod_apache_clean mod_lighty_clean python_clean
 			@rm -f $t             $(obj)            *.o \
 			       *~             *.a               *.so* \
 			       *.log          *.gz              $(PUBLIC)/*~ \
