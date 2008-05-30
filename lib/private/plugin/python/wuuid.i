@@ -29,12 +29,5 @@
    #include <wuuid.h>
  
  %}
-    
-    extern const void * WUUID;
-
-    extern void         WUUID_reinit (const void * const);
-    extern void         WUUID_hash   (const void * const, const  char *,
-                                        const  unsigned int);
-    extern const char * WUUID_text   (const void * const);
 
 
