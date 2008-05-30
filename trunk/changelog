@@ -24,11 +24,15 @@
 /*     http://code.google.com/p/warc-tools/                            */
 /* ------------------------------------------------------------------- */
 
-2008-04-06 to 2008-02-08 by "voidptrptr":
+2008-04-06 to 2008-05-29 by "voidptrptr":
+
+	* Full Python wrapper implementation
+
+2008-02-15 to 2008-04-06 by "voidptrptr":
 
 	* Second stable release. Compliant with WARC/0.17 specification
 
-2008-02-15 to 2008-02-08 by "voidptrptr":
+2008-02-08 to 2008-02-15 by "voidptrptr":
 
 	* Stable release. Compliant with WARC/0.9 specification
 

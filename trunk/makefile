@@ -112,7 +112,6 @@ APYSONAME	=,$(APYNAME).$(LIBSUFFIX).$(MAJOR)
 APYSHAREDNAME   = $(APYNAME).$(LIBSUFFIX)
 
 
-
 ###############
 # flags
 ###############
@@ -294,12 +293,16 @@ ifneq ($(findstring CYGWIN,$(UNAME_S)),)
 	EVENT_CONFIG = $(EV_OS)/config.h $(EV_OS)/event-config.h
 	EV_LIB		 = -lresolv
 #-lnsl -lrt
-	SHARED_OS    = shared_cygwin
-	PYSHARED_OS  = pyshared_cygwin
 	LIBSUFFIX    = dll
-	SHAREDNAME   = cyg$(LIBNAME).$(LIBSUFFIX)
-	WPYSHAREDNAME = cyg$(WPYNAME).$(LIBSUFFIX)
-	APYSHAREDNAME = cyg$(APYNAME).$(LIBSUFFIX)
+	SHARED_OS    = shared_cygwin
+	LIB_PYTHON   = -L$(shell echo /usr/lib/python*.*)
+	PY_VERSION   = $(shell echo /usr/lib/python*.* | sed -e "s|.*\(.\..\)|\1|")
+	PYSHARED_OS  = pyshared_cygwin
+	WPYSONAME	=,$(WPYNAME).$(LIBSUFFIX).$(MAJOR)
+	WPYSHAREDNAME   = $(WPYNAME).$(LIBSUFFIX)
+	APYNAME   	= _arc
+	APYSONAME	=,$(APYNAME).$(LIBSUFFIX).$(MAJOR)
+	APYSHAREDNAME   = $(APYNAME).$(LIBSUFFIX)
 	S_CFLAGS     = 
 endif
 
@@ -469,7 +472,7 @@ shared:
 release:
 		@$(MAKE) W_RELEASE=on
 
-source:	shared static $(a)
+source:	shared static python $(a)
 		rm -rf $(PROJECT)
 		mkdir -p $(DESTDIR)/bin
 		mkdir -p $(DESTDIR)/include/compat/sys
@@ -478,6 +481,7 @@ source:	shared static $(a)
 		cp -f license/apache2-license $(DESTDIR)
 		cp -f $(a) $(DESTDIR)/bin
 		cp -f $(APP)/*.sh $(DESTDIR)/bin
+		cp -f $(APPYTHON)/* $(DESTDIR)/bin
 		find $(LIB) -name "*.h" -type "f" -exec cp -f '{}' $(DESTDIR)/include \;
 		find $(LIB) -name "*.x" -type "f" -exec cp -f '{}' $(DESTDIR)/include \;
 		cp -f $(EVENT_CONFIG) $(DESTDIR)/include
@@ -485,6 +489,7 @@ source:	shared static $(a)
 		mv $(DESTDIR)/include/queue.h $(DESTDIR)/include/compat/sys
 		cp -rf $(APACHE) $(DESTDIR)
 		cp -rf $(LIGHTTPD) $(DESTDIR)
+		cp -rf $(PYTHON) $(DESTDIR) && rm -f $(DESTDIR)/python/*.o
 		mv $(LIBNAME).a $(DESTDIR)/lib
 		mv *$(LIBNAME)*$(LIBSUFFIX)* $(DESTDIR)/lib
 
@@ -735,7 +740,6 @@ pyshared_unix: python_clean pyshared
 pyshared_solaris: python_clean pyshared
 		$(LD) $(SWIG_LDFLAGS) $(pylib) $(wpylib) -o $(APPYTHON)/$(WPYSHAREDNAME)
 		$(CC) $(SWIG_LDFLAGS) $(pylib) $(apylib) -o $(APPYTHON)/$(APYSHAREDNAME)
-			   
 
 pyshared_osx: python_clean pyshared
 		$(CC) $(SWIG_CFLAGS) $(pylib) $(wpylib) -o $(APPYTHON)/$(WPYSHAREDNAME)
@@ -750,16 +754,8 @@ pyshared_mingw: python_clean pyshared
 
 
 pyshared_cygwin: python_clean pyshared
-		$(CC) -shared -o $(APPYTHON)/$(WPYSHAREDNAME) $(pylib) $(wpylib) \
-		-Wl,--out-implib,$(WPYNAME)dll.a \
-		-Wl,--export-all-symbols \
-		-Wl,--enable-auto-import \
-		-Wl,--no-whole-archive
-		$(CC) -shared -o $(APPYTHON)/$(APYSHAREDNAME) $(pylib) $(apylib) \
-		-Wl,--out-implib,$(APYNAME)dll.a \
-		-Wl,--export-all-symbols \
-		-Wl,--enable-auto-import \
-		-Wl,--no-whole-archive
+		$(CC) -shared $(pylib) $(wpylib) $(LIB_PYTHON)/config -lpython$(PY_VERSION) -o $(APPYTHON)/$(WPYSHAREDNAME)
+		$(CC) -shared $(pylib) $(apylib) $(LIB_PYTHON)/config -lpython$(PY_VERSION) -o $(APPYTHON)/$(APYSHAREDNAME)
 
 python:
 		@$(MAKE) W_PYSHARED=on $(PYSHARED_OS)
@@ -770,13 +766,15 @@ $(APPYTHON)/warc.py $(PYTHON)/warc_wrap.c :
 	$(SWIG) -python -outdir $(APPYTHON) $(PYTHON)/warc.i
 
 $(PYTHON)/warc_wrap.o : $(PYTHON)/warc_wrap.c
-	$(CC) $(INC_PYTHON)  -c $(PYTHON)/warc_wrap.c -o $(PYTHON)/warc_wrap.o
+	$(CC) $(INC_PYTHON) -c $(PYTHON)/warc_wrap.c -o $(PYTHON)/warc_wrap.o
+#	$(CC) $(CFLAGS) $(INC_PYTHON) -c $(PYTHON)/warc_wrap.c -o $(PYTHON)/warc_wrap.o
 
 $(APPYTHON)/arc.py $(PYTHON)/arc_wrap.c :
 	$(SWIG) -python -outdir $(APPYTHON) $(PYTHON)/arc.i
 
 $(PYTHON)/arc_wrap.o : $(PYTHON)/arc_wrap.c
-	$(CC) $(INC_PYTHON)  -c $(PYTHON)/arc_wrap.c -o $(PYTHON)/arc_wrap.o
+	$(CC) $(INC_PYTHON) -c $(PYTHON)/arc_wrap.c -o $(PYTHON)/arc_wrap.o
+#	$(CC) $(CFLAGS) $(INC_PYTHON) -c $(PYTHON)/arc_wrap.c -o $(PYTHON)/arc_wrap.o
 
 
 ####################
