@@ -1,33 +1,9 @@
-#!/usr/bin/env python
-
-# -------------------------------------------------------------------  #
-# Copyright (c) 2007-2008 Hanzo Archives Limited.                      #
-#                                                                      #
-# Licensed under the Apache License, Version 2.0 (the "License");      #
-# you may not use this file except in compliance with the License.     #
-# You may obtain a copy of the License at                              #
-#                                                                      #
-#     http://www.apache.org/licenses/LICENSE-2.0                       #
-#                                                                      #
-# Unless required by applicable law or agreed to in writing, software  #
-# distributed under the License is distributed on an "AS IS" BASIS,    #
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or      #
-# implied.                                                             #
-# See the License for the specific language governing permissions and  #
-# limitations under the License.                                       #
-#                                                                      #
-# You may find more information about Hanzo Archives at                #
-#                                                                      #
-#     http://www.hanzoarchives.com/                                    #
-#                                                                      #
-# You may find more information about the WARC Tools project at        #
-#                                                                      #
-#     http://code.google.com/p/warc-tools/                             #
-# -------------------------------------------------------------------  #
+#!/usr/bin/python
 
 import warc
 from optparse import OptionParser
 import re
+import sys
 
 def  searchFromAnyPosition (field, string) :
 
@@ -100,7 +76,7 @@ def main () :
     if  cpt != 1  :
         parser.error(" You must appply filter to on of fields : uri or mime or record type")
 
-    count = 0
+    
     w = warc.bless (warc.cvar.WFile, options.filename, 600 * 1024 * 1024, warc.WARC_FILE_READER, warc.WARC_FILE_DETECT_COMPRESSION, options.tmpdir)
 
     if (not (w)) :
@@ -142,68 +118,89 @@ def main () :
           
           if m1 :
 
-              count = count + 1
+              
 
-              print "Warc record number :", count, "\n"
-              print "********************************************Mandatory fields**************************************************\n"
+              sys.stdout.write ("%-20u " % warc.WRecord_getOffset (r))
 
-              print "WarcId:\t ", warc.WRecord_getWarcId (r),"\n"
-              print "WARC-Date:\t ", warc.WRecord_getDate (r), "\n"
-              print "WARC-Record-ID:\t ", warc.WRecord_getRecordId (r), "\n"
-              print "WARC-Type\t ", warc.WRecord_getRecordType (r), "\n"
-              print "Content-Length:\t ", warc.WRecord_getContentLength (r), "\n"
-              print "***************************************************************************************************************\n\n"
+              sys.stdout.write ("%-20u " % warc.WRecord_getCompressedSize (r))
 
-              print "**********************************************Other fields*****************************************************\n"
-          
-              print "Offset:\t ", warc.WRecord_getOffset (r),"\n"
-              print "Compressed-Size:\t ", warc.WRecord_getCompressedSize (r), "\n"
+	      sys.stdout.write ("%-10s " % warc.WRecord_getWarcId (r))
 
-              if (warc.WRecord_getTargetUri (r)) :
-                   print "WARC-Target-URI :\t ", warc.WRecord_getTargetUri (r),"\n"
+              sys.stdout.write ("%-20u " % warc.WRecord_getContentLength (r)) 
+
+              sys.stdout.write ("%-45u " % warc.WRecord_getRecordType (r)) 
+
+              sys.stdout.write ("%-44s " % warc.WRecord_getDate (r))
+
+              sys.stdout.write ("%-86s " % warc.WRecord_getRecordId (r))      
+
+              m1 = warc.WARC_FALSE
+              print "More Fields:\n"
 
               if (warc.WRecord_getContentType (r)) :
-                   print "Content-Type:\t ", warc.WRecord_getContentType (r),"\n"
+                  print "%-35s: %-20s" %  ("Content-Type" , warc.WRecord_getContentType (r))
+                  m1 = warc.WARC_TRUE 
+
+          
 
               if (warc.WRecord_getConcurrentTo(r)) :
-                   print "WARC-Concurent-To:\t ", warc.WRecord_getConcurrentTo(r), "\n"
+                 print "%-35s: %-20s" % ("WARC-Concurrent-To" , warc.WRecord_getConcurrentTo(r))
+                 m1 = warc.WARC_TRUE
 
               if (warc.WRecord_getBlockDigest (r)) :
-                   print "WARC-Bloc-Digest:\t ", warc.WRecord_getBlockDigest (r), "\n"
+                 print "%-35s: %-20s" % ( "WARC-Block-Digest", warc.WRecord_getBlockDigest (r))
+                 m1 = warc.WARC_TRUE
 
               if (warc.WRecord_getPayloadDigest (r)) :
-                   print "WARC-Payload-Digest:\t ", warc.WRecord_getPayloadDigest (r),"\n"
+                 print "%-35s: %-20s"  % ("WARC-Payload-Digest", warc.WRecord_getPayloadDigest (r))
+                 m1 = warc.WARC_TRUE
 
               if (warc.WRecord_getIpAddress (r)) :
-                   print "WARC-IP-Address:\t ", warc.WRecord_getIpAddress (r), "\n"
+                 print "%-35s: %-20s"  % ("WARC-IP-Address", warc.WRecord_getIpAddress (r))
+                 m1 = warc.WARC_TRUE
 
               if ( warc.WRecord_getRefersTo (r)) :
-                   print "WARC-Refers-To:\t ", warc.WRecord_getRefersTo (r), "\n"
+                 print  "%-35s: %-20s" % ("WARC-Refers-To", warc.WRecord_getRefersTo (r))
+                 m1 = warc.WARC_TRUE
+
+              if (warc.WRecord_getTargetUri (r)) :
+                 print   "%-35s: %-20s" % ( "WARC-Target-URI",warc.WRecord_getTargetUri (r))
+                 m1 = warc.WARC_TRUE
 
               if (warc.WRecord_getTruncated (r)) :
-                   print "WARC-Truncated:\t ", warc.WRecord_getTruncated (r),"\n"
+                 print  "%-35s: %-20s" % ("WARC-Truncated", warc.WRecord_getTruncated (r))
+                 m1 = warc.WARC_TRUE
 
               if ( warc.WRecord_getWarcInfoId (r)) :
-                   print "WARC-Warcinfo-ID:\t ", warc.WRecord_getWarcInfoId (r), "\n"
+                 print  "%-35s: %-20s" % ("WARC-Warcinfo-ID", warc.WRecord_getWarcInfoId (r))
+                 m1 = warc.WARC_TRUE
 
               if (warc.WRecord_getFilename (r)) :
-                   print "WARC-Filename:\t ", warc.WRecord_getFilename (r),"\n"
+                 print "%-35s: %-20s" % ("WARC-Filename:", warc.WRecord_getFilename (r))
+                 m1 = warc.WARC_TRUE
 
               if (warc.WRecord_getProfile (r)) :
-                   print "WARC-Profile:\t ", warc.WRecord_getProfile (r), "\n"
+                 print "%-35s: %-20s" % ("WARC-Profile", warc.WRecord_getProfile (r))
+                 m1 = warc.WARC_TRUE
 
               if (warc.WRecord_getPayloadType (r)) :
-                  print "WARC-Identified-Payload-type:\t ", warc.WRecord_getPayloadType (r), "\n"
+                 print "%-35s: %-20s" % ("WARC-Identified-Payload-type", warc.WRecord_getPayloadType (r))
+                 m1 = warc.WARC_TRUE
 
               if (warc.WRecord_getSegmentOriginId  (r)) :
-                  print "WARC-Segment-Origin-ID:\t ", warc.WRecord_getSegmentOriginId  (r),"\n"
+                 print "%-35s: %-20s" % ("WARC-Segment-Origin-ID", warc.WRecord_getSegmentOriginId  (r))
+                 m1 = warc.WARC_TRUE
 
               if (warc. WRecord_getSegmentNumber (r)) :
-                  print "WARC-Segment-Number:\t ", warc. WRecord_getSegmentNumber (r), "\n"
+                 print "%-35s: %-20d" % ("WARC-Segment-Number", warc. WRecord_getSegmentNumber (r))
+                 m1 = warc.WARC_TRUE
 
               if (warc.WRecord_getSegTotalLength(r)) :
-                  print "WARC-Segment-Total-Length:\t ", warc.WRecord_getSegTotalLength(r), "\n\n"
-                  print "***************************************************************************************************************\n\n"
+                 print "%-35s: %-20d" % ("WARC-Segment-Total-Length", warc.WRecord_getSegTotalLength(r))
+                 m1 = warc.WARC_TRUE
+         
+              if (not (m1)) :
+                print "--No One --"          
 
               if (options.verbose) :
 
@@ -212,12 +209,13 @@ def main () :
                       i = 0
                       j = warc.WList_size(al)
                       if (j) :
-                        print "********************************************More info***************************************************\n"
+                        print "-- More Info--\n"
                         while ( i < j ) :
                                    a = warc.WList_getElement (al, i)
-                                   print  "key :\t ",warc.WAnvl_getKey   (a) ,"|Value :\t ",  warc.WAnvl_getValue (a)
+                                   print  "key :  ",warc.WAnvl_getKey   (a) 
+                                   print  "Value: ",  warc.WAnvl_getValue (a)
                                    i = i + 1
-                        print "***************************************************************************************************************\n\n"
+                        
 
           warc.destroy (r)
 
