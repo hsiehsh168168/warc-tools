@@ -103,7 +103,9 @@ mod_apache    =$(APACHE)/mod_warc
 ###################
 
 SWIG            = swig
-INC_PYTHON      = -I$(shell echo /usr/include/python*.*)
+#INC_PYTHON      = -I$(shell echo /usr/include/python*.*)
+INC_PYTHON      = -I$(shell python -c 'import distutils.sysconfig; print distutils.sysconfig.get_python_inc();')
+
 WPYNAME   	= _warc
 WPYSONAME	=,$(WPYNAME).$(LIBSUFFIX).$(MAJOR)
 WPYSHAREDNAME   = $(WPYNAME).$(LIBSUFFIX)
