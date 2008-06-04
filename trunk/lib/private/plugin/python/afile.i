@@ -98,9 +98,9 @@ PyObject* pyAFile_register(void  *a, void * b, PyObject* pyfunc, PyObject* arg) 
                } warc_bool_t;
 
     extern void *          AFile_nextRecord     (void *);
-    extern unsigned int      AFile_getContentSize (const void * const);
+/*    extern unsigned int      AFile_getContentSize (const void * const); */
     extern warc_bool_t     AFile_hasMoreRecords (const void * const);
-    extern warc_bool_t     AFile_seek           (void *, const unsigned int);
+/*    extern warc_bool_t     AFile_seek           (void *, const unsigned int); */
 
 %init %{
     PyEval_InitThreads();
