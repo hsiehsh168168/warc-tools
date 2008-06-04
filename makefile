@@ -209,7 +209,6 @@ ifeq ($(UNAME_S),FreeBSD)
 	EV_SRC		+= $(EVENT)/kqueue.c $(EVENT)/poll.c
 	EVENT_CONFIG = $(EV_OS)/config.h $(EV_OS)/event-config.h
 	EV_LIB		 = 
-	INC_PYTHON     = -I$(shell echo /usr/local/include/python*.*)
 endif
 ifeq ($(UNAME_S),OpenBSD)
 	MAKE         = gmake
@@ -220,7 +219,8 @@ ifeq ($(UNAME_S),OpenBSD)
 	EVENT_CONFIG = $(EV_OS)/config.h $(EV_OS)/event-config.h
 	EV_LIB		 = 
 	GCC_EXTRA    = 
-	INC_PYTHON     = -I$(shell echo /usr/local/include/python*.*)
+	S_CFLAGS     = -fpic
+	PYSHARED_OS	 = pyshared_openbsd
 endif
 ifeq ($(UNAME_S),NetBSD)
 	MAKE         = gmake
@@ -229,7 +229,8 @@ ifeq ($(UNAME_S),NetBSD)
 	EV_SRC		+= $(EVENT)/kqueue.c $(EVENT)/poll.c
 	EVENT_CONFIG = $(EVENT)/config.h $(EVENT)/event-config.h
 	EV_LIB		 = 
-	INC_PYTHON     = -I$(shell echo /usr/local/include/python*.*)
+	S_CFLAGS     = -fpic
+	PYSHARED_OS	 = pyshared_netbsd
 endif
 ifeq ($(UNAME_S),Darwin)
 	CFLAGS 		+= -pedantic
@@ -738,6 +739,12 @@ pyshared_unix: python_clean pyshared
 			   $(pylib) $(wpylib)
 		$(CC) -shared -Wl,-soname$(APYSONAME) -o $(APPYTHON)/$(APYSHAREDNAME) \
 			   $(pylib) $(apylib)
+
+pyshared_openbsd: python_clean pyshared
+		$(LD) -Bshareable $(pylib) $(wpylib) -o $(APPYTHON)/$(WPYSHAREDNAME)
+		$(LD) -Bshareable $(pylib) $(apylib) -o $(APPYTHON)/$(APYSHAREDNAME)
+
+pyshared_netbsd: pyshared_openbsd
 
 pyshared_solaris: python_clean pyshared
 		$(LD) $(SWIG_LDFLAGS) $(pylib) $(wpylib) -o $(APPYTHON)/$(WPYSHAREDNAME)

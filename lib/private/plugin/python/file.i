@@ -111,9 +111,9 @@ PyObject* pyWFile_register(void  *a, void * b, PyObject* pyfunc, PyObject* arg) 
   extern warc_bool_t     WFile_hasMoreRecords (const void * const);
   extern void *          WFile_nextRecord     (void *);
 
-  extern warc_bool_t     WFile_setMaxSize     (void *, const unsigned int);
+/*  extern warc_bool_t     WFile_setMaxSize     (void *, const unsigned int); */
   extern warc_bool_t     WFile_storeRecord    (void *, const void *);
-  extern warc_bool_t     WFile_seek           (void *, const unsigned int);
+/*  extern warc_bool_t     WFile_seek           (void *, const unsigned int); */
   extern wfile_comp_t WFile_getCompressionMode (const void * const );
   
   
