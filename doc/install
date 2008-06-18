@@ -175,12 +175,19 @@ For an RPM package type (as root):
 
  # make rpm
 
-* To build the technical documentation, you need to install "Doxygen" from:
+* To build the technical documentation (class structure and the user guide), 
+  you have to install "Doxygen" from:
   http://www.stack.nl/~dimitri/doxygen
+
+  You also need to install "docbook" & "docbook-utils":
+  http://www.oasis-open.org/docbook/
+  http://sources.redhat.com/docbook-tools/
 
 Then, build it with:
 
  $ make doc
+
+ But this step is option and the doc was already built for you.
 
 * You need a "bash shell" to be able to use the following scripts:
 

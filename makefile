@@ -563,8 +563,9 @@ mod_lighttpd:mod_lighty_clean $(LIGHTTPD)/warc.cgi $(LIGHTTPD)/warc.fcgi
 test_all:	;	@$(BASH) $(TST)/test.sh $(u)
 test:   $(u) test_all tclean
 
-doc:        ;   doxygen ./doc/warcdoc
-
+doc:      ;
+		   doxygen ./doc/warcdoc
+		   cd ./doc/userguide && ./compile.sh
 .c.o:
 	  	${CC} ${CFLAGS} -o $@ -c $<
 
