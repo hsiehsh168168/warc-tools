@@ -63,7 +63,7 @@ void test1 (void)
   fprintf (stdout, "RecordId:     %s, length: %d\n", WHeader_getRecordId(h), 
                    WHeader_getRecordIdLen (h));*/
 
- CU_ASSERT_STRING_EQUAL("WARC/0.17",WHeader_getWarcId (h)  );
+ CU_ASSERT_STRING_EQUAL(WARC_VERSION,WHeader_getWarcId (h)  );
 CU_ASSERT(9==WHeader_getWarcIdLen (h)); 
   CU_ASSERT(1==WHeader_getRecordType(h)  ); 
  CU_ASSERT_STRING_EQUAL("12172007", WHeader_getCreationDate (h) ); 

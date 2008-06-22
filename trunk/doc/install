@@ -330,7 +330,7 @@ o Add the following Apache directives to the configuration file:
 
  # vi /usr/local/apache2/conf/httpd.conf
 
-<Location /WARC/0.17/>
+<Location /WARC/0.18/>
 	warc_dir   "/tmp/"
 	SetHandler warc
 	Order Deny,Allow
@@ -472,14 +472,14 @@ o Start/Stop Lighttpd with:
   To retrieve information from a remote WARC file, we use the following 
   REST queries:
 
-  (1) http://host:port/WARC/0.17/req_nat/offset/fname
+  (1) http://host:port/WARC/0.18/req_nat/offset/fname
 
    where:
 
    -  host and port: are the remote server host name (or IP address) 
       and port number
 
-   -  WARC and 0.17: are constants which reference the WARC specification
+   -  WARC and 0.18: are constants which reference the WARC specification
 
    -  req_nat: is a parameter with 3 possible values:
        -> file: this tells the WARC server to return a WARC file starting 
@@ -494,7 +494,7 @@ o Start/Stop Lighttpd with:
 
    -  fname: a WARC pathname file name on the server.
 
-  (2) http://host:port/WARC/0.17/filter/offset/fileld_to_filter/value_filter/fname
+  (2) http://host:port/WARC/0.18/filter/offset/fileld_to_filter/value_filter/fname
 
    where:
 
@@ -505,7 +505,7 @@ o Start/Stop Lighttpd with:
  
   - filter_string: a string to filter on
 
-  (3) http://host:port/WARC/0.17/list/offset/outpout_format/fname
+  (3) http://host:port/WARC/0.18/list/offset/outpout_format/fname
 
   where :
 

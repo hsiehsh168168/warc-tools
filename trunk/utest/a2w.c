@@ -38,6 +38,7 @@
 #include <menu.h>
 #include <afile.h>
 #include <arecord.h>
+#include <wversion.h>
 
 
 #define WARC_MAX_SIZE 629145600
@@ -59,7 +60,7 @@ void test1 (void)
                      WARC_MAX_SIZE, WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED, ".");
 
   CU_ASSERT_PTR_NOT_EQUAL(a,NIL);
-   CU_ASSERT_PTR_NOT_EQUAL(w,NIL);
+  CU_ASSERT_PTR_NOT_EQUAL(w,NIL);
   assert(a);
  assert(w);
   while (AFile_hasMoreRecords (a) )
@@ -131,12 +132,14 @@ void test1 (void)
 
 void test2 (void)
 {
- void * w =  NIL; /* warc file object */
+  void * w =  NIL; /* warc file object */
   void * r = NIL;  /* to recover records */
- warc_u32_t  i      = 1;
+  warc_u32_t  i      = 1;
   w = bless (WFile, "file.warc", 660, WARC_FILE_READER, WARC_FILE_UNCOMPRESSED, ".");
-   CU_ASSERT_PTR_NOT_EQUAL(w,NIL);
- assert(w);
+  
+  CU_ASSERT_PTR_NOT_EQUAL(w,NIL);
+  assert(w);
+
   while (WFile_hasMoreRecords (w) )
     {
       unless ( (r = WFile_nextRecord (w) ) )
@@ -154,9 +157,10 @@ void test2 (void)
       fprintf (stdout, "ContentType: %-20s\n",    WRecord_getContentType (r) );
       fprintf (stdout, "Ip Address: %-20s\n",     WRecord_getIpAddress (r));
       fprintf (stdout, "RecordId: %-20s\n",       WRecord_getRecordId    (r) );*/
+
 	if(i==1)
 	{
-	CU_ASSERT_STRING_EQUAL(WRecord_getWarcId      (r), "WARC/0.17"); 
+	CU_ASSERT_STRING_EQUAL(WRecord_getWarcId      (r), WARC_VERSION); 
 	CU_ASSERT( WRecord_getContentLength  (r) == 22567);
 	CU_ASSERT(WRecord_getRecordType  (r)==8); 
 	CU_ASSERT_STRING_EQUAL(WRecord_getTargetUri  (r) , "filedesc://BnF-elec2007-20070524113301-00040-heritrix1.arc"); 
@@ -167,7 +171,7 @@ void test2 (void)
 	}
 	if(i==2)
 	{
-	CU_ASSERT_STRING_EQUAL(WRecord_getWarcId      (r), "WARC/0.17"); 
+	CU_ASSERT_STRING_EQUAL(WRecord_getWarcId      (r), WARC_VERSION); 
 	CU_ASSERT( WRecord_getContentLength  (r) == 22567);
 	CU_ASSERT(WRecord_getRecordType  (r)==8); 
 	CU_ASSERT_STRING_EQUAL(WRecord_getTargetUri  (r) , "filedesc://BnF-elec2007-20070524113301-00040-heritrix1.arc"); 
@@ -178,7 +182,7 @@ void test2 (void)
 	}
 	if(i==3)
 	{
-	CU_ASSERT_STRING_EQUAL(WRecord_getWarcId      (r), "WARC/0.17"); 
+	CU_ASSERT_STRING_EQUAL(WRecord_getWarcId      (r), WARC_VERSION); 
 	CU_ASSERT( WRecord_getContentLength  (r) == 22567);
 	CU_ASSERT(WRecord_getRecordType  (r)==8); 
 	CU_ASSERT_STRING_EQUAL(WRecord_getTargetUri  (r) , "filedesc://BnF-elec2007-20070524113301-00040-heritrix1.arc"); 
@@ -199,10 +203,11 @@ void test3 (void)
   void  * a = bless (AFile, "./app/wdata/arc2warc/mrec.arc", ARC_FILE_UNCOMPRESSED, ".");
   void  * w = bless (WFile, "mrec.warc",
                      WARC_MAX_SIZE, WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED, ".");
+ 
   assert(a);
- assert(w);
+  assert(w);
   CU_ASSERT_PTR_NOT_EQUAL(a,NIL);
-   CU_ASSERT_PTR_NOT_EQUAL(w,NIL);
+  CU_ASSERT_PTR_NOT_EQUAL(w,NIL);
 
   while (AFile_hasMoreRecords (a) )
     {
@@ -289,7 +294,7 @@ void test4 (void)
 
       if(i==1)
 	{
-	CU_ASSERT_STRING_EQUAL(WRecord_getWarcId      (r), "WARC/0.17"); 
+	CU_ASSERT_STRING_EQUAL(WRecord_getWarcId      (r), WARC_VERSION); 
 	CU_ASSERT( WRecord_getContentLength  (r) == 22567);
 	CU_ASSERT(WRecord_getRecordType  (r)==8); 
 	CU_ASSERT_STRING_EQUAL(WRecord_getTargetUri  (r) , "filedesc://BnF-elec2007-20070524113301-00040-heritrix1.arc"); 
@@ -300,7 +305,7 @@ void test4 (void)
 	}
 	if(i==2)
 	{
-	CU_ASSERT_STRING_EQUAL(WRecord_getWarcId      (r), "WARC/0.17"); 
+	CU_ASSERT_STRING_EQUAL(WRecord_getWarcId      (r), WARC_VERSION); 
 	CU_ASSERT( WRecord_getContentLength  (r) == 22567);
 	CU_ASSERT(WRecord_getRecordType  (r)==8); 
 	CU_ASSERT_STRING_EQUAL(WRecord_getTargetUri  (r) , "filedesc://BnF-elec2007-20070524113301-00040-heritrix1.arc"); 
@@ -311,7 +316,7 @@ void test4 (void)
 	}
 	if(i==3)
 	{
-	CU_ASSERT_STRING_EQUAL(WRecord_getWarcId      (r), "WARC/0.17"); 
+	CU_ASSERT_STRING_EQUAL(WRecord_getWarcId      (r), WARC_VERSION); 
 	CU_ASSERT( WRecord_getContentLength  (r) == 22567);
 	CU_ASSERT(WRecord_getRecordType  (r)==8); 
 	CU_ASSERT_STRING_EQUAL(WRecord_getTargetUri  (r) , "filedesc://BnF-elec2007-20070524113301-00040-heritrix1.arc"); 
@@ -322,7 +327,7 @@ void test4 (void)
 	}
       if(i==4)
 	{
-	CU_ASSERT_STRING_EQUAL(WRecord_getWarcId      (r), "WARC/0.17"); 
+	CU_ASSERT_STRING_EQUAL(WRecord_getWarcId      (r), WARC_VERSION); 
 	CU_ASSERT( WRecord_getContentLength  (r) == 22567);
 	CU_ASSERT(WRecord_getRecordType  (r)==8); 
 	CU_ASSERT_STRING_EQUAL(WRecord_getTargetUri  (r) , "filedesc://BnF-elec2007-20070524113301-00040-heritrix1.arc"); 
@@ -333,7 +338,7 @@ void test4 (void)
 	}
 	if(i==5)
 	{
-	CU_ASSERT_STRING_EQUAL(WRecord_getWarcId      (r), "WARC/0.17"); 
+	CU_ASSERT_STRING_EQUAL(WRecord_getWarcId      (r), WARC_VERSION); 
 	CU_ASSERT( WRecord_getContentLength  (r) == 22567);
 	CU_ASSERT(WRecord_getRecordType  (r)==8); 
 	CU_ASSERT_STRING_EQUAL(WRecord_getTargetUri  (r) , "filedesc://BnF-elec2007-20070524113301-00040-heritrix1.arc"); 
@@ -344,7 +349,7 @@ void test4 (void)
 	}
 	if(i==6)
 	{
-	CU_ASSERT_STRING_EQUAL(WRecord_getWarcId      (r), "WARC/0.17"); 
+	CU_ASSERT_STRING_EQUAL(WRecord_getWarcId      (r), WARC_VERSION); 
 	CU_ASSERT( WRecord_getContentLength  (r) == 22567);
 	CU_ASSERT(WRecord_getRecordType  (r)==8); 
 	CU_ASSERT_STRING_EQUAL(WRecord_getTargetUri  (r) , "filedesc://BnF-elec2007-20070524113301-00040-heritrix1.arc"); 
@@ -473,7 +478,7 @@ CU_ASSERT_PTR_NOT_EQUAL(w,NIL);
       fprintf (stdout, "Ip Address: %-20s\n",    WRecord_getIpAddress (r));*/
 	if(i==1)
 	{
-	CU_ASSERT_STRING_EQUAL(WRecord_getWarcId      (r), "WARC/0.17"); 
+	CU_ASSERT_STRING_EQUAL(WRecord_getWarcId      (r), WARC_VERSION); 
 	CU_ASSERT( WRecord_getContentLength  (r) == 1364);
 	CU_ASSERT(WRecord_getRecordType  (r)==8); 
 	CU_ASSERT_STRING_EQUAL(WRecord_getTargetUri  (r) , "filedesc://BnF-elec2007-20061119183301-00236-atlas1.arc"); 
@@ -484,7 +489,7 @@ CU_ASSERT_PTR_NOT_EQUAL(w,NIL);
 	}
 	if(i==2)
 	{
-	CU_ASSERT_STRING_EQUAL(WRecord_getWarcId      (r), "WARC/0.17"); 
+	CU_ASSERT_STRING_EQUAL(WRecord_getWarcId      (r), WARC_VERSION); 
 	CU_ASSERT( WRecord_getContentLength  (r) == 1364);
 	CU_ASSERT(WRecord_getRecordType  (r)==8); 
 	CU_ASSERT_STRING_EQUAL(WRecord_getTargetUri  (r) , "iledesc://BnF-elec2007-20061119183301-00236-atlas1.arc"); 
@@ -495,7 +500,7 @@ CU_ASSERT_PTR_NOT_EQUAL(w,NIL);
 	}
 	if(i==3)
 	{
-	CU_ASSERT_STRING_EQUAL(WRecord_getWarcId      (r), "WARC/0.17"); 
+	CU_ASSERT_STRING_EQUAL(WRecord_getWarcId      (r), WARC_VERSION); 
 	CU_ASSERT( WRecord_getContentLength  (r) == 1364);
 	CU_ASSERT(WRecord_getRecordType  (r)==8); 
 	CU_ASSERT_STRING_EQUAL(WRecord_getTargetUri  (r) , "iledesc://BnF-elec2007-20061119183301-00236-atlas1.arc"); 
@@ -506,7 +511,7 @@ CU_ASSERT_PTR_NOT_EQUAL(w,NIL);
 	}
 	if(i==4)
 	{
-	CU_ASSERT_STRING_EQUAL(WRecord_getWarcId      (r), "WARC/0.17"); 
+	CU_ASSERT_STRING_EQUAL(WRecord_getWarcId      (r), WARC_VERSION); 
 	CU_ASSERT( WRecord_getContentLength  (r) == 1364);
 	CU_ASSERT(WRecord_getRecordType  (r)==8); 
 	CU_ASSERT_STRING_EQUAL(WRecord_getTargetUri  (r) , "filedesc://BnF-elec2007-20061119183301-00236-atlas1.arc"); 
@@ -517,7 +522,7 @@ CU_ASSERT_PTR_NOT_EQUAL(w,NIL);
 	}
 	if(i==5)
 	{
-	CU_ASSERT_STRING_EQUAL(WRecord_getWarcId      (r), "WARC/0.17"); 
+	CU_ASSERT_STRING_EQUAL(WRecord_getWarcId      (r), WARC_VERSION); 
 	CU_ASSERT( WRecord_getContentLength  (r) == 1364);
 	CU_ASSERT(WRecord_getRecordType  (r)==8); 
 	CU_ASSERT_STRING_EQUAL(WRecord_getTargetUri  (r) , "iledesc://BnF-elec2007-20061119183301-00236-atlas1.arc"); 
@@ -528,7 +533,7 @@ CU_ASSERT_PTR_NOT_EQUAL(w,NIL);
 	}
 	if(i==6)
 	{
-	CU_ASSERT_STRING_EQUAL(WRecord_getWarcId      (r), "WARC/0.17"); 
+	CU_ASSERT_STRING_EQUAL(WRecord_getWarcId      (r), WARC_VERSION); 
 	CU_ASSERT( WRecord_getContentLength  (r) == 1364);
 	CU_ASSERT(WRecord_getRecordType  (r)==8); 
 	CU_ASSERT_STRING_EQUAL(WRecord_getTargetUri  (r) , "iledesc://BnF-elec2007-20061119183301-00236-atlas1.arc"); 
@@ -539,7 +544,7 @@ CU_ASSERT_PTR_NOT_EQUAL(w,NIL);
 	}
 	if(i==7)
 	{
-	CU_ASSERT_STRING_EQUAL(WRecord_getWarcId      (r), "WARC/0.17"); 
+	CU_ASSERT_STRING_EQUAL(WRecord_getWarcId      (r), WARC_VERSION); 
 	CU_ASSERT( WRecord_getContentLength  (r) == 1364);
 	CU_ASSERT(WRecord_getRecordType  (r)==8); 
 	CU_ASSERT_STRING_EQUAL(WRecord_getTargetUri  (r) , "filedesc://BnF-elec2007-20061119183301-00236-atlas1.arc"); 
@@ -550,7 +555,7 @@ CU_ASSERT_PTR_NOT_EQUAL(w,NIL);
 	}
 	if(i==8)
 	{
-	CU_ASSERT_STRING_EQUAL(WRecord_getWarcId      (r), "WARC/0.17"); 
+	CU_ASSERT_STRING_EQUAL(WRecord_getWarcId      (r), WARC_VERSION); 
 	CU_ASSERT( WRecord_getContentLength  (r) == 1364);
 	CU_ASSERT(WRecord_getRecordType  (r)==8); 
 	CU_ASSERT_STRING_EQUAL(WRecord_getTargetUri  (r) , "iledesc://BnF-elec2007-20061119183301-00236-atlas1.arc"); 
@@ -561,7 +566,7 @@ CU_ASSERT_PTR_NOT_EQUAL(w,NIL);
 	}
 	if(i==9)
 	{
-	CU_ASSERT_STRING_EQUAL(WRecord_getWarcId      (r), "WARC/0.17"); 
+	CU_ASSERT_STRING_EQUAL(WRecord_getWarcId      (r), WARC_VERSION); 
 	CU_ASSERT( WRecord_getContentLength  (r) == 1364);
 	CU_ASSERT(WRecord_getRecordType  (r)==8); 
 	CU_ASSERT_STRING_EQUAL(WRecord_getTargetUri  (r) , "iledesc://BnF-elec2007-20061119183301-00236-atlas1.arc"); 
@@ -964,7 +969,7 @@ CU_ASSERT_PTR_NOT_EQUAL(w,NIL);
       fprintf (stdout, "RecordId: %-20s\n",       WRecord_getRecordId    (r) );*/
 	if(i==1)
 	{
-	CU_ASSERT_STRING_EQUAL(WRecord_getWarcId      (r), "WARC/0.17"); 
+	CU_ASSERT_STRING_EQUAL(WRecord_getWarcId      (r), WARC_VERSION); 
 	CU_ASSERT( WRecord_getContentLength  (r) == 22567);
 	CU_ASSERT(WRecord_getRecordType  (r)==8); 
 	CU_ASSERT_STRING_EQUAL(WRecord_getTargetUri  (r) , "filedesc://BnF-elec2007-20070524113301-00040-heritrix1.arc"); 
@@ -1091,7 +1096,7 @@ CU_ASSERT_PTR_NOT_EQUAL(w,NIL);
       fprintf (stdout, "RecordId: %-20s\n",       WRecord_getRecordId    (r) );*/
 if(i==1)
 	{
-	CU_ASSERT_STRING_EQUAL(WRecord_getWarcId      (r), "WARC/0.17"); 
+	CU_ASSERT_STRING_EQUAL(WRecord_getWarcId      (r), WARC_VERSION); 
 	CU_ASSERT( WRecord_getContentLength  (r) == 22567);
 	CU_ASSERT(WRecord_getRecordType  (r)==8); 
 	CU_ASSERT_STRING_EQUAL(WRecord_getTargetUri  (r) , "filedesc://BnF-elec2007-20070524113301-00040-heritrix1.arc"); 
@@ -1219,7 +1224,7 @@ CU_ASSERT_PTR_NOT_EQUAL(w,NIL);
       fprintf (stdout, "RecordId: %-20s\n",       WRecord_getRecordId    (r) );*/
 	if(i==1)
 	{
-	CU_ASSERT_STRING_EQUAL(WRecord_getWarcId      (r), "WARC/0.17"); 
+	CU_ASSERT_STRING_EQUAL(WRecord_getWarcId      (r), WARC_VERSION); 
 	CU_ASSERT( WRecord_getContentLength  (r) == 22567);
 	CU_ASSERT(WRecord_getRecordType  (r)==8); 
 	CU_ASSERT_STRING_EQUAL(WRecord_getTargetUri  (r) , "filedesc://BnF-elec2007-20070524113301-00040-heritrix1.arc"); 
@@ -1335,7 +1340,6 @@ int main (void)
                         }
 
    /* add the tests to the suite */
-
    if ((NULL == CU_add_test(pSuite, " 1: converting an uncompressed  Arc which contain a single record File to the Warc format", test1)) ||
        (NULL == CU_add_test(pSuite, " 2: reading an automatically created warc file from arc file", test2))||
        (NULL == CU_add_test(pSuite, " 3: converting a uncomprssed Arc File Which contains several records to the Warc format", test3))||
@@ -1414,10 +1418,11 @@ switch (menu())
                               }
         case 3:{
                 CU_set_output_filename("./utest/outputs/a2w");
-    		CU_set_output_filename("./utest/outputs/a2w" );
-  		CU_automated_run_tests();
-   		CU_list_tests_to_file();
-           	break;}
+                CU_set_output_filename("./utest/outputs/a2w" );
+                CU_automated_run_tests();
+                CU_list_tests_to_file();
+                break;
+               }
      
    }
    CU_cleanup_registry();
