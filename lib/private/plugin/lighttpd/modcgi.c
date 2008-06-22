@@ -1583,11 +1583,11 @@ int main()
 
     objver   = recoverUriField (r, & pos);
     version      = WString_getText (objver);
-    if ( w_strcmp (version, uS ("0.17")))
+    if ( w_strcmp (version, uS ("0.18")))
        {
           fprintf (stdout, "content-type: text/html\n\n");
           fprintf (stdout, "<html>\n<body>\n");
-          fprintf (stdout, "<FONT SIZE = 4 COLOR = blue> The second parameter of request must be a constant '0.17' actual version of warc format </FONT>\n<br>");
+          fprintf (stdout, "<FONT SIZE = 4 COLOR = blue> The second parameter of request must be a constant '0.18' actual version of warc format </FONT>\n<br>");
           fprintf (stdout, "</body>\n</html>\n");
           return 1;
        }

@@ -3,7 +3,7 @@
  "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd">
 
 <book lang="en">
-<title> warc-tools version 0.17  A library for data archiving </title>
+<title> warc-tools version 0.18  A library for data archiving </title>
 <chapter id= "introduction">
   <title> introduction </title>
   <para>
@@ -1043,7 +1043,7 @@
 	In the folowing, we give the description of the functions of the WRecord class that allow to recover the fields of a WARC Record. These function are very useful when we want to get the fileds of the header of an extracted WARC Record. For each predefinded WARC Record header field, ther is its corresponding getting function. There is also a mean to recover the Extra non predefined fields (the ANVL fields of the header), then, we may get all the stored information about the WARC Record.
 		<itemizedlist mark="dash">
 			<listitem>
-			<para><function>WRecord_getWarcId</function>: This function is used to get the WARC ID of the WARC Record. Remember that the format of a WARC ID is: WARC/version, where version is the actual version of the WARC Record, for example, the lastest version of the WARC is 0.17, then the WARC ID of any WARC Record is <constant>"WARC/0.17"</constant>.</para>
+			<para><function>WRecord_getWarcId</function>: This function is used to get the WARC ID of the WARC Record. Remember that the format of a WARC ID is: WARC/version, where version is the actual version of the WARC Record, for example, the lastest version of the WARC is 0.18, then the WARC ID of any WARC Record is <constant>"WARC/0.18"</constant>.</para>
 			</listitem>
 			<listitem>
 			<para><function>WRecord_getRecordType</function>: This function is used to get the WARC-Type field of the WARC Record. Lets remember that there is eight predefined types for a WARC Record, then, an enumertive type has been used to represent each of theses type. This function will return us the corresponding enumaration to the WARC Type of our WARC Record. The list of possible enumearations is given ordered below:

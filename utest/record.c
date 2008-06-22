@@ -77,7 +77,7 @@ CU_ASSERT_PTR_NOT_EQUAL(r,NIL);
      CU_FAIL( "CreationDate: %-20s\n", WRecord_getDate (r) );
      CU_FAIL( "ContentType: %-20s\n",  WRecord_getContentType (r) );
      CU_FAIL( "RecordId: %-20s\n",     WRecord_getRecordId    (r) );*/
-        CU_ASSERT_STRING_EQUAL("WARC/0.17",WRecord_getWarcId (r));
+        CU_ASSERT_STRING_EQUAL(WARC_VERSION,WRecord_getWarcId (r));
         CU_ASSERT(0== WRecord_getContentLength  (r)); 
         CU_ASSERT(1==WRecord_getRecordType  (r) ); 
         CU_ASSERT_STRING_EQUAL("http://www.w3c.org",WRecord_getTargetUri  (r) );
