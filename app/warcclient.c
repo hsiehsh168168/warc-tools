@@ -113,7 +113,7 @@ int main (int argc, const char ** argv)
           if (w_index (flags, c) [1] == ':')
             {
                off = (warc_u8_t *) WGetOpt_argument (p);
-               if (w_atou (off, w_strlen(ps), & offset))
+               if (w_atou (off, w_strlen(off), & offset))
                  {
                    fprintf (stderr, "invalid offset number: %s\n", off);
                    free_obj(p, 3);
