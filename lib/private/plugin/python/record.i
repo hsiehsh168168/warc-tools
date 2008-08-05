@@ -30,7 +30,7 @@
    #include <wrecord.h>
  %}
  
-/*
+
     typedef enum
     {
       WARC_UNKNOWN_RECORD = 0,
@@ -137,4 +137,3 @@
                                                 const char * ,
                                                 const unsigned int );
 
-*/
