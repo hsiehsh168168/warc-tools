@@ -30,3 +30,18 @@
  
  %}
   
+
+    extern const void * WAnvl;
+
+
+    extern const char *   WAnvl_getKey  (const void * const);
+    extern unsigned int     WAnvl_getKeyLen    (const void * const);
+    extern warc_bool_t    WAnvl_setKey       (void * const, const char *,
+          const unsigned int);
+    extern const char *   WAnvl_getValue     (const void * const);
+    extern unsigned int     WAnvl_getValueLen  (const void * const);
+    extern warc_bool_t    WAnvl_setValue     (void * const, const char *,
+          const unsigned int);
+    extern warc_bool_t    WAnvl_isValid      (const void * const);
+
+
