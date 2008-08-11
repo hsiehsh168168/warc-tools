@@ -36,12 +36,12 @@
 
     /* getters */
 
-/*    extern const char *  ARecord_getUrl          (const void * const);
+    extern const char *  ARecord_getUrl          (const void * const);
     extern const char *  ARecord_getCreationDate (const void * const);
     extern const char *  ARecord_getMimeType     (const void * const);
     extern const char *  ARecord_getIpAddress    (const void * const);
     extern warc_bool_t        ARecord_getContent      (const void* const );
-*/
+
     extern warc_bool_t        ARecord_transferContent (void *, void *, void *);
     extern warc_bool_t        ARecord_setCallback     (void *,
           warc_bool_t (*)
