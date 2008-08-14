@@ -55,8 +55,8 @@ HEADERS  = -I. -I$(PRIVATE) -I$(PUBLIC) -I$(GZIP) \
 		   -I$(EVENT_COMPACT) -I$(REGEX) -I$(PYTHON)
 
 MAJOR     = 0
-MINOR     = 17
-RELEASE   = 96
+MINOR     = 18
+RELEASE   = 97
 
 LIBSUFFIX = so
 LIBNAME   = libwarc
