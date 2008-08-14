@@ -401,7 +401,7 @@ u  += $(EV_UTEST_BIN)
 t  += $(u)
 
 a  = $(APP)/arc2warc         $(APP)/warcdump      $(APP)/warcfilter \
-	 $(APP)/warcvalidator	 
+	 $(APP)/warcvalidator	 $(APP)/wrecordbody 
 
 a  += $(EV_APP_BIN)
 
@@ -831,6 +831,13 @@ warcclient = $(PRIVATE)/wclass.o	$(PRIVATE)/wstring.o $(PRIVATE)/wlist.o \
 		   $(PRIVATE)/wclient.o     $(PRIVATE)/wgetopt.o $(TIGER)/tiger.o \
 		   $(APP)/warcclient.o	    $(evlib)
 
+wrecordbody = $(PRIVATE)/wclass.o   $(PRIVATE)/wstring.o  $(PRIVATE)/wlist.o \
+			  $(PRIVATE)/wanvl.o    $(PRIVATE)/wrecord.o  $(PRIVATE)/wheader.o \
+			  $(PRIVATE)/wfile.o	$(PRIVATE)/wgetopt.o  ${MKTEMP}.o \
+			  $(PRIVATE)/wfsmanvl.o	${CSAFE}.o			  $(gzlib) \
+			  $(PRIVATE)/wregexp.o	$(regex) \
+			  $(APP)/wrecordbody.o
+
 
 ####################
 # applications 
@@ -844,6 +851,7 @@ $(APP)/warcserver: 	  $(warcserver);  	 $(CC) $(RFLAGS) -o $@ $(warcserver) \
 				      $(EV_LIB)
 $(APP)/warcclient: 	  $(warcclient);  	 $(CC) $(CFLAGS) -o $@ $(warcclient) \
 					  $(EV_LIB)
+$(APP)/wrecordbody:   $(wrecordbody);    $(CC) $(CFLAGS) -o $@ $(wrecordbody)
 
 
 ##############
