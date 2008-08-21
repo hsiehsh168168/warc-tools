@@ -47,10 +47,196 @@
 #include <wlist.h>
 #include <wanvl.h>
 #include <wcsafe.h>
+#include <wfile.h>
 
 #define _GNU_SOURCE
 
 #define makeU(s) ((warc_u8_t *) (s))
+#define uS(s)  ((warc_u8_t *) (s))
+#define makeS(s) uS(s), w_strlen (uS(s))
+
+#define CR   ('\r')
+#define LF   ('\n')
+#define M(c) (((c) == CR) || ((c) == LF))
+#define X(c) (! (M(c)) )
+
+
+
+enum states { S1 = 1, S2, S3, S4, S5, S11, S12};
+enum actions {SEARCHING_HTTP = 1, IGNORE_ALL, WRITEING};
+
+struct user_struct {
+   warc_u32_t * fsm;
+   warc_u32_t * action;
+   void * line; /* a WString object */
+   warc_bool_t was_cr;
+/*   warc_u32_t next_offset; */
+   FILE * file;
+   void * http_code;
+};
+
+warc_bool_t b_callback (void * env, const char* buff, const warc_u32_t size)
+{
+  struct user_struct * user_data = env;
+
+  warc_u32_t * fsm = user_data -> fsm;
+  warc_u32_t * action = user_data -> action;
+  FILE * file  = user_data -> file;
+  void * http_code = user_data -> http_code;
+
+  void * line = user_data -> line;
+  
+  warc_u32_t i = 0;
+
+check_action:
+switch (*action)
+   {
+    case SEARCHING_HTTP: /* Here, we look for the HTTP response code */
+
+         while (i < size)
+             {
+              if (buff [i] == CR)
+                 {
+                  i++;
+                  user_data -> was_cr = WARC_TRUE;
+
+                  if (i == size)
+                     break;
+                 }
+               /* if we detecte a CRLF */
+              if (user_data -> was_cr && buff[i] == LF)
+                 {
+                 user_data -> was_cr = WARC_FALSE;
+                 unless (w_strcmp (WString_getText (line), uS ("")))
+                      {
+                       WString_setText (http_code, makeS ("997"));
+                       i++;
+                       *action = WRITEING; /*what comes next is considered as the content and it will be printed*/
+                       goto check_action;
+                      }
+
+                  unless (strncmp ("HTTP ", (const char *) WString_getText (line), 5)) /* we chack if it is the HTTP code line */
+                     {
+                     /* if it is, we print the code */
+                      *action = IGNORE_ALL;
+                      i++;
+                      WString_setText (http_code, WString_getText (line) + 9, 3);
+                      *fsm = S11;
+                      goto check_action;
+                     }
+                 /* else, we get an other line */
+                 WString_setText (line, makeS (""));
+                 }
+             else
+                 {
+                  if (user_data -> was_cr)
+                      {
+                       user_data -> was_cr = WARC_FALSE;
+                       WString_append (line, uS("\r"), 1);
+                       i--;
+                      }
+                  else
+                     WString_append (line, uS(buff + i), 1);
+                 }
+              i++;
+             }
+
+         break;
+
+    case IGNORE_ALL: /* here, we ignore th rest of the HTTP response until finding 2 CRLF*/
+
+         while (*fsm != S5 && i < size)
+             {
+              if (*fsm == S11) /* State 11, we come from a detection of the HTTP code line */
+                 {
+                  if (buff [i] == CR) /* if the character is a CR, xwe look for the LF */
+                    *fsm = S12;
+                  else
+                    *fsm = S1;
+                  }
+              else if (*fsm == S12) /* State 12, from state 11 */
+                 {
+                  if (buff [i] == LF) /* If we find an LF, we end the ognoring phase */
+                    *fsm = S5;
+                  else
+                    *fsm = S1;
+                 }
+              else if (*fsm == S1) /* state 1, we look for the first CR */
+                 {
+                  if (buff [i] == CR) /* we go looking for the first LF */
+                    *fsm = S2;
+                  else
+                    *fsm = S1;
+                 }
+              else if (*fsm == S2) /* state 2, we look for the first LF */
+                 {
+                  if (buff [i] == LF) /* we go looking for the second CR */
+                    *fsm = S3;
+                  else
+                    *fsm = S1;
+                 }
+              else if (*fsm == S3) /* state 3, we lok for the second CR */
+                 {
+                  if (buff [i] == CR) /* we go looking for the second LF */
+                    *fsm = S4;
+                  else
+                    *fsm = S1;
+                 }
+              else if (*fsm == S4) /* state 4, we lok for the second LF */
+                 {
+                  if (buff [i] == LF) /* double CRLF found, we end the ignoring phase */
+                    *fsm = S5;
+                  else
+                    *fsm = S1;
+                 }
+
+             i++;
+             }
+
+         if (*fsm == S5)
+            {
+             *action = WRITEING;
+             if (i < size) /* writing what reamins in the buffer on the stdout */
+                if (fwrite( (buff + i), 1, size - i, file) != size - i || ferror(stdout))
+                   {
+                    destroy (line);
+                    user_data -> line = NIL;
+                    return (WARC_FALSE);
+                   }
+            }
+         break;
+
+   case WRITEING: /* writing what reamins in the data bloc on the stdout */
+
+        if (fwrite( (buff + i), 1, size - i, file) != size - i || ferror(stdout))
+           {
+            destroy (line);
+            user_data -> line = NIL;
+            return (WARC_FALSE);
+           }
+
+        break;
+
+   default: break;
+   }
+
+  return (WARC_TRUE);
+}
+
+
+/* void printOrdinaryDate (warc_u8_t * field)
+{
+warc_u32_t i = 0;
+warc_u32_t size = w_strlen (field);
+
+while (i < size)
+  {
+   if (field[i] != ':' && field[i] != '-' && field[i] != 'Z' && field[i] != 'T' && field[i] != 't' && field[i] != 'z')
+     fprintf (stderr, "%c", field [i]);
+   i++;
+  }
+}
+*/
 
 
 /**
@@ -2304,6 +2490,119 @@ WPUBLIC  warc_u32_t WRecord_getAnvlFieldsNumber (const void * const _self)
 }
 
 
+
+/**
+ * @param  _self: A WRecord object instance
+ * @param  withhttp: a boolean indicating is the Http response header is encapsulated before the stored data
+ * @param w: the WFile object representing the warc file where the data will be read
+ * @param[out]: http_code: a string that will contain the http response code
+ *
+ * @return a pointer to the temporary file containing the payload of the data bloc if success, NIL otherwise
+ *
+ * WARC Record data bloc extraction function
+ */
+
+WPUBLIC FILE * WRecord_getBloc (void *  _self, void * w, warc_bool_t withhttp, warc_u8_t * http_code)
+{
+    struct WRecord *  self = _self;
+
+  void           * line = NIL;
+  void           * tfile = NIL;
+  void           * whttp_code;
+
+  warc_u32_t     fsm = 0;
+  warc_u32_t     act = 0;
+  warc_u8_t      * field = NIL;
+
+  struct user_struct user_data;
+
+  FILE           * file = NIL;
+
+  /* Preconditions */
+  CASSERT (self);
+
+
+  field = uS(WRecord_getTargetUri (self));
+  fprintf (stderr, "after\n");
+  unless (field)
+      field = uS("unknown");
+  else unless (w_strcmp (field, uS("")))
+      field = uS("unknown");
+
+  whttp_code = bless (WString, makeS(""));
+
+  unless (whttp_code)
+      return (NIL);
+
+  unless (strncmp ("filedesc://", (const char *) field, 11))
+     WString_setText (whttp_code, makeS("998"));
+  else unless (strncmp ("dns:", (const char *) field, 4))
+     WString_setText (whttp_code, makeS("999"));
+
+
+  line = bless (WString, makeS (""));
+  fsm = S1;
+
+  if (w_strcmp(WString_getText(whttp_code), uS("")))
+       act = WRITEING;
+  else
+     {
+      act = SEARCHING_HTTP;
+      user_data . http_code = whttp_code;
+     }
+
+  unless (withhttp)
+     act = WRITEING;
+
+  tfile = bless (WTempFile, makeS("."));
+
+  unless (tfile)
+     {
+      destroy (whttp_code);
+      destroy (line);
+      return (NIL);
+     }
+
+  file = WTempFile_handle (tfile);
+
+  unless (file)
+    {
+      destroy (tfile);
+      destroy (whttp_code);
+      destroy (line);
+      return (NIL);
+    }
+ 
+
+  user_data . fsm = & fsm;
+  user_data . action = & act;
+  user_data . line = line;
+  user_data . was_cr = WARC_FALSE;
+  user_data . file = file;
+
+
+  WFile_register (w, self, b_callback, (void *) & user_data);
+
+
+  WRecord_getContent (self);
+
+  unless (line)
+     {
+      fprintf (stderr, "A problem appeared while reading data \n");
+      destroy (whttp_code);
+      destroy (tfile);
+      return (NIL);
+     }
+
+  w_strncpy (http_code, WString_getText (whttp_code), WString_getLength (whttp_code));
+
+destroy (whttp_code);
+destroy (line);
+return (tfile);
+}
+
+
+
 /**
  * WRecord_constructor - create a new WRecord object instance
  *
@@ -2359,7 +2658,7 @@ WPRIVATE void * WRecord_destructor (void * _self)
     destroy (HDL), HDL = NIL;
 
   if (DATAF) 
-     destroy (DATAF), DATAF = NIL; 
+     destroy (DATAF), DATAF = NIL;
 
   if (ACONT)
     destroy (ACONT), ACONT = NIL, EDATAF = NIL;

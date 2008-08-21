@@ -587,9 +587,9 @@ anvl	= $(PRIVATE)/wclass.o    $(PRIVATE)/wstring.o   $(PRIVATE)/wanvl.o \
 
 record	= $(PRIVATE)/wclass.o    $(PRIVATE)/wstring.o   $(PRIVATE)/wlist.o \
 		  $(PRIVATE)/wanvl.o     $(PRIVATE)/wrecord.o   $(PRIVATE)/wuuid.o \
-          $(PRIVATE)/wfsmanvl.o  ${CSAFE}.o    $(PRIVATE)/wheader.o \
+          $(PRIVATE)/wfsmanvl.o  ${CSAFE}.o    			$(PRIVATE)/wheader.o \
           $(TIGER)/tiger.o       ${MKTEMP}.o            $(TST)/record.o \
-	      $(cunit)
+	      $(cunit)				 $(PRIVATE)/wfile.o		$(gzlib)
 
 header  = $(PRIVATE)/wheader.o   $(PRIVATE)/wclass.o    $(PRIVATE)/wstring.o \
           ${CSAFE}.o             $(PRIVATE)/wfsmanvl.o  $(PRIVATE)/wlist.o  \
@@ -614,7 +614,8 @@ arcrecord = $(PRIVATE)/arecord.o $(PRIVATE)/wstring.o   $(PRIVATE)/wclass.o \
           ${CSAFE}.o             $(PRIVATE)/wrecord.o   $(PRIVATE)/afile.o \
           $(PRIVATE)/wanvl.o     $(PRIVATE)/wlist.o     $(PRIVATE)/wfsmanvl.o  \
           $(PRIVATE)/wheader.o   $(PRIVATE)/afsmhdl.o   ${MKTEMP}.o \
-          $(TST)/arcrecord.o	 ${gzlib}               $(cunit)
+          $(TST)/arcrecord.o	 ${gzlib}               $(cunit) \
+		  $(PRIVATE)/wfile.o
 
 a2w    = $(PRIVATE)/wclass.o     $(PRIVATE)/wstring.o   $(PRIVATE)/wlist.o \
 	 	 $(PRIVATE)/wanvl.o      $(PRIVATE)/wrecord.o   $(PRIVATE)/wfsmanvl.o  \
@@ -627,7 +628,8 @@ arcfile = $(PRIVATE)/wclass.o    $(PRIVATE)/wstring.o   $(PRIVATE)/wlist.o \
 	  	 ${CSAFE}.o              $(PRIVATE)/wanvl.o     $(PRIVATE)/afile.o \
          $(PRIVATE)/wfsmanvl.o   $(PRIVATE)/wheader.o   $(PRIVATE)/wrecord.o \
          $(PRIVATE)/arecord.o    $(PRIVATE)/afsmhdl.o   ${MKTEMP}.o \
-		 $(TST)/arcfile.o        $(gzlib) 	            $(cunit)
+		 $(TST)/arcfile.o        $(gzlib) 	            $(cunit) \
+		 $(PRIVATE)/wfile.o
 
 uuid	= $(PRIVATE)/wclass.o    $(PRIVATE)/wuuid.o     ${CSAFE}.o \
 		 $(PRIVATE)/wstring.o    $(TIGER)/tiger.o       $(TST)/uuid.o\
