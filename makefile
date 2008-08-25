@@ -328,7 +328,7 @@ b	= $(PRIVATE)/wstring.c   $(PRIVATE)/wclass.c  $(PRIVATE)/wlist.c \
       $(PRIVATE)/afile.c     ${MKTEMP}.c          $(PRIVATE)/wendian.c \
       $(PRIVATE)/wuuid.c     $(PRIVATE)/wserver.c $(PRIVATE)/whash.c \
       $(PRIVATE)/wkv.c	     $(PRIVATE)/wgzip.c   $(PRIVATE)/wclient.c \
-      $(PRIVATE)/wregexp.c   
+      $(PRIVATE)/wregexp.c	 $(PRIVATE)/wbloc.c
 
 b	+= $(GZIP)/adler32.c     $(GZIP)/crc32.c      $(GZIP)/deflate.c \
 	  $(GZIP)/infback.c      $(GZIP)/inffast.c    $(GZIP)/inflate.c \
@@ -351,11 +351,12 @@ c	= $(b) \
       $(TST)/warcgzip.c      $(TST)/warcgunzip.c  $(TST)/arcfile.c \
       $(TST)/a2w.c           $(TST)/uuid.c        $(TST)/getopt.c \
       $(TST)/object.c        $(TST)/hash.c 	      $(EV_UTEST_SRC) \
-      $(TST)/header.c        $(TST)/regexp.c
+      $(TST)/header.c        $(TST)/regexp.c	  $(TST)/bloc.c
 
 
 c	+= $(APP)/arc2warc.c     $(APP)/warcdump.c    $(APP)/warcfilter.c \
-	  $(APP)/warcvalidator.c $(APP)/warcserver.c  $(APP)/warcclient.c
+	   $(APP)/warcvalidator.c $(APP)/warcserver.c  $(APP)/warcclient.c \
+	   $(APP)/wrecordbody.c
 
 h	= $(PUBLIC)/wclass.h     $(PUBLIC)/warc.h      $(PRIVATE)/wstring.h \
 	  $(PUBLIC)/wrtype.h     $(PUBLIC)/wfile.h     $(PRIVATE)/wlist.h \
@@ -365,7 +366,8 @@ h	= $(PUBLIC)/wclass.h     $(PUBLIC)/warc.h      $(PRIVATE)/wstring.h \
       $(PRIVATE)/afsmhdl.h   $(PRIVATE)/arecord.h  $(PRIVATE)/afile.h \
       ${MKTEMP}.h            $(PRIVATE)/arecord.h  $(PRIVATE)/wendian.h \
       $(PRIVATE)/whash.h     $(PRIVATE)/wserver.h  $(PRIVATE)/wclient.h \
-	  $(PUBLIC)/wgzip.h $(PUBLIC)/wheader.h $(PRIVATE)/wregexp.h
+	  $(PUBLIC)/wgzip.h 	 $(PUBLIC)/wheader.h   $(PRIVATE)/wregexp.h \
+	  $(PRIVATE)/wbloc.h
 
 h   += $(GZIP)/crc32.h       $(GZIP)/deflate.h    $(GZIP)/inffast.h \
 	  $(GZIP)/inffixed.h     $(GZIP)/inflate.h    $(GZIP)/inftrees.h \
@@ -394,7 +396,7 @@ u	= $(TST)/string       $(TST)/list            $(TST)/anvl \
       $(TST)/warcgunzip   $(TST)/file    	     $(TST)/arcrecord \
       $(TST)/arcfile      $(TST)/a2w 	         $(TST)/getopt \
       $(TST)/hash         $(TST)/object          $(TST)/header \
-      $(TST)/regexp
+      $(TST)/regexp		  $(TST)/bloc
 
 u  += $(EV_UTEST_BIN)
 
@@ -659,7 +661,11 @@ client =  $(PRIVATE)/wclass.o	 $(PRIVATE)/wstring.o  $(PRIVATE)/wlist.o \
 regexp =  $(PRIVATE)/wclass.o    $(PRIVATE)/wregexp.o   $(TST)/regexp.o \
 		  ${CSAFE}.o	         $(cunit)               $(regex)
 
-
+bloc   =  $(PRIVATE)/wclass.o    $(PRIVATE)/wbloc.o     $(TST)/bloc.o \
+		  $(PRIVATE)/wfile.o 	 $(PRIVATE)/wrecord.o	$(PRIVATE)/wstring.o \
+		  $(PRIVATE)/wanvl.o 	 $(OSDEP)/wmktmp.o 		$(PRIVATE)/wheader.o \
+		  $(PRIVATE)/wlist.o 	 $(PRIVATE)/wfsmanvl.o  $(gzlib) \
+		  ${CSAFE}.o	         $(cunit)
 
 ##################
 # unit tests deps
@@ -682,7 +688,8 @@ $(TST)/hash:	  $(hash);       $(CC) $(CFLAGS)   -o $@ $(hash)
 $(TST)/server:	  $(server);	 $(CC) ${RFLAGS}   -o $@ $(server) $(EV_LIB)
 $(TST)/client:	  $(client);	 $(CC) ${CFLAGS}   -o $@ $(client) $(EV_LIB)
 $(TST)/header:	  $(header);     $(CC) $(CFLAGS)   -o $@ $(header)
-$(TST)/regexp:	  $(regexp);     $(CC) $(RFLAGS)   -o $@ $(regexp) 
+$(TST)/regexp:	  $(regexp);     $(CC) $(RFLAGS)   -o $@ $(regexp)
+$(TST)/bloc:	  $(bloc);     	 $(CC) $(RFLAGS)   -o $@ $(bloc) 
 
 
 ######################
