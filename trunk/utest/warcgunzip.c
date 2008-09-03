@@ -330,7 +330,7 @@ CU_ASSERT_PTR_NOT_EQUAL(g,NIL);
   ret = WGzip_uncompress (g, in, 0, & usize, & csize,
                           callback1_warc, (void *) out);
   assert (! ret);
-CU_ASSERT_PTR_EQUAL(ret,NIL);
+CU_ASSERT_EQUAL(ret,0);
   /*fprintf (stdout,
            "uncompressed \"%s\" to \"%s\" [usize: %llu][csize: %llu]\n",
            f1, fout, (unsigned long long) usize, (unsigned long long) csize);*/
@@ -385,7 +385,7 @@ CU_ASSERT_PTR_NOT_EQUAL(g,NIL);
   ret = WGzip_uncompress (g, in, 0, & usize, & csize,
                           callback2_warc, (void *) & cenv);
   assert (! ret);
-CU_ASSERT_PTR_EQUAL(ret,NIL);
+CU_ASSERT_EQUAL(ret,0);
 
   /*fprintf (stdout,
            "uncompressed \"%s\" to \"%s\" [usize: %llu][csize: %llu]\n",
