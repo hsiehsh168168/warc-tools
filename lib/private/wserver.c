@@ -358,7 +358,8 @@ WPRIVATE warc_bool_t WServer_parseRequest (const warc_u8_t * uri,
     
   WString_concat (other_item, item);
     
-  if (w_strcmp (WString_getText (other_item), (warc_u8_t *) WARC_GET_VERSION))
+ /*  if (w_strcmp (WString_getText (other_item), (warc_u8_t *) WARC_GET_VERSION)) */
+  if( w_checkCompatibleVersions (other_item) )
     {
       destroy (other_item);
       destroy (item);
@@ -713,8 +714,8 @@ WPRIVATE warc_bool_t WSend_fullResponse (void * fname, void * tmp, warc_i32_t of
       evhttp_add_header (req -> output_headers, 
                    "Server", (const char *) WString_getText(server_name));
       
-      evhttp_add_header (req -> output_headers, 
-                   "Warc-Version", WARC_GET_VERSION);
+/*       evhttp_add_header (req -> output_headers,  */
+/*                    "Warc-Version", WARC_GET_VERSION); */
 
       evhttp_send_reply (req, HTTP_NOTFOUND, "File not found", buf);
 
@@ -730,8 +731,8 @@ WPRIVATE warc_bool_t WSend_fullResponse (void * fname, void * tmp, warc_i32_t of
        evhttp_add_header (req -> output_headers, 
                   "Server", (const char *) WString_getText(server_name));
       
-       evhttp_add_header (req -> output_headers, 
-                  "Warc-Version", WARC_GET_VERSION);
+ /*       evhttp_add_header (req -> output_headers,  */
+/*                   "Warc-Version", WARC_GET_VERSION); */
 
        evhttp_send_reply (req, HTTP_NOTFOUND, "Bad offset", buf);
        w_fclose (full_file);
@@ -755,8 +756,8 @@ WPRIVATE warc_bool_t WSend_fullResponse (void * fname, void * tmp, warc_i32_t of
       evhttp_add_header (req -> output_headers, 
                  "Server", (const char *) WString_getText(server_name));
             
-      evhttp_add_header (req -> output_headers, 
-                 "Warc-Version", WARC_GET_VERSION);
+ /*      evhttp_add_header (req -> output_headers,  */
+/*                  "Warc-Version", WARC_GET_VERSION); */
             
       evhttp_send_reply (req, HTTP_NOTFOUND, "Bad memory allocation", buf);
 
@@ -768,8 +769,8 @@ WPRIVATE warc_bool_t WSend_fullResponse (void * fname, void * tmp, warc_i32_t of
    evhttp_add_header (req -> output_headers, 
                    "Server", (const char *) WString_getText(server_name));
      
-   evhttp_add_header (req -> output_headers, 
-                   "Warc-Version", WARC_GET_VERSION);
+/*    evhttp_add_header (req -> output_headers,  */
+/*                    "Warc-Version", WARC_GET_VERSION); */
 
    /* starting the chunked transmition */
    w_numToString (size, char_size);
@@ -785,8 +786,8 @@ WPRIVATE warc_bool_t WSend_fullResponse (void * fname, void * tmp, warc_i32_t of
       evhttp_add_header (req -> output_headers, 
                        "Server", (const char *) WString_getText(server_name));
       
-      evhttp_add_header (req -> output_headers, 
-                       "Warc-Version", WARC_GET_VERSION);
+ /*      evhttp_add_header (req -> output_headers,  */
+/*                        "Warc-Version", WARC_GET_VERSION); */
 
       evhttp_send_reply (req, HTTP_NOTFOUND, "File not found", buf);
 
@@ -893,8 +894,8 @@ WPRIVATE warc_bool_t WSend_record (void * fname, void * tmp, warc_i32_t offset, 
       evhttp_add_header (req -> output_headers, 
                        "Server", (const char *) WString_getText(server_name));
       
-      evhttp_add_header (req -> output_headers, 
-                       "Warc-Version", WARC_GET_VERSION);
+/*       evhttp_add_header (req -> output_headers,  */
+/*                        "Warc-Version", WARC_GET_VERSION); */
 
       evhttp_send_reply (req, HTTP_NOTFOUND, "File not found", buf);
 
@@ -909,8 +910,8 @@ WPRIVATE warc_bool_t WSend_record (void * fname, void * tmp, warc_i32_t offset, 
        evhttp_add_header (req -> output_headers, 
                       "Server", (const char *) WString_getText(server_name));
      
-       evhttp_add_header (req -> output_headers, 
-                      "Warc-Version", WARC_GET_VERSION);
+ /*       evhttp_add_header (req -> output_headers,  */
+/*                       "Warc-Version", WARC_GET_VERSION); */
 
        evhttp_send_reply (req, HTTP_NOTFOUND, "No record", buf);
        destroy (wfile);
@@ -928,8 +929,8 @@ WPRIVATE warc_bool_t WSend_record (void * fname, void * tmp, warc_i32_t offset, 
       evhttp_add_header (req -> output_headers, 
                        "Server", (const char *) WString_getText(server_name));
       
-      evhttp_add_header (req -> output_headers, 
-                       "Warc-Version", WARC_GET_VERSION);
+/*       evhttp_add_header (req -> output_headers,  */
+/*                        "Warc-Version", WARC_GET_VERSION); */
 
       evhttp_send_reply (req, HTTP_NOTFOUND, "Bad record", buf);
       destroy (wfile);
@@ -954,8 +955,8 @@ WPRIVATE warc_bool_t WSend_record (void * fname, void * tmp, warc_i32_t offset, 
       evhttp_add_header (req -> output_headers, 
                  "Server", (const char *) WString_getText(server_name));
             
-      evhttp_add_header (req -> output_headers, 
-                 "Warc-Version", WARC_GET_VERSION);
+ /*      evhttp_add_header (req -> output_headers,  */
+/*                  "Warc-Version", WARC_GET_VERSION); */
             
       evhttp_send_reply (req, HTTP_NOTFOUND, "Bad memory allocation", buf);
       destroy (wfile);
@@ -966,8 +967,8 @@ WPRIVATE warc_bool_t WSend_record (void * fname, void * tmp, warc_i32_t offset, 
    evhttp_add_header (req -> output_headers, 
                       "Server", (const char *) WString_getText(server_name));
       
-   evhttp_add_header (req -> output_headers, 
-                      "Warc-Version", WARC_GET_VERSION);
+ /*   evhttp_add_header (req -> output_headers,  */
+/*                       "Warc-Version", WARC_GET_VERSION); */
 
    w_numToString (size, char_size);
    evhttp_add_header (req -> output_headers, 
@@ -1068,8 +1069,8 @@ WPRIVATE warc_bool_t WBuildXmlOutput (void * fname, const void * server_name, vo
           evhttp_add_header (req -> output_headers, 
                          "Server", (const char *) WString_getText(server_name));
      
-          evhttp_add_header (req -> output_headers, 
-                         "Warc-Version", WARC_GET_VERSION);
+/*           evhttp_add_header (req -> output_headers,  */
+/*                          "Warc-Version", WARC_GET_VERSION); */
 
           evhttp_send_reply (req, HTTP_NOTFOUND, "Bad Record", buf);
 
@@ -1252,8 +1253,8 @@ WPRIVATE warc_bool_t WBuildXmlOutput (void * fname, const void * server_name, vo
    evhttp_add_header (req -> output_headers, 
                       "Server", (const char *) WString_getText(server_name));
       
-   evhttp_add_header (req -> output_headers, 
-                      "Warc-Version", WARC_GET_VERSION);
+ /*   evhttp_add_header (req -> output_headers,  */
+/*                       "Warc-Version", WARC_GET_VERSION); */
 
    evhttp_add_header (req -> output_headers, 
                       "Content-Type", "text/xml");
@@ -1299,8 +1300,8 @@ WPRIVATE warc_bool_t WBuildHtmlOutput (void * fname, const void * server_name, v
           evhttp_add_header (req -> output_headers, 
                          "Server", (const char *) WString_getText(server_name));
      
-          evhttp_add_header (req -> output_headers, 
-                         "Warc-Version", WARC_GET_VERSION);
+ /*          evhttp_add_header (req -> output_headers,  */
+/*                          "Warc-Version", WARC_GET_VERSION); */
 
           evhttp_send_reply (req, HTTP_NOTFOUND, "Bad Record", buf);
 
@@ -1493,8 +1494,8 @@ WPRIVATE warc_bool_t WBuildHtmlOutput (void * fname, const void * server_name, v
    evhttp_add_header (req -> output_headers, 
                       "Server", (const char *) WString_getText(server_name));
       
-   evhttp_add_header (req -> output_headers, 
-                      "Warc-Version", WARC_GET_VERSION);
+/*    evhttp_add_header (req -> output_headers,  */
+/*                       "Warc-Version", WARC_GET_VERSION); */
 
    evhttp_add_header (req -> output_headers, 
                       "Content-Type", "text/html");
@@ -1543,8 +1544,8 @@ WPRIVATE warc_bool_t WBuildTextOutput (void * fname, const void * server_name, v
           evhttp_add_header (req -> output_headers, 
                          "Server", (const char *) WString_getText(server_name));
      
-          evhttp_add_header (req -> output_headers, 
-                         "Warc-Version", WARC_GET_VERSION);
+ /*          evhttp_add_header (req -> output_headers,  */
+/*                          "Warc-Version", WARC_GET_VERSION); */
 
           evhttp_send_reply (req, HTTP_NOTFOUND, "Bad Record", buf);
 
@@ -1729,8 +1730,8 @@ WPRIVATE warc_bool_t WBuildTextOutput (void * fname, const void * server_name, v
    evhttp_add_header (req -> output_headers, 
                       "Server", (const char *) WString_getText(server_name));
       
-   evhttp_add_header (req -> output_headers, 
-                      "Warc-Version", WARC_GET_VERSION);
+ /*   evhttp_add_header (req -> output_headers,  */
+/*                       "Warc-Version", WARC_GET_VERSION); */
 
    evhttp_add_header (req -> output_headers, 
                       "Content-Type", "text/plain");
@@ -1781,8 +1782,8 @@ WPRIVATE warc_bool_t WBuildJsonOutput (void * fname, const void * server_name, v
           evhttp_add_header (req -> output_headers, 
                          "Server", (const char *) WString_getText(server_name));
      
-          evhttp_add_header (req -> output_headers, 
-                         "Warc-Version", WARC_GET_VERSION);
+ /*          evhttp_add_header (req -> output_headers,  */
+/*                          "Warc-Version", WARC_GET_VERSION); */
 
           evhttp_send_reply (req, HTTP_NOTFOUND, "Bad Record", buf);
 
@@ -2038,8 +2039,8 @@ WPRIVATE warc_bool_t WBuildJsonOutput (void * fname, const void * server_name, v
    evhttp_add_header (req -> output_headers, 
                       "Server", (const char *) WString_getText(server_name));
       
-   evhttp_add_header (req -> output_headers, 
-                      "Warc-Version", WARC_GET_VERSION);
+/*    evhttp_add_header (req -> output_headers,  */
+/*                       "Warc-Version", WARC_GET_VERSION); */
 
    evhttp_add_header (req -> output_headers, 
                       "Content-Type", "text/plain");
@@ -2081,8 +2082,8 @@ WPRIVATE warc_bool_t WSend_distantDumpResponse (void * fname, void * tmp, warc_i
       evhttp_add_header (req -> output_headers, 
                        "Server", (const char *) WString_getText(server_name));
       
-      evhttp_add_header (req -> output_headers, 
-                       "Warc-Version", WARC_GET_VERSION);
+ /*      evhttp_add_header (req -> output_headers,  */
+/*                        "Warc-Version", WARC_GET_VERSION); */
 
       evhttp_send_reply (req, HTTP_NOTFOUND, "File not found", buf);
 
@@ -2097,8 +2098,8 @@ WPRIVATE warc_bool_t WSend_distantDumpResponse (void * fname, void * tmp, warc_i
        evhttp_add_header (req -> output_headers, 
                       "Server", (const char *) WString_getText(server_name));
      
-       evhttp_add_header (req -> output_headers, 
-                      "Warc-Version", WARC_GET_VERSION);
+ /*       evhttp_add_header (req -> output_headers,  */
+/*                       "Warc-Version", WARC_GET_VERSION); */
 
        evhttp_send_reply (req, HTTP_NOTFOUND, "Bad offset", buf);
        destroy (wfile);
@@ -2116,8 +2117,8 @@ WPRIVATE warc_bool_t WSend_distantDumpResponse (void * fname, void * tmp, warc_i
                         evhttp_add_header (req -> output_headers, 
                                "Server", (const char *) WString_getText(server_name));
      
-                        evhttp_add_header (req -> output_headers, 
-                               "Warc-Version", WARC_GET_VERSION);
+/*                         evhttp_add_header (req -> output_headers,  */
+/*                                "Warc-Version", WARC_GET_VERSION); */
 
                         evhttp_send_reply (req, HTTP_NOTFOUND, "Bad offset", buf);
                                 destroy (wfile);
@@ -2133,8 +2134,8 @@ WPRIVATE warc_bool_t WSend_distantDumpResponse (void * fname, void * tmp, warc_i
                         evhttp_add_header (req -> output_headers, 
                                "Server", (const char *) WString_getText(server_name));
      
-                        evhttp_add_header (req -> output_headers, 
-                               "Warc-Version", WARC_GET_VERSION);
+ /*                        evhttp_add_header (req -> output_headers,  */
+/*                                "Warc-Version", WARC_GET_VERSION); */
 
                         evhttp_send_reply (req, HTTP_NOTFOUND, "Bad offset", buf);
                                 destroy (wfile);
@@ -2150,8 +2151,8 @@ WPRIVATE warc_bool_t WSend_distantDumpResponse (void * fname, void * tmp, warc_i
                         evhttp_add_header (req -> output_headers, 
                                "Server", (const char *) WString_getText(server_name));
      
-                        evhttp_add_header (req -> output_headers, 
-                               "Warc-Version", WARC_GET_VERSION);
+/*                         evhttp_add_header (req -> output_headers,  */
+/*                                "Warc-Version", WARC_GET_VERSION); */
 
                         evhttp_send_reply (req, HTTP_NOTFOUND, "Bad offset", buf);
                                 destroy (wfile);
@@ -2167,8 +2168,8 @@ WPRIVATE warc_bool_t WSend_distantDumpResponse (void * fname, void * tmp, warc_i
                         evhttp_add_header (req -> output_headers, 
                                "Server", (const char *) WString_getText(server_name));
      
-                        evhttp_add_header (req -> output_headers, 
-                               "Warc-Version", WARC_GET_VERSION);
+/*                         evhttp_add_header (req -> output_headers,  */
+/*                                "Warc-Version", WARC_GET_VERSION); */
 
                         evhttp_send_reply (req, HTTP_NOTFOUND, "Bad offset", buf);
                                 destroy (wfile);
@@ -2182,8 +2183,8 @@ WPRIVATE warc_bool_t WSend_distantDumpResponse (void * fname, void * tmp, warc_i
                evhttp_add_header (req -> output_headers, 
                                 "Server", (const char *) WString_getText(server_name));
      
-               evhttp_add_header (req -> output_headers, 
-                                  "Warc-Version", WARC_GET_VERSION);
+ /*               evhttp_add_header (req -> output_headers,  */
+/*                                   "Warc-Version", WARC_GET_VERSION); */
 
                evhttp_send_reply (req, HTTP_NOTFOUND, "Bad offset", buf);
                destroy (wfile);
@@ -2243,8 +2244,8 @@ WPRIVATE warc_bool_t WSend_distantFilterResponse (void * fname, void * tmp, warc
       evhttp_add_header (req -> output_headers, 
                        "Server", (const char *) WString_getText(server_name));
       
-      evhttp_add_header (req -> output_headers, 
-                       "Warc-Version", WARC_GET_VERSION);
+ /*      evhttp_add_header (req -> output_headers,  */
+/*                        "Warc-Version", WARC_GET_VERSION); */
 
       evhttp_send_reply (req, HTTP_NOTFOUND, "File not found", buf);
 
@@ -2259,8 +2260,8 @@ WPRIVATE warc_bool_t WSend_distantFilterResponse (void * fname, void * tmp, warc
       evhttp_add_header (req -> output_headers, 
                  "Server", (const char *) WString_getText(server_name));
             
-      evhttp_add_header (req -> output_headers, 
-                 "Warc-Version", WARC_GET_VERSION);
+ /*      evhttp_add_header (req -> output_headers,  */
+/*                  "Warc-Version", WARC_GET_VERSION); */
             
       evhttp_send_reply (req, HTTP_NOTFOUND, "Bad memory allocation", buf);
       destroy (wfile);
@@ -2271,8 +2272,8 @@ WPRIVATE warc_bool_t WSend_distantFilterResponse (void * fname, void * tmp, warc
    evhttp_add_header (req -> output_headers, 
                       "Server", (const char *) WString_getText(server_name));
       
-   evhttp_add_header (req -> output_headers, 
-                      "Warc-Version", WARC_GET_VERSION);
+ /*   evhttp_add_header (req -> output_headers,  */
+/*                       "Warc-Version", WARC_GET_VERSION); */
 
 
   /* Seeking the required offset*/
@@ -2283,8 +2284,8 @@ WPRIVATE warc_bool_t WSend_distantFilterResponse (void * fname, void * tmp, warc
       evhttp_add_header (req -> output_headers, 
                      "Server", (const char *) WString_getText(server_name));
      
-      evhttp_add_header (req -> output_headers, 
-                       "Warc-Version", WARC_GET_VERSION);
+ /*      evhttp_add_header (req -> output_headers,  */
+/*                        "Warc-Version", WARC_GET_VERSION); */
 
       evhttp_send_reply (req, HTTP_NOTFOUND, "No record", buf);
       wfree (buffer);
@@ -2466,8 +2467,8 @@ WPRIVATE warc_bool_t WSend_distantFilterResponse (void * fname, void * tmp, warc
          evhttp_add_header (req -> output_headers, 
                         "Server", (const char *) WString_getText(server_name));
      
-         evhttp_add_header (req -> output_headers, 
-                        "Warc-Version", WARC_GET_VERSION);
+/*          evhttp_add_header (req -> output_headers,  */
+/*                         "Warc-Version", WARC_GET_VERSION); */
 
          evhttp_send_reply_end (req);
          wfree (buffer);
@@ -2521,8 +2522,8 @@ WPRIVATE void WAccess_callback (struct evhttp_request * req, void * _arg)
     evhttp_add_header (req -> output_headers, 
                        "Server", (const char *) WString_getText(server_name));
     
-    evhttp_add_header (req -> output_headers, 
-                       "Warc-Version", WARC_GET_VERSION);
+ /*    evhttp_add_header (req -> output_headers,  */
+/*                        "Warc-Version", WARC_GET_VERSION); */
     
     evhttp_send_reply (req, HTTP_NOCONTENT, "No buffer", NIL);
     return;
@@ -2535,8 +2536,8 @@ WPRIVATE void WAccess_callback (struct evhttp_request * req, void * _arg)
       evhttp_add_header (req -> output_headers, 
                          "Server", (const char *) WString_getText(server_name));
       
-      evhttp_add_header (req -> output_headers, 
-                         "Warc-Version", WARC_GET_VERSION);
+/*       evhttp_add_header (req -> output_headers,  */
+/*                          "Warc-Version", WARC_GET_VERSION); */
       
       evhttp_send_reply (req, HTTP_NOTFOUND, "Server is shooting down", buf);
       evbuffer_free (buf);
@@ -2552,8 +2553,8 @@ WPRIVATE void WAccess_callback (struct evhttp_request * req, void * _arg)
       evhttp_add_header (req -> output_headers, 
                          "Server", (const char *) WString_getText(server_name));
       
-      evhttp_add_header (req -> output_headers, 
-                         "Warc-Version", WARC_GET_VERSION);
+  /*     evhttp_add_header (req -> output_headers,  */
+/*                          "Warc-Version", WARC_GET_VERSION); */
 
     evhttp_send_reply (req, HTTP_NOCONTENT, "No String", buf);
     evbuffer_free (buf);
@@ -2569,8 +2570,8 @@ WPRIVATE void WAccess_callback (struct evhttp_request * req, void * _arg)
       evhttp_add_header (req -> output_headers, 
                          "Server", (const char *) WString_getText(server_name));
       
-      evhttp_add_header (req -> output_headers, 
-                         "Warc-Version", WARC_GET_VERSION);
+/*       evhttp_add_header (req -> output_headers,  */
+/*                          "Warc-Version", WARC_GET_VERSION); */
 
     evhttp_send_reply (req, HTTP_NOCONTENT, "No String", buf);
     destroy (fname);
@@ -2589,8 +2590,8 @@ WPRIVATE void WAccess_callback (struct evhttp_request * req, void * _arg)
       evhttp_add_header (req -> output_headers, 
                          "Server", (const char *) WString_getText(server_name));
       
-      evhttp_add_header (req -> output_headers, 
-                         "Warc-Version", WARC_GET_VERSION);
+ /*      evhttp_add_header (req -> output_headers,  */
+/*                          "Warc-Version", WARC_GET_VERSION); */
 
       evhttp_send_reply (req, HTTP_BADREQUEST, "Bad request", buf);
       evbuffer_free (buf);
@@ -2608,8 +2609,8 @@ WPRIVATE void WAccess_callback (struct evhttp_request * req, void * _arg)
       evhttp_add_header (req -> output_headers, 
                          "Server", (const char *) WString_getText(server_name));
       
-      evhttp_add_header (req -> output_headers, 
-                         "Warc-Version", WARC_GET_VERSION);
+ /*      evhttp_add_header (req -> output_headers,  */
+/*                          "Warc-Version", WARC_GET_VERSION); */
 
       evhttp_send_reply (req, HTTP_NOCONTENT, "No String", buf);
       evbuffer_free (buf);
@@ -2686,8 +2687,8 @@ WPRIVATE void WStop_callback (struct evhttp_request * req, void * _arg)
     evhttp_add_header (req -> output_headers, 
                        "Server", (const char *) WString_getText(server_name));
     
-    evhttp_add_header (req -> output_headers, 
-                       "Warc-Version", WARC_GET_VERSION);
+/*     evhttp_add_header (req -> output_headers,  */
+/*                        "Warc-Version", WARC_GET_VERSION); */
     
     evhttp_send_reply (req, HTTP_NOTMODIFIED, "Not stopped", NIL);
   }
@@ -2703,8 +2704,8 @@ WPRIVATE void WStop_callback (struct evhttp_request * req, void * _arg)
           evhttp_add_header (req -> output_headers, 
                 "Server", (const char *) WString_getText(server_name));
           
-          evhttp_add_header (req -> output_headers, 
-                "Warc-Version", WARC_GET_VERSION);
+ /*          evhttp_add_header (req -> output_headers,  */
+/*                 "Warc-Version", WARC_GET_VERSION); */
 
           evhttp_send_reply (req, HTTP_BADREQUEST, "Can't do this", buf);
         }
@@ -2718,8 +2719,8 @@ WPRIVATE void WStop_callback (struct evhttp_request * req, void * _arg)
           evhttp_add_header (req -> output_headers, 
                     "Server", (const char *) WString_getText(server_name));
           
-          evhttp_add_header (req -> output_headers, 
-                    "Warc-Version", WARC_GET_VERSION);
+  /*         evhttp_add_header (req -> output_headers,  */
+/*                     "Warc-Version", WARC_GET_VERSION); */
 
           evhttp_add_header (req -> output_headers, 
                     "Content-Type", "text/html");
