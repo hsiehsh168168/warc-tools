@@ -341,7 +341,7 @@ b	+= $(CUNIT)/Automated.c  $(CUNIT)/Basic.c     $(CUNIT)/CUError.c \
 
 b	+= $(TIGER)/tiger.c
 
-b   += $(REGEX)/regex.c
+#b   += $(REGEX)/regex.c
 
 b	+=$(EV_SRC)
 
@@ -382,7 +382,7 @@ h	+= $(TIGER)/tiger.h
 
 h   += $(MENU)/menu.h
 
-h   += $(REGEX)/regex.h
+#h   += $(REGEX)/regex.h
 
 h   += $(EVENT)/log.h	  $(EVENT)/event-internal.h	  $(EVENT)/evdns.h \
 	  $(EVENT)/event.h	  $(EVENT)/event-config.h	  $(EVENT)/evrpc.h \
@@ -436,8 +436,10 @@ evlib   = $(EV_SRC:.c=.o)
 
 regex   = $(REGEX)/regex.o
 
+all:  	$t $(regex)
 
-all:  	$t
+$(REGEX)/regex.o: $(REGEX)/regex.c
+		$(GCC) $(HEADERS) -c $< -o $@
 
 static:	$(libwarc)	; $(AR) cvr $(LIBNAME).a $(libwarc); $(RANLIB) $(LIBNAME).a
 
@@ -877,7 +879,7 @@ mod_lighty_clean: ; @rm -rf $(LIGHTTPD)/*.o $(LIGHTTPD)/*~ \
 				    $(LIGHTTPD)/warc.cgi $(LIGHTTPD)/warc.fcgi
 
 python_clean: 	   ; @rm -f $(PYTHON)/*.c $(PYTHON)/*.o      
-					 rm -f $(APPYTHON)/*.so $(APPYTHON)/warc.py \
+					 @rm -f $(APPYTHON)/*.so $(APPYTHON)/warc.py \
 					 $(APPYTHON)/arc.py $(APPYTHON)/*.pyc \
 					 $(APPYTHON)/*$(LIBSUFFIX)* $(APPYTHON)/_*
 

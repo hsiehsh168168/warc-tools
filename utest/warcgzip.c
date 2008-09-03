@@ -115,7 +115,7 @@ void test1 (void)
   ret = WGzip_compress (g, in, out, WARC_GZIP_NO_COMPRESSION, & csize);
 
   assert (!ret);
- CU_ASSERT_PTR_EQUAL(ret,NIL);
+ CU_ASSERT_EQUAL(ret,0);
 /*  fprintf (stderr, "\"%s\" compressed to \"%s\" [size: %llu] [mode: %s]\n",
            fin, fout, (unsigned long long) csize,
            makeString (WARC_GZIP_NO_COMPRESSION) );*/
@@ -156,7 +156,7 @@ void test2 (void)
   ret = WGzip_compress (g, in, out, WARC_GZIP_DEFAULT_COMPRESSION, & csize);
 
   assert (! ret);
- CU_ASSERT_PTR_EQUAL(ret,NIL);
+ CU_ASSERT_EQUAL(ret,0);
  
 /*
   fprintf (stdout, "\"%s\" compressed to \"%s\" [size: %llu] [mode: %s]\n",
@@ -235,7 +235,7 @@ void test4 (void)
 
   ret = WGzip_compress (g, in, out, WARC_GZIP_BEST_COMPRESSION, & csize);
   assert (! ret);
- CU_ASSERT_PTR_EQUAL(ret,NIL);
+ CU_ASSERT_EQUAL(ret,0);
  /* fprintf (stderr, "\"%s\" compressed to \"%s\" [size: %llu] [mode: %s]\n",
            fin, fout, (unsigned long long) csize,
            makeString (WARC_GZIP_BEST_COMPRESSION) );*/
@@ -279,7 +279,7 @@ void test5 (void)
 
   ret = WGzip_compress (g, in, out, WARC_GZIP_BEST_COMPRESSION, & csize);
   assert (! ret);
- CU_ASSERT_PTR_EQUAL(ret,NIL);
+ CU_ASSERT_EQUAL(ret,0);
  /* fprintf (stderr, "\"%s\" compressed to \"%s\" [size: %llu] [mode: %s]\n",
            fin, fout, (unsigned long long) csize,
            makeString (WARC_GZIP_BEST_COMPRESSION) );*/
@@ -328,8 +328,6 @@ void test6 (void)
   fclose (in);
 
   destroy (g);
-
-  return ;
 }
 
 
