@@ -56,7 +56,7 @@
 		<para> arc2warc - ARC to WARC converter </para>
 	</listitem>
         <listitem>
-		<para> arc2warc.sh - converts all WARC file in directory to WARC file </para>
+		<para> arc2warc.sh - converts all WARC files in directory to WARC files </para>
 	</listitem>
 	<listitem>
 		<para> warcfilter - filters WARC Record based on Uri, content type or record type </para>
