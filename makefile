@@ -593,11 +593,13 @@ record	= $(PRIVATE)/wclass.o    $(PRIVATE)/wstring.o   $(PRIVATE)/wlist.o \
 		  $(PRIVATE)/wanvl.o     $(PRIVATE)/wrecord.o   $(PRIVATE)/wuuid.o \
           $(PRIVATE)/wfsmanvl.o  ${CSAFE}.o    			$(PRIVATE)/wheader.o \
           $(TIGER)/tiger.o       ${MKTEMP}.o            $(TST)/record.o \
-	      $(cunit)				 $(PRIVATE)/wfile.o		$(gzlib)
+	      $(cunit)				 $(PRIVATE)/wfile.o		$(gzlib) \
+		  $(PRIVATE)/wversion.o
 
 header  = $(PRIVATE)/wheader.o   $(PRIVATE)/wclass.o    $(PRIVATE)/wstring.o \
           ${CSAFE}.o             $(PRIVATE)/wfsmanvl.o  $(PRIVATE)/wlist.o  \
-          $(PRIVATE)/wanvl.o     $(TST)/header.o        $(cunit)
+          $(PRIVATE)/wanvl.o     $(TST)/header.o        $(cunit) \
+		  $(PRIVATE)/wversion.o
 
 warcgzip  = $(PRIVATE)/wclass.o  $(gzlib)               $(TST)/warcgzip.o \
 		  ${CSAFE}.o             $(cunit)
@@ -612,28 +614,29 @@ file    = $(PRIVATE)/wclass.o    $(PRIVATE)/wstring.o   $(PRIVATE)/wlist.o \
 	  	  $(PRIVATE)/wanvl.o     $(PRIVATE)/wrecord.o   $(PRIVATE)/wfile.o \
           $(PRIVATE)/wuuid.o     $(PRIVATE)/wheader.o   $(PRIVATE)/wfsmanvl.o \
           ${CSAFE}.o             $(gzlib)               ${MKTEMP}.o \
-	      $(TST)/file.o          $(TIGER)/tiger.o       $(cunit)
+	      $(TST)/file.o          $(TIGER)/tiger.o       $(cunit) \
+		  $(PRIVATE)/wversion.o
 
 arcrecord = $(PRIVATE)/arecord.o $(PRIVATE)/wstring.o   $(PRIVATE)/wclass.o \
           ${CSAFE}.o             $(PRIVATE)/wrecord.o   $(PRIVATE)/afile.o \
           $(PRIVATE)/wanvl.o     $(PRIVATE)/wlist.o     $(PRIVATE)/wfsmanvl.o  \
           $(PRIVATE)/wheader.o   $(PRIVATE)/afsmhdl.o   ${MKTEMP}.o \
           $(TST)/arcrecord.o	 ${gzlib}               $(cunit) \
-		  $(PRIVATE)/wfile.o
+		  $(PRIVATE)/wfile.o     $(PRIVATE)/wversion.o
 
 a2w    = $(PRIVATE)/wclass.o     $(PRIVATE)/wstring.o   $(PRIVATE)/wlist.o \
 	 	 $(PRIVATE)/wanvl.o      $(PRIVATE)/wrecord.o   $(PRIVATE)/wfsmanvl.o  \
          $(PRIVATE)/wheader.o    $(PRIVATE)/wfile.o     $(PRIVATE)/afsmhdl.o \
          ${CSAFE}.o              $(PRIVATE)/arecord.o   $(PRIVATE)/afile.o \
 	 	 $(gzlib)                ${MKTEMP}.o \
-	 	 $(TST)/a2w.o            $(cunit)
+	 	 $(TST)/a2w.o            $(cunit) 		  		$(PRIVATE)/wversion.o
 
 arcfile = $(PRIVATE)/wclass.o    $(PRIVATE)/wstring.o   $(PRIVATE)/wlist.o \
 	  	 ${CSAFE}.o              $(PRIVATE)/wanvl.o     $(PRIVATE)/afile.o \
          $(PRIVATE)/wfsmanvl.o   $(PRIVATE)/wheader.o   $(PRIVATE)/wrecord.o \
          $(PRIVATE)/arecord.o    $(PRIVATE)/afsmhdl.o   ${MKTEMP}.o \
 		 $(TST)/arcfile.o        $(gzlib) 	            $(cunit) \
-		 $(PRIVATE)/wfile.o
+		 $(PRIVATE)/wfile.o		 $(PRIVATE)/wversion.o
 
 uuid	= $(PRIVATE)/wclass.o    $(PRIVATE)/wuuid.o     ${CSAFE}.o \
 		 $(PRIVATE)/wstring.o    $(TIGER)/tiger.o       $(TST)/uuid.o\
@@ -651,14 +654,15 @@ server =  $(PRIVATE)/wclass.o	 $(PRIVATE)/wstring.o   $(PRIVATE)/wlist.o \
 	      $(PRIVATE)/wfile.o	 $(PRIVATE)/wuuid.o     $(PRIVATE)/wfsmanvl.o \
 		  $(PRIVATE)/wserver.o	 ${CSAFE}.o             $(gzlib) \
 		  ${MKTEMP}.o 			 $(TIGER)/tiger.o       $(evlib) \
-		  $(TST)/server.o        $(PRIVATE)/wregexp.o   $(regex)
+		  $(TST)/server.o        $(PRIVATE)/wregexp.o   $(regex) \
+		  $(PRIVATE)/wversion.o
 
 client =  $(PRIVATE)/wclass.o	 $(PRIVATE)/wstring.o  $(PRIVATE)/wlist.o \
 		  $(PRIVATE)/wanvl.o     $(PRIVATE)/wrecord.o  $(PRIVATE)/wheader.o \
 	      $(PRIVATE)/wfile.o	 $(PRIVATE)/wuuid.o    $(PRIVATE)/wfsmanvl.o \
 		  $(PRIVATE)/wclient.o 	 ${CSAFE}.o            $(gzlib) \
 		  ${MKTEMP}.o 			 $(TIGER)/tiger.o      $(evlib) \
-		  $(TST)/client.o		 $(cunit)
+		  $(TST)/client.o		 $(cunit) 		  	   $(PRIVATE)/wversion.o
 
 regexp =  $(PRIVATE)/wclass.o    $(PRIVATE)/wregexp.o   $(TST)/regexp.o \
 		  ${CSAFE}.o	         $(cunit)               $(regex)
@@ -667,7 +671,7 @@ bloc   =  $(PRIVATE)/wclass.o    $(PRIVATE)/wbloc.o     $(TST)/bloc.o \
 		  $(PRIVATE)/wfile.o 	 $(PRIVATE)/wrecord.o	$(PRIVATE)/wstring.o \
 		  $(PRIVATE)/wanvl.o 	 $(OSDEP)/wmktmp.o 		$(PRIVATE)/wheader.o \
 		  $(PRIVATE)/wlist.o 	 $(PRIVATE)/wfsmanvl.o  $(gzlib) \
-		  ${CSAFE}.o	         $(cunit)
+		  ${CSAFE}.o	         $(cunit) 		  	    $(PRIVATE)/wversion.o
 
 ##################
 # unit tests deps
@@ -703,7 +707,7 @@ modcgi   = $(PRIVATE)/wclass.o	  $(PRIVATE)/wstring.o  $(PRIVATE)/wlist.o \
 	       $(PRIVATE)/wfile.o	  $(PRIVATE)/wuuid.o    ${MKTEMP}.o \
 		   $(PRIVATE)/wfsmanvl.o  ${CSAFE}.o	        $(gzlib) \
 		   $(PRIVATE)/wgetopt.o   $(TIGER)/tiger.o	    $(LIGHTTPD)/modcgi.o \
-           $(PRIVATE)/wregexp.o
+           $(PRIVATE)/wregexp.o   $(PRIVATE)/wversion.o
 
 
 $(LIGHTTPD)/warc.cgi:  $(modcgi)
@@ -719,7 +723,7 @@ modfcgi   = $(PRIVATE)/wclass.o	  $(PRIVATE)/wstring.o $(PRIVATE)/wlist.o \
 	       $(PRIVATE)/wfile.o	  $(PRIVATE)/wuuid.o   $(PRIVATE)/wfsmanvl.o \
 		   ${CSAFE}.o	          $(gzlib)             ${MKTEMP}.o \
 		   $(PRIVATE)/wgetopt.o   $(TIGER)/tiger.o     $(LIGHTTPD)/modfcgi.o \
-           $(PRIVATE)/wregexp.o
+           $(PRIVATE)/wregexp.o   $(PRIVATE)/wversion.o
 
 $(LIGHTTPD)/warc.fcgi:  $(modfcgi)
 			$(CC) $(RFLAGS) $(INC_LIGHTY) -o $@ $(modfcgi) $(LIB_FCGI)
@@ -738,7 +742,8 @@ pylib   =  $(GZIP)/adler32.o     $(GZIP)/compress.o      $(GZIP)/crc32.o  \
 		   $(PRIVATE)/wstring.o  $(PRIVATE)/wlist.o		 $(PRIVATE)/wclass.o \
 		   $(OSDEP)/wmktmp.o     $(PRIVATE)/whash.o      $(PRIVATE)/wkv.o \
 		   $(OSDEP)/wcsafe.o	 $(PRIVATE)/wuuid.o		 $(PRIVATE)/wrecord.o \
-		   $(PRIVATE)/wheader.o	 $(PRIVATE)/wanvl.o	     $(PRIVATE)/wfsmanvl.o
+		   $(PRIVATE)/wheader.o	 $(PRIVATE)/wanvl.o	     $(PRIVATE)/wfsmanvl.o \
+		   $(PRIVATE)/wversion.o
 
 wpylib   = $(PRIVATE)/wfile.o \
 		   $(PYTHON)/warc_wrap.o
@@ -806,26 +811,28 @@ warcdump  = $(PRIVATE)/wclass.o     $(PRIVATE)/wstring.o $(PRIVATE)/wlist.o \
 		   $(PRIVATE)/wanvl.o       $(PRIVATE)/wrecord.o $(PRIVATE)/wheader.o \
 		   $(PRIVATE)/wfile.o       $(PRIVATE)/wgetopt.o $(PRIVATE)/wfsmanvl.o \
            ${CSAFE}.o               $(APP)/warcdump.o    $(gzlib) \
-           ${MKTEMP}.o  
+           ${MKTEMP}.o  		    $(PRIVATE)/wversion.o
 
 arc2warc = $(PRIVATE)/wclass.o      $(PRIVATE)/wstring.o $(PRIVATE)/wlist.o \
 	       $(PRIVATE)/wanvl.o       $(PRIVATE)/wrecord.o $(PRIVATE)/wheader.o \
 	       $(PRIVATE)/wfile.o       $(PRIVATE)/afile.o   $(PRIVATE)/afsmhdl.o \
            $(PRIVATE)/wfsmanvl.o    ${CSAFE}.o           $(PRIVATE)/arecord.o \
            ${MKTEMP}.o              $(TIGER)/tiger.o     $(PRIVATE)/wuuid.o \
-		   $(PRIVATE)/wgetopt.o     $(APP)/arc2warc.o    $(gzlib) 
+		   $(PRIVATE)/wgetopt.o     $(APP)/arc2warc.o    $(gzlib) \
+		   $(PRIVATE)/wversion.o
 
 warcfilter  = $(PRIVATE)/wclass.o   $(PRIVATE)/wstring.o  $(PRIVATE)/wlist.o \
 		   $(PRIVATE)/wanvl.o       $(PRIVATE)/wrecord.o  $(PRIVATE)/wheader.o \
 		   $(PRIVATE)/wfile.o       $(PRIVATE)/wgetopt.o  ${MKTEMP}.o \
            $(PRIVATE)/wfsmanvl.o    ${CSAFE}.o            $(gzlib) \
-           $(APP)/warcfilter.o      $(PRIVATE)/wregexp.o  $(regex)
+           $(APP)/warcfilter.o      $(PRIVATE)/wregexp.o  $(regex) \
+		   $(PRIVATE)/wversion.o
 
 warcvalidator = $(PRIVATE)/wclass.o $(PRIVATE)/wstring.o $(PRIVATE)/wlist.o \
 		   $(PRIVATE)/wanvl.o       $(PRIVATE)/wrecord.o $(PRIVATE)/wheader.o \
 		   $(PRIVATE)/wfile.o       $(PRIVATE)/wgetopt.o $(PRIVATE)/wfsmanvl.o \
            ${MKTEMP}.o              ${CSAFE}.o           $(gzlib)  \
-           $(APP)/warcvalidator.o    
+           $(APP)/warcvalidator.o   $(PRIVATE)/wversion.o
 
 warcserver = $(PRIVATE)/wclass.o	$(PRIVATE)/wstring.o $(PRIVATE)/wlist.o \
 		   $(PRIVATE)/wanvl.o 	    $(PRIVATE)/wrecord.o $(PRIVATE)/wheader.o \
@@ -833,21 +840,21 @@ warcserver = $(PRIVATE)/wclass.o	$(PRIVATE)/wstring.o $(PRIVATE)/wlist.o \
 		   ${MKTEMP}.o           	${CSAFE}.o	         $(gzlib) \
 		   $(PRIVATE)/wserver.o     $(PRIVATE)/wgetopt.o $(TIGER)/tiger.o \
 		   $(APP)/warcserver.o	    $(evlib)             $(PRIVATE)/wregexp.o \
-           $(regex)
+           $(regex)                 $(PRIVATE)/wversion.o
 
 warcclient = $(PRIVATE)/wclass.o	$(PRIVATE)/wstring.o $(PRIVATE)/wlist.o \
 		   $(PRIVATE)/wanvl.o 	    $(PRIVATE)/wrecord.o $(PRIVATE)/wheader.o\
 	       $(PRIVATE)/wfile.o	    $(PRIVATE)/wuuid.o   $(PRIVATE)/wfsmanvl.o \
 		   ${MKTEMP}.o	            ${CSAFE}.o	         $(gzlib) \
 		   $(PRIVATE)/wclient.o     $(PRIVATE)/wgetopt.o $(TIGER)/tiger.o \
-		   $(APP)/warcclient.o	    $(evlib)
+		   $(APP)/warcclient.o	    $(evlib)             $(PRIVATE)/wversion.o
 
 wrecordbody = $(PRIVATE)/wclass.o   $(PRIVATE)/wstring.o  $(PRIVATE)/wlist.o \
 			  $(PRIVATE)/wanvl.o    $(PRIVATE)/wrecord.o  $(PRIVATE)/wheader.o \
 			  $(PRIVATE)/wfile.o	$(PRIVATE)/wgetopt.o  ${MKTEMP}.o \
 			  $(PRIVATE)/wfsmanvl.o	${CSAFE}.o			  $(gzlib) \
 			  $(PRIVATE)/wregexp.o	$(regex) \
-			  $(APP)/wrecordbody.o
+			  $(APP)/wrecordbody.o  $(PRIVATE)/wversion.o
 
 
 ####################

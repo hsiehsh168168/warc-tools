@@ -24,24 +24,30 @@
 /*     http://code.google.com/p/warc-tools/                            */
 /* ------------------------------------------------------------------- */
 
-#ifndef	__WARC_VERSION_H__
-#define	__WARC_VERSION_H__
+#include <wversion.h>
+#include <wmisc.h>
+#include <wcsafe.h>  /* w_strcmp, ... */
 
-/* to mix C and C++ */
-#ifdef __cplusplus
-extern "C"
-  {
-#endif
+#define makeUS(s) ((const warc_u8_t *) s)
 
-#include <wport.h>
+const warc_u8_t * WARC_COMPATIBLE_VERSIONS [] = 
+  { makeUS(WARC_VERSION), makeUS("WARC/0.17"), 0 };
 
-#define WARC_VERSION "WARC/0.18"
 
-    extern warc_bool_t w_checkCompatibleVersions (const warc_u8_t * id);
+WPUBLIC warc_bool_t w_checkCompatibleVersions (const warc_u8_t * id)
+{
+  const warc_u8_t * p = WARC_COMPATIBLE_VERSIONS [0];
 
-#ifdef __cplusplus
-  }
+  /* preconditions */
+  assert (id);
 
-#endif
+  while (p)
+    {
+      if (w_strcmp(id, p) == 0)
+        return (WARC_FALSE);
 
-#endif /* __WARC_VERSION_H__ */
+      p ++;
+    }
+
+  return (WARC_TRUE);
+}

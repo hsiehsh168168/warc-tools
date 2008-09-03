@@ -39,7 +39,7 @@
 #include <wsign.h>    /* CASSET macro */
 #include <wstring.h>  /* for class's prototypes */
 #include <wmem.h>     /* wmalloc, wfree */
-#include "wmisc.h"    /* warc_bool_t ... */
+#include <wmisc.h>    /* warc_bool_t ... */
 #include <wrectype.h> /* revist, resource ... */
 #include <wlist.h>    /* for Class's Prototype*/
 #include <wversion.h> /* WARC_VERSION */
@@ -2037,15 +2037,16 @@ WPUBLIC warc_bool_t WHeader_extractFromWarcFile (void * _self, FILE * infile)
   charbuf = wmalloc (WString_getLength (WARC_ID)+1);
     unless (charbuf)
       {
-      WarcDebugMsg ("Can't Allocate memory for working");
+      WarcDebugMsg ("Can't Allocate memory for WARC_ID");
       return (WARC_TRUE);
       }
   digital = w_fread (charbuf, 1, WString_getLength (WARC_ID), infile);
   charbuf [digital] = '\0';
 
-  if (w_strcmp (charbuf, WString_getText (WARC_ID)))
+/*   if (w_strcmp (charbuf, WString_getText (WARC_ID))) */
+  if ( w_checkCompatibleVersions (charbuf) )
      {
-     WarcDebugMsg ("Incorrect Warc Version");
+     WarcDebugMsg ("Incompatible Warc Version");
      wfree (charbuf);
      return (WARC_TRUE);
      }
