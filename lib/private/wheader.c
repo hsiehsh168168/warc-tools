@@ -2050,6 +2050,15 @@ WPUBLIC warc_bool_t WHeader_extractFromWarcFile (void * _self, FILE * infile)
      wfree (charbuf);
      return (WARC_TRUE);
      }
+  else /* force WARC_ID to be charbuf anyway */
+    {
+      if(WString_setText (WARC_ID, makeS(charbuf)))
+        {
+          WarcDebugMsg ("Cannot copy WARC_VERSION from file");
+          wfree (charbuf);
+          return (WARC_TRUE);
+        }
+    }
 
   /* jumping the CRLF separator */
   w_fread (charbuf, 2, 1, infile);
