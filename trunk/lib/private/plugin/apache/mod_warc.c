@@ -1663,8 +1663,6 @@ static warc_i32_t warc_handler(request_rec * r)
     objnature = recoverUriField (r-> uri, & pos);
     reqnature = WString_getText (objnature);
 
-          fprintf (stderr, "---------\n");
-
     if ( w_strcmp (reqnature, "file" ))
           if ( w_strcmp (reqnature, "record"))
                if (  w_strcmp (reqnature, "list"))
