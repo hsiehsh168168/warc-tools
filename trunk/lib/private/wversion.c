@@ -36,14 +36,14 @@ const warc_u8_t * WARC_COMPATIBLE_VERSIONS [] =
 
 WPUBLIC warc_bool_t w_checkCompatibleVersions (const warc_u8_t * id)
 {
-  const warc_u8_t * p = WARC_COMPATIBLE_VERSIONS [0];
+  const warc_u8_t ** p = WARC_COMPATIBLE_VERSIONS;
 
   /* preconditions */
   assert (id);
 
-  while (p)
+  while (* p)
     {
-      if (w_strcmp(id, p) == 0)
+      if (w_strcmp(id, * p) == 0)
         return (WARC_FALSE);
 
       p ++;

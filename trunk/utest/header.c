@@ -201,7 +201,6 @@ fprintf(stdout,"//////////test3/////////\n");
   assert (h);
  CU_ASSERT_PTR_NOT_EQUAL(h,NIL);
   
-
   file = fopen (fname, "rb");
     unless (file)
       {
