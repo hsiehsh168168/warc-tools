@@ -26,6 +26,7 @@
 /* file.i */
  %{
    #include <wport.h>
+   #include <wclass.h>
    #include "pyback.h"
     /*
      * C default headers
@@ -86,7 +87,6 @@ PyObject* pyWFile_register(void  *a, void * b, PyObject* pyfunc, PyObject* arg) 
  %}
 
 
-  
   typedef enum {WARC_FILE_UNCOMPRESSED = 0,
                   WARC_FILE_COMPRESSED_GZIP,
                   WARC_FILE_COMPRESSED_GZIP_DEFAULT_COMPRESSION,

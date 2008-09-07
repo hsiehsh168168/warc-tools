@@ -23,10 +23,17 @@
 /*     http://code.google.com/p/warc-tools/                            */
 /* ------------------------------------------------------------------- */
 
-%module   arc
-%include "aclass.i"
-%include "arecord.i"
-%include "record.i"
-%include "afile.i"
-%include "list.i"
-%include "apybless.i"
+/* anvl.i */
+ %{
+   #include <wport.h>
+   #include "wpybless.h"
+ 
+ %}
+  
+
+    extern void * bless_WFile (const char  * , const unsigned int  , unsigned int , const unsigned int , const char * );
+
+    extern void * bless_WRecord ();
+
+    extern void * bless_WBloc (void  * , void  * , const unsigned int );
+

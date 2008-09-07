@@ -25,6 +25,13 @@
 #     http://code.google.com/p/warc-tools/                             #
 # -------------------------------------------------------------------  #
 
+import wpath
+
+from afile import AFile
+from arecord import ARecord
+
+from wrecord  import WRecord
+from wfile import WFile
 
 import warc
 import arc
@@ -63,7 +70,7 @@ def main () :
     if (not (options.wfilename)) :
         parser.error(" You must give the outpout WARC file name desired")
 
-    a = arc.bless (arc.cvar.AFile, options.afilename, arc.ARC_FILE_DETECT_COMPRESSION, options.tmpdir)
+    a = AFile (options.afilename, arc.ARC_FILE_DETECT_COMPRESSION, options.tmpdir)
 
     if (not (a)) :
        print "ARC file not found "
@@ -74,84 +81,84 @@ def main () :
     else :
         cmode = warc.WARC_FILE_UNCOMPRESSED
 
-    w = warc.bless(warc.cvar.WFile, options.wfilename, 600 * 1024 * 1024 , warc.WARC_FILE_WRITER, cmode, options.tmpdir);
+    w = WFile(options.wfilename, 600 * 1024 * 1024 , warc.WARC_FILE_WRITER, cmode, options.tmpdir);
   
 
     if (not (w)) :
        print "given temporary directory does not exist "
-       arc.destroy (a)
+       a . destroy ()
        return
 
     uuid = warc.bless (warc.cvar.WUUID)
 
     if (not (uuid)) :
        print " can not create wuuid object "
-       arc.destroy (a)
-       warc.destroy (w)
+       a . destroy ()
+       w . destroy ()
        return
    
-    while (arc.AFile_hasMoreRecords (a) ) :
+    while (a . hasMoreRecords () ) :
 
-          ar = arc.AFile_nextRecord (a)
+          ar = a. nextRecord ()
 
           if (not (ar)) :
              print "bad ARC file"
-             arc.destroy (a)
-             warc.destroy (w)
+             a . destroy ()
+             w . destroy ()
              warc.destroy (uuid)
              return
 
-          wr = warc.bless (warc.cvar.WRecord)
+          wr = WRecord ()
 
           if (not (wr)) :
              print "can not create WARC record object"
-             arc.destroy (a)
-             warc.destroy (w)
+             a . destroy ()
+             w . destroy ()
              warc.destroy (uuid)
-             arc.destroy (ar)
+             ar . destroy ()
              return
 
-          warc.WRecord_setRecordType (wr, warc.WARC_RESOURCE_RECORD)
+          wr . setRecordType ( warc.WARC_RESOURCE_RECORD)
 
-          uri = arc.ARecord_getUrl (ar)
-          warc.WRecord_setTargetUri (wr, uri, len (uri))
+          uri = ar . getUrl ()
+          wr . setTargetUri (uri, len (uri))
 
-          date = arc.ARecord_getCreationDate (ar)
-          warc.WRecord_setDateFromArc  (wr, date, len(date))
+          date = ar . getCreationDate ()
+          wr . setDateFromArc  (date, len(date))
 
-          mime = arc.ARecord_getMimeType (ar)
-          warc.WRecord_setContentType (wr, mime, len (mime))
+          mime = ar . getMimeType ()
+          wr . setContentType (mime, len (mime))
 
-          ip = arc.ARecord_getIpAddress(ar)
-          warc.WRecord_setIpAddress (wr, ip, len(ip))
+          ip = ar . getIpAddress()
+          wr . setIpAddress (ip, len(ip))
           
           warc.WUUID_hash (uuid, uri , len (uri))
           warc.WUUID_hash (uuid, date , len (date))
-          warc.WRecord_setRecordId  (wr, warc.WUUID_text (uuid), len (warc.WUUID_text (uuid)))
+          wr. setRecordId  (warc.WUUID_text (uuid), len (warc.WUUID_text (uuid)))
           warc.WUUID_reinit (uuid)
 
-          if (arc.ARecord_transferContent (ar, wr, a)) :
+          if (ar . transferContent (wr, a)) :
               print "Unable to pass content to the Warc Record"
-              arc.destroy (a)
-              warc.destroy (w)
+              a . destroy ()
+              w . destroy ()
               warc.destroy (uuid)
-              arc.destroy (ar)
+              ar . destroy ()
               return
 
-          if (warc.WFile_storeRecord (w, wr)) :
+          if (w . storeRecord (wr) ) :
               print "failed to write  WRecord" 
-              arc.destroy (a)
-              warc.destroy (w)
+              a . destroy ()
+              w . destroy ()
               warc.destroy (uuid)
-              arc.destroy (ar)
+              ar . destroy ()
               return
 
-          arc.destroy (ar)
-          warc.destroy (wr)
+          ar . destroy ()
+          wr . destroy ()
     
     warc.destroy (uuid)
-    arc.destroy (a)
-    warc.destroy (w)
+    a . destroy ()
+    w . destroy ()
     return
 
 

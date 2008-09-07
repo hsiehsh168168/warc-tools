@@ -36,6 +36,7 @@ TST      = utest
 DOC      = doc
 LIB      = lib
 MISC     = misc
+CONTRIB  = contrib
 PUBLIC   = $(LIB)/public
 PRIVATE  = $(LIB)/private
 PLUGIN   = $(PRIVATE)/plugin
@@ -743,60 +744,68 @@ pylib   =  $(GZIP)/adler32.o     $(GZIP)/compress.o      $(GZIP)/crc32.o  \
 		   $(OSDEP)/wmktmp.o     $(PRIVATE)/whash.o      $(PRIVATE)/wkv.o \
 		   $(OSDEP)/wcsafe.o	 $(PRIVATE)/wuuid.o		 $(PRIVATE)/wrecord.o \
 		   $(PRIVATE)/wheader.o	 $(PRIVATE)/wanvl.o	     $(PRIVATE)/wfsmanvl.o \
-		   $(PRIVATE)/wversion.o
+		   $(PRIVATE)/wversion.o $(PRIVATE)/wbloc.o   $(PRIVATE)/wfile.o 
 
-wpylib   = $(PRIVATE)/wfile.o \
-		   $(PYTHON)/warc_wrap.o
+wpylib   =   $(PYTHON)/warc_wrap.o $(PYTHON)/wpybless.o $(PYTHON)/wfield.o
 
 apylib   = $(PRIVATE)/arecord.o  $(PRIVATE)/afile.o 	 $(PRIVATE)/afsmhdl.o \
-		   $(PYTHON)/arc_wrap.o
+		   $(PYTHON)/arc_wrap.o  $(PYTHON)/wpybless.o $(PYTHON)/apybless.o $(PYTHON)/wfield.o
 
 pyshared_unix: python_clean pyshared
-		$(CC) -shared -Wl,-soname$(WPYSONAME) -o $(APPYTHON)/$(WPYSHAREDNAME) \
+		$(CC) -shared -Wl,-soname$(WPYSONAME) -o $(PYTHON)/$(WPYSHAREDNAME) \
 			   $(pylib) $(wpylib)
-		$(CC) -shared -Wl,-soname$(APYSONAME) -o $(APPYTHON)/$(APYSHAREDNAME) \
+		$(CC) -shared -Wl,-soname$(APYSONAME) -o $(PYTHON)/$(APYSHAREDNAME) \
 			   $(pylib) $(apylib)
 
 pyshared_openbsd: python_clean pyshared
-		$(LD) -Bshareable $(pylib) $(wpylib) -o $(APPYTHON)/$(WPYSHAREDNAME)
-		$(LD) -Bshareable $(pylib) $(apylib) -o $(APPYTHON)/$(APYSHAREDNAME)
+		$(LD) -Bshareable $(pylib) $(wpylib) -o $(PYTHON)/$(WPYSHAREDNAME)
+		$(LD) -Bshareable $(pylib) $(apylib) -o $(PYTHON)/$(APYSHAREDNAME)
 
 pyshared_netbsd: pyshared_openbsd
 
 pyshared_solaris: python_clean pyshared
-		$(LD) $(SWIG_LDFLAGS) $(pylib) $(wpylib) -o $(APPYTHON)/$(WPYSHAREDNAME)
-		$(CC) $(SWIG_LDFLAGS) $(pylib) $(apylib) -o $(APPYTHON)/$(APYSHAREDNAME)
+		$(LD) $(SWIG_LDFLAGS) $(pylib) $(wpylib) -o $(PYTHON)/$(WPYSHAREDNAME)
+		$(CC) $(SWIG_LDFLAGS) $(pylib) $(apylib) -o $(PYTHON)/$(APYSHAREDNAME)
 
 pyshared_osx: python_clean pyshared
-		$(CC) $(SWIG_CFLAGS) $(pylib) $(wpylib) -o $(APPYTHON)/$(WPYSHAREDNAME)
-		$(CC) $(SWIG_CFLAGS) $(pylib) $(apylib) -o $(APPYTHON)/$(APYSHAREDNAME) 
+		$(CC) $(SWIG_CFLAGS) $(pylib) $(wpylib) -o $(PYTHON)/$(WPYSHAREDNAME)
+		$(CC) $(SWIG_CFLAGS) $(pylib) $(apylib) -o $(PYTHON)/$(APYSHAREDNAME) 
 
 
 pyshared_mingw: python_clean pyshared
-		$(CC) -shared -o $(APPYTHON)/$(WPYSHAREDNAME) $(pylib) $(wpylib) \
+		$(CC) -shared -o $(PYTHON)/$(WPYSHAREDNAME) $(pylib) $(wpylib) \
 		-Wl,--out-implib,$(WPYNAME)dll.a
-		$(CC) -shared -o $(APPYTHON)/$(APYSHAREDNAME) $(pylib) $(apylib) \
+		$(CC) -shared -o $(PYTHON)/$(APYSHAREDNAME) $(pylib) $(apylib) \
 		-Wl,--out-implib,$(APYNAME)dll.a
 
 
 pyshared_cygwin: python_clean pyshared
-		$(CC) -shared $(pylib) $(wpylib) $(LIB_PYTHON)/config -lpython$(PY_VERSION) -o $(APPYTHON)/$(WPYSHAREDNAME)
-		$(CC) -shared $(pylib) $(apylib) $(LIB_PYTHON)/config -lpython$(PY_VERSION) -o $(APPYTHON)/$(APYSHAREDNAME)
+		$(CC) -shared $(pylib) $(wpylib) $(LIB_PYTHON)/config -lpython$(PY_VERSION) -o $(PYTHON)/$(WPYSHAREDNAME)
+		$(CC) -shared $(pylib) $(apylib) $(LIB_PYTHON)/config -lpython$(PY_VERSION) -o $(PYTHON)/$(APYSHAREDNAME)
 
 python:
 		@$(MAKE) W_PYSHARED=on $(PYSHARED_OS)
 
-pyshared : $(APPYTHON)/warc.py $(APPYTHON)/arc.py $(pylib) $(wpylib) $(apylib)
+pyshared : $(PYTHON)/warc.py $(PYTHON)/arc.py $(pylib) $(wpylib) $(apylib)
 
-$(APPYTHON)/warc.py $(PYTHON)/warc_wrap.c : 
-	$(SWIG) -python -outdir $(APPYTHON) $(PYTHON)/warc.i
+$(PYTHON)/warc.py $(PYTHON)/warc_wrap.c : 
+	$(SWIG) -python -outdir $(PYTHON) $(PYTHON)/warc.i
+
+$(PYTHON)/wpybless.o : $(PYTHON)/wpybless.c
+	$(CC) $(CFLAGS) $(INC_RUBY) -c $< -o $@
+
+$(PYTHON)/apybless.o : $(PYTHON)/apybless.c
+	$(CC) $(CFLAGS) $(INC_RUBY) -c $< -o $@
+
+$(PYTHON)/wfield.o : $(PYTHON)/wfield.c
+	$(CC) $(CFLAGS) $(INC_RUBY) -c $< -o $@
 
 $(PYTHON)/warc_wrap.o : $(PYTHON)/warc_wrap.c
 	$(CC) $(INC_PYTHON) -c $(PYTHON)/warc_wrap.c -o $(PYTHON)/warc_wrap.o
 #	$(CC) $(CFLAGS) $(INC_PYTHON) -c $(PYTHON)/warc_wrap.c -o $(PYTHON)/warc_wrap.o
 
-$(APPYTHON)/arc.py $(PYTHON)/arc_wrap.c :
-	$(SWIG) -python -outdir $(APPYTHON) $(PYTHON)/arc.i
+$(PYTHON)/arc.py $(PYTHON)/arc_wrap.c :
+	$(SWIG) -python -outdir $(PYTHON) $(PYTHON)/arc.i
 
 $(PYTHON)/arc_wrap.o : $(PYTHON)/arc_wrap.c
 	$(CC) $(INC_PYTHON) -c $(PYTHON)/arc_wrap.c -o $(PYTHON)/arc_wrap.o
@@ -885,10 +894,10 @@ mod_apache_clean:	; @rm -rf $(mod_apache).la $(mod_apache).lo \
 mod_lighty_clean: ; @rm -rf $(LIGHTTPD)/*.o $(LIGHTTPD)/*~ \
 				    $(LIGHTTPD)/warc.cgi $(LIGHTTPD)/warc.fcgi
 
-python_clean: 	   ; @rm -f $(PYTHON)/*.c $(PYTHON)/*.o      
-					 @rm -f $(APPYTHON)/*.so $(APPYTHON)/warc.py \
-					 $(APPYTHON)/arc.py $(APPYTHON)/*.pyc \
-					 $(APPYTHON)/*$(LIBSUFFIX)* $(APPYTHON)/_*
+python_clean: 	   ; @rm -f $(PYTHON)/*.o $(PYTHON)/*~ $(PYTHON)/*.pyc      
+					 @rm -f $(APPYTHON)/*.so $(PYTHON)/warc.py $(PYTHON)/warc_warp.c $(PYTHON)/arc_warp.c\
+					 $(PYTHON)/arc.py $(APPYTHON)/*.pyc  $(APPYTHON)/*~ \
+					 $(PYTHON)/*$(LIBSUFFIX)* $(PYTHON)/_* 
 
 clean:		tclean	mod_apache_clean mod_lighty_clean python_clean
 			@rm -f $t             $(obj)            *.o \
@@ -905,5 +914,6 @@ clean:		tclean	mod_apache_clean mod_lighty_clean python_clean
                    $(CUNIT)/*.o   $(REGEX)/*~       $(REGEX)/*.o \
 				   ${OSDEP}/*.o   ${OSDEP}/*~       ${MINGW_DEP}/*.o
 			@rm -rf $(DOC)/html    warc-tools*
+			@rm -rf $(CONTRIB)/jhove/*~ $(CONTRIB)/httrack/*~ $(CONTRIB)/file/*~	
 
 .PHONY: all static clean tclean doc source tgz rpm deb mod_apache_clean mod_lighty_clean

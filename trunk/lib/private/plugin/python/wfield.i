@@ -23,10 +23,17 @@
 /*     http://code.google.com/p/warc-tools/                            */
 /* ------------------------------------------------------------------- */
 
-%module   arc
-%include "aclass.i"
-%include "arecord.i"
-%include "record.i"
-%include "afile.i"
-%include "list.i"
-%include "apybless.i"
+/* wbloc.i */
+ %{
+   #include <wport.h>
+   #include "wfield.h"
+ 
+ %}
+  
+
+
+    extern const char * getFieldKey (void * r, unsigned int rank);
+    extern const char * getFieldValue (void * r, unsigned rank);
+
+
+

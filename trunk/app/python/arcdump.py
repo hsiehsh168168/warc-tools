@@ -25,6 +25,9 @@
 #     http://code.google.com/p/warc-tools/                             #
 # -------------------------------------------------------------------  #
 
+import wpath
+from afile import AFile
+from arecord import ARecord
 
 import arc
 from optparse import OptionParser
@@ -50,34 +53,34 @@ def main () :
         parser.error(" You must give ARC file name")
 
     count = 0
-    a = arc.bless (arc.cvar.AFile, options.filename, arc.ARC_FILE_DETECT_COMPRESSION, options.tmpdir)
+    a = AFile (options.filename, arc.ARC_FILE_DETECT_COMPRESSION, options.tmpdir)
 
     if (not (a)) :
              print "ARC file  not found  "
              return
         
-    while (arc.AFile_hasMoreRecords (a) ) :
+    while (a . hasMoreRecords () ) :
  
-          ar = arc.AFile_nextRecord (a)
+          ar = a . nextRecord ()
           if (not (ar)) :
              print "bad arc file"
-             arc.destroy (a)
+             a . destroy ()
              return
           count = count +1
 
           print "Arc record number :", count, "\n"
           print "***************************************************************************************************************\n\n"
 
-          print "Url:\t ", arc.ARecord_getUrl (ar)
-          print "CreationDate:\t ", arc.ARecord_getCreationDate (ar)
-          print "MimeType:\t ", arc.ARecord_getMimeType (ar)
-          print "IpAdress:\t ", arc.ARecord_getIpAddress(ar)
+          print "Url:\t ", ar . getUrl ()
+          print "CreationDate:\t ", ar . getCreationDate ()
+          print "MimeType:\t ", ar . getMimeType ()
+          print "IpAdress:\t ", ar . getIpAddress()
         
           print "***************************************************************************************************************\n\n"
 
-          arc.destroy (ar)
+          ar . destroy ()
 
-    arc.destroy (a)
+    a . destroy ()
     return
 
 if __name__ == "__main__":

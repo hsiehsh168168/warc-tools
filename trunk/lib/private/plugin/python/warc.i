@@ -30,4 +30,7 @@
 %include "anvl.i"
 %include "record.i"
 %include "file.i"
+%include "wbloc.i"
+%include "wpybless.i"
+%include "wfield.i"
 

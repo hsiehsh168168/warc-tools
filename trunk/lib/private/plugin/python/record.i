@@ -24,6 +24,7 @@
 /* ------------------------------------------------------------------- */
 
 /* record.i */
+%include "typemaps.i"
  %{
    #include <wport.h>
    #include <wrectype.h>
@@ -52,7 +53,7 @@
     extern const char *  WRecord_getDate (const void * const);
     extern const char *  WRecord_getContentType (const void * const);
     extern const char *  WRecord_getRecordId    (const void * const);
-    extern warc_bool_t   WRecord_getContent     (const void * const);
+    extern int   WRecord_getContent     (const void * const);
     extern const char *   WRecord_getAnvlValue   (const void * const,
           const char *);
     extern  unsigned int  WRecord_getContentLength        (const void * const );
@@ -74,66 +75,72 @@
     extern const void * WRecord_getAnvl         (const void * const);
 
 
-    extern warc_bool_t   WRecord_setRecordType   (void *, const warc_rec_t);
-    extern warc_bool_t   WRecord_setTargetUri   (void *, const char *,
+    extern int   WRecord_setRecordType   (void *, const warc_rec_t);
+    extern int   WRecord_setTargetUri   (void *, const char *,
           const unsigned int);
-    extern warc_bool_t   WRecord_setDate (void *, const char *,
+    extern int   WRecord_setDate (void *, const char *,
           const unsigned int);
-    extern warc_bool_t   WRecord_setContentType  (void *, const char *,
+    extern int   WRecord_setContentType  (void *, const char *,
           const unsigned int );
-    extern warc_bool_t   WRecord_setRecordId     (void *, const char *,
-          const unsigned int );
-
-    extern  warc_bool_t WRecord_setConcurrentTo (void *,  const char *,
+    extern int   WRecord_setRecordId     (void *, const char *,
           const unsigned int );
 
-    extern warc_bool_t WRecord_setBlockDigest (void *, const char *,
-          const unsigned int);
+    extern  int WRecord_setConcurrentTo (void *,  const char *,
+          const unsigned int );
 
-    extern warc_bool_t WRecord_setPayloadDigest (void *, const char *,
+    extern int WRecord_setBlockDigest (void *, const char *,
           const unsigned int);
 
-    extern warc_bool_t  WRecord_setIpAddress (void *, const char *,
-          const unsigned int );
-
-    extern warc_bool_t  WRecord_setRefersTo (void *,  const char *,
+    extern int WRecord_setPayloadDigest (void *, const char *,
           const unsigned int);
 
-    extern warc_bool_t  WRecord_setTruncated (void *, const char *,
+    extern int  WRecord_setIpAddress (void *, const char *,
           const unsigned int );
 
-    extern warc_bool_t   WRecord_setWarcInfoId (void * _self, const char *,
+    extern int  WRecord_setRefersTo (void *,  const char *,
+          const unsigned int);
+
+    extern int  WRecord_setTruncated (void *, const char *,
           const unsigned int );
 
-    extern warc_bool_t   WRecord_setProfile (void *, const char *,
+    extern int   WRecord_setWarcInfoId (void * _self, const char *,
           const unsigned int );
 
-    extern warc_bool_t  WRecord_setPayloadType (void *, const char *,
+    extern int   WRecord_setProfile (void *, const char *,
           const unsigned int );
 
-    extern warc_bool_t   WRecord_setSegmentOriginId (void *, const char *,
+    extern int  WRecord_setPayloadType (void *, const char *,
           const unsigned int );
 
-    extern warc_bool_t    WRecord_setSegmentNumber (void *,  const unsigned int);
+    extern int   WRecord_setSegmentOriginId (void *, const char *,
+          const unsigned int );
+
+    extern int    WRecord_setSegmentNumber (void *,  const unsigned int);
 
     
-    extern warc_bool_t    WRecord_setSegTotalLength (void *, const unsigned int);
+    extern int    WRecord_setSegTotalLength (void *, const unsigned int);
 
-    extern warc_bool_t    WRecord_setFilename (void *, const char *,
+    extern int    WRecord_setFilename (void *, const char *,
           const unsigned int );
 
 
-    extern warc_bool_t   WRecord_addAnvl         (void *, const char *,
+    extern int   WRecord_addAnvl         (void *, const char *,
           const unsigned int, const char *,
           const unsigned int);
 
-    extern warc_bool_t   WRecord_setContentFromFileName (void *, const char *);
+    extern int   WRecord_setContentFromFileName (void *, const char *);
 
-    extern warc_bool_t    WRecord_getOffset           (const void * const );
+    extern int    WRecord_getOffset           (const void * const );
     extern unsigned int    WRecord_getUncompressedSize (const void * const );
     extern unsigned int    WRecord_getCompressedSize   (const void * const);
 
-    extern warc_bool_t WRecord_setDateFromArc   (void *  ,
+    extern int WRecord_setDateFromArc   (void *  ,
                                                 const char * ,
                                                 const unsigned int );
 
+    extern unsigned int WRecord_getAnvlFieldsNumber (const void * const );
+
+
+/* %apply char * OUTPUT { char * key, char * value } */
+
+   extern int WRecord_getAnvlField (const void * const , const unsigned int , const char ** , const char **);
