@@ -23,10 +23,12 @@
 /*     http://code.google.com/p/warc-tools/                            */
 /* ------------------------------------------------------------------- */
 
-%module   arc
-%include "aclass.i"
-%include "arecord.i"
-%include "record.i"
-%include "afile.i"
-%include "list.i"
-%include "apybless.i"
+
+Good news.
+The WARC file format is officially supported by the UNIX/Linux command "file" 
+since the version "4.26" (ftp://ftp.astron.com/pub/file/file-4.26.tar.gz). 
+"file" is now able to recognize a WARC file as follow:
+
+$ file foo.warc
+$ file -z foo.warc.gz
+

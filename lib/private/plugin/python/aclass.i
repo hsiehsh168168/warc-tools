@@ -39,7 +39,7 @@
 #include <wclass.h>
      
  %}
-   %varargs(const char * str = NULL,  afile_comp_t comp =2,  const char * chr = NULL) bless;
+/*    %varargs(const char * str = NULL,  afile_comp_t comp =2,  const char * chr = NULL) bless; */
    extern void * bless   (const void *, ...);
    extern void   destroy (void *);
    extern void   cassert (void * const, const unsigned int);

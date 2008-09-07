@@ -25,6 +25,9 @@
 #     http://code.google.com/p/warc-tools/                             #
 # -------------------------------------------------------------------  #
 
+import wpath
+from wrecord  import WRecord
+from wfile import WFile
 
 import warc
 from optparse import OptionParser
@@ -46,7 +49,7 @@ def main () :
                       action="store_true", dest="verbose")
     
     parser.add_option("-t", "--tempdir", dest="tmpdir",
-                      help="Temporary working directory", default="./")
+                      help="Temporary working directory", default=".")
 
     (options, args) = parser.parse_args()
 
@@ -56,100 +59,102 @@ def main () :
     if (not (options.filename)) :
         parser.error(" You must give WARC file name")
 
-    w = warc.bless (warc.cvar.WFile, options.filename, 600 * 1024 * 1024, warc.WARC_FILE_READER, warc.WARC_FILE_DETECT_COMPRESSION, options.tmpdir)
-
+    w = WFile (options.filename ,600 * 1024 * 1024, warc.WARC_FILE_READER, warc.WARC_FILE_DETECT_COMPRESSION, options.tmpdir)
+    print "habiba"
     if (not (w)) :
              print "WARC file  not found  "
              return
     print "%-20s %-20s %-10s %-20s %-45s %-44s %-86s " % ("Offset", "CSize", "WarcId", "Content-Length", \
            "WARC-Type", "WARC-Date",  "WARC-Record-ID")
 
-    while (warc.WFile_hasMoreRecords (w)) :
+    while ( w.hasMoreRecords()) :
 
-          r = warc.WFile_nextRecord(w)
+          r = w.nextRecord()
 
           if (not (r)) :
              print "bad WARC file "
+             ######################### JE DOIT FAIRE LE DESTROY APRES
              warc.destroy (w)
              return             
 
-          sys.stdout.write ("%-20u " % warc.WRecord_getOffset (r))
+          sys.stdout.write ("%-20u " %  r . getOffset () )
 
-          sys.stdout.write ("%-20u " % warc.WRecord_getCompressedSize (r))
+          sys.stdout.write ("%-20u " %  r . getCompressedSize () )
 
-	  sys.stdout.write ("%-10s " % warc.WRecord_getWarcId (r))
+	  sys.stdout.write ("%-10s " %  r . getWarcId () )
 
-          sys.stdout.write ("%-20u " % warc.WRecord_getContentLength (r)) 
+          sys.stdout.write ("%-20u " %  r . getContentLength () ) 
 
-          sys.stdout.write ("%-45u " % warc.WRecord_getRecordType (r)) 
+          sys.stdout.write ("%-45u " %  r . getRecordType () ) 
 
-          sys.stdout.write ("%-44s " % warc.WRecord_getDate (r))
+          sys.stdout.write ("%-44s " %  r . getDate () )
 
-          sys.stdout.write ("%-86s " % warc.WRecord_getRecordId (r))      
-
+          sys.stdout.write ("%-86s " %  r . getRecordId () )      
+          #########
           m1 = warc.WARC_FALSE
           print "More Fields:\n"
-
-          if (warc.WRecord_getContentType (r)) :
-              print "%-35s: %-20s" %  ("Content-Type" , warc.WRecord_getContentType (r))
+          #########
+          
+          if (r . getContentType () ) :
+              print "%-35s: %-20s" %  ("Content-Type" , r . getContentType () )
               m1 = warc.WARC_TRUE 
 
           
 
-          if (warc.WRecord_getConcurrentTo(r)) :
-              print "%-35s: %-20s" % ("WARC-Concurrent-To" , warc.WRecord_getConcurrentTo(r))
+          if (r . getConcurrentTo ()) :
+              print "%-35s: %-20s" % ("WARC-Concurrent-To" , r . getConcurrentTo ())
               m1 = warc.WARC_TRUE
 
-          if (warc.WRecord_getBlockDigest (r)) :
-              print "%-35s: %-20s" % ( "WARC-Block-Digest", warc.WRecord_getBlockDigest (r))
+          if (r . getBlockDigest ()) :
+              print "%-35s: %-20s" % ( "WARC-Block-Digest", r . getBlockDigest ())
               m1 = warc.WARC_TRUE
 
-          if (warc.WRecord_getPayloadDigest (r)) :
-              print "%-35s: %-20s"  % ("WARC-Payload-Digest", warc.WRecord_getPayloadDigest (r))
+          if (r . getPayloadDigest ()) :
+              print "%-35s: %-20s"  % ("WARC-Payload-Digest", r . getPayloadDigest ())
               m1 = warc.WARC_TRUE
 
-          if (warc.WRecord_getIpAddress (r)) :
-               print "%-35s: %-20s"  % ("WARC-IP-Address", warc.WRecord_getIpAddress (r))
+          if (r . getIpAddress ()) :
+               print "%-35s: %-20s"  % ("WARC-IP-Address", r . getIpAddress ())
                m1 = warc.WARC_TRUE
 
-          if ( warc.WRecord_getRefersTo (r)) :
-               print  "%-35s: %-20s" % ("WARC-Refers-To", warc.WRecord_getRefersTo (r))
+          if ( r . getRefersTo ()) :
+               print  "%-35s: %-20s" % ("WARC-Refers-To", r . getRefersTo ())
                m1 = warc.WARC_TRUE
 
-          if (warc.WRecord_getTargetUri (r)) :
-               print   "%-35s: %-20s" % ( "WARC-Target-URI",warc.WRecord_getTargetUri (r))
+          if (r . getTargetUri ()) :
+               print   "%-35s: %-20s" % ( "WARC-Target-URI",r . getTargetUri ())
                m1 = warc.WARC_TRUE
 
-          if (warc.WRecord_getTruncated (r)) :
-               print  "%-35s: %-20s" % ("WARC-Truncated", warc.WRecord_getTruncated (r))
+          if (r . getTruncated ()) :
+               print  "%-35s: %-20s" % ("WARC-Truncated", r . getTruncated ())
                m1 = warc.WARC_TRUE
 
-          if ( warc.WRecord_getWarcInfoId (r)) :
-               print  "%-35s: %-20s" % ("WARC-Warcinfo-ID", warc.WRecord_getWarcInfoId (r))
+          if ( r . getWarcInfoId ()) :
+               print  "%-35s: %-20s" % ("WARC-Warcinfo-ID", r . getWarcInfoId ())
                m1 = warc.WARC_TRUE
 
-          if (warc.WRecord_getFilename (r)) :
-               print "%-35s: %-20s" % ("WARC-Filename:", warc.WRecord_getFilename (r))
+          if (r . getFileName ()) :
+               print "%-35s: %-20s" % ("WARC-Filename:", r . getFileName ())
                m1 = warc.WARC_TRUE
 
-          if (warc.WRecord_getProfile (r)) :
-               print "%-35s: %-20s" % ("WARC-Profile", warc.WRecord_getProfile (r))
+          if (r . getProfile ()) :
+               print "%-35s: %-20s" % ("WARC-Profile", r . getProfile ())
                m1 = warc.WARC_TRUE
 
-          if (warc.WRecord_getPayloadType (r)) :
-               print "%-35s: %-20s" % ("WARC-Identified-Payload-type", warc.WRecord_getPayloadType (r))
+          if (r . getPayloadType ()) :
+               print "%-35s: %-20s" % ("WARC-Identified-Payload-type", r . getPayloadType ())
                m1 = warc.WARC_TRUE
 
-          if (warc.WRecord_getSegmentOriginId  (r)) :
-                print "%-35s: %-20s" % ("WARC-Segment-Origin-ID", warc.WRecord_getSegmentOriginId  (r))
+          if (r . getSegmentOriginId  ()) :
+                print "%-35s: %-20s" % ("WARC-Segment-Origin-ID", r . getSegmentOriginId  ())
                 m1 = warc.WARC_TRUE
 
-          if (warc. WRecord_getSegmentNumber (r)) :
-                print "%-35s: %-20d" % ("WARC-Segment-Number", warc. WRecord_getSegmentNumber (r))
+          if (r . getSegmentNumber ()) :
+                print "%-35s: %-20d" % ("WARC-Segment-Number", r . getSegmentNumber ())
                 m1 = warc.WARC_TRUE
 
-          if (warc.WRecord_getSegTotalLength(r)) :
-                print "%-35s: %-20d" % ("WARC-Segment-Total-Length", warc.WRecord_getSegTotalLength(r))
+          if (r . getSegTotalLength ()) :
+                print "%-35s: %-20d" % ("WARC-Segment-Total-Length", r . getSegTotalLength())
                 m1 = warc.WARC_TRUE
          
           if (not (m1)) :
@@ -157,23 +162,18 @@ def main () :
 
           if (options.verbose) :
 
-             al = warc.WRecord_getAnvl (r)
-            
-             if  al :
-                 i = 0
-                 j = warc.WList_size(al)
-                 if (j) :
-                        print "-- More Info--\n"
-                        while ( i < j ) :
-                                   a = warc.WList_getElement (al, i)
-                                   print  "key :  ",warc.WAnvl_getKey   (a) 
-                                   print  "Value: ",  warc.WAnvl_getValue (a)
-                                   i = i + 1
-                                   
+                 nb = r . getAnvlFieldsNumber ()
+                 if  nb != 0 :
+                     i = 0
+                     print "-- More Info--\n"
+                     while ( i < nb ) :
+                         print  "key :  ", r . getAnvlFieldKey (i)
+                         print  "Value: ", r . getAnvlFieldValue (i)
+                         i = i + 1
+                        
+          r.destroy()
 
-          warc.destroy (r)
-
-    warc.destroy (w)
+    w.destroy ()
     return
 
 if __name__ == "__main__":

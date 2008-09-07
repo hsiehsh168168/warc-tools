@@ -42,8 +42,8 @@
     extern const char *  ARecord_getIpAddress    (const void * const);
     extern warc_bool_t        ARecord_getContent      (const void* const );
 
-    extern warc_bool_t        ARecord_transferContent (void *, void *, void *);
-    extern warc_bool_t        ARecord_setCallback     (void *,
+    extern int        ARecord_transferContent (void *, void *, void *);
+    extern int        ARecord_setCallback     (void *,
           warc_bool_t (*)
           (void *,  const char *,
            warc_u32_t) );

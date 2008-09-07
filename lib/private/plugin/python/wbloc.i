@@ -23,10 +23,18 @@
 /*     http://code.google.com/p/warc-tools/                            */
 /* ------------------------------------------------------------------- */
 
-%module   arc
-%include "aclass.i"
-%include "arecord.i"
-%include "record.i"
-%include "afile.i"
-%include "list.i"
-%include "apybless.i"
+/* wbloc.i */
+ %{
+   #include <wport.h>
+   #include <wbloc.h>
+ 
+ %}
+  
+
+    extern const void * WBloc;
+
+    extern char * WBloc_next (void *);
+    extern const char * WBloc_getHttpCode (const void * const);
+
+
+

@@ -23,10 +23,26 @@
 /*     http://code.google.com/p/warc-tools/                            */
 /* ------------------------------------------------------------------- */
 
-%module   arc
-%include "aclass.i"
-%include "arecord.i"
-%include "record.i"
-%include "afile.i"
-%include "list.i"
-%include "apybless.i"
+#ifndef __WFIELD_H__
+#define __WFIELD_H__
+#include <warc.h>
+
+
+/* to mix C and C++ */
+#ifdef __cplusplus
+extern "C"
+  {
+#endif
+
+
+
+    extern const warc_u8_t * getFieldKey (void * r, warc_u32_t rank);
+    extern const warc_u8_t * getFieldValue (void * r, warc_u32_t rank);
+
+
+#ifdef __cplusplus
+  }
+
+#endif
+
+#endif /* __WFIELD_H__ */

@@ -23,10 +23,31 @@
 /*     http://code.google.com/p/warc-tools/                            */
 /* ------------------------------------------------------------------- */
 
-%module   arc
-%include "aclass.i"
-%include "arecord.i"
-%include "record.i"
-%include "afile.i"
-%include "list.i"
-%include "apybless.i"
+#ifndef __WPYBLESS_H__
+#define __WPYBLESS_H__
+#include <warc.h>
+
+
+/* to mix C and C++ */
+#ifdef __cplusplus
+extern "C"
+  {
+#endif
+
+
+    extern void * bless_WFile (const char  * , const warc_u32_t  , wfile_mode_t , const wfile_comp_t , const char * );
+
+
+    extern void * bless_WRecord ();
+
+
+    extern void * bless_WBloc (void  * , void  * , const warc_u32_t );
+
+
+#ifdef __cplusplus
+  }
+
+#endif
+
+#endif /* __WPYBLESS_H__ */
+

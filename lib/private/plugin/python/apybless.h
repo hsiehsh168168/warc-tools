@@ -23,10 +23,27 @@
 /*     http://code.google.com/p/warc-tools/                            */
 /* ------------------------------------------------------------------- */
 
-%module   arc
-%include "aclass.i"
-%include "arecord.i"
-%include "record.i"
-%include "afile.i"
-%include "list.i"
-%include "apybless.i"
+#ifndef __APYBLESS_H__
+#define __APYBLESS_H__
+
+#include <stdio.h>
+#include <afile.h>
+
+
+/* to mix C and C++ */
+#ifdef __cplusplus
+extern "C"
+  {
+#endif
+
+
+    extern void * bless_AFile (const char *, const afile_comp_t, const char *);
+
+
+#ifdef __cplusplus
+  }
+
+#endif
+
+#endif /* __WPYBLESS_H__ */
+

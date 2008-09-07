@@ -23,10 +23,14 @@
 /*     http://code.google.com/p/warc-tools/                            */
 /* ------------------------------------------------------------------- */
 
-%module   arc
-%include "aclass.i"
-%include "arecord.i"
-%include "record.i"
-%include "afile.i"
-%include "list.i"
-%include "apybless.i"
+/* anvl.i */
+ %{
+   #include <wport.h>
+   #include "apybless.h"
+ 
+ %}
+  
+
+    extern void * bless_AFile (const char *, const unsigned int, const char *);
+
+

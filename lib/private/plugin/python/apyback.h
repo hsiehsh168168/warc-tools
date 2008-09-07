@@ -32,6 +32,8 @@ typedef struct {
     PyObject* callback;
     PyObject* arg;
     } callbackStruct;
+
+
 PyObject* pyAFile_register(void *, void * , PyObject* pyfunc, PyObject* arg);
 extern warc_bool_t     AFile_register       (void *, void *,
           int (*)
