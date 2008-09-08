@@ -1,0 +1,17 @@
+
+HTTracks contributions:
+
+
+httrak2warc.sh
+---------------
+
+This script will help you to move existing HTTtack collections to WARC format.
+It's a 3 stags application:
+
+1. collect all files within a collection
+2. strip out unwanted ones (junk files, HTTRack related files ...)
+3. proceeds to the conversion 
+
+This script use the Python command "app/python/file2warc.py" internally.
+
+So, change it to fit your needs.

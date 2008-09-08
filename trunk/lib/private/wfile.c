@@ -2056,7 +2056,7 @@ WPUBLIC warc_bool_t WFile_storeRecord (void* _self, const void * wrec)
 
   unless (WRecord_check (wrec) )
   {
-    WarcDebugMsg ("The filled field are not compatible with the WARC Record Type");
+    WarcDebugMsg ("filled fields are not compatible with the WARC Record type");
     return (WARC_TRUE);
   }
 
