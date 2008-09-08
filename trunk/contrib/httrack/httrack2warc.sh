@@ -35,6 +35,7 @@ compressed=""
 tempdir="."
 ip="0.0.0.0"
 
+file2wrec="../app/python/file2wrec.py"
 
 
 isDigit () {
@@ -242,7 +243,7 @@ if [ $stage -eq 3 ]; then
        getDate $r
 
        #./file2wrec.py $inurl $inmime $indate $ip $maxsize ...
-       python ../file2wrec.py -f "$r" -w "$warcname" -u "$inurl" -m "$inmime" -d "$indate" -i "$ip" -x "$maxsize" -t "$tempdir" $compressed >&2
+       python $file2wrec -f "$r" -w "$warcname" -u "$inurl" -m "$inmime" -d "$indate" -i "$ip" -x "$maxsize" -t "$tempdir" $compressed >&2
 
     done < "$list"
 
