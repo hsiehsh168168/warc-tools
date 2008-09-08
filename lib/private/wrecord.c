@@ -75,6 +75,74 @@ struct user_struct {
    void * http_code;
 };
 
+
+/**
+ * WARC WRecord class internal
+ */
+
+#define SIGN 5
+
+#define MASK1    0x0000000F
+#define AND_MSK1 0x00000001
+#define OR_MSK1  0x00000061
+#define AND_MSK2 0x00000011
+#define OR_MSK2  0x00000457
+#define AND_MSK3 0x00000051
+#define OR_MSK3  0x0000045F
+#define AND_MSK4 0x00000001
+#define OR_MSK4  0x0000045F
+#define AND_MSK5 0x00000011
+#define OR_MSK5  0x00000459
+#define AND_MSK6 0x00000190
+#define OR_MSK6  0x000007D0
+
+struct WRecord
+  {
+
+    const void * class;
+
+    /*@{*/
+    void * header; /**< Header object */
+    void * tdatafile; /**< Temporary Data File descriptor */
+    FILE * externdfile; /**< User given data file descriptor */
+    void * arccontent; /**< data File recovered from an Arc Record */
+    warc_u32_t check; /**< Mandatory Fields presence cheking value */
+    warc_u32_t opt_check; /**< Optional fields checking value */
+    warc_u64_t size; /**< Warc Data File size */
+    warc_bool_t (* callback) (void* env, const char * buff, warc_u32_t size); /**< Pointer to the user call back function */
+    void * env; /**< pointer to user data buffer */
+    warc_i64_t woffset; /**< the offset of the data bloc in the warc file */
+    void * who; /**< The WFile object representing the WarcFile which contains this record*/
+    warc_bool_t presentchdr; /**< in compressed record case, to see if
+                           warc the compressionheader where present */
+    warc_u64_t  csize; /**< the compressed size of the record (in compressed cas) */
+    warc_u64_t  usize; /**< the uncompressed size of the record */
+    warc_u64_t  offsetinfile; /**< the begining offset of the record in the Warc File */
+
+    /*@}*/
+  };
+
+
+#define HDL     (self -> header)
+#define DATAF   (self -> tdatafile)
+#define EDATAF  (self -> externdfile)
+#define CHECK   (self -> check)
+#define OPT_CHK (self -> opt_check)
+#define CBACK   (self -> callback)
+#define ENV     (self -> env)
+#define SIZE    (self -> size)
+#define OFFSET  (self -> woffset)
+#define WHO     (self -> who)
+#define CHDP    (self -> presentchdr)
+#define ACONT   (self -> arccontent)
+#define CSIZE   (self -> csize)
+#define USIZE   (self -> usize)
+#define IOFFSET (self -> offsetinfile)
+
+
+
+
+
 warc_bool_t b_callback (void * env, const char* buff, const warc_u32_t size)
 {
   struct user_struct * user_data = env;
@@ -238,69 +306,6 @@ while (i < size)
 }
 */
 
-
-/**
- * WARC WRecord class internal
- */
-
-#define SIGN 5
-
-#define MASK1    0x0000000F
-#define AND_MSK1 0x00000001
-#define OR_MSK1  0x00000061
-#define AND_MSK2 0x00000011
-#define OR_MSK2  0x00000457
-#define AND_MSK3 0x00000051
-#define OR_MSK3  0x0000045F
-#define AND_MSK4 0x00000001
-#define OR_MSK4  0x0000045F
-#define AND_MSK5 0x00000011
-#define OR_MSK5  0x00000459
-#define AND_MSK6 0x00000190
-#define OR_MSK6  0x000007D0
-
-struct WRecord
-  {
-
-    const void * class;
-
-    /*@{*/
-    void * header; /**< Header object */
-    void * tdatafile; /**< Temporary Data File descriptor */
-    FILE * externdfile; /**< User given data file descriptor */
-    void * arccontent; /**< data File recovered from an Arc Record */
-    warc_u32_t check; /**< Mandatory Fields presence cheking value */
-    warc_u32_t opt_check; /**< Optionnaly fields presence checking value */
-    warc_u64_t size; /**< Warc Data File size */
-    warc_bool_t (* callback) (void* env, const char * buff, warc_u32_t size); /**< Pointer to the user call back function */
-    void * env; /**< pointer to user data buffer */
-    warc_i64_t woffset; /**< the offset of the data bloc in the warc file */
-    void * who; /**< The WFile object representing the WarcFile which contains this record*/
-    warc_bool_t presentchdr; /**< in compressed record case, to see if
-                           warc the compressionheader where present */
-    warc_u64_t  csize; /**< the compressed size of the record (in compressed cas) */
-    warc_u64_t  usize; /**< the uncompressed size of the record */
-    warc_u64_t  offsetinfile; /**< the begining offset of the record in the Warc File */
-
-    /*@}*/
-  };
-
-
-#define HDL     (self -> header)
-#define DATAF   (self -> tdatafile)
-#define EDATAF  (self -> externdfile)
-#define CHECK   (self -> check)
-#define OPT_CHK (self -> opt_check)
-#define CBACK   (self -> callback)
-#define ENV     (self -> env)
-#define SIZE    (self -> size)
-#define OFFSET  (self -> woffset)
-#define WHO     (self -> who)
-#define CHDP    (self -> presentchdr)
-#define ACONT   (self -> arccontent)
-#define CSIZE   (self -> csize)
-#define USIZE   (self -> usize)
-#define IOFFSET (self -> offsetinfile)
 
 
 /**
@@ -1753,7 +1758,7 @@ WPUBLIC warc_bool_t WRecord_setRecordId (void * _self,
   wrt = WHeader_setRecordId (HDL, rid, len);
 
   if (wrt == WARC_FALSE)
-    CHECK = CHECK | 0x002;
+    CHECK = CHECK | 0x0002;
 
   return (wrt);
 }
@@ -1889,7 +1894,7 @@ WIPUBLIC void * WRecord_setHeader (void * const _self, void * h)
  */
 
 WIPUBLIC warc_bool_t WRecord_setContentFromFileName (void * _self,
-    const char * file)
+                                                     const char * file)
 {
 
   struct WRecord * self  = _self;
@@ -1901,7 +1906,7 @@ WIPUBLIC warc_bool_t WRecord_setContentFromFileName (void * _self,
   assert (! DATAF);
 
   unless (file)
-  return (WARC_TRUE);
+    return (WARC_TRUE);
 
   dfile = w_fopen_rb (file);
   unless (dfile)
@@ -2013,6 +2018,7 @@ WPUBLIC FILE * WRecord_getDataFileExtern (const void * const _self)
 
   /* Preconditions */
   CASSERT (self);
+
   assert (EDATAF);
 
   return (EDATAF);
@@ -2231,7 +2237,7 @@ WIPUBLIC warc_bool_t WRecord_setEnv (void * _self, void * env)
  *
  * @return True if all filled, False otherwise
  *
- * WRecord all fields filling checking function
+ * WRecord - fields checking function
  */
 
 WPUBLIC warc_bool_t WRecord_check (const void * const _self)
@@ -2664,7 +2670,9 @@ WPRIVATE void * WRecord_destructor (void * _self)
     destroy (ACONT), ACONT = NIL, EDATAF = NIL;
 
   if (EDATAF)
-    fclose (EDATAF), EDATAF = NIL;
+    {
+      w_fclose (EDATAF); EDATAF = NIL;
+    }
 
   if (CHECK)
     CHECK = 0;

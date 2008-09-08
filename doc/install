@@ -125,6 +125,8 @@ environment variable if necessary):
 - strip
 - subversion client
 - chmod
+- perl (for contrib/httrack)
+- python (for Python-SWIG wrapper)
 
 
 * To start unit tests, type:

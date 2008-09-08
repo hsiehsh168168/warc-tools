@@ -67,8 +67,6 @@ getURL () {
     inurl=$(perl -nle 'print $1 if /Mirrored from (.*) by HTTrack/' $1 | head -1)
     if [ -z "$inurl" ]; then
         inurl="$urlprefix$1"
-    else
-        inurl="$urlprefix$inurl"
     fi
 }
 

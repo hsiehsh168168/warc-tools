@@ -81,7 +81,8 @@ def main () :
     else :
         cmode = warc.WARC_FILE_UNCOMPRESSED
 
-    w = WFile(options.wfilename, 600 * 1024 * 1024 , warc.WARC_FILE_WRITER, cmode, options.tmpdir);
+    w = WFile(options.wfilename, 600 * 1024 * 1024,
+              warc.WARC_FILE_WRITER, cmode, options.tmpdir);
   
 
     if (not (w)) :
@@ -118,7 +119,7 @@ def main () :
              ar . destroy ()
              return
 
-          wr . setRecordType ( warc.WARC_RESOURCE_RECORD)
+          wr . setRecordType (warc.WARC_RESOURCE_RECORD)
 
           uri = ar . getUrl ()
           wr . setTargetUri (uri, len (uri))
@@ -138,7 +139,7 @@ def main () :
           warc.WUUID_reinit (uuid)
 
           if (ar . transferContent (wr, a)) :
-              print "Unable to pass content to the Warc Record"
+              print "Unable to pass content to the WRecord"
               a . destroy ()
               w . destroy ()
               warc.destroy (uuid)
@@ -146,7 +147,7 @@ def main () :
               return
 
           if (w . storeRecord (wr) ) :
-              print "failed to write  WRecord" 
+              print "failed to write WRecord" 
               a . destroy ()
               w . destroy ()
               warc.destroy (uuid)

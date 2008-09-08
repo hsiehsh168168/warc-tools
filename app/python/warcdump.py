@@ -25,13 +25,14 @@
 #     http://code.google.com/p/warc-tools/                             #
 # -------------------------------------------------------------------  #
 
-import wpath
-from wrecord  import WRecord
-from wfile import WFile
-
-import warc
-from optparse import OptionParser
 import sys
+from optparse import OptionParser
+
+import wpath
+import warc
+from   wrecord  import WRecord
+from   wfile    import WFile
+
 
 def main () :
     
@@ -60,20 +61,17 @@ def main () :
         parser.error(" You must give WARC file name")
 
     w = WFile (options.filename ,600 * 1024 * 1024, warc.WARC_FILE_READER, warc.WARC_FILE_DETECT_COMPRESSION, options.tmpdir)
-    print "habiba"
-    if (not (w)) :
-             print "WARC file  not found  "
-             return
-    print "%-20s %-20s %-10s %-20s %-45s %-44s %-86s " % ("Offset", "CSize", "WarcId", "Content-Length", \
-           "WARC-Type", "WARC-Date",  "WARC-Record-ID")
 
-    while ( w.hasMoreRecords()) :
+    if (not (w)) :
+             print "WARC file  not found "
+             return
+    #print "%-20s %-20s %-10s %-20s %-45s %-44s %-86s " % ("Offset", "CSize", "WarcId", "Content-Length", "WARC-Type", "WARC-Date",  "WARC-Record-ID")
+
+    while ( w.hasMoreRecords() ) :
 
           r = w.nextRecord()
 
           if (not (r)) :
-             print "bad WARC file "
-             ######################### JE DOIT FAIRE LE DESTROY APRES
              warc.destroy (w)
              return             
 
@@ -81,7 +79,7 @@ def main () :
 
           sys.stdout.write ("%-20u " %  r . getCompressedSize () )
 
-	  sys.stdout.write ("%-10s " %  r . getWarcId () )
+          sys.stdout.write ("%-10s " %  r . getWarcId () )
 
           sys.stdout.write ("%-20u " %  r . getContentLength () ) 
 
@@ -92,14 +90,11 @@ def main () :
           sys.stdout.write ("%-86s " %  r . getRecordId () )      
           #########
           m1 = warc.WARC_FALSE
-          print "More Fields:\n"
           #########
           
           if (r . getContentType () ) :
               print "%-35s: %-20s" %  ("Content-Type" , r . getContentType () )
               m1 = warc.WARC_TRUE 
-
-          
 
           if (r . getConcurrentTo ()) :
               print "%-35s: %-20s" % ("WARC-Concurrent-To" , r . getConcurrentTo ())

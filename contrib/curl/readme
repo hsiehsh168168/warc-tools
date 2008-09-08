@@ -1,0 +1,47 @@
+WARC-tools interface to libCurl:
+
+Requirements
+-------------
+
+* Please, make sure you have "libCurl" version 7.18.2 or above correctly 
+installed from:
+http://curl.haxx.se/download.html
+
+If not:
+
+$ ./configure --help
+$ ./configure your_options && make && sudo make install
+
+* Install the latest version of PycURL:
+http://pycurl.sourceforge.net
+
+$ cd pycurl-7.18.2
+$ sudo python setup.py install
+
+Features
+---------
+
+* it's very fast because it's almost all in C.
+* it supports lots of extreme features like SSL-ed, tftp, ftp, telnet, dict, ldap, http, file, https, ftps and gopher.
+* it provides a simple, clean way to write WARC files
+
+A power mix between libCurl, Python, and warc-tools.
+
+
+
+Usage
+------
+
+Don't forget to build the python interface first:
+
+$ (cd ../.. && make && make python)
+
+Then, run:
+$ ./url2warc.py -h
+
+And try the example:
+
+$ ./url2warc.py -f list.txt -o foo.warc.gz
+$ ls -la foo.warc.gz
+
+
