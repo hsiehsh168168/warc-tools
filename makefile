@@ -895,7 +895,8 @@ mod_lighty_clean: ; @rm -rf $(LIGHTTPD)/*.o $(LIGHTTPD)/*~ \
 				    $(LIGHTTPD)/warc.cgi $(LIGHTTPD)/warc.fcgi
 
 python_clean: 	   ; @rm -f $(PYTHON)/*.o $(PYTHON)/*~ $(PYTHON)/*.pyc      
-					 @rm -f $(APPYTHON)/*.so $(PYTHON)/warc.py $(PYTHON)/warc_warp.c $(PYTHON)/arc_warp.c\
+					 @rm -f $(APPYTHON)/*.so $(PYTHON)/warc.py \
+					 $(PYTHON)/warc_warp.c $(PYTHON)/arc_warp.c\
 					 $(PYTHON)/arc.py $(APPYTHON)/*.pyc  $(APPYTHON)/*~ \
 					 $(PYTHON)/*$(LIBSUFFIX)* $(PYTHON)/_* 
 

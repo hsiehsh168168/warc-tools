@@ -44,11 +44,10 @@ def addtowarc (fname, wfile, uri, mime, date, ip, cmode, maxsize, tmpdir):
 
 
 
-
 def main () :
 
-    usage = "Convert a file on disk to a WARC record \n\n"\
-            "file2wrec.py  -f <file.> -w <file.warc> \n"\
+    usage = "Converts a file on disk to a WARC record \n\n"\
+            + sys.argv[0] + " -f <file.> -w <file.warc> \n"\
             "                     -u <url> -m <mime> -d <date> -i <ip> \n"\
             "                     [-c] [-x <maxsize>] [-t <working_dir>]\n "\
             "\t-f    : valid file name\n"\
@@ -92,4 +91,8 @@ def main () :
               options.maxsize, options.tmpdir)
     
 if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print "For help, try : " + sys.argv[0] + " -h"
+        sys.exit(1)
+    
     main()
