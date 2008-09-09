@@ -24,6 +24,12 @@
 /*     http://code.google.com/p/warc-tools/                            */
 /* ------------------------------------------------------------------- */
 
+2008-05-29 to 2008-09-08 by "voidptrptr":
+
+	* Complete rewrite of the Python wrapper
+	* Curl integration with pyCurl (contrib/curl)
+	* HTTrack collections migration tool (contrib/httrack)
+
 2008-04-06 to 2008-05-29 by "voidptrptr":
 
 	* Full Python wrapper implementation
