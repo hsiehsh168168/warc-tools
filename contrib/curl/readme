@@ -15,12 +15,12 @@ If not:
 $ ./configure --help
 $ ./configure your_options && make && sudo make install
 
-* Install the latest version of PycURL from CVS (important):
+* Install PycURL version 7.19.0 or above:
 http://pycurl.sourceforge.net
-http://sourceforge.net/cvs/?group_id=28236
 
-$ cvs -z3 -d:pserver:anonymous@pycurl.cvs.sourceforge.net:/cvsroot/pycurl co -P pycurl
-$ cd pycurl
+$ wget http://pycurl.sourceforge.net/download/pycurl-7.19.0.tar.gz
+$ tar xf pycurl-7.19.0.tar.gz
+$ cd pycurl-7.19.0
 $ sudo python setup.py install
 
 Features
