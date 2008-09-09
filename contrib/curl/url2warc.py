@@ -102,9 +102,14 @@ def fetcher(url):
     url2      = curl.getinfo(pycurl.EFFECTIVE_URL)
     status    = curl.getinfo(pycurl.HTTP_CODE)
     redirect  = curl.getinfo(pycurl.REDIRECT_COUNT)
-    sd        = curl.getinfo(pycurl.LASTSOCKET);
-    ipaddr    = getIpAddress(sd, url)
 
+    # for pyCurl (compatible with libcurl 7.18.2)
+    #sd        = curl.getinfo(pycurl.LASTSOCKET);
+    #ipaddr    = getIpAddress(sd, url)
+
+    # for puCurl from CVS (compatible with libcurl 7.19.x or above)
+    ipaddr      = curl.getinfo(pycurl.PRIMARY_IP);
+    
     curl.close()
     fp.close()
     

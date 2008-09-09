@@ -3,19 +3,24 @@ WARC-tools interface to libCurl:
 Requirements
 -------------
 
-* Please, make sure you have "libCurl" version 7.18.2 or above correctly 
+* Please, make sure you have "libCurl" version 7.19.0 or above correctly 
 installed from:
+
 http://curl.haxx.se/download.html
+
+$ curl --version
 
 If not:
 
 $ ./configure --help
 $ ./configure your_options && make && sudo make install
 
-* Install the latest version of PycURL:
+* Install the latest version of PycURL from CVS (important):
 http://pycurl.sourceforge.net
+http://sourceforge.net/cvs/?group_id=28236
 
-$ cd pycurl-7.18.2
+$ cvs -z3 -d:pserver:anonymous@pycurl.cvs.sourceforge.net:/cvsroot/pycurl co -P pycurl
+$ cd pycurl
 $ sudo python setup.py install
 
 Features
