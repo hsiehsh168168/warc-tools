@@ -26,6 +26,7 @@
 # -------------------------------------------------------------------  #
 
 import sys, time, sha, os, re, socket
+from urlparse import urlparse
 import pycurl
 
 sys.path.insert (0, "../../lib/private/plugin/python/")
@@ -58,7 +59,19 @@ def header(buf):
         
     fp.write (buf)
 
-
+def getIpAddress(sd, url):
+    ip = "0.0.0.0"
+    if sd != -1:
+        sock      = socket.fromfd(sd, socket.AF_INET, socket.SOCK_STREAM)
+        (ip,port) = sock.getpeername()
+        sock.close()
+    else:
+        try:
+            ip = socket.gethostbyname_ex( urlparse(url)[1] )[2][0]
+        except:
+            ip = "0.0.0.0"
+            
+    return ip
         
 def fetcher(url):
     global fp
@@ -86,18 +99,16 @@ def fetcher(url):
     if mime == None :
         mime = "unknown"
 
-    url2     = curl.getinfo(pycurl.EFFECTIVE_URL)
-    status   = curl.getinfo(pycurl.HTTP_CODE)
-    redirect = curl.getinfo(pycurl.REDIRECT_COUNT)
-    sock     = curl.getinfo(pycurl.LASTSOCKET);
-    #ipaddr, port = sock.getpeername()
-    #print ">>> SD: ", sd
-    ip       = "0.0.0.0"
-    
+    url2      = curl.getinfo(pycurl.EFFECTIVE_URL)
+    status    = curl.getinfo(pycurl.HTTP_CODE)
+    redirect  = curl.getinfo(pycurl.REDIRECT_COUNT)
+    sd        = curl.getinfo(pycurl.LASTSOCKET);
+    ipaddr    = getIpAddress(sd, url)
+
     curl.close()
     fp.close()
     
-    return url2, mime, date, ip, status, redirect
+    return url2, mime, date, ipaddr, status, redirect
 
 
 
