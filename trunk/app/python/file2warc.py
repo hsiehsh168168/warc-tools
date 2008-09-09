@@ -39,34 +39,28 @@ from   wrecord import WRecord
 def addToWarc (fname, wfile, uri, mime, date, ip, cmode, maxsize, tmpdir):
 	
 ##  creating a new record  ##
+##  don't forget to check return values of each functions  ##
 
 	w = WFile(wfile, maxsize, warc.WARC_FILE_WRITER, cmode, tmpdir)
-
 	r = WRecord()
-
 	r . setRecordType(warc.WARC_RESOURCE_RECORD)
-	
-	r . setTargetUri(uri, len(uri))	
-	
-	r . setDate(date, len(date))
-	
-	r . setContentType(mime, len(mime))
+       	r . setTargetUri(uri, len(uri))	
+       	r . setDate(date, len(date))
+       	r . setContentType(mime, len(mime))
 
-	#s = time.strftime ("%a, %d%b%Y%H%M%S", time.localtime())
-    s = time.strftime ("%Y-%m-%dT%H:%M:%SZ", time.localtime())
-
-    # use your "unique identifier" function here
+        # use your "unique identifier" function here
+        s = time.strftime ("%Y-%m-%dT%H:%M:%SZ", time.localtime())
 	sh = sha.new(uri + s)
 	rid = sh.hexdigest()
 	rid = "uuid:" + rid
 	r . setRecordId(rid, len(rid))
-	
 	r . setIpAddress(ip, len(ip))
+
 	r . setContentFromFileName(fname)
 
 	w . storeRecord(r)
-
 	r . destroy()
+
 	w . destroy()
 
 
@@ -103,10 +97,9 @@ def main () :
     compmode = warc.WARC_FILE_UNCOMPRESSED
     if (options.cmode):
         compmode = warc.WARC_FILE_COMPRESSED_GZIP
-    
-	addToWarc(options.filename, options.wfilename, options.url,
-              options.mime, options.date, options.ip, compmode,
-              options.maxsize, options.tmpdir)
+
+
+    addToWarc(options.filename, options.wfilename, options.url, options.mime, options.date, options.ip, compmode, options.maxsize, options.tmpdir)
     
 if __name__ == "__main__":
     if len(sys.argv) < 2:

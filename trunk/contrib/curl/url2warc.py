@@ -125,6 +125,7 @@ def logger (log) :
 
 
 def addToWarc (w, uri, mime, date, ip) :
+##  don't forget to check return values of each functions  ##
 	r = WRecord()
 
     # change the record type if you want
@@ -140,6 +141,7 @@ def addToWarc (w, uri, mime, date, ip) :
 	r . setRecordId(rid, len(rid))
 	r . setIpAddress(ip, len(ip))
 	r . setContentFromFileName(tmpfile)
+
 	w . storeRecord(r)
 	r . destroy()
 
@@ -195,7 +197,7 @@ def main () :
         if not url or url[0] == "#":
             continue
 
-        # Start a bunch of threads
+        # fetch the RL
         effective_url, mime, date, ip, status, redirect = fetcher(url)
 
         addToWarc (w, effective_url, mime, date, ip)
