@@ -915,6 +915,8 @@ clean:		tclean	mod_apache_clean mod_lighty_clean python_clean
                    $(CUNIT)/*.o   $(REGEX)/*~       $(REGEX)/*.o \
 				   ${OSDEP}/*.o   ${OSDEP}/*~       ${MINGW_DEP}/*.o
 			@rm -rf $(DOC)/html    warc-tools*
-			@rm -rf $(CONTRIB)/jhove/*~ $(CONTRIB)/httrack/*~ $(CONTRIB)/file/*~	
+			@rm -rf $(CONTRIB)/jhove/*~ $(CONTRIB)/httrack/*~ \
+					$(CONTRIB)/file/*~ $(CONTRIB)/curl/*~ \
+					$(CONTRIB)/youtube/*~
 
 .PHONY: all static clean tclean doc source tgz rpm deb mod_apache_clean mod_lighty_clean

@@ -41,7 +41,7 @@ Don't forget to build the python interface first:
 
 $ (cd ../.. && make && make python)
 
-Then, run:
+Then, for help run:
 $ ./url2warc.py -h
 
 And try the example:
