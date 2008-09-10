@@ -56,6 +56,7 @@ except ImportError:
 def header(buf):
     if buf == None:
         fp.write ( '\n\r\r\n' )
+        return
         
     fp.write (buf)
 
