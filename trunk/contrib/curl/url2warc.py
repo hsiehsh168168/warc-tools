@@ -98,7 +98,7 @@ def fetcher(url):
             
     mime = p.sub( '', curl.getinfo(pycurl.CONTENT_TYPE))
     if mime == None :
-        mime = "unknown"
+        mime = 'octet/stream'
 
     url2      = curl.getinfo(pycurl.EFFECTIVE_URL)
     status    = curl.getinfo(pycurl.HTTP_CODE)
