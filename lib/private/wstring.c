@@ -80,6 +80,7 @@ struct WString
         } \
     }while(0)
 
+
 /**
  * @param _self WString object
  *

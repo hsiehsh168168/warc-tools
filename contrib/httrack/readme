@@ -52,7 +52,8 @@ $ ls -la contrib/httrack
 
 You can now run HTTrack with WARC as storage backend:
 
-$ httrack --wrapper contrib/httrack/httrack_warc.so
+$ httrack --wrapper contrib/httrack/libhtswarc.so YOUR_URL_TO_CRAWL
+
 
 
 
