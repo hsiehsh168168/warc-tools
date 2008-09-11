@@ -37,6 +37,11 @@ DOC      = doc
 LIB      = lib
 MISC     = misc
 CONTRIB  = contrib
+CURL	 = $(CONTRIB)/curl
+FILE	 = $(CONTRIB)/file
+HTTRACK	 = $(CONTRIB)/httrack
+JHOVE	 = $(CONTRIB)/jhove
+YOUTUBE	 = $(CONTRIB)/youtube
 PUBLIC   = $(LIB)/public
 PRIVATE  = $(LIB)/private
 PLUGIN   = $(PRIVATE)/plugin
@@ -52,12 +57,12 @@ MINGW_DEP= $(OSDEP)/mingw
 OUT      = $(TST)/outputs
 PYTHON   = $(PLUGIN)/python
 HEADERS  = -I. -I$(PRIVATE) -I$(PUBLIC) -I$(GZIP) \
-		   -I$(CUNIT)       -I$(TIGER)  -I$(EVENT) \
+		   -I$(CUNIT) -I$(TIGER) -I$(EVENT) \
 		   -I$(EVENT_COMPACT) -I$(REGEX) -I$(PYTHON)
 
 MAJOR     = 0
 MINOR     = 18
-RELEASE   = 97
+RELEASE   = 98
 
 LIBSUFFIX = so
 LIBNAME   = libwarc
@@ -104,15 +109,24 @@ mod_apache    =$(APACHE)/mod_warc
 ###################
 
 SWIG            = swig
-#INC_PYTHON      = -I$(shell echo /usr/include/python*.*)
 INC_PYTHON      = -I$(shell python -c 'import distutils.sysconfig; print distutils.sysconfig.get_python_inc();')
 
-WPYNAME   	= _warc
-WPYSONAME	=,$(WPYNAME).$(LIBSUFFIX).$(MAJOR)
-WPYSHAREDNAME   = $(WPYNAME).$(LIBSUFFIX)
-APYNAME   	= _arc
-APYSONAME	=,$(APYNAME).$(LIBSUFFIX).$(MAJOR)
-APYSHAREDNAME   = $(APYNAME).$(LIBSUFFIX)
+WPYNAME   	  = _warc
+WPYSONAME	  =,$(WPYNAME).$(LIBSUFFIX).$(MAJOR)
+WPYSHAREDNAME = $(WPYNAME).$(LIBSUFFIX)
+APYNAME   	  = _arc
+APYSONAME	  =,$(APYNAME).$(LIBSUFFIX).$(MAJOR)
+APYSHAREDNAME = $(APYNAME).$(LIBSUFFIX)
+
+
+#################
+# httrack plugin
+#################
+
+INC_HTTRACK	  = -I/usr/include/httrack
+HTNAME   	  = httrack_warc
+HTSONAME	  =,$(HTNAME).$(LIBSUFFIX).$(MAJOR)
+HTSHAREDNAME  = $(HTNAME).$(LIBSUFFIX).$(MAJOR).$(MINOR).$(RELEASE)
 
 
 ###############
@@ -180,8 +194,11 @@ EV_SRC       = $(EVENT)/event.c		$(EVENT)/buffer.c    $(EVENT)/log.c \
 ##$(EVENT)/evbuffer.c $(EVENT)/event_tagging.c $(EVENT)/evrpc.c
 
 
+# default shared targets
 SHARED_OS    = shared_unix
 PYSHARED_OS	 = pyshared_unix
+HTSHARED_OS	 = htshared_unix
+
 
 # compile WARC as a shared library
 ifeq ($(W_SHARED),on)
@@ -192,6 +209,12 @@ endif
 ifeq ($(W_PYSHARED),on)
 	S_CFLAGS = -fPIC -DPIC
 endif
+
+# compile the HTTrack plugin as a shared library
+ifeq ($(W_HTSHARED),on) 
+	S_CFLAGS  = -fPIC -DPIC
+endif
+
 
 # adapt makefile to OS
 ifeq ($(UNAME_S),Linux)
@@ -222,6 +245,7 @@ ifeq ($(UNAME_S),OpenBSD)
 	GCC_EXTRA    = 
 	S_CFLAGS     = -fpic
 	PYSHARED_OS	 = pyshared_openbsd
+	HTSHARED_OS	 = htshared_openbsd
 endif
 ifeq ($(UNAME_S),NetBSD)
 	MAKE         = gmake
@@ -232,6 +256,7 @@ ifeq ($(UNAME_S),NetBSD)
 	EV_LIB		 = 
 	S_CFLAGS     = -fpic
 	PYSHARED_OS	 = pyshared_netbsd
+	HTSHARED_OS	 = htshared_netbsd
 endif
 ifeq ($(UNAME_S),Darwin)
 	CFLAGS 		+= -pedantic
@@ -244,15 +269,18 @@ ifeq ($(UNAME_S),Darwin)
 #-lresolv
 	SHARED_OS	 = shared_osx
 	PYSHARED_OS	 = pyshared_osx
+	HTSHARED_OS	 = htshared_osx
 	LIBSUFFIX    = dylib
 	INSTALLNAME	 = $(LIBNAME).$(MAJOR).$(LIBSUFFIX)
 	SHAREDNAME	 = $(LIBNAME).$(MAJOR).$(MINOR).$(RELEASE).$(LIBSUFFIX)
 	S_CFLAGS     =
 #PYINSTALLNAME= $(PYNAME).$(MAJOR).$(LIBSUFFIX)
-	PYLIBSUFFIX	 = so
+	PYLIBSUFFIX	  = so
 	WPYSHAREDNAME = $(WPYNAME).$(PYLIBSUFFIX)
 	APYSHAREDNAME = $(APYNAME).$(PYLIBSUFFIX)
-	SWIG_CFLAGS  = -bundle -undefined suppress -flat_namespace
+	HTINSTALLNAME = $(HTNAME).$(MAJOR).$(LIBSUFFIX)
+	HTSHAREDNAME  = $(HTNAME).$(MAJOR).$(MINOR).$(RELEASE).$(LIBSUFFIX)
+	SWIG_CFLAGS   = -bundle -undefined suppress -flat_namespace
 endif
 ifeq ($(UNAME_S),SunOS)
 	CC	    += -R/usr/local/lib
@@ -262,6 +290,7 @@ ifeq ($(UNAME_S),SunOS)
 	EVENT_CONFIG = $(EV_OS)/config.h $(EV_OS)/event-config.h
 	EV_LIB	     = -lrt -lsocket
 	PYSHARED_OS  = pyshared_solaris
+	HTSHARED_OS  = htshared_solaris
 	SWIG_LDFLAGS = -G
 #-lnsl -lresolv -lsocket
 	SONAME	     = 
@@ -277,6 +306,7 @@ ifneq ($(findstring MINGW,$(UNAME_S)),)
 	EV_LIB		 = -lws2_32
 	SHARED_OS    = shared_mingw
 	PYSHARED_OS  = pyshared_mingw
+	HTSHARED_OS  = htshared_mingw
 	LIBSUFFIX    = dll
 	SHAREDNAME   = $(LIBNAME).$(LIBSUFFIX)
 	WPYSHAREDNAME = $(WPYNAME).$(LIBSUFFIX)
@@ -302,11 +332,15 @@ ifneq ($(findstring CYGWIN,$(UNAME_S)),)
 	LIB_PYTHON   = -L$(shell echo /usr/lib/python*.*)
 	PY_VERSION   = $(shell echo /usr/lib/python*.* | sed -e "s|.*\(.\..\)|\1|")
 	PYSHARED_OS  = pyshared_cygwin
+	HTSHARED_OS  = htshared_cygwin
 	WPYSONAME	=,$(WPYNAME).$(LIBSUFFIX).$(MAJOR)
 	WPYSHAREDNAME   = $(WPYNAME).$(LIBSUFFIX)
 	APYNAME   	= _arc
 	APYSONAME	=,$(APYNAME).$(LIBSUFFIX).$(MAJOR)
 	APYSHAREDNAME   = $(APYNAME).$(LIBSUFFIX)
+	HTSONAME	  =,$(HTNAME).$(LIBSUFFIX).$(MAJOR)
+	HTSHAREDNAME  = $(HTNAME).$(LIBSUFFIX)
+
 	S_CFLAGS     = 
 endif
 
@@ -341,8 +375,6 @@ b	+= $(CUNIT)/Automated.c  $(CUNIT)/Basic.c     $(CUNIT)/CUError.c \
 	   $(CUNIT)/TestRun.c	 $(CUNIT)/Util.c      $(CUNIT)/menu.c
 
 b	+= $(TIGER)/tiger.c
-
-#b   += $(REGEX)/regex.c
 
 b	+=$(EV_SRC)
 
@@ -382,8 +414,6 @@ h	+= $(CUNIT)/Automated.h	 $(CUNIT)/Basic.h	  $(CUNIT)/CUCurses.h \
 h	+= $(TIGER)/tiger.h
 
 h   += $(MENU)/menu.h
-
-#h   += $(REGEX)/regex.h
 
 h   += $(EVENT)/log.h	  $(EVENT)/event-internal.h	  $(EVENT)/evdns.h \
 	  $(EVENT)/event.h	  $(EVENT)/event-config.h	  $(EVENT)/evrpc.h \
@@ -460,7 +490,7 @@ shared_osx: clean $(libwarc)
 		ln -sf $(SHAREDNAME)  $(LIBNAME).$(MAJOR).$(LIBSUFFIX) && \
 		ln -sf $(SHAREDNAME)  $(LIBNAME).$(LIBSUFFIX)
 
-#http://www.emmestech.com/software/cygwin/pexports-0.43/moron2.html
+# http://www.emmestech.com/software/cygwin/pexports-0.43/moron2.html
 # http://mingw.org/docs.shtml
 shared_mingw: clean $(libwarc)
 		$(CC) -shared -o $(SHAREDNAME) $(libwarc) \
@@ -719,7 +749,7 @@ $(LIGHTTPD)/warc.cgi:  $(modcgi)
 # lighttpd fcgi module 
 ######################
 
-modfcgi   = $(PRIVATE)/wclass.o	  $(PRIVATE)/wstring.o $(PRIVATE)/wlist.o \
+modfcgi   =$(PRIVATE)/wclass.o	  $(PRIVATE)/wstring.o $(PRIVATE)/wlist.o \
 		   $(PRIVATE)/wanvl.o 	  $(PRIVATE)/wrecord.o $(PRIVATE)/wheader.o \
 	       $(PRIVATE)/wfile.o	  $(PRIVATE)/wuuid.o   $(PRIVATE)/wfsmanvl.o \
 		   ${CSAFE}.o	          $(gzlib)             ${MKTEMP}.o \
@@ -744,9 +774,9 @@ pylib   =  $(GZIP)/adler32.o     $(GZIP)/compress.o      $(GZIP)/crc32.o  \
 		   $(OSDEP)/wmktmp.o     $(PRIVATE)/whash.o      $(PRIVATE)/wkv.o \
 		   $(OSDEP)/wcsafe.o	 $(PRIVATE)/wuuid.o		 $(PRIVATE)/wrecord.o \
 		   $(PRIVATE)/wheader.o	 $(PRIVATE)/wanvl.o	     $(PRIVATE)/wfsmanvl.o \
-		   $(PRIVATE)/wversion.o $(PRIVATE)/wbloc.o   $(PRIVATE)/wfile.o 
+		   $(PRIVATE)/wversion.o $(PRIVATE)/wbloc.o   	 $(PRIVATE)/wfile.o 
 
-wpylib   =   $(PYTHON)/warc_wrap.o $(PYTHON)/wpybless.o $(PYTHON)/wfield.o
+wpylib   = $(PYTHON)/warc_wrap.o $(PYTHON)/wpybless.o $(PYTHON)/wfield.o
 
 apylib   = $(PRIVATE)/arecord.o  $(PRIVATE)/afile.o 	 $(PRIVATE)/afsmhdl.o \
 		   $(PYTHON)/arc_wrap.o  $(PYTHON)/wpybless.o $(PYTHON)/apybless.o $(PYTHON)/wfield.o
@@ -786,30 +816,56 @@ pyshared_cygwin: python_clean pyshared
 python:
 		@$(MAKE) W_PYSHARED=on $(PYSHARED_OS)
 
-pyshared : $(PYTHON)/warc.py $(PYTHON)/arc.py $(pylib) $(wpylib) $(apylib)
+pyshared: $(PYTHON)/warc.py $(PYTHON)/arc.py $(pylib) $(wpylib) $(apylib)
 
 $(PYTHON)/warc.py $(PYTHON)/warc_wrap.c : 
 	$(SWIG) -python -outdir $(PYTHON) $(PYTHON)/warc.i
 
 $(PYTHON)/wpybless.o : $(PYTHON)/wpybless.c
-	$(CC) $(CFLAGS) $(INC_RUBY) -c $< -o $@
+	$(CC) $(CFLAGS) $(INC_PYTHON) -c $< -o $@
 
 $(PYTHON)/apybless.o : $(PYTHON)/apybless.c
-	$(CC) $(CFLAGS) $(INC_RUBY) -c $< -o $@
+	$(CC) $(CFLAGS) $(INC_PYTHON) -c $< -o $@
 
 $(PYTHON)/wfield.o : $(PYTHON)/wfield.c
-	$(CC) $(CFLAGS) $(INC_RUBY) -c $< -o $@
+	$(CC) $(CFLAGS) $(INC_PYTHON) -c $< -o $@
 
 $(PYTHON)/warc_wrap.o : $(PYTHON)/warc_wrap.c
 	$(CC) $(INC_PYTHON) -c $(PYTHON)/warc_wrap.c -o $(PYTHON)/warc_wrap.o
-#	$(CC) $(CFLAGS) $(INC_PYTHON) -c $(PYTHON)/warc_wrap.c -o $(PYTHON)/warc_wrap.o
 
 $(PYTHON)/arc.py $(PYTHON)/arc_wrap.c :
 	$(SWIG) -python -outdir $(PYTHON) $(PYTHON)/arc.i
 
 $(PYTHON)/arc_wrap.o : $(PYTHON)/arc_wrap.c
 	$(CC) $(INC_PYTHON) -c $(PYTHON)/arc_wrap.c -o $(PYTHON)/arc_wrap.o
-#	$(CC) $(CFLAGS) $(INC_PYTHON) -c $(PYTHON)/arc_wrap.c -o $(PYTHON)/arc_wrap.o
+
+
+######################
+# HTTrack WARC plugin
+######################
+
+htlib	= $(HTTRACK)/httrack_warc_plugin.o
+
+htshared_unix: httrack_clean htshared
+		$(CC) -shared -Wl,-soname$(HTSONAME) -o $(HTTRACK)/$(HTSHAREDNAME) $(libwarc) $(htlib)
+		ln -sf $(HTSHAREDNAME) $(HTTRACK)/$(HTNAME).$(LIBSUFFIX).$(MAJOR) && \
+		ln -sf $(HTSHAREDNAME) $(HTTRACK)/$(HTNAME).$(LIBSUFFIX)
+
+htshared_osx: httrack_clean htshared
+		$(CC) -dynamiclib -install_name $(HTINSTALLNAME) \
+		-compatibility_version $(MAJOR).$(MINOR) \
+		-current_version $(MAJOR).$(MINOR).$(RELEASE) \
+		-o $(HTTRACK)/$(HTSHAREDNAME) $(libwarc) $(htlib)
+		ln -sf $(HTSHAREDNAME) $(HTTRACK)/$(HTNAME).$(MAJOR).$(LIBSUFFIX) && \
+		ln -sf $(HTSHAREDNAME) $(HTTRACK)/$(HTNAME).$(LIBSUFFIX)
+
+httrack: all
+		@$(MAKE) W_HTSHARED=on $(HTSHARED_OS)
+
+htshared: $(htlib)
+
+$(HTTRACK)/httrack_warc_plugin.o : $(HTTRACK)/httrack_warc_plugin.c
+	$(GCC) $(HEADERS) $(INC_HTTRACK) -c $< -o $@
 
 
 ####################
@@ -900,7 +956,11 @@ python_clean: 	   ; @rm -f $(PYTHON)/*.o $(PYTHON)/*~ $(PYTHON)/*.pyc
 					 $(PYTHON)/arc.py $(APPYTHON)/*.pyc  $(APPYTHON)/*~ \
 					 $(PYTHON)/*$(LIBSUFFIX)* $(PYTHON)/_* 
 
-clean:		tclean	mod_apache_clean mod_lighty_clean python_clean
+httrack_clean: 	   ; @rm -f $(HTTRACK)/*.o $(HTTRACK)/*~ $(HTTRACK)/*.so* \
+					$(HTTRACK)/*.dylib*    $(HTTRACK)/*.dll*     
+
+
+clean:		tclean	mod_apache_clean mod_lighty_clean python_clean httrack_clean
 			@rm -f $t             $(obj)            *.o \
 			       *~             *.a               *.so* \
 			       *.log          *.gz              $(PUBLIC)/*~ \
@@ -908,15 +968,15 @@ clean:		tclean	mod_apache_clean mod_lighty_clean python_clean
 				   $(APP)/*.exe   $(TST)/*~         $(TST)/*.exe \
                    $(DOC)/*~      $(MINGW_DEP)/*~   $(TIGER)/*~ \
 			       $(MISC)/*~     $(MISC)/DEBIAN/*~ $(PRIVATE)/*~ \
-				   semantic.cache depend            *.dylib* \
+				   semantic.cache depend            *.dylib* *.dll* \
 				   *.bak		  *.stackdump*		*core*	\
 				   $(EVENT)/*~	  $(EVENT)/*.o      $(MENU)/*~	\
                    $(OUT)/*.xml   $(OUT)/*~		    $(CUNIT)/*~ \
                    $(CUNIT)/*.o   $(REGEX)/*~       $(REGEX)/*.o \
 				   ${OSDEP}/*.o   ${OSDEP}/*~       ${MINGW_DEP}/*.o
-			@rm -rf $(DOC)/html    warc-tools*
-			@rm -rf $(CONTRIB)/jhove/*~ $(CONTRIB)/httrack/*~ \
-					$(CONTRIB)/file/*~ $(CONTRIB)/curl/*~ \
-					$(CONTRIB)/youtube/*~
+			@rm -rf $(JHOVE)/*~   $(HTTRACK)/*~   	$(FILE)/*~ $(CURL)/*~ \
+					$(YOUTUBE)/*~
+			@rm -rf $(DOC)/html   warc-tools*
 
-.PHONY: all static clean tclean doc source tgz rpm deb mod_apache_clean mod_lighty_clean
+
+.PHONY: all static clean tclean doc source tgz rpm deb mod_apache_clean mod_lighty_clean python_clean httrack_clean

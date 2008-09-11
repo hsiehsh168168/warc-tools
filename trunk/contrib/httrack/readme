@@ -15,3 +15,46 @@ It's a 3 stags application:
 This script use the Python command "app/python/file2warc.py" internally.
 
 So, change it to fit your needs.
+
+
+WARC plugin for HTTrack
+------------------------
+
+To be able to use the WARC format as the backend storage system
+for HTTrack, make sure you have HTTrack version 3.42.x or above correctly
+installed:
+
+$ httrack --version
+HTTrack version 3.42-3+libhtsjava.so.2
+
+If no, the simplest way is to build it from source:
+
+$ wget http://www.httrack.com/httrack-3.42-3.tar.gz
+$ tar xf httrack-3.42-3.tar.gz
+$ cd httrack-3.42-3
+$ ./configure your_options_here && make && sudo make install
+
+
+Note: if you're running Debian/Ubunto or Redhat/Fedora, don't forget
+the install HTTrack development headers.
+
+
+When done, simply run:
+
+$ make httrack
+
+Note: if the "make" fail, make sure you've the HTTrack headers (*.h) inthe right directory "/usr/include/httrack".
+
+
+And list the generated shard library:
+
+$ ls -la contrib/httrack
+
+You can now run HTTrack with WARC as storage backend:
+
+$ httrack --wrapper contrib/httrack/httrack_warc.so
+
+
+
+If you need to change something that doesn't fit, hack the module:
+contrib/httrack/httrack_warc_plugin.c
