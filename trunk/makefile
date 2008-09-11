@@ -472,7 +472,7 @@ full	= $(regex) $(libwarc)
 all:	$(regex) $t
 
 $(REGEX)/regex.o: $(REGEX)/regex.c
-		$(GCC) $(HEADERS) -c $< -o $@
+		$(GCC) $(S_CFLAGS) $(HEADERS) -c $< -o $@
 
 static:	$(full)	; $(AR) cvr $(LIBNAME).a $(full); $(RANLIB) $(LIBNAME).a
 
@@ -867,7 +867,7 @@ httrack: all
 htshared: $(htlib)
 
 $(HTTRACK)/httrack_warc_plugin.o : $(HTTRACK)/httrack_warc_plugin.c
-	$(GCC) $(HEADERS) $(INC_HTTRACK) -c $< -o $@
+	$(GCC) $(S_CFLAGS) $(HEADERS) $(INC_HTTRACK) -c $< -o $@
 
 
 ####################
