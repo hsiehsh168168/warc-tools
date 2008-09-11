@@ -1917,13 +1917,13 @@ WIPUBLIC warc_bool_t WRecord_setContentFromFileName (void * _self,
   w_file_size (dfile, SIZE);
 
   if (WHeader_setContentLength (HDL, SIZE))
-     {
-     w_fclose (dfile);
-     return (WARC_TRUE);
-     }
+    {
+      w_fclose (dfile);
+      return (WARC_TRUE);
+    }
 
   CHECK = CHECK | 0x0008;
-
+  
   return (WARC_FALSE);
 }
 
@@ -2529,7 +2529,7 @@ WPUBLIC FILE * WRecord_getBloc (void *  _self, void * w, warc_bool_t withhttp, w
 
 
   field = uS(WRecord_getTargetUri (self));
-  fprintf (stderr, "after\n");
+
   unless (field)
       field = uS("unknown");
   else unless (w_strcmp (field, uS("")))

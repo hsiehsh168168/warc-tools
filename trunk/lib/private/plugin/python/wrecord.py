@@ -163,7 +163,6 @@ class WRecord:
 
 	def getBloc(self, with_http, wfile, code):
 		if (wfile.type() == classtype.WFile):
-
 			withh = warc.cvar.WARC_TRUE
 			if (withh_http == false):
 				withh = warc.cavar.WARC_FALSE 

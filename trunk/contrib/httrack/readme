@@ -54,8 +54,10 @@ You can now run HTTrack with WARC as storage backend:
 
 $ httrack --wrapper contrib/httrack/libhtswarc.so YOUR_URL_TO_CRAWL
 
+Or on Mac OSX:
+
+$ httrack --wrapper contrib/httrack/libhtswarc.dylib YOUR_URL_TO_CRAWL
 
 
-
-If you need to change something that doesn't fit, hack the module:
+Note: if you need to change something that doesn't fit, hack the module:
 contrib/httrack/httrack_warc_plugin.c

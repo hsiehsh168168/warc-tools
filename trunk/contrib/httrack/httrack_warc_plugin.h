@@ -24,8 +24,8 @@
 /*     http://code.google.com/p/warc-tools/                            */
 /* ------------------------------------------------------------------- */
 
-#ifndef	__WARC_HTTRACK_H__
-#define	__WARC_HTTRACK_H__
+#ifndef	__WARC_HTTRACK_DEFAULT_VALUES__
+#define	__WARC_HTTRACK_DEFAULT_VALUES__
 
 
 /* to mix C and C++ */
@@ -34,31 +34,17 @@ extern "C"
   {
 #endif
 
+#define HTTRACK_DEFAULT_TIMESTAMP  "0000-00-00T00:00:00Z"
+#define HTTRACK_DEFAULT_MIMETYPE   "octet/stream" 
+#define HTTRACK_DEFAULT_IP         "0.0.0.0"
 
-    /**
-     * Portability header file
-     */
-
-#include <wport.h>
-
-    extern void   destroyWARC  (void *);
-    
-    extern void * blessWARC    (const char *, 
-                                unsigned int, const char *);
-    
-    extern void   writeWRecord (const char *,
-                                const char *, const char *,
-                                const char *, void *);
-
-    extern void   setURL       (const char *, const char *, void *);
-    extern void   setMIME      (const char *, void *);
-    extern void   setIP        (const char *, void *);
-    extern void   setTimeStamp (const char *, void *);
+#define HTTRACK_TMP_DIR            "."
+#define HTTRACK_OUTPUT_WARC        "outfile.warc.gz"
+#define HTTRACK_WARC_SIZE          (1024 * 1024 * 1024)
 
 #ifdef __cplusplus
   }
 
 #endif
 
-
-#endif /* __WARC_HTTRACK_H__ */
+#endif /* __WARC_HTTRACK_DEFAULT_VALUES__ */
