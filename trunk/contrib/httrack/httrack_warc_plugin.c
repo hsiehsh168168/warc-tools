@@ -47,9 +47,9 @@
 
 /* local function called as "check_html" callback */
 
-static int process_file(t_hts_callbackarg * carg, httrackp * opt,
-                        char * html, int len, const char * url_address, 
-                        const char* url_file) 
+static int check_html_cb (t_hts_callbackarg * carg, httrackp * opt,
+                          char * html, int len, const char * url_address, 
+                          const char* url_file) 
 {
 
   void * dummyArg = (void *) CALLBACKARG_USERDEF (carg);
@@ -60,25 +60,39 @@ static int process_file(t_hts_callbackarg * carg, httrackp * opt,
      to be called. 
   */
   
-  if (CALLBACKARG_PREV_FUN(carg, check_html) != NULL) 
-    {
-      if (!CALLBACKARG_PREV_FUN(carg, check_html)(CALLBACKARG_PREV_CARG(carg),
-                                                  opt, html, len, 
-                                                  url_address, url_file))
-        return 0;  /* abort */
-    }
+  /* if (CALLBACKARG_PREV_FUN(carg, check_html) != NULL)  */
+/*     { */
+/*       if (!CALLBACKARG_PREV_FUN(carg, check_html)(CALLBACKARG_PREV_CARG(carg), */
+/*                                                   opt, html, len,  */
+/*                                                   url_address, url_file)) */
+/*         return 0;  /\* abort *\/ */
+/*     } */
 
-  fprintf(stderr, "+++ file %s%s\n", url_address, url_file);
+  //fprintf(stderr, "+++ COUCOU file %s   -   %s\n", url_address, url_file);
 
   return 1;  /* success */
 }
 
 
-static void store_in_warc (t_hts_callbackarg *carg, httrackp *opt, 
+int savename_cb (t_hts_callbackarg *carg, httrackp* opt, 
+                               const char* adr_complete, 
+                               const char* fil_complete, 
+                               const char* referer_adr, 
+                               const char* referer_fil, char* save)
+{
+  void * wst = (void *) CALLBACKARG_USERDEF (carg);
+
+  //fprintf(stderr, "+++ savename_cb: %s%s\n", adr_complete, fil_complete);
+
+  setURL (adr_complete, fil_complete, wst);
+
+  return 1;  /* success */
+}
+
+static void filesave_cb (t_hts_callbackarg *carg, httrackp *opt, 
                            const char * filename)
 {
-  
-  void * w = (void *) CALLBACKARG_USERDEF (carg);
+  void * wst = (void *) CALLBACKARG_USERDEF (carg);
  
  
 /*  if (CALLBACKARG_PREV_FUN(carg, filesave) != NULL) 
@@ -87,31 +101,32 @@ static void store_in_warc (t_hts_callbackarg *carg, httrackp *opt,
           return ;  
     }*/
 
+
   writeWRecord ("http://www.iipc.net",  "2008-09-10T00:00:00Z",
                 "octet/stream",         "0.0.0.0",
-                filename, w);
+                filename, wst);
 
 }
 
 /* local function called as "end" callback */
-static int end_of_mirror(t_hts_callbackarg *carg, httrackp *opt)
+static int end_cb(t_hts_callbackarg *carg, httrackp *opt)
 
 {
-/*   void * w = (void *) CALLBACKARG_USERDEF (carg); */
+  void * wst = (struct WPlugin *) CALLBACKARG_USERDEF (carg);
 
-/*   /\* close the WARC file  and free resources *\/ */
-/*   if(w) */
-/*     destroy (w); */
+  /* close the WARC file  and free resources */
+  destroyWARC (wst);
+
 
   /* processing */
-  fprintf(stderr, "That's all, folks!\n");
+/*   fprintf(stderr, "That's all, folks!\n"); */
 
   /* call parent functions if multiple callbacks are chained. you can skip this part, if you don't want previous callbacks to be called. */
-  if (CALLBACKARG_PREV_FUN(carg, end) != NULL) 
-    {
-      /* status is ok on our side, return other callabck's status */
-      return CALLBACKARG_PREV_FUN(carg, end)(CALLBACKARG_PREV_CARG(carg), opt);
-    }
+/*   if (CALLBACKARG_PREV_FUN(carg, end) != NULL)  */
+/*     { */
+/*       /\* status is ok on our side, return other callabck's status *\/ */
+/*       return CALLBACKARG_PREV_FUN(carg, end)(CALLBACKARG_PREV_CARG(carg), opt); */
+/*     } */
 
   return 1;  /* success */
 }
@@ -123,7 +138,7 @@ static int end_of_mirror(t_hts_callbackarg *carg, httrackp *opt)
 
 EXTERNAL_FUNCTION int hts_plug(httrackp *opt, const char* argv) {
 
-  void * w = NULL;
+  void * wst = NULL;
 
   /* optional argument passed in the commandline we won't be using here */
   const char *arg = strchr(argv, ',');
@@ -134,15 +149,16 @@ EXTERNAL_FUNCTION int hts_plug(httrackp *opt, const char* argv) {
 #define WARC_TMP    "."
 #define OUTPUT_WARC "outfile.warc.gz"
 #define WARC_SIZE   (1024 * 1024 * 1024)
-  w = blessWFile (OUTPUT_WARC, WARC_SIZE, WARC_TMP);
+  wst = blessWARC (OUTPUT_WARC, WARC_SIZE, WARC_TMP);
 
-  if (! w)
+  if (! wst)
     return (0); /* failure */
 
   /* plug callback functions */
-  CHAIN_FUNCTION(opt, check_html, process_file,  w);
-  CHAIN_FUNCTION(opt, filesave,   store_in_warc, w);
-  CHAIN_FUNCTION(opt, end,        end_of_mirror, w);
+/*   CHAIN_FUNCTION(opt, check_html, check_html_cb, wst); */
+  CHAIN_FUNCTION(opt, savename,   savename_cb,   wst);
+  CHAIN_FUNCTION(opt, filesave,   filesave_cb,   wst);
+  CHAIN_FUNCTION(opt, end,        end_cb,        wst);
 
   return 1;  /* success */
 }
@@ -151,8 +167,9 @@ EXTERNAL_FUNCTION int hts_plug(httrackp *opt, const char* argv) {
   module exit point the function name and prototype MUST match this prototype
 */
 
+#define WARC_MODULE_NAME "libhtswarc.so"
 EXTERNAL_FUNCTION int hts_unplug(httrackp *opt) {
-  fprintf(stderr, "Module unplugged");
+  fprintf(stderr, "Module " WARC_MODULE_NAME " unplugged\n");
 
   return 1;  /* success */
 }

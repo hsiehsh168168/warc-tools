@@ -25,12 +25,20 @@
 
 
 #include <warc.h>      /* WARC headers */
+#include <wmem.h>      /* wcalloc, wfree */
+
 #include <warcmisc.h>
 
 
 #define makeS(s) (s), w_strlen(s)
 #define uS(s) ((warc_u8_t *) (s))
 
+struct WPlugin {
+  void * w;
+  void * ip;
+  void * url;
+  void * mime;
+};
 
 /* WIPUBLIC void * blessWString (char * const s, unsigned int len) */
 /* { */
@@ -38,20 +46,70 @@
 /* } */
 
 
-WIPUBLIC void * blessWFile (const char * filename, unsigned int max,
-                            const char * tmpdir)
+WPUBLIC void * blessWARC (const char * filename, unsigned int max,
+                           const char * tmpdir)
 {
-  printf("+++ WFILE CONSTRUCTOR\n");
-  return bless (WFile, filename, max, 
-                WARC_FILE_WRITER, WARC_FILE_COMPRESSED_GZIP,
-                tmpdir);
+  struct WPlugin * wst = NIL;
+
+  wst = wmalloc(sizeof(struct WPlugin));
+  unless (wst)
+    return (NIL);
+
+  wst -> w = wst -> ip = wst -> mime = NULL;
+
+  wst -> w = bless (WFile, filename, max, WARC_FILE_WRITER, 
+                    WARC_FILE_COMPRESSED_GZIP, tmpdir);
+
+  unless (wst -> w)
+    destroyWARC (wst);
+
+  wst -> url = bless (WString, makeS(uS("")));
+  unless (wst -> url)
+    destroyWARC (wst);
+
+
+  return (wst);
 }
 
 
-WIPUBLIC void writeWRecord (const char * url,  const char * timestamp,
-                            const char * mime, const char * ip,
-                            const char * file, void * w)
+WPUBLIC void setURL (const char * domain, const char * file, void * _wst)
 {
+  struct WPlugin * wst = (struct WPlugin *) _wst;
+  
+  WString_setText(wst -> url, makeS(uS(domain)));
+  WString_append (wst -> url, makeS(uS(file)));
+}
+
+
+WPUBLIC void destroyWARC (void * _wst)
+{
+  struct WPlugin * wst = (struct WPlugin *) _wst;
+
+  unless (wst)
+    return;
+
+  if (wst -> ip)
+    destroy (wst -> ip);
+
+  if (wst -> url)
+    destroy (wst -> url);
+
+  if (wst -> mime)
+    destroy (wst -> mime);
+
+  if (wst -> w)
+    destroy (wst -> w);
+
+  wfree (wst);
+}
+
+
+WPUBLIC void writeWRecord (const char * url,  const char * timestamp,
+                            const char * mime, const char * ip,
+                            const char * file, void * _wst)
+{
+  struct WPlugin * wst = (struct WPlugin *) _wst;
+
   void * r = NULL;
   void * u = NULL;
 
@@ -67,6 +125,9 @@ WIPUBLIC void writeWRecord (const char * url,  const char * timestamp,
      destroy (r);
      return ;
     }
+
+  /* fprintf(stderr, "+++ filesave_cb: %s\n", WString_getText(wst -> url)); */
+
 
   /* TU DEVRAIS TESTER LA AVLEUR DE RETOUR DES FONCTIONS LYES ICI */
 
@@ -86,5 +147,5 @@ WIPUBLIC void writeWRecord (const char * url,  const char * timestamp,
 
   WRecord_setContentFromFileName (r, file);
 
-  WFile_storeRecord (w, r);
+  WFile_storeRecord (wst -> w, r);
 }
