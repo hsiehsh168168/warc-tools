@@ -263,12 +263,12 @@ WIPUBLIC warc_bool_t WFile_hasMoreRecords (const void * const _self)
   if (MODE != WARC_FILE_READER)
     return (WARC_TRUE);
 
+  /* if it reach the end of WARC, its start over again */
   if (w_ftell (FH) == (warc_i64_t) FSIZE)
     {
-      w_fseek_start (FH);
+      w_fseek_start (FH); /* restet from start */
       return (WARC_FALSE);
     }
-
   else
     return (WARC_TRUE);
 
@@ -2050,9 +2050,8 @@ WPUBLIC warc_bool_t WFile_storeRecord (void* _self, const void * wrec)
   w_fseek_end (FH);
 
   bloc = WRecord_getDataFileExtern (wrec);
-
   unless (bloc)
-  return (WARC_TRUE);
+    return (WARC_TRUE);
 
   unless (WRecord_check (wrec) )
   {
@@ -2061,10 +2060,8 @@ WPUBLIC warc_bool_t WFile_storeRecord (void* _self, const void * wrec)
   }
 
   w_fseek_end (bloc);
-
   if (WRecord_getDataSize (wrec) != w_ftell (bloc) )
     return (WARC_TRUE);
-
   w_fseek_start (bloc);
 
   WTempFile_reset (TEMP_FILE);

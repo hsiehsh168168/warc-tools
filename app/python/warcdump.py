@@ -72,7 +72,7 @@ def main () :
           r = w.nextRecord()
 
           if (not (r)) :
-             warc.destroy (w)
+             w.destroy ()
              return             
 
           sys.stdout.write ("%-20u " %  r . getOffset () )

@@ -106,17 +106,17 @@ def main () :
              print "bad ARC file"
              a . destroy ()
              w . destroy ()
-             warc.destroy (uuid)
+             uuid . destroy ()
              return
 
           wr = WRecord ()
 
           if (not (wr)) :
              print "can not create WARC record object"
-             a . destroy ()
-             w . destroy ()
-             warc.destroy (uuid)
-             ar . destroy ()
+             a    . destroy ()
+             w    . destroy ()
+             uuid . destroy ()
+             ar   . destroy ()
              return
 
           wr . setRecordType (warc.WARC_RESOURCE_RECORD)
@@ -142,7 +142,7 @@ def main () :
               print "Unable to pass content to the WRecord"
               a . destroy ()
               w . destroy ()
-              warc.destroy (uuid)
+              uuid.destroy ()
               ar . destroy ()
               return
 
@@ -150,14 +150,14 @@ def main () :
               print "failed to write WRecord" 
               a . destroy ()
               w . destroy ()
-              warc.destroy (uuid)
+              uuid.destroy ()
               ar . destroy ()
               return
 
           ar . destroy ()
           wr . destroy ()
     
-    warc.destroy (uuid)
+    uuid.destroy ()
     a . destroy ()
     w . destroy ()
     return

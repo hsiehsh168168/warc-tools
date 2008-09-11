@@ -864,9 +864,6 @@ $(PYTHON)/arc_wrap.o : $(PYTHON)/arc_wrap.c
 htlib	= $(HTTRACK)/httrack_warc_plugin.o $(HTTRACK)/warcmisc.o
 
 htshared_unix: httrack_clean htshared
-		$(CC) -shared $(full) $(htlib) -o $(HTTRACK)/libhtswarc.so
-
-htshared_unix0: httrack_clean htshared
 		$(CC) -shared -Wl,-soname$(HTSONAME) -o $(HTTRACK)/$(HTSHAREDNAME) $(full) $(htlib)
 		ln -sf $(HTSHAREDNAME) $(HTTRACK)/$(HTNAME).$(LIBSUFFIX).$(MAJOR) && \
 		ln -sf $(HTSHAREDNAME) $(HTTRACK)/$(HTNAME).$(LIBSUFFIX)

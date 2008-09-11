@@ -24,7 +24,7 @@
 /* ------------------------------------------------------------------- */
 
 
-/* For plugin construction, see: http://www.httrack.com/html/plug.html */
+/* For plugin buiding, see: http://www.httrack.com/html/plug.html */
 
 
 
@@ -41,102 +41,55 @@
 /* WARC headers and misc functions */
 #include <warcmisc.h> 
 
+/* default values */
+#include <httrack_warc_plugin.h>
+
+
+/* useful macros */
 #define makeS(s) (s), w_strlen(s)
 #define uS(s) ((warc_u8_t *) (s))
 
 
-/* local function called as "check_html" callback */
-
-static int check_html_cb (t_hts_callbackarg * carg, httrackp * opt,
-                          char * html, int len, const char * url_address, 
-                          const char* url_file) 
-{
-
-  void * dummyArg = (void *) CALLBACKARG_USERDEF (carg);
-
-  /* 
-     call parent functions if multiple callbacks are chained. 
-     you can skip this part, if you don't want previous callbacks
-     to be called. 
-  */
-  
-  /* if (CALLBACKARG_PREV_FUN(carg, check_html) != NULL)  */
-/*     { */
-/*       if (!CALLBACKARG_PREV_FUN(carg, check_html)(CALLBACKARG_PREV_CARG(carg), */
-/*                                                   opt, html, len,  */
-/*                                                   url_address, url_file)) */
-/*         return 0;  /\* abort *\/ */
-/*     } */
-
-  //fprintf(stderr, "+++ COUCOU file %s   -   %s\n", url_address, url_file);
-
-  return 1;  /* success */
-}
-
-
-int savename_cb (t_hts_callbackarg *carg, httrackp* opt, 
-                               const char* adr_complete, 
-                               const char* fil_complete, 
-                               const char* referer_adr, 
-                               const char* referer_fil, char* save)
+int check_mime_cb (t_hts_callbackarg *carg, httrackp* opt, const char* adr,
+                  const char* fil, const char* mime, int status)
 {
   void * wst = (void *) CALLBACKARG_USERDEF (carg);
 
-  //fprintf(stderr, "+++ savename_cb: %s%s\n", adr_complete, fil_complete);
-
-  setURL (adr_complete, fil_complete, wst);
-
-  return 1;  /* success */
+  setMIME (mime, wst);
 }
 
-static void filesave_cb (t_hts_callbackarg *carg, httrackp *opt, 
-                           const char * filename)
+void filesave_cb (t_hts_callbackarg *carg, httrackp* opt, const char* file)
 {
   void * wst = (void *) CALLBACKARG_USERDEF (carg);
- 
- 
-/*  if (CALLBACKARG_PREV_FUN(carg, filesave) != NULL) 
-    {
-      if (!CALLBACKARG_PREV_FUN (carg, filesave)(CALLBACKARG_PREV_CARG(carg), opt, file))
-          return ;  
-    }*/
 
-
-  writeWRecord ("http://www.iipc.net",  "2008-09-10T00:00:00Z",
-                "octet/stream",         "0.0.0.0",
-                filename, wst);
-
+  writeWRecord (HTTRACK_DEFAULT_TIMESTAMP,
+                HTTRACK_DEFAULT_MIMETYPE,  HTTRACK_DEFAULT_IP,
+                file,                  wst);
 }
 
-/* local function called as "end" callback */
+void filesave2_cb (t_hts_callbackarg *carg, httrackp* opt, 
+                   const char* hostname, const char* filename, 
+                   const char* localfile, int is_new, int is_modified, 
+                   int not_updated)
+{
+  void * wst = (void *) CALLBACKARG_USERDEF (carg);
+
+  setURL (hostname, filename, wst);
+}
+
 static int end_cb(t_hts_callbackarg *carg, httrackp *opt)
 
 {
   void * wst = (struct WPlugin *) CALLBACKARG_USERDEF (carg);
 
-  /* close the WARC file  and free resources */
   destroyWARC (wst);
-
-
-  /* processing */
-/*   fprintf(stderr, "That's all, folks!\n"); */
-
-  /* call parent functions if multiple callbacks are chained. you can skip this part, if you don't want previous callbacks to be called. */
-/*   if (CALLBACKARG_PREV_FUN(carg, end) != NULL)  */
-/*     { */
-/*       /\* status is ok on our side, return other callabck's status *\/ */
-/*       return CALLBACKARG_PREV_FUN(carg, end)(CALLBACKARG_PREV_CARG(carg), opt); */
-/*     } */
 
   return 1;  /* success */
 }
 
-/*
-  module entry point
-  the function name and prototype MUST match this prototype
-*/
 
-EXTERNAL_FUNCTION int hts_plug(httrackp *opt, const char* argv) {
+/* module entry point */
+EXTERNAL_FUNCTION int hts_plug (httrackp *opt, const char* argv) {
 
   void * wst = NULL;
 
@@ -146,19 +99,16 @@ EXTERNAL_FUNCTION int hts_plug(httrackp *opt, const char* argv) {
   if (arg != NULL)
     arg ++;
 
-#define WARC_TMP    "."
-#define OUTPUT_WARC "outfile.warc.gz"
-#define WARC_SIZE   (1024 * 1024 * 1024)
-  wst = blessWARC (OUTPUT_WARC, WARC_SIZE, WARC_TMP);
 
+  wst = blessWARC (HTTRACK_OUTPUT_WARC, HTTRACK_WARC_SIZE, HTTRACK_TMP_DIR);
   if (! wst)
     return (0); /* failure */
 
   /* plug callback functions */
-/*   CHAIN_FUNCTION(opt, check_html, check_html_cb, wst); */
-  CHAIN_FUNCTION(opt, savename,   savename_cb,   wst);
-  CHAIN_FUNCTION(opt, filesave,   filesave_cb,   wst);
-  CHAIN_FUNCTION(opt, end,        end_cb,        wst);
+  CHAIN_FUNCTION(opt, check_mime,  check_mime_cb, wst);
+  CHAIN_FUNCTION(opt, filesave2,   filesave2_cb,   wst);
+  CHAIN_FUNCTION(opt, filesave,    filesave_cb,   wst);
+  CHAIN_FUNCTION(opt, end,         end_cb,        wst);
 
   return 1;  /* success */
 }
