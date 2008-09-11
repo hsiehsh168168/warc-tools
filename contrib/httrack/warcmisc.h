@@ -24,8 +24,8 @@
 /*     http://code.google.com/p/warc-tools/                            */
 /* ------------------------------------------------------------------- */
 
-#ifndef	__WARC_MISC_H__
-#define	__WARC_MISC_H__
+#ifndef	__WARC_HTTRACK_H__
+#define	__WARC_HTTRACK_H__
 
 
 /* to mix C and C++ */
@@ -41,12 +41,16 @@ extern "C"
 
 #include <wport.h>
 
+    extern void   destroyWARC  (void *);
+    
+    extern void * blessWARC  (const char *, 
+                              unsigned int, const char *);
+    
+    extern void   writeWRecord (const char *, const char *,
+                                const char *, const char *,
+                                const char *, void *);
 
-extern void * blessWFile (const char *, unsigned int, const char *);
-
-extern void writeWRecord (const char *, const char *,
-                          const char *, const char *,
-                          const char *, void *);
+    extern void   setURL (const char *, const char *, void *);
 
 #ifdef __cplusplus
   }
@@ -54,4 +58,4 @@ extern void writeWRecord (const char *, const char *,
 #endif
 
 
-#endif /* __WARC_MISC_H__ */
+#endif /* __WARC_HTTRACK_H__ */
