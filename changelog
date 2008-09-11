@@ -24,6 +24,10 @@
 /*     http://code.google.com/p/warc-tools/                            */
 /* ------------------------------------------------------------------- */
 
+2008-09-08 to 2008-09-10 by "voidptrptr":
+
+	* WARC storage backend for HTTrack (contrib/httrack)
+
 2008-05-29 to 2008-09-08 by "voidptrptr":
 
 	* Complete rewrite of the Python wrapper

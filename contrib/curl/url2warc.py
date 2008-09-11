@@ -152,7 +152,7 @@ def main () :
     global tmpdir
     global tmpfile
     
-    usage = " Download list of URLs in parallel and store them in WARC container \n\n"\
+    usage = " Download list of URLs and store them in WARC container \n\n"\
             + sys.argv[0] + " -f <urls_list> -o <warc_file> [-s <tmpfile>] [-t <tmpdir>] [-q]"
     
     parser = OptionParser(usage)
