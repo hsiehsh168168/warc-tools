@@ -41,8 +41,9 @@
 WIPUBLIC void * blessWFile (const char * filename, unsigned int max,
                             const char * tmpdir)
 {
+  printf("+++ WFILE CONSTRUCTOR\n");
   return bless (WFile, filename, max, 
-                WARC_FILE_COMPRESSED_GZIP, WARC_FILE_WRITER, 
+                WARC_FILE_WRITER, WARC_FILE_COMPRESSED_GZIP,
                 tmpdir);
 }
 

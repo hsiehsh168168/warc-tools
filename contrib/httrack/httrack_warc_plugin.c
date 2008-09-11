@@ -79,7 +79,8 @@ static void store_in_warc (t_hts_callbackarg *carg, httrackp *opt,
 {
   
   void * w = (void *) CALLBACKARG_USERDEF (carg);
-  
+ 
+ 
 /*  if (CALLBACKARG_PREV_FUN(carg, filesave) != NULL) 
     {
       if (!CALLBACKARG_PREV_FUN (carg, filesave)(CALLBACKARG_PREV_CARG(carg), opt, file))
@@ -89,16 +90,18 @@ static void store_in_warc (t_hts_callbackarg *carg, httrackp *opt,
   writeWRecord ("http://www.iipc.net",  "2008-09-10T00:00:00Z",
                 "octet/stream",         "0.0.0.0",
                 filename, w);
+
 }
 
 /* local function called as "end" callback */
 static int end_of_mirror(t_hts_callbackarg *carg, httrackp *opt)
 
 {
-  void * w = (void *) CALLBACKARG_USERDEF (carg);
+/*   void * w = (void *) CALLBACKARG_USERDEF (carg); */
 
-  /* close the WARC file  and free resources */
-  destroy (w);
+/*   /\* close the WARC file  and free resources *\/ */
+/*   if(w) */
+/*     destroy (w); */
 
   /* processing */
   fprintf(stderr, "That's all, folks!\n");
@@ -120,6 +123,8 @@ static int end_of_mirror(t_hts_callbackarg *carg, httrackp *opt)
 
 EXTERNAL_FUNCTION int hts_plug(httrackp *opt, const char* argv) {
 
+  void * w = NULL;
+
   /* optional argument passed in the commandline we won't be using here */
   const char *arg = strchr(argv, ',');
 
@@ -127,18 +132,17 @@ EXTERNAL_FUNCTION int hts_plug(httrackp *opt, const char* argv) {
     arg ++;
 
 #define WARC_TMP    "."
-#define OUTPUT_WARC "outfile.warc"
+#define OUTPUT_WARC "outfile.warc.gz"
 #define WARC_SIZE   (1024 * 1024 * 1024)
-
-  void * w = blessWFile (OUTPUT_WARC, WARC_SIZE, WARC_TMP);
+  w = blessWFile (OUTPUT_WARC, WARC_SIZE, WARC_TMP);
 
   if (! w)
     return (0); /* failure */
 
   /* plug callback functions */
-  CHAIN_FUNCTION(opt, check_html, process_file,  & w);
-  CHAIN_FUNCTION(opt, filesave,   store_in_warc, & w);
-  CHAIN_FUNCTION(opt, end,        end_of_mirror, & w);
+  CHAIN_FUNCTION(opt, check_html, process_file,  w);
+  CHAIN_FUNCTION(opt, filesave,   store_in_warc, w);
+  CHAIN_FUNCTION(opt, end,        end_of_mirror, w);
 
   return 1;  /* success */
 }

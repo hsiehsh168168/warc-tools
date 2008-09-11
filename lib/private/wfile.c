@@ -2350,6 +2350,7 @@ WPRIVATE void * WFile_constructor (void * _self, va_list * app)
   const char              * dname      = va_arg (* app, const char *);
   warc_u32_t                dname_len  = w_strlen ((warc_u8_t *) dname);
 
+
   FNAME = bless (WString, fname, w_strlen ((warc_u8_t *) fname) );
   unless (FNAME)
     {
@@ -2376,12 +2377,14 @@ WPRIVATE void * WFile_constructor (void * _self, va_list * app)
   COMP    = compressed;
   MODE    = mode;
 
+
   MAXSIZE = max_size;
   unless (MAXSIZE)
   {
     destroy (self);
     return (NIL);
   }
+
 
   if (MODE == WARC_FILE_READER) /* reading from a WARC file */
     {
