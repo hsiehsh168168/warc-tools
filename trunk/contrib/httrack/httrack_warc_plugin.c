@@ -1,15 +1,45 @@
+/* ------------------------------------------------------------------- */
+/* Copyright (c) 2007-2008 Hanzo Archives Limited.                     */
+/*                                                                     */
+/* Licensed under the Apache License, Version 2.0 (the "License");     */
+/* you may not use this file except in compliance with the License.    */
+/* You may obtain a copy of the License at                             */
+/*                                                                     */
+/*     http://www.apache.org/licenses/LICENSE-2.0                      */
+/*                                                                     */
+/* Unless required by applicable law or agreed to in writing, software */
+/* distributed under the License is distributed on an "AS IS" BASIS,   */
+/* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or     */
+/* implied.                                                            */
+/* See the License for the specific language governing permissions and */
+/* limitations under the License.                                      */
+/*                                                                     */
+/* You may find more information about Hanzo Archives at               */
+/*                                                                     */
+/*     http://www.hanzoarchives.com/                                   */
+/*                                                                     */
+/* You may find more information about the WARC Tools project at       */
+/*                                                                     */
+/*     http://code.google.com/p/warc-tools/                            */
+/* ------------------------------------------------------------------- */
+
+
+/* For plugin construction, see: http://www.httrack.com/html/plug.html */
+
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-/* http://www.httrack.com/html/plug.html */
 
 /* HTTrack mandatory headers */
 #include <httrack-library.h>
 #include <htsopt.h>
 #include <htsdefines.h>
 
-#include <warc.h> /* WARC headers */
+/* WARC headers and misc functions */
+#include <warcmisc.h> 
 
 #define makeS(s) (s), w_strlen(s)
 #define uS(s) ((warc_u8_t *) (s))
@@ -45,14 +75,10 @@ static int process_file(t_hts_callbackarg * carg, httrackp * opt,
 
 
 static void store_in_warc (t_hts_callbackarg *carg, httrackp *opt, 
-                           const char * file)
+                           const char * filename)
 {
   
   void * w = (void *) CALLBACKARG_USERDEF (carg);
-  
-  void * r = NIL;
-  void * u = NIL;
-  
   
 /*  if (CALLBACKARG_PREV_FUN(carg, filesave) != NULL) 
     {
@@ -60,38 +86,9 @@ static void store_in_warc (t_hts_callbackarg *carg, httrackp *opt,
           return ;  
     }*/
 
-  r = bless (WRecord);
-
-  unless (r)
-    return ;
-
-  u = bless (WUUID);
-
-  unless (u)
-    {
-     destroy (r);
-     return ;
-    }
-
-  /* TU DEVRAIS TESTER LA AVLEUR DE RETOUR DES FONCTIONS LYES ICI */
-
-  WRecord_setRecordType (r, WARC_RESOURCE_RECORD);
-  WRecord_setTargetUri  (r, makeS (uS("http://www.iipc.net")));
-  WRecord_setDate       (r, makeS (uS("2008-09-10T00:00:00Z")));
-  WRecord_setContentType(r, makeS (uS("octet/stream")));
-
-  WUUID_hash (u, makeS(uS("onestring")));
-  WUUID_hash (u, makeS(uS("towstring")));
-
-  WRecord_setRecordId(r, makeS (WUUID_text (u) ));
-
-  destroy (u);
-
-  WRecord_setIpAddress(r, makeS(uS("0.0.0.0")));
-
-  WRecord_setContentFromFileName (r, file);
-
-  WFile_storeRecord (w, r);
+  writeWRecord ("http://www.iipc.net",  "2008-09-10T00:00:00Z",
+                "octet/stream",         "0.0.0.0",
+                filename, w);
 }
 
 /* local function called as "end" callback */
@@ -100,7 +97,7 @@ static int end_of_mirror(t_hts_callbackarg *carg, httrackp *opt)
 {
   void * w = (void *) CALLBACKARG_USERDEF (carg);
 
-
+  /* close the WARC file  and free resources */
   destroy (w);
 
   /* processing */
@@ -133,11 +130,9 @@ EXTERNAL_FUNCTION int hts_plug(httrackp *opt, const char* argv) {
 #define OUTPUT_WARC "outfile.warc"
 #define WARC_SIZE   (1024 * 1024 * 1024)
 
-  void * w = bless (WFile, OUTPUT_WARC, WARC_SIZE, 
-                    WARC_FILE_COMPRESSED_GZIP, WARC_FILE_WRITER, 
-                    WARC_TMP);
+  void * w = blessWFile (OUTPUT_WARC, WARC_SIZE, WARC_TMP);
 
-  unless (w)
+  if (! w)
     return (0); /* failure */
 
   /* plug callback functions */

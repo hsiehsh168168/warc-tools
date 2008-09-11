@@ -124,7 +124,7 @@ APYSHAREDNAME = $(APYNAME).$(LIBSUFFIX)
 #################
 
 INC_HTTRACK	  = -I/usr/include/httrack
-HTNAME   	  = httrack_warc
+HTNAME   	  = libhtswarc
 HTSONAME	  =,$(HTNAME).$(LIBSUFFIX).$(MAJOR)
 HTSHAREDNAME  = $(HTNAME).$(LIBSUFFIX).$(MAJOR).$(MINOR).$(RELEASE)
 
@@ -348,7 +348,22 @@ endif
 # post OS flags processing
 
 CFLAGS += $(GCC_EXTRA)
-CFLAGS += $(S_CFLAGS)
+
+# compile WARC as a shared library
+ifeq ($(W_SHARED),on)
+	CFLAGS += $(S_CFLAGS)
+endif
+
+ifeq ($(W_PYSHARED),on)
+	CFLAGS += $(S_CFLAGS)
+endif
+
+ifeq ($(W_HTSHARED),on) 
+	CFLAGS += $(S_CFLAGS)
+endif
+
+
+
 
 RFLAGS = $(CFLAGS)
 CFLAGS += $(DEFS)
@@ -846,9 +861,12 @@ $(PYTHON)/arc_wrap.o : $(PYTHON)/arc_wrap.c
 # HTTrack WARC plugin
 ######################
 
-htlib	= $(HTTRACK)/httrack_warc_plugin.o
+htlib	= $(HTTRACK)/httrack_warc_plugin.o $(HTTRACK)/warcmisc.o
 
 htshared_unix: httrack_clean htshared
+		$(CC) -shared $(full) $(htlib) -o $(HTTRACK)/libhtswarc.so
+
+htshared_unix0: httrack_clean htshared
 		$(CC) -shared -Wl,-soname$(HTSONAME) -o $(HTTRACK)/$(HTSHAREDNAME) $(full) $(htlib)
 		ln -sf $(HTSHAREDNAME) $(HTTRACK)/$(HTNAME).$(LIBSUFFIX).$(MAJOR) && \
 		ln -sf $(HTSHAREDNAME) $(HTTRACK)/$(HTNAME).$(LIBSUFFIX)
@@ -861,13 +879,16 @@ htshared_osx: httrack_clean htshared
 		ln -sf $(HTSHAREDNAME) $(HTTRACK)/$(HTNAME).$(MAJOR).$(LIBSUFFIX) && \
 		ln -sf $(HTSHAREDNAME) $(HTTRACK)/$(HTNAME).$(LIBSUFFIX)
 
-httrack: all
+httrack: 
 		@$(MAKE) W_HTSHARED=on $(HTSHARED_OS)
 
-htshared: $(htlib)
+htshared: $(htlib) $(full)
+
+$(HTTRACK)/warcmisc.o : $(HTTRACK)/warcmisc.c
+	$(CC) $(CFLAGS) -I$(HTTRACK) -c $< -o $@
 
 $(HTTRACK)/httrack_warc_plugin.o : $(HTTRACK)/httrack_warc_plugin.c
-	$(GCC) $(S_CFLAGS) $(HEADERS) $(INC_HTTRACK) -c $< -o $@
+	$(GCC) $(S_CFLAGS) $(HEADERS) -I$(HTTRACK) $(INC_HTTRACK) -c $< -o $@
 
 
 ####################
@@ -959,7 +980,7 @@ python_clean: 	   ; @rm -f $(PYTHON)/*.o $(PYTHON)/*~ $(PYTHON)/*.pyc
 					 $(PYTHON)/*$(LIBSUFFIX)* $(PYTHON)/_* 
 
 httrack_clean: 	   ; @rm -f $(HTTRACK)/*.o $(HTTRACK)/*~ $(HTTRACK)/*.so* \
-					$(HTTRACK)/*.dylib*    $(HTTRACK)/*.dll*     
+					$(HTTRACK)/*.dylib*    $(HTTRACK)/*.dll* $(htlib)    
 
 
 clean:		tclean	mod_apache_clean mod_lighty_clean python_clean httrack_clean
