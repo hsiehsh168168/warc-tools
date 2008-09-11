@@ -363,7 +363,7 @@ b	= $(PRIVATE)/wstring.c   $(PRIVATE)/wclass.c  $(PRIVATE)/wlist.c \
       $(PRIVATE)/afile.c     ${MKTEMP}.c          $(PRIVATE)/wendian.c \
       $(PRIVATE)/wuuid.c     $(PRIVATE)/wserver.c $(PRIVATE)/whash.c \
       $(PRIVATE)/wkv.c	     $(PRIVATE)/wgzip.c   $(PRIVATE)/wclient.c \
-      $(PRIVATE)/wregexp.c	 $(PRIVATE)/wbloc.c
+      $(PRIVATE)/wregexp.c	 $(PRIVATE)/wbloc.c   $(PRIVATE)/wversion.c
 
 b	+= $(GZIP)/adler32.c     $(GZIP)/crc32.c      $(GZIP)/deflate.c \
 	  $(GZIP)/infback.c      $(GZIP)/inffast.c    $(GZIP)/inflate.c \
@@ -467,38 +467,40 @@ evlib   = $(EV_SRC:.c=.o)
 
 regex   = $(REGEX)/regex.o
 
-all:  	$t $(regex)
+full	= $(regex) $(libwarc)
+
+all:	$(regex) $t
 
 $(REGEX)/regex.o: $(REGEX)/regex.c
 		$(GCC) $(HEADERS) -c $< -o $@
 
-static:	$(libwarc)	; $(AR) cvr $(LIBNAME).a $(libwarc); $(RANLIB) $(LIBNAME).a
+static:	$(full)	; $(AR) cvr $(LIBNAME).a $(full); $(RANLIB) $(LIBNAME).a
 
 # http://rute.2038bug.com/node26.html.gz (Unix, Unix-like)
-shared_unix: clean $(libwarc)
-		$(CC) -shared -Wl,-soname$(SONAME) -o $(SHAREDNAME) $(libwarc)
+shared_unix: clean $(full)
+		$(CC) -shared -Wl,-soname$(SONAME) -o $(SHAREDNAME) $(full)
 		ln -sf $(SHAREDNAME)  $(LIBNAME).$(LIBSUFFIX).$(MAJOR) && \
 		ln -sf $(SHAREDNAME)  $(LIBNAME).$(LIBSUFFIX)
 
 
 # http://www.finkproject.org/doc/porting/shared.php (MacOS X)
-shared_osx: clean $(libwarc)
+shared_osx: clean $(full)
 		$(CC) -dynamiclib -install_name $(INSTALLNAME) \
 		-compatibility_version $(MAJOR).$(MINOR) \
 		-current_version $(MAJOR).$(MINOR).$(RELEASE) \
-		-o $(SHAREDNAME) $(libwarc)
+		-o $(SHAREDNAME) $(full)
 		ln -sf $(SHAREDNAME)  $(LIBNAME).$(MAJOR).$(LIBSUFFIX) && \
 		ln -sf $(SHAREDNAME)  $(LIBNAME).$(LIBSUFFIX)
 
 # http://www.emmestech.com/software/cygwin/pexports-0.43/moron2.html
 # http://mingw.org/docs.shtml
-shared_mingw: clean $(libwarc)
-		$(CC) -shared -o $(SHAREDNAME) $(libwarc) \
+shared_mingw: clean $(full)
+		$(CC) -shared -o $(SHAREDNAME) $(full) \
 		-Wl,--out-implib,$(LIBNAME)dll.a
 
 # http://www.cygwin.com/cygwin-ug-net/dll.html
-shared_cygwin: clean $(libwarc)
-		$(CC) -shared -o $(SHAREDNAME) $(libwarc) \
+shared_cygwin: clean $(full)
+		$(CC) -shared -o $(SHAREDNAME) $(full) \
 		-Wl,--out-implib,$(LIBNAME)dll.a \
 		-Wl,--export-all-symbols \
 		-Wl,--enable-auto-import \
@@ -847,7 +849,7 @@ $(PYTHON)/arc_wrap.o : $(PYTHON)/arc_wrap.c
 htlib	= $(HTTRACK)/httrack_warc_plugin.o
 
 htshared_unix: httrack_clean htshared
-		$(CC) -shared -Wl,-soname$(HTSONAME) -o $(HTTRACK)/$(HTSHAREDNAME) $(libwarc) $(htlib)
+		$(CC) -shared -Wl,-soname$(HTSONAME) -o $(HTTRACK)/$(HTSHAREDNAME) $(full) $(htlib)
 		ln -sf $(HTSHAREDNAME) $(HTTRACK)/$(HTNAME).$(LIBSUFFIX).$(MAJOR) && \
 		ln -sf $(HTSHAREDNAME) $(HTTRACK)/$(HTNAME).$(LIBSUFFIX)
 
@@ -855,7 +857,7 @@ htshared_osx: httrack_clean htshared
 		$(CC) -dynamiclib -install_name $(HTINSTALLNAME) \
 		-compatibility_version $(MAJOR).$(MINOR) \
 		-current_version $(MAJOR).$(MINOR).$(RELEASE) \
-		-o $(HTTRACK)/$(HTSHAREDNAME) $(libwarc) $(htlib)
+		-o $(HTTRACK)/$(HTSHAREDNAME) $(full) $(htlib) -lhttrack
 		ln -sf $(HTSHAREDNAME) $(HTTRACK)/$(HTNAME).$(MAJOR).$(LIBSUFFIX) && \
 		ln -sf $(HTSHAREDNAME) $(HTTRACK)/$(HTNAME).$(LIBSUFFIX)
 

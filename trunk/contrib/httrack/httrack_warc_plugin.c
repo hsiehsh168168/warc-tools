@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+/* http://www.httrack.com/html/plug.html */
+
 /* HTTrack mandatory headers */
 #include <httrack-library.h>
 #include <htsopt.h>
@@ -74,7 +76,7 @@ static void store_in_warc (t_hts_callbackarg *carg, httrackp *opt,
   /* TU DEVRAIS TESTER LA AVLEUR DE RETOUR DES FONCTIONS LYES ICI */
 
   WRecord_setRecordType (r, WARC_RESOURCE_RECORD);
-  Wrecord_setTargetUri  (r, makeS (uS("http://www.iipc.net")));
+  WRecord_setTargetUri  (r, makeS (uS("http://www.iipc.net")));
   WRecord_setDate       (r, makeS (uS("2008-09-10T00:00:00Z")));
   WRecord_setContentType(r, makeS (uS("octet/stream")));
 
