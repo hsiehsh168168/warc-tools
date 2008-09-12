@@ -59,7 +59,7 @@ struct WBloc
     /*@{*/
     warc_u32_t    allocation_unit; /**< The amount of Byte to allocate */
     warc_u8_t   * buffer ; /**< The buffer whcich will contain the data */
-    warc_bool_t   first_access; /** To test if it is the first access to data */
+    warc_bool_t   eob; /** end of bloc */
     void        * wfile; /** The Warc File wher the bloc will be got */
     void        * wrecord; /** The WRecord class instance containg the bloc */
     void        * wtfile; /** The WTempFile object that will contain the data bloc */
@@ -71,11 +71,13 @@ struct WBloc
 
 #define ALLOC        (self -> allocation_unit)
 #define BUFF         (self -> buffer)
-#define FIRST        (self -> first_access)
 #define WFILE        (self -> wfile)
 #define RECORD       (self -> wrecord)
 #define WTFILE       (self -> wtfile)
 #define CODE         (self -> http_code)
+#define EOB          (self -> eob)
+
+#define DEFAULT_UNIT  64 * 1024
 
 
 /**
@@ -90,43 +92,32 @@ struct WBloc
 
 WPUBLIC warc_u8_t * WBloc_next (void * _self)
 {
-    struct WBloc *  self = _self;
+  struct WBloc *  self = _self;
 
-    FILE       * tfile = NIL;
-    warc_u32_t  size = 0;
+  FILE       * tfile = NIL;
+  warc_u32_t  size = 0;
 
   /* Preconditions  */
   CASSERT (self);
 
-  if (FIRST)
-     {
-      WTFILE = WRecord_getBloc (RECORD, WFILE, WARC_TRUE, CODE);
-
-      unless (WTFILE)
-        return (NIL);
-
-      FIRST = WARC_FALSE;
-     }
-
   tfile = WTempFile_handle (WTFILE);
-
-
-  if (feof (tfile))
-     {
+  if(EOB || feof (tfile))
+    {
+      EOB = WARC_FALSE;
       w_fseek_start (tfile);
       return (NIL);
-     }
+    }
 
-  w_fseek_start (tfile);
   size = w_fread (BUFF, 1, ALLOC, tfile);
+  if(size)
+    BUFF [size] = '\0';
 
-  if (size < ALLOC && ! feof (tfile))
-     {
-      w_fseek_start (tfile);
-      return (NIL);
-     }
+  if(size < ALLOC)
+    {
+      EOB = WARC_TRUE;
+      return (BUFF);
+    }
 
-  BUFF [size] = '\0';
   return (BUFF);
 }
 
@@ -146,6 +137,8 @@ WPUBLIC const warc_u8_t * WBloc_getHttpCode (const void * const _self)
   /* Preconditions */
   CASSERT (self);
 
+  /* preconditions */
+
   unless (CODE)
     return (NIL);
 
@@ -156,7 +149,7 @@ WPUBLIC const warc_u8_t * WBloc_getHttpCode (const void * const _self)
 }
 
 
-#define DEFAULT_UNIT  64 * 1024
+
 
 /**
  * WBloc_constructor - create a new WBloc object instance
@@ -173,42 +166,37 @@ WPRIVATE void * WBloc_constructor (void * _self, va_list * app)
 {
 
   struct WBloc       * const self = _self;
-  void  *             file   = va_arg (* app, void *);
-  void  *             record = va_arg (* app, void *);
-  const   warc_u32_t  alloc  = va_arg (* app, const warc_u32_t);
+  void  *             file        = va_arg (* app, void *);
+  void  *             record      = va_arg (* app, void *);
+  warc_bool_t         httpheaders = va_arg (* app, const warc_bool_t);
+  const   warc_u32_t  alloc       = va_arg (* app, const warc_u32_t);
 
   warc_u32_t allocated = DEFAULT_UNIT;
 
-  /* preconditions */
-
   unless (record)
-    { 
-     destroy(self);
-     return (NIL);
-    }
-
-  unless (alloc)
-    {
-     destroy (self);
-     return (NIL);
-    }
-  else
-     allocated = alloc;
-
+  { 
+    destroy(self);
+    return (NIL);
+  }
+  
+  /* if alloc = 0, use allocated */
+  if (alloc)
+    allocated = alloc;
+  
   ALLOC = allocated;
-  BUFF = wmalloc (ALLOC+1);
+  BUFF = wmalloc (ALLOC + 1);
 
   unless (BUFF)
-    {
+  {
     destroy (self);
     return (NIL);
-    }
+  }
 
-  FIRST = WARC_TRUE;
-  WTFILE = NIL;
-  RECORD = record;
-  WFILE = file;
+  WTFILE   = NIL;
+  RECORD   = record;
+  WFILE    = file;
   CODE [0] = '\0';
+  EOB      = WARC_FALSE;
 
   unless (RECORD && WFILE)
     {
@@ -216,6 +204,15 @@ WPRIVATE void * WBloc_constructor (void * _self, va_list * app)
      destroy (self);
      return (NIL);
     }
+
+  WTFILE = WRecord_getBloc (RECORD, WFILE, httpheaders, CODE);
+  unless (WTFILE)
+  {
+    destroy (self);
+    return (NIL);
+  }
+
+  w_fseek_start (WTempFile_handle (WTFILE));
 
   return (self);
 }

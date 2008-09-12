@@ -44,12 +44,13 @@ from wtypes import WTypes
 class WBloc:
 
 ##Constructor ##
-	def __init__(self, wfile, wrec, alloc):
+	def __init__(self, wfile, wrec, httpheaders, alloc):
 		self.classtype = WTypes()
-		if (wfile.type != self.classtype.WFile or wrec.type != self.classtype.WRecord or alloc == 0):
+                self.httpheaders = httpheaders
+                if (wfile.type != self.classtype.WFile or wrec.type != self.classtype.WRecord):
 			return 0
 		self.type = self.classtype.WBloc
-		self.me = warc.bless_WBloc(wfile.getInternal(self), wrec.getInternal(self), alloc)
+		self.me = warc.bless_WBloc(wfile.getInternal(self), wrec.getInternal(self), self.httpheaders, alloc)
 
 
 ## Bloc chunks recovering ##
@@ -58,8 +59,8 @@ class WBloc:
 		return warc.WBloc_next(self.me)
 
 
-	def getHttpCode(self):
-		return warc.WBloc_getHttpCode(self.me)
+# 	def getHttpCode(self):
+# 		return warc.WBloc_getHttpCode(self.me)
 
 
 

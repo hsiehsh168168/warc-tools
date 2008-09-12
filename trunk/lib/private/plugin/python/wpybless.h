@@ -41,7 +41,7 @@ extern "C"
     extern void * bless_WRecord ();
 
 
-    extern void * bless_WBloc (void  * , void  * , const warc_u32_t );
+    extern void * bless_WBloc (void  * , void  * , warc_bool_t, const warc_u32_t );
 
 
 #ifdef __cplusplus

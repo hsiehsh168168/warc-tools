@@ -5466,17 +5466,21 @@ SWIGINTERN PyObject *_wrap_bless_WBloc(PyObject *SWIGUNUSEDPARM(self), PyObject 
   PyObject *resultobj = 0;
   void *arg1 = (void *) 0 ;
   void *arg2 = (void *) 0 ;
-  unsigned int arg3 ;
+  warc_bool_t arg3 ;
+  unsigned int arg4 ;
   void *result = 0 ;
   int res1 ;
   int res2 ;
-  unsigned int val3 ;
+  int val3 ;
   int ecode3 = 0 ;
+  unsigned int val4 ;
+  int ecode4 = 0 ;
   PyObject * obj0 = 0 ;
   PyObject * obj1 = 0 ;
   PyObject * obj2 = 0 ;
+  PyObject * obj3 = 0 ;
   
-  if (!PyArg_ParseTuple(args,(char *)"OOO:bless_WBloc",&obj0,&obj1,&obj2)) SWIG_fail;
+  if (!PyArg_ParseTuple(args,(char *)"OOOO:bless_WBloc",&obj0,&obj1,&obj2,&obj3)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0,SWIG_as_voidptrptr(&arg1), 0, 0);
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "bless_WBloc" "', argument " "1"" of type '" "void *""'"); 
@@ -5485,12 +5489,17 @@ SWIGINTERN PyObject *_wrap_bless_WBloc(PyObject *SWIGUNUSEDPARM(self), PyObject 
   if (!SWIG_IsOK(res2)) {
     SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "bless_WBloc" "', argument " "2"" of type '" "void *""'"); 
   }
-  ecode3 = SWIG_AsVal_unsigned_SS_int(obj2, &val3);
+  ecode3 = SWIG_AsVal_int(obj2, &val3);
   if (!SWIG_IsOK(ecode3)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "bless_WBloc" "', argument " "3"" of type '" "unsigned int""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "bless_WBloc" "', argument " "3"" of type '" "warc_bool_t""'");
   } 
-  arg3 = (unsigned int)(val3);
-  result = (void *)bless_WBloc(arg1,arg2,arg3);
+  arg3 = (warc_bool_t)(val3);
+  ecode4 = SWIG_AsVal_unsigned_SS_int(obj3, &val4);
+  if (!SWIG_IsOK(ecode4)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "bless_WBloc" "', argument " "4"" of type '" "unsigned int""'");
+  } 
+  arg4 = (unsigned int)(val4);
+  result = (void *)bless_WBloc(arg1,arg2,arg3,arg4);
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_void, 0 |  0 );
   return resultobj;
 fail:

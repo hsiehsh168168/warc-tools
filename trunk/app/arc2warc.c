@@ -241,7 +241,7 @@ int main (int argc, const char ** argv)
         free_err (7);
 
       /* set the record tyep */
-      b = WRecord_setRecordType  (wr, WARC_RESOURCE_RECORD);
+      b = WRecord_setRecordType  (wr, WARC_RESPONSE_RECORD);
 
       if (b)
         free_err (8);

@@ -35,5 +35,5 @@
 
     extern void * bless_WRecord ();
 
-    extern void * bless_WBloc (void  * , void  * , const unsigned int );
+    extern void * bless_WBloc (void  * , void  * , warc_bool_t, const unsigned int );
 
