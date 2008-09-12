@@ -31,7 +31,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
+/* #include <sys/time.h> */
 
 /* HTTrack mandatory headers */
 #include <httrack-library.h>
@@ -62,6 +62,15 @@ void filesave_cb (t_hts_callbackarg *carg, httrackp* opt, const char* file)
 {
   void * wst = (void *) CALLBACKARG_USERDEF (carg);
 
+  /* struct tm *ptr; */
+/*   time_t tm; */
+/*   char str[60]; */
+
+/*   tm = time(NULL); */
+/*   ptr = localtime(&tm); */
+/*   strftime(str ,100 , "It is %A.\n",ptr); */
+/*   printf(str); */
+  
   writeWRecord (HTTRACK_DEFAULT_TIMESTAMP,
                 HTTRACK_DEFAULT_MIMETYPE,  HTTRACK_DEFAULT_IP,
                 file,                  wst);

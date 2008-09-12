@@ -18,11 +18,11 @@ WPUBLIC void * bless_WRecord ()
 return (bless (WRecord));
 }
 
-WPUBLIC void * bless_WBloc (void  * wfile, void  * wrecord, const warc_u32_t alloc)
+WPUBLIC void * bless_WBloc (void  * wfile, void  * wrecord, warc_bool_t httpheaders, const warc_u32_t alloc)
 {
 void * x;
 
-x = bless (WBloc, wfile, wrecord, alloc);
+ x = bless (WBloc, wfile, wrecord, httpheaders, alloc);
 
 return (x);
 }

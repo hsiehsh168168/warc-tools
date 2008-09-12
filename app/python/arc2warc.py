@@ -119,7 +119,7 @@ def main () :
              ar   . destroy ()
              return
 
-          wr . setRecordType (warc.WARC_RESOURCE_RECORD)
+          wr . setRecordType (warc.WARC_RESPONSE_RECORD)
 
           uri = ar . getUrl ()
           wr . setTargetUri (uri, len (uri))

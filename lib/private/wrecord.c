@@ -2508,16 +2508,17 @@ WPUBLIC  warc_u32_t WRecord_getAnvlFieldsNumber (const void * const _self)
  * WARC Record data bloc extraction function
  */
 
-WPUBLIC FILE * WRecord_getBloc (void *  _self, void * w, warc_bool_t withhttp, warc_u8_t * http_code)
+WPUBLIC void * WRecord_getBloc (void *  _self, void * w, 
+                                warc_bool_t withhttp, warc_u8_t * http_code)
 {
-    struct WRecord *  self = _self;
+  struct WRecord *  self = _self;
 
-  void           * line = NIL;
-  void           * tfile = NIL;
-  void           * whttp_code;
+  void           * line       = NIL;
+  void           * tfile      = NIL;
+  void           * whttp_code = NIL;
 
-  warc_u32_t     fsm = 0;
-  warc_u32_t     act = 0;
+  warc_u32_t       fsm   = 0;
+  warc_u32_t       act   = 0;
   warc_u8_t      * field = NIL;
 
   struct user_struct user_data;
@@ -2579,32 +2580,31 @@ WPUBLIC FILE * WRecord_getBloc (void *  _self, void * w, warc_bool_t withhttp, w
       return (NIL);
     }
  
-
-  user_data . fsm = & fsm;
+  user_data . fsm    = & fsm;
   user_data . action = & act;
-  user_data . line = line;
+  user_data . line   = line;
   user_data . was_cr = WARC_FALSE;
-  user_data . file = file;
-
+  user_data . file   = file;
 
   WFile_register (w, self, b_callback, (void *) & user_data);
-
 
   WRecord_getContent (self);
 
   unless (line)
      {
-      fprintf (stderr, "A problem appeared while reading data \n");
+      fprintf (stderr, "A problem appeared while reading data from REcord\n");
       destroy (whttp_code);
       destroy (tfile);
       return (NIL);
      }
 
-  w_strncpy (http_code, WString_getText (whttp_code), WString_getLength (whttp_code));
+  w_strncpy (http_code, WString_getText (whttp_code), 
+             WString_getLength (whttp_code));
 
-destroy (whttp_code);
-destroy (line);
-return (tfile);
+  destroy (whttp_code);
+  destroy (line);
+
+  return (tfile);
 }
 
 

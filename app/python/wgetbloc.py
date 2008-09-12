@@ -90,14 +90,13 @@ def main () :
         print "End of file reached, no record with number", options.cnt
         sys.exit(0);
 
-    # choose your buffer size (ex. 32K = 32 * 1024) to read the payload
+    # choose your buffer size (ex. 64K = 64 * 1024) to read the payload
     # (with the HTP headers) chunk by chunk 
-    b = WBloc(w, r, 32 * 1024)
-
+    b = WBloc (w, r, False, 64 * 1024)
     while True:
         buff = b.getNext()
         if buff:
-            print buff
+            sys.stdout.write(buff)
         else: # no more data to read. reach the end of record
             break
 
