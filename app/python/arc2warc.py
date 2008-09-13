@@ -25,6 +25,7 @@
 #     http://code.google.com/p/warc-tools/                             #
 # -------------------------------------------------------------------  #
 
+
 import wpath
 
 from afile import AFile
@@ -38,51 +39,42 @@ import arc
 
 from optparse import OptionParser
 
-def main () :
+# attempt to make a warc name 
+# from an arcfile name 
+# basic strategy is to replace arc with warc
+# if that fails just paste '.warc' on the end 
+# if cmode is True  then add a gz if necessary
+# otherwise remove it if necessary 
 
-    usage =  "./app/python/arc2warc.py  -a <file.arc> -f <file.warc> [-c] [-t <working_dir>]\n "\
-             "\t-a    : valid ARC file name\n"\
-             "\t-f    : valid WARC file name\n"\
-             "\t[-c]  : WARC file will be GZIP compressed (default no)\n"\
-             "\t[-t]  : temporary working directory (default './')\n"
-             
- 
-    parser = OptionParser(usage)
-
-    parser.add_option("-a", "--afile", dest="afilename",
-                      help="read data from ARC FILENAME")
-    parser.add_option("-f", "--wfile", dest="wfilename",
-                      help="write data to WARC FILENAME")
-    parser.add_option("-c", "--compressed", dest="cmode",
-                      action="store_true", help="compressed outpout  WARC FILE")
-    parser.add_option("-t", "--tempdir", dest="tmpdir",
-                      help="Temporary working directory", default="./")
-
-    (options, args) = parser.parse_args()
+def guessname( fname , cmode ):
+    if '.arc' in fname:
+        fname = fname.replace( '.arc' , '.warc' )
+    else:
+        fname += '.warc' 
+    if cmode:
+        if not '.gz' in fname:
+            fname += '.gz'
+    else:
+        if '.gz' in fname:
+            fname = fname.replace( '.gz' , '' )
+    return fname            
+            
 
 
-    if len (args) != 0 :
-       parser.error(" Incorrect arguments")
-
-    if (not (options.afilename)) :
-        parser.error(" You must give ARC file name")
-
-    if (not (options.wfilename)) :
-        parser.error(" You must give the outpout WARC file name desired")
-
-    a = AFile (options.afilename, arc.ARC_FILE_DETECT_COMPRESSION, options.tmpdir)
+def convert( fname , outfname , tmpdir , cmode  ):
+    a = AFile ( fname , arc.ARC_FILE_DETECT_COMPRESSION, tmpdir)
 
     if (not (a)) :
        print "ARC file not found "
        return
 
-    if (options.cmode) :
+    if (cmode) :
         cmode = warc.WARC_FILE_COMPRESSED_GZIP
     else :
         cmode = warc.WARC_FILE_UNCOMPRESSED
 
-    w = WFile(options.wfilename, 600 * 1024 * 1024,
-              warc.WARC_FILE_WRITER, cmode, options.tmpdir);
+    w = WFile(  outfname , 600 * 1024 * 1024,
+              warc.WARC_FILE_WRITER, cmode, tmpdir);
   
 
     if (not (w)) :
@@ -106,17 +98,17 @@ def main () :
              print "bad ARC file"
              a . destroy ()
              w . destroy ()
-             uuid . destroy ()
+             warc.destroy (uuid)
              return
 
           wr = WRecord ()
 
           if (not (wr)) :
              print "can not create WARC record object"
-             a    . destroy ()
-             w    . destroy ()
-             uuid . destroy ()
-             ar   . destroy ()
+             a . destroy ()
+             w . destroy ()
+             warc.destroy (uuid)
+             ar . destroy ()
              return
 
           wr . setRecordType (warc.WARC_RESPONSE_RECORD)
@@ -142,7 +134,7 @@ def main () :
               print "Unable to pass content to the WRecord"
               a . destroy ()
               w . destroy ()
-              uuid.destroy ()
+              warc.destroy (uuid)
               ar . destroy ()
               return
 
@@ -150,16 +142,51 @@ def main () :
               print "failed to write WRecord" 
               a . destroy ()
               w . destroy ()
-              uuid.destroy ()
+              warc.destroy (uuid)
               ar . destroy ()
               return
 
           ar . destroy ()
           wr . destroy ()
     
-    uuid.destroy ()
+    warc.destroy (uuid)
     a . destroy ()
     w . destroy ()
+
+def main () :
+
+    usage =  "./app/python/arc2warc.py  [OPTIONS] ARC-FILES "
+             
+ 
+    parser = OptionParser(usage)
+
+    parser.add_option("-c", "--compressed", dest="cmode",
+                      action="store_true", help="compressed outpout  WARC FILE")
+    parser.add_option("-t", "--tempdir", dest="tmpdir",
+                      help="Temporary working directory", default="./")
+    parser.add_option("-v","--verbose",
+                                action="store_true",dest="verbose" , default=False,
+                                help="print more information")                        
+
+    (options, args) = parser.parse_args()
+
+
+    if not ( len (args) > 0 ):
+       parser.error(" Please give one or more arcs to convert")
+
+
+    for fname in args:
+        ofname = guessname( fname , options.cmode )
+        if options.verbose:
+            print 'Converting %s to %s' % ( fname , ofname )            
+        convert( fname , ofname , options.tmpdir , options.cmode )
+        if options.verbose:
+            print 'Done'    
+        
+
+
+
+  
     return
 
 
