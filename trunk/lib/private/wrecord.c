@@ -1990,7 +1990,7 @@ WPUBLIC warc_bool_t  WRecord_setContentFromString (void * _self,
   if(w_fwrite (str, 1, strlen, EDATAF) != strlen)
     {
       EDATAF = NIL;
-      destroy (CONTENT);
+      destroy (CONTENT), CONTENT = NIL;
       return (WARC_TRUE);
     }
 
@@ -1999,11 +1999,12 @@ WPUBLIC warc_bool_t  WRecord_setContentFromString (void * _self,
   if (WHeader_setContentLength (HDL, SIZE))
     {
       EDATAF = NIL;
-      destroy (CONTENT);
+      destroy (CONTENT), CONTENT = NIL;
       return (WARC_TRUE);
     }
 
   CHECK = CHECK | 0x0008;
+
   return (WARC_FALSE);
 }
 
@@ -2724,15 +2725,18 @@ WPRIVATE void * WRecord_destructor (void * _self)
 
   if (ACONT)
     destroy (ACONT), ACONT = NIL, EDATAF = NIL;
-
-  if (EDATAF)
-    {
-      w_fclose (EDATAF); EDATAF = NIL;
-    }
-
+  
   if (CONTENT)
     destroy (CONTENT), CONTENT = NIL, EDATAF = NIL;
-  
+
+  /* EDATAF destruction must be after CONTENT and DATAF destruction,
+     because both are freeying EDATAF behind the scene
+   */
+  if (EDATAF)
+   {
+     w_fclose (EDATAF); EDATAF = NIL;
+    }
+ 
   if (CHECK)
     CHECK = 0;
   

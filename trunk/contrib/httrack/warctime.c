@@ -1,4 +1,3 @@
-
 /* ------------------------------------------------------------------- */
 /* Copyright (c) 2007-2008 Hanzo Archives Limited.                     */
 /*                                                                     */
@@ -24,45 +23,18 @@
 /*     http://code.google.com/p/warc-tools/                            */
 /* ------------------------------------------------------------------- */
 
-#ifndef	__WARC_HTTRACK_H__
-#define	__WARC_HTTRACK_H__
+#include <time.h>      /* strftime */
+#include <stdio.h>     /* sprintf */
+
+#include <warc.h>      /* warc_u8_t */
+
+#include <warctime.h>
 
 
-/* to mix C and C++ */
-#ifdef __cplusplus
-extern "C"
-  {
-#endif
+WIPUBLIC void warcTimeStamp (warc_u8_t * ts)
+{
+  time_t tm = time(NIL);
 
-    /**
-     * Portability header file
-     */
-
-#include <wport.h>
-
-#define HTTRACK_DEFAULT_TMPDIR     "."
-/* #define HTTRACK_WARC_SIZE          (1024 * 1024 * 1024) */
-#define HTTRACK_WARC_SIZE          (100 * 1024)
-
-    extern void   destroyWARC  (void *);
-    
-    extern void * blessWARC    (const char *);
-    
-    extern warc_bool_t  writeRequest  (const char *, const char *, void *);
-
-    extern warc_bool_t  writeResponse (const char *, const char *, void *);
-
-    extern warc_bool_t  writeResource (const char *, const char *,
-                                       const char *, void *);
-
-    extern void   setURL       (const char *, const char *, void *);
-    extern void   setMIME      (const char *, void *);
-    extern void   setIP        (const char *, void *);
-
-#ifdef __cplusplus
-  }
-
-#endif
-
-
-#endif /* __WARC_HTTRACK_H__ */
+  strftime((char *) ts, 21, "%Y-%m-%dT%H:%M:%SZ", 
+           (struct tm *) localtime (& tm));
+}
