@@ -41,22 +41,30 @@ The library was tested in x86 and PPC on both 32 bits and 64 bits architectures.
     # wget ftp://ftp.sunfreeware.com/pub/freeware/sparc/10/gcc-3.4.6-sol10-sparc-local.gz
     # wget ftp://ftp.sunfreeware.com/pub/freeware/sparc/10/make-3.81-sol10-sparc-local.gz
     # wget ftp://ftp.sunfreeware.com/pub/freeware/sparc/10/binutils-2.17-sol10-sparc-local.gz
-    # wget ftp://ftp.sunfreeware.com/pub/freeware/intel/10/python-2.5.1-sol10-sparc-local.gz
-    # wget ftp://ftp.sunfreeware.com/pub/freeware/intel/10/libgcc-3.3-sol10-sparc-local.gz
+    # wget ftp://ftp.sunfreeware.com/pub/freeware/sparc/10/python-2.5.1-sol10-sparc-local.gz
+    # wget ftp://ftp.sunfreeware.com/pub/freeware/sparc/10/libgcc-3.3-sol10-sparc-local.gz
+    # wget ftp://ftp.sunfreeware.com/pub/freeware/sparc/10/libidn-1.8-sol10-x86-local.gz
+    # wget ftp://ftp.sunfreeware.com/pub/freeware/sparc/10/libintl-3.4.0-sol10-x86-local.gz
+    # wget ftp://ftp.sunfreeware.com/pub/freeware/sparc/10/curl-7.19.0-sol10-x86-local.gz
 
     # gunzip libiconv-1.11-sol10-sparc-local.gz
     # gunzip gcc-3.4.6-sol10-sparc-local.gz
     # gunzip make-3.81-sol10-sparc-local.gz
     # gunzip binutils-2.17-sol10-sparc-local.gz
     # gunzip python-2.5.1-sol10-sparc-local.gz
-    # ginzip libgcc-3.3-sol10-sparc-local.gz
+    # gunzip libgcc-3.3-sol10-sparc-local.gz
+    # gunzip libidn-1.8-sol10-x86-local.gz
+    # gunzip libintl-3.4.0-sol10-x86-local.gz
+    # gunzip curl-7.19.0-sol10-x86-local.gz
 
     # pkgadd -d libiconv-1.11-sol10-sparc-local
     # pkgadd -d gcc-3.4.6-sol10-sparc-local
     # pkgadd -d make-3.81-sol10-sparc-local
     # pkgadd -d binutils-2.17-sol10-sparc-local
-    # pkgadd -d python-2.5.1-sol10-sparc-local
     # pkgadd -d libgcc-3.3-sol10-sparc-local (don't overwrite the existing files on your system when prompted. Say "no" and continue the install)
+    # pkgadd -d libidn-1.8-sol10-x86-local
+    # pkgadd -d libintl-3.4.0-sol10-x86-local
+    # pkgadd -d curl-7.19.0-sol10-x86-local
 
     # export PATH=$PATH:/usr/local/bin
 

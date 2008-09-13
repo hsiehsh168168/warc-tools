@@ -292,10 +292,10 @@ ifeq ($(UNAME_S),SunOS)
 	EVENT_CONFIG = $(EV_OS)/config.h $(EV_OS)/event-config.h
 	EV_LIB	     = -lrt -lsocket
 	PYSHARED_OS  = pyshared_solaris
-	HTSHARED_OS  = htshared_solaris
 	SWIG_LDFLAGS = -G
 #-lnsl -lresolv -lsocket
 	SONAME	     = 
+	HTSONAME     = 
 endif
 ifneq ($(findstring MINGW,$(UNAME_S)),)
 	MKTEMP       = $(MINGW_DEP)/wmktmp
@@ -335,14 +335,11 @@ ifneq ($(findstring CYGWIN,$(UNAME_S)),)
 	PY_VERSION   = $(shell echo /usr/lib/python*.* | sed -e "s|.*\(.\..\)|\1|")
 	PYSHARED_OS  = pyshared_cygwin
 	HTSHARED_OS  = htshared_cygwin
-	WPYSONAME	=,$(WPYNAME).$(LIBSUFFIX).$(MAJOR)
-	WPYSHAREDNAME   = $(WPYNAME).$(LIBSUFFIX)
-	APYNAME   	= _arc
-	APYSONAME	=,$(APYNAME).$(LIBSUFFIX).$(MAJOR)
-	APYSHAREDNAME   = $(APYNAME).$(LIBSUFFIX)
-	HTSONAME	  =,$(HTNAME).$(LIBSUFFIX).$(MAJOR)
-	HTSHAREDNAME  = $(HTNAME).$(LIBSUFFIX)
-
+	WPYSONAME	 =,$(WPYNAME).$(LIBSUFFIX).$(MAJOR)
+	WPYSHAREDNAME= $(WPYNAME).$(LIBSUFFIX)
+	APYNAME   	 = _arc
+	APYSONAME	 =,$(APYNAME).$(LIBSUFFIX).$(MAJOR)
+	APYSHAREDNAME= $(APYNAME).$(LIBSUFFIX)
 	S_CFLAGS     = 
 endif
 
