@@ -25,7 +25,8 @@
 # -------------------------------------------------------------------  #
 
 import sys
- 
+
+sys.path.insert (0, "/usr/local/warc-tools/python/")
 sys.path.insert (0, "../../lib/private/plugin/python/")
 
 

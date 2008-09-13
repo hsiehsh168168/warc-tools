@@ -529,12 +529,12 @@ shared:
 release:
 		@$(MAKE) W_RELEASE=on
 
-source:	shared static python $(a)
+source:	shared static python httrack $(a)
 		rm -rf $(PROJECT)
 		mkdir -p $(DESTDIR)/bin
 		mkdir -p $(DESTDIR)/include/compat/sys
 		mkdir -p $(DESTDIR)/lib
-		cp -f readme $(DESTDIR)
+		cp -f readme version $(DESTDIR)
 		cp -f license/apache2-license $(DESTDIR)
 		cp -f $(a) $(DESTDIR)/bin
 		cp -f $(APP)/*.sh $(DESTDIR)/bin
@@ -549,7 +549,8 @@ source:	shared static python $(a)
 		cp -rf $(PYTHON) $(DESTDIR) && rm -f $(DESTDIR)/python/*.o
 		mv $(LIBNAME).a $(DESTDIR)/lib
 		mv *$(LIBNAME)*$(LIBSUFFIX)* $(DESTDIR)/lib
-
+		cp -rf $(CONTRIB) $(DESTDIR)
+		(cd $(DESTDIR)/$(HTTRACK) && rm -f *.c *.h *.o && sed -i "s|file2warc=.*|file2warc=../../bin/file2warc.py|" httrack2warc.sh)
 
 tgz:	source
 		rm -f $(PROJECT).tar.gz
