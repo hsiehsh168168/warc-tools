@@ -182,6 +182,7 @@ GCC_EXTRA = -Wextra
 # OS dependant functions (for portability issue)
 MKTEMP = $(OSDEP)/wmktmp
 CSAFE  = $(OSDEP)/wcsafe
+HTTIME = $(HTTRACK)/warctime
 
 # LIBEVENT DEPS
 EV_UTEST_BIN = $(TST)/server  	    $(TST)/client
@@ -281,6 +282,7 @@ ifeq ($(UNAME_S),Darwin)
 	HTINSTALLNAME = $(HTNAME).$(MAJOR).$(LIBSUFFIX)
 	HTSHAREDNAME  = $(HTNAME).$(MAJOR).$(MINOR).$(RELEASE).$(LIBSUFFIX)
 	SWIG_CFLAGS   = -bundle -undefined suppress -flat_namespace
+	HTTIME        = $(HTTRACK)/warctime-osx
 endif
 ifeq ($(UNAME_S),SunOS)
 	CC	    += -R/usr/local/lib
@@ -861,7 +863,8 @@ $(PYTHON)/arc_wrap.o : $(PYTHON)/arc_wrap.c
 # HTTrack WARC plugin
 ######################
 
-htlib	= $(HTTRACK)/httrack_warc_plugin.o $(HTTRACK)/warcmisc.o
+htlib	= $(HTTRACK)/httrack_warc_plugin.o $(HTTRACK)/warcplug.o \
+		  $(HTTIME).o
 
 htshared_unix: httrack_clean htshared
 		$(CC) -shared -Wl,-soname$(HTSONAME) -o $(HTTRACK)/$(HTSHAREDNAME) $(full) $(htlib)
@@ -881,7 +884,10 @@ httrack:
 
 htshared: $(htlib) $(full)
 
-$(HTTRACK)/warcmisc.o : $(HTTRACK)/warcmisc.c
+$(HTTIME).o : $(HTTIME).c
+	$(CC) $(CFLAGS) -I$(HTTRACK) -c $< -o $@
+
+$(HTTRACK)/warcplug.o : $(HTTRACK)/warcplug.c
 	$(CC) $(CFLAGS) -I$(HTTRACK) -c $< -o $@
 
 $(HTTRACK)/httrack_warc_plugin.o : $(HTTRACK)/httrack_warc_plugin.c

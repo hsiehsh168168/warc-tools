@@ -38,7 +38,7 @@
 #include <htsdefines.h>
 
 /* WARC headers and misc functions */
-#include <warcmisc.h> 
+#include <warcplug.h> 
 
 /* default values */
 #include <httrack_warc_plugin.h>
@@ -56,7 +56,8 @@ int sendhead_cb (t_hts_callbackarg *carg, httrackp* opt, char* buff,
   void * wst = (void *) CALLBACKARG_USERDEF (carg);
 
   setURL (adr, fil, wst);
-  writeRequest (HTTRACK_DEFAULT_IP, buff, wst);
+  if (writeRequest (HTTRACK_DEFAULT_IP, buff, wst))
+    return (0);
 
   return (1); /* success */
 }
@@ -68,7 +69,8 @@ int receivehead_cb (t_hts_callbackarg *carg, httrackp* opt, char* buff,
   void * wst = (void *) CALLBACKARG_USERDEF (carg);
 
   setURL (adr, fil, wst);
-  writeResponse (HTTRACK_DEFAULT_IP, buff, wst);
+  if (writeResponse (HTTRACK_DEFAULT_IP, buff, wst))
+        return (0);
 
   return (1); /* success */
 }
@@ -87,7 +89,11 @@ void filesave_cb (t_hts_callbackarg *carg, httrackp* opt, const char* file)
 {
   void * wst = (void *) CALLBACKARG_USERDEF (carg);
   
+  if(! wst)
+    return;
+
   writeResource (HTTRACK_DEFAULT_MIMETYPE,  HTTRACK_DEFAULT_IP, file, wst);
+    
 }
 
 void filesave2_cb (t_hts_callbackarg *carg, httrackp* opt, 
@@ -135,7 +141,7 @@ EXTERNAL_FUNCTION int hts_plug (httrackp *opt, const char* argv) {
   CHAIN_FUNCTION(opt, filesave2,   filesave2_cb,   wst);
   CHAIN_FUNCTION(opt, filesave,    filesave_cb,    wst);
   CHAIN_FUNCTION(opt, sendhead,    sendhead_cb,    wst);
-  CHAIN_FUNCTION(opt, receivehead, receivehead_cb, wst);
+/*   CHAIN_FUNCTION(opt, receivehead, receivehead_cb, wst); */
   CHAIN_FUNCTION(opt, end,         end_cb,         wst);
 
   return 1;  /* success */

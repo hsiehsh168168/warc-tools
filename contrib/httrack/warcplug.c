@@ -29,8 +29,8 @@
 #include <warc.h>      /* WARC headers */
 #include <wmem.h>      /* wcalloc, wfree */
 
-#include <warcmisc.h>
-
+#include <warcplug.h>
+#include <warctime.h>  /* warcTimeStamp */
 
 #define makeS(s) (s), w_strlen(s)
 #define uS(s) ((warc_u8_t *) (s))
@@ -186,14 +186,6 @@ WPUBLIC void  destroyWARC (void * _wst)
   wfree (wst), wst = NIL;
 }
 
-WIPRIVATE void warcTimeStamp (warc_u8_t * ts)
-{
-  time_t tm = time(NIL);
-
-  strftime((char *) ts, 21, "%Y-%m-%dT%H:%M:%SZ", 
-           (struct tm *) localtime (& tm));
-}
-
 
 WPRIVATE warc_bool_t writeRecord (void * _wst, void * r)
 {
@@ -338,6 +330,7 @@ WPUBLIC warc_bool_t writeRequest (const char * ip, const char * headers,
   WRecord_setRecordId(r, makeS (uS(WUUID_text (u))));
 
   destroy (u);
+
 
   WRecord_setContentFromString(r, makeS (uS(headers)));
 
