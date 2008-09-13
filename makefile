@@ -550,7 +550,8 @@ source:	shared static python httrack $(a)
 		mv $(LIBNAME).a $(DESTDIR)/lib
 		mv *$(LIBNAME)*$(LIBSUFFIX)* $(DESTDIR)/lib
 		cp -rf $(CONTRIB) $(DESTDIR)
-		(cd $(DESTDIR)/$(HTTRACK) && rm -f *.c *.h *.o && sed -i "s|file2warc=.*|file2warc=../../bin/file2warc.py|" httrack2warc.sh)
+		(cd $(DESTDIR)/$(HTTRACK) && rm -f *.c *.h *.o && sed -e "s|file2warc=.*|file2warc=\"..\/..\/bin\/file2warc.py\"|" httrack2warc.sh > tmp && mv tmp httrack2warc.sh)
+
 
 tgz:	source
 		rm -f $(PROJECT).tar.gz
@@ -979,7 +980,7 @@ mod_lighty_clean: ; @rm -rf $(LIGHTTPD)/*.o $(LIGHTTPD)/*~ \
 
 python_clean: 	   ; @rm -f $(PYTHON)/*.o $(PYTHON)/*~ $(PYTHON)/*.pyc      
 					 @rm -f $(APPYTHON)/*.so $(PYTHON)/warc.py \
-					 $(PYTHON)/warc_warp.c $(PYTHON)/arc_warp.c\
+					 $(PYTHON)/warc_wrap.c $(PYTHON)/arc_wrap.c\
 					 $(PYTHON)/arc.py $(APPYTHON)/*.pyc  $(APPYTHON)/*~ \
 					 $(PYTHON)/*$(LIBSUFFIX)* $(PYTHON)/_* 
 
