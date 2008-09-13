@@ -24,6 +24,10 @@
 /*     http://code.google.com/p/warc-tools/                            */
 /* ------------------------------------------------------------------- */
 
+2008-09-10 to 2008-09-12 by "voidptrptr":
+
+	* Full functional release of HTTrack WARC plugin, ready to use (contrib/httrack)
+
 2008-09-08 to 2008-09-10 by "voidptrptr":
 
 	* WARC storage backend for HTTrack (contrib/httrack)

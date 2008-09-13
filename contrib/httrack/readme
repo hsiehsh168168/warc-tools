@@ -50,14 +50,32 @@ And list the generated shard library:
 
 $ ls -la contrib/httrack
 
-You can now run HTTrack with WARC as storage backend:
+Now, you can run HTTrack with WARC as storage backend:
 
 $ httrack --wrapper contrib/httrack/libhtswarc.so YOUR_URL_TO_CRAWL
 
 Or on Mac OSX:
 
-$ httrack --wrapper contrib/httrack/libhtswarc.dylib YOUR_URL_TO_CRAWL
+$ httrack -%v0 --quiet --wrapper contrib/httrack/libhtswarc.dylib YOUR_URL_TO_CRAWL
 
+If you want to provide a file template for WARC naming, simply run HTTrack 
+with with a prefix (here "myprefix-"):
 
-Note: if you need to change something that doesn't fit, hack the module:
-contrib/httrack/httrack_warc_plugin.c
+$ httrack --wrapper contrib/httrack/libhtswarc.so,myprefix- YOUR_URL_TO_CRAWL
+
+The generated WARC files will be:
+
+myprefix-0.warc.gz
+myprefix-1.warc.gz
+myprefix-2.warc.gz
+myprefix-3.warc.gz
+... and so one
+
+NOTE: the default naming template is "httrack-", so the WARCs 
+will be: 
+
+httrack-0.warc.gz
+httrack-1.warc.gz
+httrack-2.warc.gz
+httrack-3.warc.gz
+... and so one

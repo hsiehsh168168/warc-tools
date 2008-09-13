@@ -76,6 +76,7 @@ struct WFile
     wfile_comp_t compressed; /**< indicates if the record is compressed */
     warc_u64_t maxsize; /**< Maximum Warc file size in BYTES */
     warc_u64_t fsize; /**< The current WarcFile Size */
+    warc_bool_t isfull; /**< WARC is full or not */
     /*@}*/
   };
 
@@ -89,7 +90,7 @@ struct WFile
 #define MAXSIZE       (self -> maxsize)
 #define COMP          (self -> compressed)
 #define FSIZE         (self -> fsize)
-
+#define ISFULL        (self -> isfull)
 
 /* Header line field separator definition */
 /* redefine it to change the number of spaces to put */
@@ -293,9 +294,26 @@ WIPUBLIC warc_u64_t WFile_getFileSize (const void * const _self)
   CASSERT (self);
 
   return (FSIZE);
-
 }
 
+
+/**
+ * @param _self: WFile object instance
+ * 
+ * @return WARC_TRUE if it is full, WARC_FALSE otherwise
+ *
+ * Return is the WARC file is full or not
+ */
+
+WIPUBLIC warc_u64_t WFile_isFull (const void * const _self)
+{
+  const struct WFile * self = _self;
+  
+  /* Preconditions */
+  CASSERT (self);
+  
+  return (ISFULL);
+}
 
 /**
  * @param _self: a WFile object instance
@@ -308,8 +326,8 @@ WIPUBLIC warc_u64_t WFile_getFileSize (const void * const _self)
 
 WIPUBLIC wfile_comp_t WFile_getCompressionMode (const void * const _self)
 {
-    const struct WFile * const self = _self;
-
+  const struct WFile * const self = _self;
+  
   return (COMP);
 }
 
@@ -1841,16 +1859,12 @@ WFile_storeRecordGzipCompressed (void * _self,
                                  const void * wrec, 
                                  warc_u32_t datalength,
                                  FILE * bloc, FILE * wtfile
-/*                                 , void * objwtfile */
                                 )
 {
   struct WFile * self = _self;
 
-/*   warc_u32_t     i       = 0; */
   void         * gzobj   = NIL;
   warc_u64_t     csize   = 0;    /* the size of the compressed data */
-  /*FILE         * crec    = NIL;*/  /* to store the compressed record  */
-/*   void         * objcrec = NIL; */
   warc_u64_t     where   = 0;
   warc_gzlevel_t level;
 
@@ -1880,24 +1894,9 @@ WFile_storeRecordGzipCompressed (void * _self,
   w_fseek_end (wtfile);
 
   /* writing Data Bloc */
-  WFile_writeDataBloc (wtfile, bloc, WRecord_getDataSize (wrec) );
+  WFile_writeDataBloc (wtfile, bloc, WRecord_getDataSize (wrec));
 
   /* writing final double CRLF */
-/*   i = 0x0D; */
-
-/*   w_fwrite (& i, 1, 1, wtfile); */
-
-/*   i = 0x0A; */
-
-/*   w_fwrite (& i, 1, 1, wtfile); */
-
-/*   i = 0x0D; */
-
-/*   w_fwrite (& i, 1, 1, wtfile); */
-
-/*   i = 0x0A; */
-
-/*   w_fwrite (& i, 1, 1, wtfile); */
   w_fwrite ("\r\n\r\n", 4, 1, wtfile);
 
 
@@ -1907,11 +1906,9 @@ WFile_storeRecordGzipCompressed (void * _self,
   where = w_ftell (FH);
 
   if (WGzip_compress (gzobj, wtfile, FH, level, & csize) )
-/*   if (WGzip_compress (gzobj, wtfile, crec, level, & csize) )*/ 
     {
       WarcDebugMsg ("failed to GZIP compress the record");
-/*       destroy (objwtfile); */
-/*       destroy (objcrec); */
+
       w_fflush (FH);
       w_ftruncate(w_fileno (FH), where);
       w_fseek_from_start (FH, where);
@@ -1919,20 +1916,21 @@ WFile_storeRecordGzipCompressed (void * _self,
       return (WARC_TRUE);
     }
 
-/*   destroy (objwtfile), wtfile = NIL; */
-
   destroy (gzobj), gzobj = NIL;
 
-  /* testing if the record will not overload the Warc File */
-  if ( MAXSIZE < (warc_u64_t) w_ftell (FH) )
-/*   if ( (warc_u64_t) (MAXSIZE - w_ftell (FH) ) < csize) */
+  /* testing if the record will not overload the WARC File */
+  if (MAXSIZE <= (warc_u64_t) w_ftell (FH) )
     {
+      /* set WARC file to FULL, no more records could be added */
+      ISFULL = WARC_TRUE;
+
+      w_fseek_start (wtfile);
+
       w_fflush (FH);
       w_ftruncate(w_fileno (FH), where);
       w_fseek_from_start (FH, where);
 
-/*       destroy (objcrec); */
-      WarcDebugMsg ("couldn't add record to the warc file, maximum size reached");
+      WarcDebugMsg ("couldn't add gzipped record to the warc file, maximum size reached");
       return (WARC_TRUE);
     }
 
@@ -1957,53 +1955,33 @@ WPRIVATE warc_bool_t
 WFile_storeRecordUncompressed (void* _self, const void * wrec,
                                warc_u32_t datalength, FILE * bloc,
                                FILE * wtfile
-/*                                , void * objwtfile */
                                )
 {
 
   struct WFile * self = _self;
 
-/*   warc_u32_t     i    = 0; */
 
   /* testing if the record writing will not overload the Warc File */
-
   if ( (datalength + 4) > (datalength) && /* avoid integer overflow */
-          (MAXSIZE - w_ftell (FH) ) < (datalength + 4) )
+       (MAXSIZE - w_ftell (FH) ) < (datalength + 4) )
     {
-/*       destroy (objwtfile); */
+      /* set WARC file to FULL, no more records could be added */
+      ISFULL = WARC_TRUE;
+
       WarcDebugMsg ("couldn't add record to the warc file, maximum size reached");
       return (WARC_TRUE);
     }
 
-  FSIZE = w_ftell(FH);
-
-  /* flushing the Warc Record Header Temporary file into
-     the Warc File */
+  /* flushing the Warc Record Header Temporary file into the Warc File */
   WFile_flushTemporary (FH, wtfile);
 
   /* writing Data Bloc */
   WFile_writeDataBloc (FH, bloc, WRecord_getDataSize (wrec) );
 
   /* writing final double CRLF */
-/*   i = 0x0D; */
-
-/*   w_fwrite (& i, 1, 1, FH); */
-
-/*   i = 0x0A; */
-
-/*   w_fwrite (& i, 1, 1, FH); */
-
-/*   i = 0x0D; */
-
-/*   w_fwrite (& i, 1, 1, FH); */
-
-/*   i = 0x0A; */
-
-/*   w_fwrite (& i, 1, 1, FH); */
   w_fwrite ("\r\n\r\n", 4, 1, FH);
 
-  /* destroying the temporary file */
-/*   destroy (objwtfile); */
+  FSIZE = w_ftell(FH);
 
   return (WARC_FALSE);
 }
@@ -2023,18 +2001,16 @@ WPUBLIC warc_bool_t WFile_storeRecord (void* _self, const void * wrec)
 
   struct WFile * self = _self;
 
-  FILE         * bloc;       /* to open the data bloc file */
-  const void   * head;      /* recover Header from the WRecord */
-  const void   * lanvl;      /* recover the anvl list from the Warc Record Header */
-  FILE         * wtfile     = NIL;   /* for creation of the temporary file */
-/*   void         * objwtfile  = NIL; */
-  warc_u32_t     datalength = 0;
-  const warc_u8_t    * field      = NIL; /*wil; hold the different fields value*/
+  FILE         * bloc;   /* to open the data bloc file */
+  const void   * head;   /* recover Header from the WRecord */
+  const void   * lanvl;  /* recover the anvl list from the Warc Record Header */
+  FILE         * wtfile      = NIL; /* for creation of the temporary file */
+  const warc_u8_t * field    = NIL; /*wil; hold the different fields value*/
+  warc_u32_t     datalength  = 0;
 
   /* Preconditions */
 
   CASSERT (self);
-
   unless (wrec)
   {
     return (WARC_TRUE);
@@ -2055,7 +2031,7 @@ WPUBLIC warc_bool_t WFile_storeRecord (void* _self, const void * wrec)
 
   unless (WRecord_check (wrec) )
   {
-    WarcDebugMsg ("filled fields are not compatible with the WARC Record type");
+    WarcDebugMsg ("filled fields are incompatible with the WARC Record type");
     return (WARC_TRUE);
   }
 
@@ -2466,7 +2442,7 @@ WPRIVATE void * WFile_constructor (void * _self, va_list * app)
 
       if (FSIZE >= MAXSIZE)
         {
-          w_fprintf (fprintf (stderr , "WARC file maximum size reached\n") );
+          w_fprintf (fprintf (stderr , "Couldn't open a WARC file with MAX size limit lesser than its actual size\n") );
           destroy (self);
           return NIL;
         }
@@ -2486,7 +2462,9 @@ WPRIVATE void * WFile_constructor (void * _self, va_list * app)
       return (NIL);
     }
 
-
+  /* by default, assume it's not full */
+  ISFULL = WARC_FALSE;
+  
   return (self);
 }
 
