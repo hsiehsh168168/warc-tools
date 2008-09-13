@@ -34,13 +34,10 @@ extern "C"
   {
 #endif
 
-#define HTTRACK_DEFAULT_TIMESTAMP  "0000-00-00T00:00:00Z"
 #define HTTRACK_DEFAULT_MIMETYPE   "octet/stream" 
 #define HTTRACK_DEFAULT_IP         "0.0.0.0"
+#define HTTRACK_DEFAULT_TEMPLATE   "httrack-"
 
-#define HTTRACK_TMP_DIR            "."
-#define HTTRACK_OUTPUT_WARC        "outfile.warc.gz"
-#define HTTRACK_WARC_SIZE          (1024 * 1024 * 1024)
 
 #ifdef __cplusplus
   }

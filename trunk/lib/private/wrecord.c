@@ -106,6 +106,7 @@ struct WRecord
     void * tdatafile; /**< Temporary Data File descriptor */
     FILE * externdfile; /**< User given data file descriptor */
     void * arccontent; /**< data File recovered from an Arc Record */
+    void * content_from_string; /**< data content from string */
     warc_u32_t check; /**< Mandatory Fields presence cheking value */
     warc_u32_t opt_check; /**< Optional fields checking value */
     warc_u64_t size; /**< Warc Data File size */
@@ -138,6 +139,7 @@ struct WRecord
 #define CSIZE   (self -> csize)
 #define USIZE   (self -> usize)
 #define IOFFSET (self -> offsetinfile)
+#define CONTENT (self -> content_from_string)
 
 
 
@@ -1904,6 +1906,7 @@ WIPUBLIC warc_bool_t WRecord_setContentFromFileName (void * _self,
   CASSERT (self);
   assert (! EDATAF);
   assert (! DATAF);
+  assert (! CONTENT);
 
   unless (file)
     return (WARC_TRUE);
@@ -1938,21 +1941,69 @@ WIPUBLIC warc_bool_t WRecord_setContentFromFileName (void * _self,
  */
 
 WIPUBLIC warc_bool_t WRecord_setContentFromFileHandle (void * _self,
-    void * dataf)
+                                                       void * dataf)
 {
 
   struct WRecord * self  = _self;
-
+  
   /* Preconditions */
   CASSERT (self);
   assert (! EDATAF); /* EDATAF must be NIL (WRecord manually created) */
   assert (! DATAF);
+  assert (! CONTENT);
 
   unless (dataf)
     return (WARC_TRUE);
-
+  
   DATAF = dataf;
+  
+  return (WARC_FALSE);
+}
 
+/**
+ * @param _self: WRecord object insance
+ * @param dir; the directory where the temporary file must be created
+ * @param dirlen: the length of the dir string
+ *
+ * @return False if succeeds, True otherwise
+ *
+ * Set record content from string
+ */
+
+WPUBLIC warc_bool_t  WRecord_setContentFromString (void * _self,
+                                                  const warc_u8_t * str,
+                                                  const warc_u32_t strlen)
+{
+  struct WRecord * self  = _self;
+
+  /* Preconditions */
+  CASSERT (self);
+  assert (! EDATAF);
+  assert (! DATAF);
+  assert (! CONTENT);
+
+  CONTENT = bless (WTempFile, makeS("."));
+  unless (CONTENT)
+    return (WARC_TRUE);
+
+  EDATAF = WTempFile_handle (CONTENT);
+  if(w_fwrite (str, 1, strlen, EDATAF) != strlen)
+    {
+      EDATAF = NIL;
+      destroy (CONTENT);
+      return (WARC_TRUE);
+    }
+
+  SIZE = strlen;
+
+  if (WHeader_setContentLength (HDL, SIZE))
+    {
+      EDATAF = NIL;
+      destroy (CONTENT);
+      return (WARC_TRUE);
+    }
+
+  CHECK = CHECK | 0x0008;
   return (WARC_FALSE);
 }
 
@@ -1967,15 +2018,16 @@ WIPUBLIC warc_bool_t WRecord_setContentFromFileHandle (void * _self,
  * Create a tremporary file for the record to hold data bloc
  */
 
-WPUBLIC warc_bool_t WRecord_makeDataFile (void * _self, const warc_u8_t * dir, const warc_u32_t dirlen)
+WPUBLIC warc_bool_t WRecord_makeDataFile (void * _self, const warc_u8_t * dir, 
+                                          const warc_u32_t dirlen)
 {
-    struct WRecord * self = _self;
+  struct WRecord * self = _self;
 
   /* Preconditions */
-  DATAF = bless (WTempFile, dir, dirlen);
+  CASSERT (self);
 
+  DATAF = bless (WTempFile, dir, dirlen);
   unless (DATAF)
-    
     return (WARC_TRUE);
     
   return (WARC_FALSE);
@@ -1987,7 +2039,7 @@ WPUBLIC warc_bool_t WRecord_makeDataFile (void * _self, const warc_u8_t * dir, c
  *
  * @return the WRecord data bloc file descriptor
  *
- * Warc Record Extern Data File descriptor provider
+ * Warc Record intern Data File descriptor provider (from file handle)
  */
 
 WPUBLIC void * WRecord_getDataFile (const void * const _self)
@@ -2021,6 +2073,8 @@ WPUBLIC FILE * WRecord_getDataFileExtern (const void * const _self)
 
   assert (EDATAF);
 
+  w_fseek_start (EDATAF);
+  
   return (EDATAF);
 }
 
@@ -2083,7 +2137,7 @@ WPUBLIC warc_bool_t WRecord_setContentSize (void * _self, warc_i64_t sz)
  * @return True if still there is data in the record data file,
  * false otherwise Warc Record data file access function
  *
- * Warc Record content accessing function
+ * Warc Record content access function
  */
 
 WIPUBLIC warc_bool_t WRecord_getContent (const void* const _self)
@@ -2101,6 +2155,7 @@ WIPUBLIC warc_bool_t WRecord_getContent (const void* const _self)
   CASSERT (self);
   assert  (DATAF);
   assert  (! EDATAF);
+  assert  (! CONTENT);
 
   handle = WTempFile_handle (DATAF);
 
@@ -2416,11 +2471,12 @@ WIPUBLIC warc_bool_t WRecord_setContentFromArc (void * _self, void * arcontent)
   CASSERT (self);
   assert (! EDATAF);
   assert (! DATAF);
+  assert (! CONTENT);
 
   unless (arcontent)
-  return (WARC_TRUE);
+    return (WARC_TRUE);
 
-  ACONT = arcontent;
+  ACONT  = arcontent;
   EDATAF = WTempFile_handle (ACONT);
 
   return (WARC_FALSE);
@@ -2630,17 +2686,17 @@ WPRIVATE void * WRecord_constructor (void * _self, va_list * app)
   HDL = bless (WHeader, WARC_UNKNOWN_RECORD, "", 0, "", 0);
   assert (HDL);
 
-  DATAF  = NIL;
-  EDATAF = NIL;
-  ACONT =  NIL;
-  CHECK  = 0;
-  OPT_CHK  = 0;
-  CBACK  = NIL;
-  SIZE   = 0;
-  OFFSET = 0;
-  WHO    = NIL;
-  CHDP   = WARC_FALSE;
-
+  DATAF   = NIL;
+  EDATAF  = NIL;
+  CONTENT = NIL;
+  ACONT   = NIL;
+  CHECK   = 0;
+  OPT_CHK = 0;
+  CBACK   = NIL;
+  SIZE    = 0;
+  OFFSET  = 0;
+  WHO     = NIL;
+  CHDP    = WARC_FALSE;
 
   return (self);
 }
@@ -2674,9 +2730,12 @@ WPRIVATE void * WRecord_destructor (void * _self)
       w_fclose (EDATAF); EDATAF = NIL;
     }
 
+  if (CONTENT)
+    destroy (CONTENT), CONTENT = NIL, EDATAF = NIL;
+  
   if (CHECK)
     CHECK = 0;
-
+  
   if (OPT_CHK)
     OPT_CHK = 0;
 

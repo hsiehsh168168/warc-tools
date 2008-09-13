@@ -34,26 +34,30 @@ extern "C"
   {
 #endif
 
-
     /**
      * Portability header file
      */
 
 #include <wport.h>
 
+#define HTTRACK_DEFAULT_TMPDIR     "."
+/* #define HTTRACK_WARC_SIZE          (1024 * 1024 * 1024) */
+#define HTTRACK_WARC_SIZE          (100 * 1024)
+
     extern void   destroyWARC  (void *);
     
-    extern void * blessWARC    (const char *, 
-                                unsigned int, const char *);
+    extern void * blessWARC    (const char *);
     
-    extern void   writeWRecord (const char *,
-                                const char *, const char *,
-                                const char *, void *);
+    extern warc_bool_t  writeRequest  (const char *, const char *, void *);
+
+    extern warc_bool_t  writeResponse (const char *, const char *, void *);
+
+    extern warc_bool_t  writeResource (const char *, const char *,
+                                       const char *, void *);
 
     extern void   setURL       (const char *, const char *, void *);
     extern void   setMIME      (const char *, void *);
     extern void   setIP        (const char *, void *);
-    extern void   setTimeStamp (const char *, void *);
 
 #ifdef __cplusplus
   }

@@ -31,7 +31,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-/* #include <sys/time.h> */
 
 /* HTTrack mandatory headers */
 #include <httrack-library.h>
@@ -50,6 +49,31 @@
 #define uS(s) ((warc_u8_t *) (s))
 
 
+int sendhead_cb (t_hts_callbackarg *carg, httrackp* opt, char* buff, 
+                 const char* adr, const char* fil, const char* referer_adr,
+                 const char* referer_fil, htsblk* outgoing)
+{
+  void * wst = (void *) CALLBACKARG_USERDEF (carg);
+
+  setURL (adr, fil, wst);
+  writeRequest (HTTRACK_DEFAULT_IP, buff, wst);
+
+  return (1); /* success */
+}
+
+int receivehead_cb (t_hts_callbackarg *carg, httrackp* opt, char* buff, 
+                    const char* adr, const char* fil, const char* referer_adr,
+                    const char* referer_fil, htsblk* incoming)
+{
+  void * wst = (void *) CALLBACKARG_USERDEF (carg);
+
+  setURL (adr, fil, wst);
+  writeResponse (HTTRACK_DEFAULT_IP, buff, wst);
+
+  return (1); /* success */
+}
+
+
 int check_mime_cb (t_hts_callbackarg *carg, httrackp* opt, const char* adr,
                   const char* fil, const char* mime, int status)
 {
@@ -58,22 +82,12 @@ int check_mime_cb (t_hts_callbackarg *carg, httrackp* opt, const char* adr,
   setMIME (mime, wst);
 }
 
+
 void filesave_cb (t_hts_callbackarg *carg, httrackp* opt, const char* file)
 {
   void * wst = (void *) CALLBACKARG_USERDEF (carg);
-
-  /* struct tm *ptr; */
-/*   time_t tm; */
-/*   char str[60]; */
-
-/*   tm = time(NULL); */
-/*   ptr = localtime(&tm); */
-/*   strftime(str ,100 , "It is %A.\n",ptr); */
-/*   printf(str); */
   
-  writeWRecord (HTTRACK_DEFAULT_TIMESTAMP,
-                HTTRACK_DEFAULT_MIMETYPE,  HTTRACK_DEFAULT_IP,
-                file,                  wst);
+  writeResource (HTTRACK_DEFAULT_MIMETYPE,  HTTRACK_DEFAULT_IP, file, wst);
 }
 
 void filesave2_cb (t_hts_callbackarg *carg, httrackp* opt, 
@@ -99,25 +113,30 @@ static int end_cb(t_hts_callbackarg *carg, httrackp *opt)
 
 /* module entry point */
 EXTERNAL_FUNCTION int hts_plug (httrackp *opt, const char* argv) {
-
-  void * wst = NULL;
-
   /* optional argument passed in the commandline we won't be using here */
   const char *arg = strchr(argv, ',');
 
+  void       * wst    = NULL;
+  const char * prefix = HTTRACK_DEFAULT_TEMPLATE;
+
   if (arg != NULL)
-    arg ++;
+    {
+      ++ arg;
+      if (arg && '\0' != arg[0])
+        prefix = arg; 
+    }
 
-
-  wst = blessWARC (HTTRACK_OUTPUT_WARC, HTTRACK_WARC_SIZE, HTTRACK_TMP_DIR);
+  wst = blessWARC (prefix);
   if (! wst)
     return (0); /* failure */
 
   /* plug callback functions */
-  CHAIN_FUNCTION(opt, check_mime,  check_mime_cb, wst);
+  CHAIN_FUNCTION(opt, check_mime,  check_mime_cb,  wst);
   CHAIN_FUNCTION(opt, filesave2,   filesave2_cb,   wst);
-  CHAIN_FUNCTION(opt, filesave,    filesave_cb,   wst);
-  CHAIN_FUNCTION(opt, end,         end_cb,        wst);
+  CHAIN_FUNCTION(opt, filesave,    filesave_cb,    wst);
+  CHAIN_FUNCTION(opt, sendhead,    sendhead_cb,    wst);
+  CHAIN_FUNCTION(opt, receivehead, receivehead_cb, wst);
+  CHAIN_FUNCTION(opt, end,         end_cb,         wst);
 
   return 1;  /* success */
 }
@@ -128,7 +147,7 @@ EXTERNAL_FUNCTION int hts_plug (httrackp *opt, const char* argv) {
 
 #define WARC_MODULE_NAME "libhtswarc.so"
 EXTERNAL_FUNCTION int hts_unplug(httrackp *opt) {
-  fprintf(stderr, "Module " WARC_MODULE_NAME " unplugged\n");
+  fprintf(stderr, "> \"" WARC_MODULE_NAME "\" mdule unplugged. OK\n");
 
   return 1;  /* success */
 }

@@ -91,7 +91,7 @@ def main () :
         sys.exit(0);
 
     # choose your buffer size (ex. 64K = 64 * 1024) to read the payload
-    # (with the HTP headers) chunk by chunk 
+    # (with the HTTP headers or not, use the boolean flag) chunk by chunk 
     b = WBloc (w, r, False, 64 * 1024)
     while True:
         buff = b.getNext()
