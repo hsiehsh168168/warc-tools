@@ -29,7 +29,9 @@ import sys, time, sha, os, re, socket
 from urlparse import urlparse
 import pycurl
 
+sys.path.insert (0, "/usr/local/warc-tools/python/")
 sys.path.insert (0, "../../lib/private/plugin/python/")
+
 import warc
 from   wfile   import WFile
 from   wrecord import WRecord 
