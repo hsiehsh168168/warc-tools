@@ -2005,6 +2005,54 @@ WPUBLIC warc_bool_t  WRecord_setContentFromString (void * _self,
 
   CHECK = CHECK | 0x0008;
 
+  /* not needed because "WRecord_getDataFileExtern" already check that */
+  /* w_fseek_start (EDATAF); */
+
+  return (WARC_FALSE);
+}
+
+
+/**
+ * @param _self: WRecord object insance
+ * @param dir; the directory where the temporary file must be created
+ * @param dirlen: the length of the dir string
+ *
+ * @return False if succeeds, True otherwise
+ *
+ * Append string to a content previously written by "WRecord_setContentFromString"
+ */
+
+WPUBLIC warc_bool_t  WRecord_setContentFromStringConcat (void * _self,
+                                                         const warc_u8_t * str,
+                                                         const warc_u32_t strlen)
+{
+  struct WRecord * self  = _self;
+
+  /* Preconditions */
+  CASSERT (self);
+  assert (! DATAF);
+  assert (CONTENT);
+  assert (EDATAF);
+
+  /* be sure to got to the end */
+  w_fseek_end (EDATAF);
+
+  if(w_fwrite (str, 1, strlen, EDATAF) != strlen)
+    {
+      EDATAF = NIL;
+      destroy (CONTENT), CONTENT = NIL;
+      return (WARC_TRUE);
+    }
+
+  SIZE += strlen;
+
+  if (WHeader_setContentLength (HDL, SIZE))
+    {
+      EDATAF = NIL;
+      destroy (CONTENT), CONTENT = NIL;
+      return (WARC_TRUE);
+    }
+
   return (WARC_FALSE);
 }
 

@@ -24,7 +24,8 @@
 /* ------------------------------------------------------------------- */
 
 
-Good news.
+Good news IIPC !!!
+
 The WARC file format is officially supported by the UNIX/Linux command "file" 
 since the version "4.26" (ftp://ftp.astron.com/pub/file/file-4.26.tar.gz). 
 "file" is now able to recognize a WARC file as follow:
