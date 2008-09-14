@@ -23,33 +23,4 @@
 /*     http://code.google.com/p/warc-tools/                            */
 /* ------------------------------------------------------------------- */
 
-YouTube video downloader to WARC storage
-
-It shows you how simple to hack everything with "warc-tools"
-and the power of Python (or any other language with binding to warc-tools)
-
-Requirements
--------------
-
-Nothing but Python.
-
-This shell script use the Python code "youtube-dl" from:
-http://www.arrakis.es/~rggi3/youtube-dl
-
-and "file2warc.py" in "app/pyhton"
-
-
-Usage
-------
-
-Don't forget to build the python interface first:
-
-$ (cd ../.. && make && make python)
-
-Then, for help run:
-$ ./youtube2warc.sh
-
-And try the example:
-
-$ ./youtube2warc.sh -f urls.txt -o foo.warc.gz
-$ ls -la foo.warc.gz
+UNIX/Linux manual pages for app/*.c commands

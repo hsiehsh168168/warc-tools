@@ -24,11 +24,10 @@
 #     http://code.google.com/p/warc-tools/                             #
 # -------------------------------------------------------------------  #
 
-import sys
+import os, sys
 
+# for deployment
 sys.path.insert (0, "/usr/local/warc-tools/python/")
+
+# for local usage
 sys.path.insert (0, "../../lib/private/plugin/python/")
-
-
-
-

@@ -151,7 +151,10 @@ extern "C"
     extern warc_bool_t WRecord_setContentFromString (void *, const warc_u8_t *,
                                                      const warc_u32_t);
     
-    
+    extern warc_bool_t  WRecord_setContentFromStringConcat (void *,
+                                                            const warc_u8_t *,
+                                                            const warc_u32_t);
+
 #ifdef __cplusplus
   }
 

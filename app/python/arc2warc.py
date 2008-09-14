@@ -25,6 +25,7 @@
 #     http://code.google.com/p/warc-tools/                             #
 # -------------------------------------------------------------------  #
 
+from optparse import OptionParser
 
 import wpath
 
@@ -33,12 +34,10 @@ from arecord import ARecord
 
 from wrecord  import WRecord
 from wfile import WFile
-
+    
 import warc
 import arc
-
-from optparse import OptionParser
-
+    
 # attempt to make a warc name 
 # from an arcfile name 
 # basic strategy is to replace arc with warc
@@ -170,10 +169,8 @@ def main () :
 
     (options, args) = parser.parse_args()
 
-
     if not ( len (args) > 0 ):
        parser.error(" Please give one or more arcs to convert")
-
 
     for fname in args:
         ofname = guessname( fname , options.cmode )
@@ -183,10 +180,6 @@ def main () :
         if options.verbose:
             print 'Done'    
         
-
-
-
-  
     return
 
 
