@@ -277,6 +277,13 @@ class WRecord:
 
 	def setDateFromArc(self, date, date_len):
 		return warc.WRecord_setDateFromArc(self.me, date, date_len)
+	
+	def setContentFromString(self, str_v, str_len):
+		return warc.WRecord_setContentFromString (self.me, str_v, str_len)
+	
+	
+	def setContentFromStringConcat(self, str_v, str_len):
+		return warc.WRecord_setContentFromStringConcat (self.me, str_v, str_len)
 
 
 ##Python WRecord class methods ##

@@ -25,19 +25,21 @@
 #     http://code.google.com/p/warc-tools/                             #
 # -------------------------------------------------------------------  #
 
-from optparse import OptionParser
 
 import wpath
+import time, sha
 
 from afile import AFile
 from arecord import ARecord
 
 from wrecord  import WRecord
 from wfile import WFile
-    
+
 import warc
 import arc
-    
+
+from optparse import OptionParser
+
 # attempt to make a warc name 
 # from an arcfile name 
 # basic strategy is to replace arc with warc
@@ -81,14 +83,8 @@ def convert( fname , outfname , tmpdir , cmode  ):
        a . destroy ()
        return
 
-    uuid = warc.bless (warc.cvar.WUUID)
 
-    if (not (uuid)) :
-       print " can not create wuuid object "
-       a . destroy ()
-       w . destroy ()
-       return
-   
+  
     while (a . hasMoreRecords () ) :
 
           ar = a. nextRecord ()
@@ -97,7 +93,6 @@ def convert( fname , outfname , tmpdir , cmode  ):
              print "bad ARC file"
              a . destroy ()
              w . destroy ()
-             warc.destroy (uuid)
              return
 
           wr = WRecord ()
@@ -106,7 +101,6 @@ def convert( fname , outfname , tmpdir , cmode  ):
              print "can not create WARC record object"
              a . destroy ()
              w . destroy ()
-             warc.destroy (uuid)
              ar . destroy ()
              return
 
@@ -124,16 +118,16 @@ def convert( fname , outfname , tmpdir , cmode  ):
           ip = ar . getIpAddress()
           wr . setIpAddress (ip, len(ip))
           
-          warc.WUUID_hash (uuid, uri , len (uri))
-          warc.WUUID_hash (uuid, date , len (date))
-          wr. setRecordId  (warc.WUUID_text (uuid), len (warc.WUUID_text (uuid)))
-          warc.WUUID_reinit (uuid)
+          s = time.strftime ("%Y-%m-%dT%H:%M:%SZ", time.localtime())
+          sh = sha.new(uri + s)
+          rid = sh.hexdigest()
+          rid = "uuid:" + rid
+          wr. setRecordId  (rid, len (rid))
 
           if (ar . transferContent (wr, a)) :
               print "Unable to pass content to the WRecord"
               a . destroy ()
               w . destroy ()
-              warc.destroy (uuid)
               ar . destroy ()
               return
 
@@ -141,14 +135,12 @@ def convert( fname , outfname , tmpdir , cmode  ):
               print "failed to write WRecord" 
               a . destroy ()
               w . destroy ()
-              warc.destroy (uuid)
               ar . destroy ()
               return
 
           ar . destroy ()
           wr . destroy ()
     
-    warc.destroy (uuid)
     a . destroy ()
     w . destroy ()
 
@@ -169,8 +161,10 @@ def main () :
 
     (options, args) = parser.parse_args()
 
+
     if not ( len (args) > 0 ):
        parser.error(" Please give one or more arcs to convert")
+
 
     for fname in args:
         ofname = guessname( fname , options.cmode )
@@ -180,6 +174,10 @@ def main () :
         if options.verbose:
             print 'Done'    
         
+
+
+
+  
     return
 
 
