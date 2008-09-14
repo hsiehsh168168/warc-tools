@@ -50,6 +50,8 @@ int init_suite4(void) {return 0; }
 int clean_suite4(void) {return 0; }
 int init_suite5(void) {return 0; }
 int clean_suite5(void) {return 0; }
+int init_suite6(void) {return 0; }
+int clean_suite6(void) {return 0; }
 
 
 warc_bool_t callback (void * env, const char* buff, const warc_u32_t size)
@@ -3072,140 +3074,21 @@ void test13 (void)
   
 void test14 (void)
 {
-  const char * file1 = "./app/wdata/testwfile/unidesc.html";
   
+  const char * file1 = "./app/wdata/testwfile/unidesc.html";
+
+
   void * r = NIL;
   void * w = NIL;
   void * u = NIL;
+
+  
 
   r = bless (WRecord);
   w = bless (WFile, "./cwarc.warc.gz", 600 * 1024 * 1024, WARC_FILE_WRITER, WARC_FILE_COMPRESSED_GZIP_BEST_SPEED, ".");
-  
-  if (WRecord_setRecordType (r, WARC_INFO_RECORD) )
-    {
-      CU_FAIL( "Corrupted Record type\n");
-      destroy (r);
-      destroy (w);
-      return;
-    }
-  
-  if (WRecord_setDate (r, makeS ("2008-04-03T02:59:55Z") ) )
-    {
-      CU_FAIL( "Corrupted date\n");
-      destroy (r);
-      destroy (w);
-      return;
-    }
-  
-  u = bless (WUUID);
-  
-  WUUID_hash (u, makeU ("record1://anunknownplace") );
-  
-  if (WRecord_setRecordId (r, makeS (WUUID_text (u) ) ) )
-    {
-      CU_FAIL( "Corrupted record ID\n");
-      destroy (r);
-      destroy (w);
-      destroy (u);
-      return;
-    }
-  
-  destroy (u);
-  
-  if (WRecord_setContentType (r, makeS ("Text/random") ) )
-    {
-      CU_FAIL( "Corrupted content type\n");
-      destroy (r);
-      destroy (w);
-      return;
-    }
-  
-  if (WRecord_setBlockDigest (r, makeS ("sha1:0451-9645-AM35P-12LL")))
-    {
-      CU_FAIL( "Corrupted Bloc Digest to \n");
-      destroy (r);
-      destroy (w);
-      return;
-     }
-  
-  if (WRecord_setPayloadDigest (r, makeS ("sha2:0121-KJ45-1111-A001L")))
-    {
-      CU_FAIL( "Corrupted Pay Load Digest to \n");
-      destroy (r);
-      destroy (w);
-      return;
-    }
-  
-  if (WRecord_setTruncated (r, makeS("time")))
-    {
-      CU_FAIL( "Corrupted Truncated  \n");
-      destroy (r);
-      destroy (w);
-      return;
-    }
-  
-  if (WRecord_setFilename (r, makeS ("/home/user/warcfile.warc")))
-    {
-      CU_FAIL( "Corrupted Filename  \n");
-      destroy (r);
-      destroy (w);
-      return;
-    }
 
-  if (WRecord_setProfile (r, makeS ("Compressed:gzip:best speed")))
-    {
-      CU_FAIL( "Corrupted Profile  \n");
-      destroy (r);
-      destroy (w);
-      return;
-    }
 
-  if (WRecord_setPayloadType (r, makeS("text/html; charset=unicode-utf8")))
-    {
-      CU_FAIL( "Corrupted PayLoadType  \n");
-      destroy (r);
-      destroy (w);
-      return;
-    }
-  
-  if (WRecord_setContentFromFileName (r, file1) )
-    {
-      CU_FAIL( "record not filled\n");
-      destroy (r);
-      destroy (w);
-      return;
-    }
-  
-  if (WFile_storeRecord (w, r) )
-    {
-      CU_FAIL( "record not stored\n");
-      destroy (r);
-      destroy (w);
-      return;
-    }
-  
-  CU_PASS( "OK first.\n");
-  
-  destroy (r);
-  destroy (w);
-  
-  return;
-}
-
-void test15 (void)
-{
-  
-  const char * file1 = "./app/wdata/testwfile/unidesc.html";
-  const char * file2 = "./app/wdata/testwfile/anvlcom";
-
-  void * r = NIL;
-  void * w = NIL;
-  void * u = NIL;
-
-  r = bless (WRecord);
-  w = bless (WFile, "./2cwarc.warc.gz", 600 * 1024 * 1024, WARC_FILE_WRITER, WARC_FILE_COMPRESSED_GZIP_BEST_SPEED, ".");
-
-  if (WRecord_setRecordType (r, WARC_INFO_RECORD) )
+  if  (WRecord_setRecordType (r, WARC_INFO_RECORD) )
     {
       CU_FAIL( "Corrupted Record type\n");
       destroy (r);
@@ -3236,7 +3119,7 @@ void test15 (void)
 
   destroy (u);
 
-  if (WRecord_setContentType (r, makeS ("Text/random") ) )
+  if  (WRecord_setContentType (r, makeS ("Text/random") ) )
     {
       CU_FAIL( "Corrupted content type\n");
       destroy (r);
@@ -3244,10 +3127,10 @@ void test15 (void)
       return;
     }
 
-
   
     if (WRecord_setBlockDigest (r, makeS ("sha1:0451-9645-AM35P-12LL")))
-      {
+
+     {
       CU_FAIL( "Corrupted Bloc Digest to \n");
       destroy (r);
       destroy (w);
@@ -3255,6 +3138,7 @@ void test15 (void)
      }
 
     if (WRecord_setPayloadDigest (r, makeS ("sha2:0121-KJ45-1111-A001L")))
+
      {
       CU_FAIL( "Corrupted Pay Load Digest to \n");
       destroy (r);
@@ -3264,6 +3148,7 @@ void test15 (void)
 
 
     if (WRecord_setTruncated (r, makeS("time")))
+   
      {
       CU_FAIL( "Corrupted Truncated  \n");
       destroy (r);
@@ -3273,6 +3158,7 @@ void test15 (void)
 
    
     if (WRecord_setFilename (r, makeS ("/home/user/warcfile.warc")))
+
      {
       CU_FAIL( "Corrupted Filename  \n");
       destroy (r);
@@ -3290,12 +3176,160 @@ void test15 (void)
      }
 
     if (WRecord_setPayloadType (r, makeS("text/html; charset=unicode-utf8")))
+
+     
      {
       CU_FAIL( "Corrupted PayLoadType  \n");
       destroy (r);
       destroy (w);
       return;
      }
+
+
+    
+
+  if (WRecord_setContentFromFileName (r, file1) )
+    {
+      CU_FAIL( "record not filled\n");
+      destroy (r);
+      destroy (w);
+      return;
+    }
+
+  if (WFile_storeRecord (w, r) )
+    {
+      CU_FAIL( "record not stored\n");
+      destroy (r);
+      destroy (w);
+      return;
+    }
+
+  CU_PASS( "OK first.\n");
+
+  destroy (r);
+
+
+  destroy (w);
+
+  return;
+}
+
+void test15 (void)
+{
+  
+  const char * file1 = "./app/wdata/testwfile/unidesc.html";
+  const char * file2 = "./app/wdata/testwfile/anvlcom";
+
+  void * r = NIL;
+  void * w = NIL;
+  void * u = NIL;
+
+
+
+  r = bless (WRecord);
+  w = bless (WFile, "./2cwarc.warc.gz", 600 * 1024 * 1024, WARC_FILE_WRITER, WARC_FILE_COMPRESSED_GZIP_BEST_SPEED, ".");
+
+
+
+  if  (WRecord_setRecordType (r, WARC_INFO_RECORD) )
+    {
+      CU_FAIL( "Corrupted Record type\n");
+      destroy (r);
+      destroy (w);
+      return;
+    }
+
+  if  (WRecord_setDate (r, makeS ("2008-04-03T02:59:55Z") ) )
+    {
+      CU_FAIL( "Corrupted date\n");
+      destroy (r);
+      destroy (w);
+      return;
+    }
+
+  u = bless (WUUID);
+
+  WUUID_hash (u, makeU ("record1://anunknownplace") );
+
+  if (WRecord_setRecordId (r, makeS (WUUID_text (u) ) ) )
+    {
+      CU_FAIL( "Corrupted record ID\n");
+      destroy (r);
+      destroy (w);
+      destroy (u);
+      return;
+    }
+
+  destroy (u);
+
+  if  (WRecord_setContentType (r, makeS ("Text/random") ) )
+    {
+      CU_FAIL( "Corrupted content type\n");
+      destroy (r);
+      destroy (w);
+      return;
+    }
+
+
+  
+    if (WRecord_setBlockDigest (r, makeS ("sha1:0451-9645-AM35P-12LL")))
+
+     {
+      CU_FAIL( "Corrupted Bloc Digest to \n");
+      destroy (r);
+      destroy (w);
+      return;
+     }
+
+    if (WRecord_setPayloadDigest (r, makeS ("sha2:0121-KJ45-1111-A001L")))
+
+     {
+      CU_FAIL( "Corrupted Pay Load Digest to \n");
+      destroy (r);
+      destroy (w);
+      return;
+     }
+
+
+    if (WRecord_setTruncated (r, makeS("time")))
+   
+     {
+      CU_FAIL( "Corrupted Truncated  \n");
+      destroy (r);
+      destroy (w);
+      return;
+     }
+
+   
+    if (WRecord_setFilename (r, makeS ("/home/user/warcfile.warc")))
+
+     {
+      CU_FAIL( "Corrupted Filename  \n");
+      destroy (r);
+      destroy (w);
+      return;
+     }
+
+    if (WRecord_setProfile (r, makeS ("Compressed:gzip:best speed")))
+
+     {
+      CU_FAIL( "Corrupted Profile  \n");
+      destroy (r);
+      destroy (w);
+      return;
+     }
+
+    if (WRecord_setPayloadType (r, makeS("text/html; charset=unicode-utf8")))
+
+     
+     {
+      CU_FAIL( "Corrupted PayLoadType  \n");
+      destroy (r);
+      destroy (w);
+      return;
+     }
+
+    
 
   if (WRecord_setContentFromFileName (r, file1) )
     {
@@ -3319,15 +3353,15 @@ void test15 (void)
   
   r = bless (WRecord);
 
-  if (WRecord_setRecordType (r, WARC_INFO_RECORD) )
+  if  (WRecord_setRecordType (r, WARC_INFO_RECORD) )
     {
       CU_FAIL( "Corrupted Record type\n");
       destroy (r);
       destroy (w);
       return;
     }
-  
-  if (WRecord_setDate (r, makeS ("2008-04-03T02:59:55Z") ) )
+
+  if  (WRecord_setDate (r, makeS ("2008-04-03T02:59:55Z") ) )
     {
       CU_FAIL( "Corrupted date\n");
       destroy (r);
@@ -3338,7 +3372,7 @@ void test15 (void)
   u = bless (WUUID);
 
   WUUID_hash (u, makeU ("record1://anunknownplace") );
-  
+
   if (WRecord_setRecordId (r, makeS (WUUID_text (u) ) ) )
     {
       CU_FAIL( "Corrupted record ID\n");
@@ -3347,10 +3381,10 @@ void test15 (void)
       destroy (u);
       return;
     }
-  
+
   destroy (u);
-  
-  if (WRecord_setContentType (r, makeS ("Text/random") ) )
+
+  if  (WRecord_setContentType (r, makeS ("Text/random") ) )
     {
       CU_FAIL( "Corrupted content type\n");
       destroy (r);
@@ -3359,54 +3393,65 @@ void test15 (void)
     }
 
   
-  if (WRecord_setBlockDigest (r, makeS ("sha1:0451-9645-AM35P-12LL")))
-    {
+    if (WRecord_setBlockDigest (r, makeS ("sha1:0451-9645-AM35P-12LL")))
+
+     {
       CU_FAIL( "Corrupted Bloc Digest to \n");
       destroy (r);
       destroy (w);
       return;
-    }
-  
-  if (WRecord_setPayloadDigest (r, makeS ("sha2:0121-KJ45-1111-A001L")))
-    {
+     }
+
+    if (WRecord_setPayloadDigest (r, makeS ("sha2:0121-KJ45-1111-A001L")))
+
+     {
       CU_FAIL( "Corrupted Pay Load Digest to \n");
       destroy (r);
       destroy (w);
       return;
-      }
-  
-  if (WRecord_setTruncated (r, makeS("time")))
-    {
+     }
+
+
+
+    if (WRecord_setTruncated (r, makeS("time")))
+   
+     {
       CU_FAIL( "Corrupted Truncated  \n");
       destroy (r);
       destroy (w);
       return;
-    }
-  
-  if (WRecord_setFilename (r, makeS ("/home/user/warcfile.warc")))
-    {
+     }
+
+   
+    if (WRecord_setFilename (r, makeS ("/home/user/warcfile.warc")))
+
+     {
       CU_FAIL( "Corrupted Filename  \n");
       destroy (r);
       destroy (w);
       return;
-    }
-  
-  if (WRecord_setProfile (r, makeS ("Compressed:gzip:best speed")))
-    {
+     }
+
+    if (WRecord_setProfile (r, makeS ("Compressed:gzip:best speed")))
+
+     {
       CU_FAIL( "Corrupted Profile  \n");
       destroy (r);
       destroy (w);
       return;
-    }
+     }
 
-  if (WRecord_setPayloadType (r, makeS("text/html; charset=unicode-utf8")))
-    {
+    if (WRecord_setPayloadType (r, makeS("text/html; charset=unicode-utf8")))
+
+     
+     {
       CU_FAIL( "Corrupted PayLoadType  \n");
       destroy (r);
       destroy (w);
       return;
-    }
-  
+     }
+
+
   if (WRecord_setContentFromFileName (r, file2) )
     {
       CU_FAIL( "record not filled\n");
@@ -3414,7 +3459,7 @@ void test15 (void)
       destroy (w);
       return;
     }
-  
+
   if (WFile_storeRecord (w, r) )
     {
       CU_FAIL( "record not stored\n");
@@ -3422,19 +3467,19 @@ void test15 (void)
       destroy (w);
       return;
     }
-  
+
   CU_PASS( "OK\n");
 
   destroy (r);
   destroy (w);
-  
+
   return;
 }
 
-
-
 void test16 (void)
 {
+
+ 
   void * w =  NIL;  /*warc file object */
   void * r = NIL;  /*to recover records */
   char  env[20];
@@ -3455,169 +3500,247 @@ void test16 (void)
         return;
       }
 
-      /*fprintf(stdout, "==============================================================================\n");
-        fprintf(stdout, "Content Langth: %d\n", WRecord_getContentLength (r));
-        fprintf(stdout, "Target Uri: %s\n", WRecord_getTargetUri (r));
-        fprintf(stdout, "Content type: %s\n", WRecord_getContentType (r));
-        fprintf(stdout, "Concurrent Id: %s\n", WRecord_getConcurrentTo (r));
-        fprintf(stdout, "Block Digest: %s\n", WRecord_getBlockDigest (r));
-        fprintf(stdout,"Payload Digest: %s\n", WRecord_getPayloadDigest (r));
-        fprintf(stdout, "Ip Address: %s\n", WRecord_getIpAddress (r));
-        fprintf(stdout, "Refers To: %s \n", WRecord_getRefersTo (r));
-        fprintf(stdout, "Trucation: %s\n", WRecord_getTruncated (r));
-        fprintf(stdout, "Warc Info Id: %s\n", WRecord_getWarcInfoId (r));
-        fprintf(stdout, "Profile: %s\n", WRecord_getProfile (r));
-        fprintf(stdout, "Filename: %s\n", WRecord_getFilename (r));
-        fprintf(stdout, "Payload Type: %s\n", WRecord_getPayloadType (r));
-        fprintf(stdout, "Origin Segment Id: %s\n", WRecord_getSegmentOriginId (r));
-        fprintf(stdout, "Segment number: %d\n", WRecord_getSegmentNumber (r));
-        fprintf(stdout, "Segments Total Size: %d\n", WRecord_getSegTotalLength (r));
-        fprintf(stdout, "--------------------------------------------------------------------------\n");
-        fprintf(stdout, "\n\n");*/
 
-      CU_ASSERT(WRecord_getContentLength (r)==9740);
-      CU_ASSERT_STRING_EQUAL("Text/random",WRecord_getContentType (r));
-      CU_ASSERT_STRING_EQUAL("sha1:0451-9645-AM35P-12LL",WRecord_getBlockDigest (r));
-      CU_ASSERT_STRING_EQUAL("sha2:0121-KJ45-1111-A001L", WRecord_getPayloadDigest (r));
-      CU_ASSERT_STRING_EQUAL("time", WRecord_getTruncated (r));
-      CU_ASSERT_STRING_EQUAL("Compressed:gzip:best speed",WRecord_getProfile (r));
-      CU_ASSERT_STRING_EQUAL("/home/user/warcfile.warc",WRecord_getFilename (r));
-      CU_ASSERT_STRING_EQUAL("text/html; charset=unicode-utf8",WRecord_getPayloadType (r));
-      CU_ASSERT(WRecord_getSegmentNumber (r)==0);
-      CU_ASSERT(WRecord_getSegTotalLength (r)==0);
+
+     /*fprintf(stdout, "==============================================================================\n");
+     
       
+    fprintf(stdout, "Content Langth: %d\n", WRecord_getContentLength (r));
+     fprintf(stdout, "Target Uri: %s\n", WRecord_getTargetUri (r));
+     fprintf(stdout, "Content type: %s\n", WRecord_getContentType (r));
+     fprintf(stdout, "Concurrent Id: %s\n", WRecord_getConcurrentTo (r));
+     fprintf(stdout, "Block Digest: %s\n", WRecord_getBlockDigest (r));
+    fprintf(stdout,"Payload Digest: %s\n", WRecord_getPayloadDigest (r));
+    fprintf(stdout, "Ip Address: %s\n", WRecord_getIpAddress (r));
+    fprintf(stdout, "Refers To: %s \n", WRecord_getRefersTo (r));
+    fprintf(stdout, "Trucation: %s\n", WRecord_getTruncated (r));
+    fprintf(stdout, "Warc Info Id: %s\n", WRecord_getWarcInfoId (r));
+    fprintf(stdout, "Profile: %s\n", WRecord_getProfile (r));
+    fprintf(stdout, "Filename: %s\n", WRecord_getFilename (r));
+    fprintf(stdout, "Payload Type: %s\n", WRecord_getPayloadType (r));
+    fprintf(stdout, "Origin Segment Id: %s\n", WRecord_getSegmentOriginId (r));
+    fprintf(stdout, "Segment number: %d\n", WRecord_getSegmentNumber (r));
+    fprintf(stdout, "Segments Total Size: %d\n", WRecord_getSegTotalLength (r));
+
+
+      fprintf(stdout, "--------------------------------------------------------------------------\n");
+
+      fprintf(stdout, "\n\n");*/
+      CU_ASSERT(WRecord_getContentLength (r)==9740);
+     /* CU_ASSERT_STRING_EQUAL("(null)",WRecord_getTargetUri (r));*/
+CU_ASSERT_STRING_EQUAL("Text/random",WRecord_getContentType (r));
+/*CU_ASSERT_STRING_EQUAL("(null)",WRecord_getConcurrentTo (r));*/
+CU_ASSERT_STRING_EQUAL("sha1:0451-9645-AM35P-12LL",WRecord_getBlockDigest (r));
+CU_ASSERT_STRING_EQUAL("sha2:0121-KJ45-1111-A001L", WRecord_getPayloadDigest (r));
+
+/*CU_ASSERT_STRING_EQUAL("(null)",WRecord_getIpAddress (r));*/
+/*CU_ASSERT_STRING_EQUAL("(null)",WRecord_getRefersTo (r));*/
+CU_ASSERT_STRING_EQUAL("time", WRecord_getTruncated (r));
+/*CU_ASSERT_STRING_EQUAL("(null)",WRecord_getWarcInfoId (r));*/
+CU_ASSERT_STRING_EQUAL("Compressed:gzip:best speed",WRecord_getProfile (r));
+CU_ASSERT_STRING_EQUAL("/home/user/warcfile.warc",WRecord_getFilename (r));
+CU_ASSERT_STRING_EQUAL("text/html; charset=unicode-utf8",WRecord_getPayloadType (r));
+/*CU_ASSERT_STRING_EQUAL("(null)", WRecord_getSegmentOriginId (r));*/
+
+CU_ASSERT(WRecord_getSegmentNumber (r)==0);
+CU_ASSERT(WRecord_getSegTotalLength (r)==0);
+
       WFile_register (w, r, callback, (void *) env);
       
-      CU_ASSERT_FALSE(WRecord_getContent (r));
-      
+        CU_ASSERT_FALSE(WRecord_getContent (r));
+
       destroy (r);
     }
-  
+
   destroy (w);
+
+  return;
 }
 
 void test17 (void)
 {
+
+ 
   void * w =  NIL;  /*warc file object */
   void * r = NIL;  /*to recover records */
-  warc_u32_t  i      = 1;
+ warc_u32_t  i      = 1;
+
+ 
 
   w = bless (WFile, "./awarcmlp.warc", 600 * 1024 * 1024,
              WARC_FILE_READER, WARC_FILE_UNCOMPRESSED, ".");
   unless (w)
-    return;
+  return;
 
   while (WFile_hasMoreRecords (w) )
     {
+
       unless ( (r = WFile_nextRecord (w) ) )
-        {
-          destroy (w);
-          return;
-        }
-      
+      {
+        destroy (w);
+        return;
+      }
 
-      /*
-        fprintf(stdout, "==============================================================================\n");
-        fprintf(stdout, "Content Langth: %d\n", WRecord_getContentLength (r));
-        fprintf(stdout, "Target Uri: %s\n", WRecord_getTargetUri (r));
-        fprintf(stdout, "Content type: %s\n", WRecord_getContentType (r));
-        fprintf(stdout, "Concurrent Id: %s\n", WRecord_getConcurrentTo (r));
-        fprintf(stdout, "Block Digest: %s\n", WRecord_getBlockDigest (r));
-        fprintf(stdout, "Payload Digest: %s\n", WRecord_getPayloadDigest (r));
-        fprintf(stdout, "Ip Address: %s\n", WRecord_getIpAddress (r));
-        fprintf(stdout, "Refers To: %s \n", WRecord_getRefersTo (r));
-        fprintf(stdout, "Trucation: %s\n", WRecord_getTruncated (r));
-        fprintf(stdout, "Warc Info Id: %s\n", WRecord_getWarcInfoId (r));
-        fprintf(stdout, "Profile: %s\n", WRecord_getProfile (r));
-        fprintf(stdout, "Filename: %s\n", WRecord_getFilename (r));
-        fprintf(stdout, "Payload Type: %s\n", WRecord_getPayloadType (r));
-        fprintf(stdout, "Origin Segment Id: %s\n", WRecord_getSegmentOriginId (r));
-        fprintf(stdout, "Segment number: %d\n", WRecord_getSegmentNumber (r));
-        fprintf(stdout, "Segments Total Size: %d\n", WRecord_getSegTotalLength (r));
-        
-        fprintf(stdout, "--------------------------------------------------------------------------\n");
-        fprintf(stdout, "\n\n");*/
+
+/*
+      fprintf(stdout, "==============================================================================\n");
       
-      if (i==1)
-        {
-          CU_ASSERT(WRecord_getContentLength (r)==9740);
-          CU_ASSERT_STRING_EQUAL("Text/random",WRecord_getContentType (r));
-          CU_ASSERT_STRING_EQUAL("sha1:0451-9645-AM35P-12LL",WRecord_getBlockDigest (r));
-          CU_ASSERT_STRING_EQUAL("sha2:0121-KJ45-1111-A001L", WRecord_getPayloadDigest (r));
-          CU_ASSERT_STRING_EQUAL("time", WRecord_getTruncated (r));
-          CU_ASSERT_STRING_EQUAL("Compressed:gzip:best speed",WRecord_getProfile (r));
-          CU_ASSERT_STRING_EQUAL("/home/user/warcfile.warc",WRecord_getFilename (r));
-          CU_ASSERT_STRING_EQUAL("text/html; charset=unicode-utf8",WRecord_getPayloadType (r));
-          CU_ASSERT(WRecord_getSegmentNumber (r)==0);
-          CU_ASSERT(WRecord_getSegTotalLength (r)==0);
-        }
-      if (i==2)
-        {
-          CU_ASSERT(WRecord_getContentLength (r)==8330);
-          CU_ASSERT_STRING_EQUAL("Text/random",WRecord_getContentType (r));
-          CU_ASSERT_STRING_EQUAL("sha1:0451-9645-AM35P-12LL",WRecord_getBlockDigest (r));
-          CU_ASSERT_STRING_EQUAL("sha2:0121-KJ45-1111-A001L", WRecord_getPayloadDigest (r));
-          CU_ASSERT_STRING_EQUAL("time", WRecord_getTruncated (r));
-          CU_ASSERT_STRING_EQUAL("Compressed:gzip:best speed",WRecord_getProfile (r));
-          CU_ASSERT_STRING_EQUAL("/home/user/warcfile.warc",WRecord_getFilename (r));
-          CU_ASSERT_STRING_EQUAL("text/html; charset=unicode-utf8",WRecord_getPayloadType (r));
-          CU_ASSERT(WRecord_getSegmentNumber (r)==0);
-          CU_ASSERT(WRecord_getSegTotalLength (r)==0);
-        }
-      if (i==3)
-        {
-          CU_ASSERT(WRecord_getContentLength (r)==9740);
-          CU_ASSERT_STRING_EQUAL("Text/random",WRecord_getContentType (r));
-          CU_ASSERT_STRING_EQUAL("sha1:0451-9645-AM35P-12LL",WRecord_getBlockDigest (r));
-          CU_ASSERT_STRING_EQUAL("sha2:0121-KJ45-1111-A001L", WRecord_getPayloadDigest (r));
-          CU_ASSERT_STRING_EQUAL("time", WRecord_getTruncated (r));
-          CU_ASSERT_STRING_EQUAL("Compressed:gzip:best speed",WRecord_getProfile (r));
-          CU_ASSERT_STRING_EQUAL("/home/user/warcfile.warc",WRecord_getFilename (r));
-          CU_ASSERT_STRING_EQUAL("text/html; charset=unicode-utf8",WRecord_getPayloadType (r));
-          CU_ASSERT(WRecord_getSegmentNumber (r)==0);
-          CU_ASSERT(WRecord_getSegTotalLength (r)==0);
-        }
-      if (i==4)
-        {
-          CU_ASSERT(WRecord_getContentLength (r)==8330);
-          CU_ASSERT_STRING_EQUAL("Text/random",WRecord_getContentType (r));
-          CU_ASSERT_STRING_EQUAL("sha1:0451-9645-AM35P-12LL",WRecord_getBlockDigest (r));
-          CU_ASSERT_STRING_EQUAL("sha2:0121-KJ45-1111-A001L", WRecord_getPayloadDigest (r));
-          CU_ASSERT_STRING_EQUAL("time", WRecord_getTruncated (r));
-          CU_ASSERT_STRING_EQUAL("Compressed:gzip:best speed",WRecord_getProfile (r));
-          CU_ASSERT_STRING_EQUAL("/home/user/warcfile.warc",WRecord_getFilename (r));
-          CU_ASSERT_STRING_EQUAL("text/html; charset=unicode-utf8",WRecord_getPayloadType (r));
-          CU_ASSERT(WRecord_getSegmentNumber (r)==0);
-          CU_ASSERT(WRecord_getSegTotalLength (r)==0);
-        }
-      if (i==5)
-        {
-          CU_ASSERT(WRecord_getContentLength (r)==9740);
-          CU_ASSERT_STRING_EQUAL("Text/random",WRecord_getContentType (r));
-          CU_ASSERT_STRING_EQUAL("sha1:0451-9645-AM35P-12LL",WRecord_getBlockDigest (r));
-          CU_ASSERT_STRING_EQUAL("sha2:0121-KJ45-1111-A001L", WRecord_getPayloadDigest (r));
-          CU_ASSERT_STRING_EQUAL("time", WRecord_getTruncated (r));
-          CU_ASSERT_STRING_EQUAL("Compressed:gzip:best speed",WRecord_getProfile (r));
-          CU_ASSERT_STRING_EQUAL("/home/user/warcfile.warc",WRecord_getFilename (r));
-          CU_ASSERT_STRING_EQUAL("text/html; charset=unicode-utf8",WRecord_getPayloadType (r));
-          CU_ASSERT(WRecord_getSegmentNumber (r)==0);
-          CU_ASSERT(WRecord_getSegTotalLength (r)==0);
-         }
-      if (i==6)
+      
+    fprintf(stdout, "Content Langth: %d\n", WRecord_getContentLength (r));
+    fprintf(stdout, "Target Uri: %s\n", WRecord_getTargetUri (r));
+    fprintf(stdout, "Content type: %s\n", WRecord_getContentType (r));
+    fprintf(stdout, "Concurrent Id: %s\n", WRecord_getConcurrentTo (r));
+    fprintf(stdout, "Block Digest: %s\n", WRecord_getBlockDigest (r));
+    fprintf(stdout, "Payload Digest: %s\n", WRecord_getPayloadDigest (r));
+    fprintf(stdout, "Ip Address: %s\n", WRecord_getIpAddress (r));
+    fprintf(stdout, "Refers To: %s \n", WRecord_getRefersTo (r));
+    fprintf(stdout, "Trucation: %s\n", WRecord_getTruncated (r));
+    fprintf(stdout, "Warc Info Id: %s\n", WRecord_getWarcInfoId (r));
+    fprintf(stdout, "Profile: %s\n", WRecord_getProfile (r));
+    fprintf(stdout, "Filename: %s\n", WRecord_getFilename (r));
+    fprintf(stdout, "Payload Type: %s\n", WRecord_getPayloadType (r));
+    fprintf(stdout, "Origin Segment Id: %s\n", WRecord_getSegmentOriginId (r));
+    fprintf(stdout, "Segment number: %d\n", WRecord_getSegmentNumber (r));
+    fprintf(stdout, "Segments Total Size: %d\n", WRecord_getSegTotalLength (r));
+
+
+      fprintf(stdout, "--------------------------------------------------------------------------\n");
+
+      fprintf(stdout, "\n\n");*/
+
+   if (i==1)
        {
-         CU_ASSERT(WRecord_getContentLength (r)==8330);
-         CU_ASSERT_STRING_EQUAL("Text/random",WRecord_getContentType (r));
-         CU_ASSERT_STRING_EQUAL("sha1:0451-9645-AM35P-12LL",WRecord_getBlockDigest (r));
-         CU_ASSERT_STRING_EQUAL("sha2:0121-KJ45-1111-A001L", WRecord_getPayloadDigest (r));
-         CU_ASSERT_STRING_EQUAL("time", WRecord_getTruncated (r));
-         CU_ASSERT_STRING_EQUAL("Compressed:gzip:best speed",WRecord_getProfile (r));
-         CU_ASSERT_STRING_EQUAL("/home/user/warcfile.warc",WRecord_getFilename (r));
-         CU_ASSERT_STRING_EQUAL("text/html; charset=unicode-utf8",WRecord_getPayloadType (r));
-         CU_ASSERT(WRecord_getSegmentNumber (r)==0);
-         CU_ASSERT(WRecord_getSegTotalLength (r)==0);
-        }
+CU_ASSERT(WRecord_getContentLength (r)==9740);
+     /* CU_ASSERT_STRING_EQUAL("(null)",WRecord_getTargetUri (r));*/
+CU_ASSERT_STRING_EQUAL("Text/random",WRecord_getContentType (r));
+/*CU_ASSERT_STRING_EQUAL("(null)",WRecord_getConcurrentTo (r));*/
+CU_ASSERT_STRING_EQUAL("sha1:0451-9645-AM35P-12LL",WRecord_getBlockDigest (r));
+CU_ASSERT_STRING_EQUAL("sha2:0121-KJ45-1111-A001L", WRecord_getPayloadDigest (r));
 
-      ++ i;
+/*CU_ASSERT_STRING_EQUAL("(null)",WRecord_getIpAddress (r));*/
+/*CU_ASSERT_STRING_EQUAL("(null)",WRecord_getRefersTo (r));*/
+CU_ASSERT_STRING_EQUAL("time", WRecord_getTruncated (r));
+/*CU_ASSERT_STRING_EQUAL("(null)",WRecord_getWarcInfoId (r));*/
+CU_ASSERT_STRING_EQUAL("Compressed:gzip:best speed",WRecord_getProfile (r));
+CU_ASSERT_STRING_EQUAL("/home/user/warcfile.warc",WRecord_getFilename (r));
+CU_ASSERT_STRING_EQUAL("text/html; charset=unicode-utf8",WRecord_getPayloadType (r));
+/*CU_ASSERT_STRING_EQUAL("(null)", WRecord_getSegmentOriginId (r));*/
+
+CU_ASSERT(WRecord_getSegmentNumber (r)==0);
+CU_ASSERT(WRecord_getSegTotalLength (r)==0);
+
+        }
+if (i==2)
+       {
+CU_ASSERT(WRecord_getContentLength (r)==8330);
+     /* CU_ASSERT_STRING_EQUAL("(null)",WRecord_getTargetUri (r));*/
+CU_ASSERT_STRING_EQUAL("Text/random",WRecord_getContentType (r));
+/*CU_ASSERT_STRING_EQUAL("(null)",WRecord_getConcurrentTo (r));*/
+CU_ASSERT_STRING_EQUAL("sha1:0451-9645-AM35P-12LL",WRecord_getBlockDigest (r));
+CU_ASSERT_STRING_EQUAL("sha2:0121-KJ45-1111-A001L", WRecord_getPayloadDigest (r));
+
+/*CU_ASSERT_STRING_EQUAL("(null)",WRecord_getIpAddress (r));*/
+/*CU_ASSERT_STRING_EQUAL("(null)",WRecord_getRefersTo (r));*/
+CU_ASSERT_STRING_EQUAL("time", WRecord_getTruncated (r));
+/*CU_ASSERT_STRING_EQUAL("(null)",WRecord_getWarcInfoId (r));*/
+CU_ASSERT_STRING_EQUAL("Compressed:gzip:best speed",WRecord_getProfile (r));
+CU_ASSERT_STRING_EQUAL("/home/user/warcfile.warc",WRecord_getFilename (r));
+CU_ASSERT_STRING_EQUAL("text/html; charset=unicode-utf8",WRecord_getPayloadType (r));
+/*CU_ASSERT_STRING_EQUAL("(null)", WRecord_getSegmentOriginId (r));*/
+
+CU_ASSERT(WRecord_getSegmentNumber (r)==0);
+CU_ASSERT(WRecord_getSegTotalLength (r)==0);
+
+        }
+if (i==3)
+       {
+CU_ASSERT(WRecord_getContentLength (r)==9740);
+     /* CU_ASSERT_STRING_EQUAL("(null)",WRecord_getTargetUri (r));*/
+CU_ASSERT_STRING_EQUAL("Text/random",WRecord_getContentType (r));
+/*CU_ASSERT_STRING_EQUAL("(null)",WRecord_getConcurrentTo (r));*/
+CU_ASSERT_STRING_EQUAL("sha1:0451-9645-AM35P-12LL",WRecord_getBlockDigest (r));
+CU_ASSERT_STRING_EQUAL("sha2:0121-KJ45-1111-A001L", WRecord_getPayloadDigest (r));
+
+/*CU_ASSERT_STRING_EQUAL("(null)",WRecord_getIpAddress (r));*/
+/*CU_ASSERT_STRING_EQUAL("(null)",WRecord_getRefersTo (r));*/
+CU_ASSERT_STRING_EQUAL("time", WRecord_getTruncated (r));
+/*CU_ASSERT_STRING_EQUAL("(null)",WRecord_getWarcInfoId (r));*/
+CU_ASSERT_STRING_EQUAL("Compressed:gzip:best speed",WRecord_getProfile (r));
+CU_ASSERT_STRING_EQUAL("/home/user/warcfile.warc",WRecord_getFilename (r));
+CU_ASSERT_STRING_EQUAL("text/html; charset=unicode-utf8",WRecord_getPayloadType (r));
+/*CU_ASSERT_STRING_EQUAL("(null)", WRecord_getSegmentOriginId (r));*/
+
+CU_ASSERT(WRecord_getSegmentNumber (r)==0);
+CU_ASSERT(WRecord_getSegTotalLength (r)==0);
+
+        }
+if (i==4)
+       {
+CU_ASSERT(WRecord_getContentLength (r)==8330);
+     /* CU_ASSERT_STRING_EQUAL("(null)",WRecord_getTargetUri (r));*/
+CU_ASSERT_STRING_EQUAL("Text/random",WRecord_getContentType (r));
+/*CU_ASSERT_STRING_EQUAL("(null)",WRecord_getConcurrentTo (r));*/
+CU_ASSERT_STRING_EQUAL("sha1:0451-9645-AM35P-12LL",WRecord_getBlockDigest (r));
+CU_ASSERT_STRING_EQUAL("sha2:0121-KJ45-1111-A001L", WRecord_getPayloadDigest (r));
+
+/*CU_ASSERT_STRING_EQUAL("(null)",WRecord_getIpAddress (r));*/
+/*CU_ASSERT_STRING_EQUAL("(null)",WRecord_getRefersTo (r));*/
+CU_ASSERT_STRING_EQUAL("time", WRecord_getTruncated (r));
+/*CU_ASSERT_STRING_EQUAL("(null)",WRecord_getWarcInfoId (r));*/
+CU_ASSERT_STRING_EQUAL("Compressed:gzip:best speed",WRecord_getProfile (r));
+CU_ASSERT_STRING_EQUAL("/home/user/warcfile.warc",WRecord_getFilename (r));
+CU_ASSERT_STRING_EQUAL("text/html; charset=unicode-utf8",WRecord_getPayloadType (r));
+/*CU_ASSERT_STRING_EQUAL("(null)", WRecord_getSegmentOriginId (r));*/
+
+CU_ASSERT(WRecord_getSegmentNumber (r)==0);
+CU_ASSERT(WRecord_getSegTotalLength (r)==0);
+
+        }
+if (i==5)
+       {
+CU_ASSERT(WRecord_getContentLength (r)==9740);
+     /* CU_ASSERT_STRING_EQUAL("(null)",WRecord_getTargetUri (r));*/
+CU_ASSERT_STRING_EQUAL("Text/random",WRecord_getContentType (r));
+/*CU_ASSERT_STRING_EQUAL("(null)",WRecord_getConcurrentTo (r));*/
+CU_ASSERT_STRING_EQUAL("sha1:0451-9645-AM35P-12LL",WRecord_getBlockDigest (r));
+CU_ASSERT_STRING_EQUAL("sha2:0121-KJ45-1111-A001L", WRecord_getPayloadDigest (r));
+
+/*CU_ASSERT_STRING_EQUAL("(null)",WRecord_getIpAddress (r));*/
+/*CU_ASSERT_STRING_EQUAL("(null)",WRecord_getRefersTo (r));*/
+CU_ASSERT_STRING_EQUAL("time", WRecord_getTruncated (r));
+/*CU_ASSERT_STRING_EQUAL("(null)",WRecord_getWarcInfoId (r));*/
+CU_ASSERT_STRING_EQUAL("Compressed:gzip:best speed",WRecord_getProfile (r));
+CU_ASSERT_STRING_EQUAL("/home/user/warcfile.warc",WRecord_getFilename (r));
+CU_ASSERT_STRING_EQUAL("text/html; charset=unicode-utf8",WRecord_getPayloadType (r));
+/*CU_ASSERT_STRING_EQUAL("(null)", WRecord_getSegmentOriginId (r));*/
+
+CU_ASSERT(WRecord_getSegmentNumber (r)==0);
+CU_ASSERT(WRecord_getSegTotalLength (r)==0);
+
+        }
+if (i==6)
+       {
+CU_ASSERT(WRecord_getContentLength (r)==8330);
+     /* CU_ASSERT_STRING_EQUAL("(null)",WRecord_getTargetUri (r));*/
+CU_ASSERT_STRING_EQUAL("Text/random",WRecord_getContentType (r));
+/*CU_ASSERT_STRING_EQUAL("(null)",WRecord_getConcurrentTo (r));*/
+CU_ASSERT_STRING_EQUAL("sha1:0451-9645-AM35P-12LL",WRecord_getBlockDigest (r));
+CU_ASSERT_STRING_EQUAL("sha2:0121-KJ45-1111-A001L", WRecord_getPayloadDigest (r));
+
+/*CU_ASSERT_STRING_EQUAL("(null)",WRecord_getIpAddress (r));*/
+/*CU_ASSERT_STRING_EQUAL("(null)",WRecord_getRefersTo (r));*/
+CU_ASSERT_STRING_EQUAL("time", WRecord_getTruncated (r));
+/*CU_ASSERT_STRING_EQUAL("(null)",WRecord_getWarcInfoId (r));*/
+CU_ASSERT_STRING_EQUAL("Compressed:gzip:best speed",WRecord_getProfile (r));
+CU_ASSERT_STRING_EQUAL("/home/user/warcfile.warc",WRecord_getFilename (r));
+CU_ASSERT_STRING_EQUAL("text/html; charset=unicode-utf8",WRecord_getPayloadType (r));
+/*CU_ASSERT_STRING_EQUAL("(null)", WRecord_getSegmentOriginId (r));*/
+
+CU_ASSERT(WRecord_getSegmentNumber (r)==0);
+CU_ASSERT(WRecord_getSegTotalLength (r)==0);
+
+        }
+i++;
       destroy (r);
     }
 
@@ -3628,15 +3751,18 @@ void test17 (void)
 
 void test18 (void)
 {
+
+  
   void * w =  NIL;  /*warc file object */
   void * r = NIL;  /*to recover records */
   char  env[20]; 
-  warc_u32_t  i      = 1;
+warc_u32_t  i      = 1;
+
 
   w = bless (WFile, "./2cwarc.warc.gz", 600 * 1024 * 1024,
              WARC_FILE_READER, WARC_FILE_COMPRESSED_GZIP, ".");
   unless (w)
-    return;
+  return;
 
   while (WFile_hasMoreRecords (w) )
     {
@@ -3645,6 +3771,8 @@ void test18 (void)
         destroy (w);
         return;
       }
+
+
 
     /*  fprintf(stdout, "==============================================================================\n");
       fprintf(stdout, "Content Langth: %d\n", WRecord_getContentLength (r));
@@ -3663,97 +3791,155 @@ void test18 (void)
       fprintf(stdout, "Origin Segment Id: %s\n", WRecord_getSegmentOriginId (r));
       fprintf(stdout, "Segment number: %d\n", WRecord_getSegmentNumber (r));
       fprintf(stdout, "Segments Total Size: %d\n", WRecord_getSegTotalLength (r));
+      
+
       fprintf(stdout, "--------------------------------------------------------------------------\n");
+
       fprintf(stdout, "\n\n");*/
 
-      WFile_register (w, r, callback, (void *) env);
-      CU_ASSERT_FALSE(WRecord_getContent (r)); 
-      
-      if (i==1)
-        {
-          CU_ASSERT(WRecord_getContentLength (r)==9740);
-          CU_ASSERT_STRING_EQUAL("Text/random",WRecord_getContentType (r));
-          CU_ASSERT_STRING_EQUAL("sha1:0451-9645-AM35P-12LL",WRecord_getBlockDigest (r));
-          CU_ASSERT_STRING_EQUAL("sha2:0121-KJ45-1111-A001L", WRecord_getPayloadDigest (r));
-          CU_ASSERT_STRING_EQUAL("time", WRecord_getTruncated (r));
-          CU_ASSERT_STRING_EQUAL("Compressed:gzip:best speed",WRecord_getProfile (r));
-          CU_ASSERT_STRING_EQUAL("/home/user/warcfile.warc",WRecord_getFilename (r));
-          CU_ASSERT_STRING_EQUAL("text/html; charset=unicode-utf8",WRecord_getPayloadType (r));
-          CU_ASSERT(WRecord_getSegmentNumber (r)==0);
-          CU_ASSERT(WRecord_getSegTotalLength (r)==0);
-          
+       WFile_register (w, r, callback, (void *) env);
+       CU_ASSERT_FALSE(WRecord_getContent (r)); 
+
+ if (i==1)
+       {
+CU_ASSERT(WRecord_getContentLength (r)==9740);
+     /* CU_ASSERT_STRING_EQUAL("(null)",WRecord_getTargetUri (r));*/
+CU_ASSERT_STRING_EQUAL("Text/random",WRecord_getContentType (r));
+/*CU_ASSERT_STRING_EQUAL("(null)",WRecord_getConcurrentTo (r));*/
+CU_ASSERT_STRING_EQUAL("sha1:0451-9645-AM35P-12LL",WRecord_getBlockDigest (r));
+CU_ASSERT_STRING_EQUAL("sha2:0121-KJ45-1111-A001L", WRecord_getPayloadDigest (r));
+
+/*CU_ASSERT_STRING_EQUAL("(null)",WRecord_getIpAddress (r));*/
+/*CU_ASSERT_STRING_EQUAL("(null)",WRecord_getRefersTo (r));*/
+CU_ASSERT_STRING_EQUAL("time", WRecord_getTruncated (r));
+/*CU_ASSERT_STRING_EQUAL("(null)",WRecord_getWarcInfoId (r));*/
+CU_ASSERT_STRING_EQUAL("Compressed:gzip:best speed",WRecord_getProfile (r));
+CU_ASSERT_STRING_EQUAL("/home/user/warcfile.warc",WRecord_getFilename (r));
+CU_ASSERT_STRING_EQUAL("text/html; charset=unicode-utf8",WRecord_getPayloadType (r));
+/*CU_ASSERT_STRING_EQUAL("(null)", WRecord_getSegmentOriginId (r));*/
+
+CU_ASSERT(WRecord_getSegmentNumber (r)==0);
+CU_ASSERT(WRecord_getSegTotalLength (r)==0);
+
         }
-      if (i==2)
-        {
-          CU_ASSERT(WRecord_getContentLength (r)==8330);
-          CU_ASSERT_STRING_EQUAL("Text/random",WRecord_getContentType (r));
-          CU_ASSERT_STRING_EQUAL("sha1:0451-9645-AM35P-12LL",WRecord_getBlockDigest (r));
-          CU_ASSERT_STRING_EQUAL("sha2:0121-KJ45-1111-A001L", WRecord_getPayloadDigest (r));
-          CU_ASSERT_STRING_EQUAL("time", WRecord_getTruncated (r));
-          CU_ASSERT_STRING_EQUAL("Compressed:gzip:best speed",WRecord_getProfile (r));
-          CU_ASSERT_STRING_EQUAL("/home/user/warcfile.warc",WRecord_getFilename (r));
-          CU_ASSERT_STRING_EQUAL("text/html; charset=unicode-utf8",WRecord_getPayloadType (r));
-          CU_ASSERT(WRecord_getSegmentNumber (r)==0);
-          CU_ASSERT(WRecord_getSegTotalLength (r)==0);
+if (i==2)
+       {
+CU_ASSERT(WRecord_getContentLength (r)==8330);
+     /* CU_ASSERT_STRING_EQUAL("(null)",WRecord_getTargetUri (r));*/
+CU_ASSERT_STRING_EQUAL("Text/random",WRecord_getContentType (r));
+/*CU_ASSERT_STRING_EQUAL("(null)",WRecord_getConcurrentTo (r));*/
+CU_ASSERT_STRING_EQUAL("sha1:0451-9645-AM35P-12LL",WRecord_getBlockDigest (r));
+CU_ASSERT_STRING_EQUAL("sha2:0121-KJ45-1111-A001L", WRecord_getPayloadDigest (r));
+
+/*CU_ASSERT_STRING_EQUAL("(null)",WRecord_getIpAddress (r));*/
+/*CU_ASSERT_STRING_EQUAL("(null)",WRecord_getRefersTo (r));*/
+CU_ASSERT_STRING_EQUAL("time", WRecord_getTruncated (r));
+/*CU_ASSERT_STRING_EQUAL("(null)",WRecord_getWarcInfoId (r));*/
+CU_ASSERT_STRING_EQUAL("Compressed:gzip:best speed",WRecord_getProfile (r));
+CU_ASSERT_STRING_EQUAL("/home/user/warcfile.warc",WRecord_getFilename (r));
+CU_ASSERT_STRING_EQUAL("text/html; charset=unicode-utf8",WRecord_getPayloadType (r));
+/*CU_ASSERT_STRING_EQUAL("(null)", WRecord_getSegmentOriginId (r));*/
+
+CU_ASSERT(WRecord_getSegmentNumber (r)==0);
+CU_ASSERT(WRecord_getSegTotalLength (r)==0);
+
         }
-      if (i==3)
-        {
-          CU_ASSERT(WRecord_getContentLength (r)==9740);
-          CU_ASSERT_STRING_EQUAL("Text/random",WRecord_getContentType (r));
-          CU_ASSERT_STRING_EQUAL("sha1:0451-9645-AM35P-12LL",WRecord_getBlockDigest (r));
-          CU_ASSERT_STRING_EQUAL("sha2:0121-KJ45-1111-A001L", WRecord_getPayloadDigest (r));
-          CU_ASSERT_STRING_EQUAL("time", WRecord_getTruncated (r));
-          CU_ASSERT_STRING_EQUAL("Compressed:gzip:best speed",WRecord_getProfile (r));
-          CU_ASSERT_STRING_EQUAL("/home/user/warcfile.warc",WRecord_getFilename (r));
-          CU_ASSERT_STRING_EQUAL("text/html; charset=unicode-utf8",WRecord_getPayloadType (r));
-          CU_ASSERT(WRecord_getSegmentNumber (r)==0);
-          CU_ASSERT(WRecord_getSegTotalLength (r)==0);
+if (i==3)
+       {
+CU_ASSERT(WRecord_getContentLength (r)==9740);
+     /* CU_ASSERT_STRING_EQUAL("(null)",WRecord_getTargetUri (r));*/
+CU_ASSERT_STRING_EQUAL("Text/random",WRecord_getContentType (r));
+/*CU_ASSERT_STRING_EQUAL("(null)",WRecord_getConcurrentTo (r));*/
+CU_ASSERT_STRING_EQUAL("sha1:0451-9645-AM35P-12LL",WRecord_getBlockDigest (r));
+CU_ASSERT_STRING_EQUAL("sha2:0121-KJ45-1111-A001L", WRecord_getPayloadDigest (r));
+
+/*CU_ASSERT_STRING_EQUAL("(null)",WRecord_getIpAddress (r));*/
+/*CU_ASSERT_STRING_EQUAL("(null)",WRecord_getRefersTo (r));*/
+CU_ASSERT_STRING_EQUAL("time", WRecord_getTruncated (r));
+/*CU_ASSERT_STRING_EQUAL("(null)",WRecord_getWarcInfoId (r));*/
+CU_ASSERT_STRING_EQUAL("Compressed:gzip:best speed",WRecord_getProfile (r));
+CU_ASSERT_STRING_EQUAL("/home/user/warcfile.warc",WRecord_getFilename (r));
+CU_ASSERT_STRING_EQUAL("text/html; charset=unicode-utf8",WRecord_getPayloadType (r));
+/*CU_ASSERT_STRING_EQUAL("(null)", WRecord_getSegmentOriginId (r));*/
+
+CU_ASSERT(WRecord_getSegmentNumber (r)==0);
+CU_ASSERT(WRecord_getSegTotalLength (r)==0);
+
         }
-      if (i==4)
-        {
-          CU_ASSERT(WRecord_getContentLength (r)==8330);
-          CU_ASSERT_STRING_EQUAL("Text/random",WRecord_getContentType (r));
-          CU_ASSERT_STRING_EQUAL("sha1:0451-9645-AM35P-12LL",WRecord_getBlockDigest (r));
-          CU_ASSERT_STRING_EQUAL("sha2:0121-KJ45-1111-A001L", WRecord_getPayloadDigest (r));
-          CU_ASSERT_STRING_EQUAL("time", WRecord_getTruncated (r));
-          CU_ASSERT_STRING_EQUAL("Compressed:gzip:best speed",WRecord_getProfile (r));
-          CU_ASSERT_STRING_EQUAL("/home/user/warcfile.warc",WRecord_getFilename (r));
-          CU_ASSERT_STRING_EQUAL("text/html; charset=unicode-utf8",WRecord_getPayloadType (r));
-          CU_ASSERT(WRecord_getSegmentNumber (r)==0);
-          CU_ASSERT(WRecord_getSegTotalLength (r)==0);
+if (i==4)
+       {
+CU_ASSERT(WRecord_getContentLength (r)==8330);
+     /* CU_ASSERT_STRING_EQUAL("(null)",WRecord_getTargetUri (r));*/
+CU_ASSERT_STRING_EQUAL("Text/random",WRecord_getContentType (r));
+/*CU_ASSERT_STRING_EQUAL("(null)",WRecord_getConcurrentTo (r));*/
+CU_ASSERT_STRING_EQUAL("sha1:0451-9645-AM35P-12LL",WRecord_getBlockDigest (r));
+CU_ASSERT_STRING_EQUAL("sha2:0121-KJ45-1111-A001L", WRecord_getPayloadDigest (r));
+
+/*CU_ASSERT_STRING_EQUAL("(null)",WRecord_getIpAddress (r));*/
+/*CU_ASSERT_STRING_EQUAL("(null)",WRecord_getRefersTo (r));*/
+CU_ASSERT_STRING_EQUAL("time", WRecord_getTruncated (r));
+/*CU_ASSERT_STRING_EQUAL("(null)",WRecord_getWarcInfoId (r));*/
+CU_ASSERT_STRING_EQUAL("Compressed:gzip:best speed",WRecord_getProfile (r));
+CU_ASSERT_STRING_EQUAL("/home/user/warcfile.warc",WRecord_getFilename (r));
+CU_ASSERT_STRING_EQUAL("text/html; charset=unicode-utf8",WRecord_getPayloadType (r));
+/*CU_ASSERT_STRING_EQUAL("(null)", WRecord_getSegmentOriginId (r));*/
+
+CU_ASSERT(WRecord_getSegmentNumber (r)==0);
+CU_ASSERT(WRecord_getSegTotalLength (r)==0);
+
         }
-      if (i==5)
-        {
-          CU_ASSERT(WRecord_getContentLength (r)==9740);
-          CU_ASSERT_STRING_EQUAL("Text/random",WRecord_getContentType (r));
-          CU_ASSERT_STRING_EQUAL("sha1:0451-9645-AM35P-12LL",WRecord_getBlockDigest (r));
-          CU_ASSERT_STRING_EQUAL("sha2:0121-KJ45-1111-A001L", WRecord_getPayloadDigest (r));
-          CU_ASSERT_STRING_EQUAL("time", WRecord_getTruncated (r));
-          CU_ASSERT_STRING_EQUAL("Compressed:gzip:best speed",WRecord_getProfile (r));
-          CU_ASSERT_STRING_EQUAL("/home/user/warcfile.warc",WRecord_getFilename (r));
-          CU_ASSERT_STRING_EQUAL("text/html; charset=unicode-utf8",WRecord_getPayloadType (r));
-          CU_ASSERT(WRecord_getSegmentNumber (r)==0);
-          CU_ASSERT(WRecord_getSegTotalLength (r)==0);
+if (i==5)
+       {
+CU_ASSERT(WRecord_getContentLength (r)==9740);
+     /* CU_ASSERT_STRING_EQUAL("(null)",WRecord_getTargetUri (r));*/
+CU_ASSERT_STRING_EQUAL("Text/random",WRecord_getContentType (r));
+/*CU_ASSERT_STRING_EQUAL("(null)",WRecord_getConcurrentTo (r));*/
+CU_ASSERT_STRING_EQUAL("sha1:0451-9645-AM35P-12LL",WRecord_getBlockDigest (r));
+CU_ASSERT_STRING_EQUAL("sha2:0121-KJ45-1111-A001L", WRecord_getPayloadDigest (r));
+
+/*CU_ASSERT_STRING_EQUAL("(null)",WRecord_getIpAddress (r));*/
+/*CU_ASSERT_STRING_EQUAL("(null)",WRecord_getRefersTo (r));*/
+CU_ASSERT_STRING_EQUAL("time", WRecord_getTruncated (r));
+/*CU_ASSERT_STRING_EQUAL("(null)",WRecord_getWarcInfoId (r));*/
+CU_ASSERT_STRING_EQUAL("Compressed:gzip:best speed",WRecord_getProfile (r));
+CU_ASSERT_STRING_EQUAL("/home/user/warcfile.warc",WRecord_getFilename (r));
+CU_ASSERT_STRING_EQUAL("text/html; charset=unicode-utf8",WRecord_getPayloadType (r));
+/*CU_ASSERT_STRING_EQUAL("(null)", WRecord_getSegmentOriginId (r));*/
+
+CU_ASSERT(WRecord_getSegmentNumber (r)==0);
+CU_ASSERT(WRecord_getSegTotalLength (r)==0);
+
         }
-      if (i==6)
-        {
-          CU_ASSERT(WRecord_getContentLength (r)==8330);
-          CU_ASSERT_STRING_EQUAL("Text/random",WRecord_getContentType (r));
-          CU_ASSERT_STRING_EQUAL("sha1:0451-9645-AM35P-12LL",WRecord_getBlockDigest (r));
-          CU_ASSERT_STRING_EQUAL("sha2:0121-KJ45-1111-A001L", WRecord_getPayloadDigest (r));
-          CU_ASSERT_STRING_EQUAL("time", WRecord_getTruncated (r));
-          CU_ASSERT_STRING_EQUAL("Compressed:gzip:best speed",WRecord_getProfile (r));
-          CU_ASSERT_STRING_EQUAL("/home/user/warcfile.warc",WRecord_getFilename (r));
-          CU_ASSERT_STRING_EQUAL("text/html; charset=unicode-utf8",WRecord_getPayloadType (r));
-          CU_ASSERT(WRecord_getSegmentNumber (r)==0);
-          CU_ASSERT(WRecord_getSegTotalLength (r)==0);
+if (i==6)
+       {
+CU_ASSERT(WRecord_getContentLength (r)==8330);
+     /* CU_ASSERT_STRING_EQUAL("(null)",WRecord_getTargetUri (r));*/
+CU_ASSERT_STRING_EQUAL("Text/random",WRecord_getContentType (r));
+/*CU_ASSERT_STRING_EQUAL("(null)",WRecord_getConcurrentTo (r));*/
+CU_ASSERT_STRING_EQUAL("sha1:0451-9645-AM35P-12LL",WRecord_getBlockDigest (r));
+CU_ASSERT_STRING_EQUAL("sha2:0121-KJ45-1111-A001L", WRecord_getPayloadDigest (r));
+
+/*CU_ASSERT_STRING_EQUAL("(null)",WRecord_getIpAddress (r));*/
+/*CU_ASSERT_STRING_EQUAL("(null)",WRecord_getRefersTo (r));*/
+CU_ASSERT_STRING_EQUAL("time", WRecord_getTruncated (r));
+/*CU_ASSERT_STRING_EQUAL("(null)",WRecord_getWarcInfoId (r));*/
+CU_ASSERT_STRING_EQUAL("Compressed:gzip:best speed",WRecord_getProfile (r));
+CU_ASSERT_STRING_EQUAL("/home/user/warcfile.warc",WRecord_getFilename (r));
+CU_ASSERT_STRING_EQUAL("text/html; charset=unicode-utf8",WRecord_getPayloadType (r));
+/*CU_ASSERT_STRING_EQUAL("(null)", WRecord_getSegmentOriginId (r));*/
+
+CU_ASSERT(WRecord_getSegmentNumber (r)==0);
+CU_ASSERT(WRecord_getSegTotalLength (r)==0);
+
         }
-      
-      ++ i;
+i++;
+
       destroy (r);
     }
 
   destroy (w);
+
+  return;
 }
 
 
@@ -3927,39 +4113,53 @@ void test21 (void)
 
 void test22 (void)
 {
+
+  
   void * w =  NIL;  /* warc file object */
   void * r =  NIL;  /* to recover records */
   void * r2 = NIL; /* the false record */
+
 
   char  env[20];
 
   w = bless (WFile, "./awanvl.warc", 660 * 1024 * 1024,
              WARC_FILE_READER, WARC_FILE_UNCOMPRESSED, ".");
-  
+
   unless (w)
-    return;
-  
+  return;
+
   while (WFile_hasMoreRecords (w) )
     {
+
       unless ( (r = WFile_nextRecord (w) ) )
-        {
-          destroy (w);
-          return;
-        }
-      
-      CU_ASSERT(WRecord_getContentLength (r)==9740);
-      CU_ASSERT_STRING_EQUAL("Text/random",WRecord_getContentType (r));
-      CU_ASSERT_STRING_EQUAL("sha1:0451-9645-AM35P-12LL",WRecord_getBlockDigest (r));
-      CU_ASSERT_STRING_EQUAL("sha2:0121-KJ45-1111-A001L", WRecord_getPayloadDigest (r));
-      CU_ASSERT_STRING_EQUAL("time", WRecord_getTruncated (r));
-      CU_ASSERT_STRING_EQUAL("Compressed:gzip:best speed",WRecord_getProfile (r));
-      CU_ASSERT_STRING_EQUAL("/home/user/warcfile.warc",WRecord_getFilename (r));
-      CU_ASSERT_STRING_EQUAL("text/html; charset=unicode-utf8",WRecord_getPayloadType (r));
-      CU_ASSERT(WRecord_getSegmentNumber (r)==0);
-      CU_ASSERT(WRecord_getSegTotalLength (r)==0);
+      {
+        destroy (w);
+        return;
+      }
+
+
+CU_ASSERT(WRecord_getContentLength (r)==9740);
+     /* CU_ASSERT_STRING_EQUAL("(null)",WRecord_getTargetUri (r));*/
+CU_ASSERT_STRING_EQUAL("Text/random",WRecord_getContentType (r));
+/*CU_ASSERT_STRING_EQUAL("(null)",WRecord_getConcurrentTo (r));*/
+CU_ASSERT_STRING_EQUAL("sha1:0451-9645-AM35P-12LL",WRecord_getBlockDigest (r));
+CU_ASSERT_STRING_EQUAL("sha2:0121-KJ45-1111-A001L", WRecord_getPayloadDigest (r));
+
+/*CU_ASSERT_STRING_EQUAL("(null)",WRecord_getIpAddress (r));*/
+/*CU_ASSERT_STRING_EQUAL("(null)",WRecord_getRefersTo (r));*/
+CU_ASSERT_STRING_EQUAL("time", WRecord_getTruncated (r));
+/*CU_ASSERT_STRING_EQUAL("(null)",WRecord_getWarcInfoId (r));*/
+CU_ASSERT_STRING_EQUAL("Compressed:gzip:best speed",WRecord_getProfile (r));
+CU_ASSERT_STRING_EQUAL("/home/user/warcfile.warc",WRecord_getFilename (r));
+CU_ASSERT_STRING_EQUAL("text/html; charset=unicode-utf8",WRecord_getPayloadType (r));
+/*CU_ASSERT_STRING_EQUAL("(null)", WRecord_getSegmentOriginId (r));*/
+
+CU_ASSERT(WRecord_getSegmentNumber (r)==0);
+CU_ASSERT(WRecord_getSegTotalLength (r)==0);
 
       destroy (r);
       r2 = bless (WRecord);
+
       if (WFile_register (w, r2, callback, (void *) env) )
         {
           CU_PASS( "unable to register the callback");
@@ -3967,40 +4167,56 @@ void test22 (void)
           destroy (r2);
           return;
         }
-      
+
       WRecord_getContent (r2);
-      
+
       destroy (r2);
     }
-  
+
   destroy (w);
+
+  return;
 }
 
 
 void test23 (void)
 {
-  void *  w   =  NIL;  /* warc file object */
-  void *  r   = NIL;   /*to recover records */
-  void *  w2  = NIL;   /* the false wfile object */
-  char    env [20];
+
+ 
+  void * w =  NIL;  /*warc file object */
+  void * r = NIL;  /*to recover records */
+  void * w2 = NIL; /* the false wfile object */
+  char  env[20];
+
 
   w = bless (WFile, "./awanvl.warc", 660 * 1024 * 1024,
              WARC_FILE_READER, WARC_FILE_UNCOMPRESSED, ".");
 
   unless (w)
-    return;
+  return;
 
   while (WFile_hasMoreRecords (w) )
     {
       unless ( (r = WFile_nextRecord (w) ) )
-        {
-          destroy (w);
-          return;
-        }
-      
+      {
+        destroy (w);
+        return;
+      }
+/*CU_ASSERT(WRecord_getContentLength (r)==9740);*/
+/*CU_ASSERT_STRING_EQUAL("Text/random",WRecord_getContentType (r));*/
+/*CU_ASSERT_STRING_EQUAL("sha1:0451-9645-AM35P-12LL",WRecord_getBlockDigest (r));
+CU_ASSERT_STRING_EQUAL("sha2:0121-KJ45-1111-A001L", WRecord_getPayloadDigest (r));
+CU_ASSERT_STRING_EQUAL("time", WRecord_getTruncated (r));
+CU_ASSERT_STRING_EQUAL("Compressed:gzip:best speed",WRecord_getProfile (r));
+CU_ASSERT_STRING_EQUAL("/home/user/warcfile.warc",WRecord_getFilename (r));
+CU_ASSERT_STRING_EQUAL("text/html; charset=unicode-utf8",WRecord_getPayloadType (r));*/
+/*CU_ASSERT(WRecord_getSegmentNumber (r)==0);
+CU_ASSERT(WRecord_getSegTotalLength (r)==0);*/
+
+
       w2 = bless (WFile, "./app/wdata/testwfile/warcfile.warc", 660 * 1024 * 1024,
                   WARC_FILE_READER, WARC_FILE_UNCOMPRESSED);
-      
+
       if (WFile_register (w2, r, callback, (void *) env) )
         {
           CU_PASS("unable to register the callback");
@@ -4009,18 +4225,196 @@ void test23 (void)
           destroy (w);
           return;
         }
-      
+
+
       CU_ASSERT_FALSE(WRecord_getContent (r));
+
       destroy (r);
     }
-  
+
   destroy (w2);
+
   destroy (w);
+  return;
 }
 
 
 
 
+
+void test24 (void)
+{
+  
+
+  /*const char * file1 = "./app/wdata/testwfile/unidesc.html";*/
+
+  void * r = bless (WRecord);
+  void * w = bless (WFile, "./strings.warc", 600 * 1024 * 1024,  WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED, ".");
+  void * u = NIL;
+
+  
+
+
+  if  (WRecord_setRecordType (r, WARC_INFO_RECORD) )
+    {
+    CU_FAIL( "Corrupted Record type\n");
+      destroy (r);
+      destroy (w);
+      return;
+    }
+
+  if  (WRecord_setDate (r, makeS ("2008-04-03T02:59:55Z") ) )
+    {
+      CU_FAIL( "Corrupted date\n");
+      destroy (r);
+      destroy (w);
+      return;
+    }
+
+  u = bless (WUUID);
+
+  WUUID_hash (u, makeU ("record1://anunknownplace") );
+
+  if (WRecord_setRecordId (r, makeS (WUUID_text (u) ) ) )
+    {
+      CU_FAIL( "Corrupted record ID\n");
+      destroy (r);
+      destroy (w);
+      destroy (u);
+      return;
+    }
+
+  destroy (u);
+
+  if  (WRecord_setContentType (r, makeS ("Text/random") ) )
+    {
+      CU_FAIL( "Corrupted content type\n");
+      destroy (r);
+      destroy (w);
+      return;
+    }
+
+    if (WRecord_setBlockDigest (r, makeS ("sha1:0451-9645-AM35P-12LL")))
+
+     {
+      CU_FAIL( "Corrupted Bloc Digest to \n");
+      destroy (r);
+      destroy (w);
+      return;
+     }
+
+    if (WRecord_setPayloadDigest (r, makeS ("sha2:0121-KJ45-1111-A001L")))
+
+     {
+      CU_FAIL( "Corrupted Pay Load Digest to \n");
+      destroy (r);
+      destroy (w);
+      return;
+     }
+
+
+    if (WRecord_setTruncated (r, makeS("time")))
+   
+     {
+      CU_FAIL( "Corrupted Truncated  \n");
+      destroy (r);
+      destroy (w);
+      return;
+     }
+
+   
+    if (WRecord_setFilename (r, makeS ("/home/user/warcfile.warc")))
+
+     {
+      CU_FAIL( "Corrupted Filename  \n");
+      destroy (r);
+      destroy (w);
+      return;
+     }
+
+    if (WRecord_setProfile (r, makeS ("Compressed:gzip:best speed")))
+
+     {
+      CU_FAIL( "Corrupted Profile  \n");
+      destroy (r);
+      destroy (w);
+      return;
+     }
+
+    if (WRecord_setPayloadType (r, makeS("text/html; charset=unicode-utf8")))
+
+     
+     {
+      CU_FAIL( "Corrupted PayLoadType  \n");
+      destroy (r);
+      destroy (w);
+      return;
+     }
+
+    if (WRecord_setContentFromString (r, makeS ("some text here\r\nto test if the header string works\r\nlets hope that it will work\r\n")))
+       {
+        CU_FAIL ("bad string\n");
+        destroy (r);
+        destroy (w);
+        return;
+       }
+
+    if (WRecord_setContentFromStringConcat (r, makeS ("an extra text to test with it\r\nlets hope that this will also work\r\n")))
+       {
+        CU_FAIL ("bad string\n");
+        destroy (r);
+        destroy (w);
+        return;
+       }
+
+    if (WRecord_setContentFromStringConcat (r, makeS ("an extra text to test with it\r\nlets hope that this will also work\r\n")))
+       {
+        CU_FAIL ("bad string\n");
+        destroy (r);
+        destroy (w);
+        return;
+       }
+
+    if (WRecord_setContentFromStringConcat (r, makeS ("an extra text to test with it\r\nlets hope that this will also work\r\n")))
+       {
+        CU_FAIL ("bad string\n");
+        destroy (r);
+        destroy (w);
+        return;
+       }
+
+    if (WRecord_setContentFromStringConcat (r, makeS ("an extra text to test with it\r\nlets hope that this will also work\r\n")))
+       {
+        CU_FAIL ("bad string\n");
+        destroy (r);
+        destroy (w);
+        return;
+       }
+
+
+/*  if (WRecord_setContentFromFileName (r, file1) )
+    {
+      CU_FAIL( "record not filled\n");
+      destroy (r);
+      destroy (w);
+      return;
+    }*/
+
+  if (WFile_storeRecord (w, r) )
+    {
+      CU_FAIL( "record not stored\n");
+      destroy (r);
+      destroy (w);
+      return;
+    }
+
+  CU_PASS( "OK\n");
+
+  destroy (r);
+  destroy (w);
+
+  return;
+}
 
 
 
@@ -4127,24 +4521,40 @@ int main (void)
       return CU_get_error();
              }
 
-   switch (menu()) 
-     {
-     case 1: {CU_console_run_tests(); break;} 
-     case 2:  
-       {
-       case 21: {CU_basic_set_mode(CU_BRM_NORMAL); CU_basic_run_tests(); break;}
-       case 22:{CU_basic_set_mode(CU_BRM_VERBOSE ); CU_basic_run_tests(); break;}
-       case 23:{CU_basic_set_mode(CU_BRM_SILENT); CU_basic_run_tests(); break;}  
-       }
-     case 3:
-       {
-         CU_set_output_filename("./utest/outputs/file");
-         CU_set_output_filename("./utest/outputs/file" );
-         CU_automated_run_tests();
-         CU_list_tests_to_file();
-         break;
-       }
-     }
+/* add a suite to the registry */
+   pSuite = CU_add_suite("Suite6", init_suite6, clean_suite6);
+   if (NULL == pSuite) {
+      CU_cleanup_registry();
+      return CU_get_error();
+                        }
+
+   /* add the tests to the suite */
+
+   if ((NULL == CU_add_test(pSuite, "TEST 24:creatig a warcfile with a content filled from strings > ", test24)))	
+             {
+      CU_cleanup_registry();
+      return CU_get_error();
+             }
+
+
+switch (menu()) 
+  {
+        case 1: {CU_console_run_tests(); break;} 
+	case 2:  {
+                       
+                           case 21: {CU_basic_set_mode(CU_BRM_NORMAL); CU_basic_run_tests(); break;}
+                            case 22:{CU_basic_set_mode(CU_BRM_VERBOSE ); CU_basic_run_tests(); break;}
+                             case 23:{CU_basic_set_mode(CU_BRM_SILENT); CU_basic_run_tests(); break;}  
+
+                              }
+        case 3:{
+                CU_set_output_filename("./utest/outputs/file");
+    		CU_set_output_filename("./utest/outputs/file" );
+  		CU_automated_run_tests();
+   		CU_list_tests_to_file();
+           	break;}
+     
+   }
    CU_cleanup_registry();
    return CU_get_error();
 }

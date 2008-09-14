@@ -48,7 +48,7 @@ class WBloc:
 		self.classtype = WTypes()
                 self.httpheaders = httpheaders
                 if (wfile.type != self.classtype.WFile or wrec.type != self.classtype.WRecord):
-			return 0
+									return 0
 		self.type = self.classtype.WBloc
 		self.me = warc.bless_WBloc(wfile.getInternal(self), wrec.getInternal(self), self.httpheaders, alloc)
 
@@ -59,8 +59,8 @@ class WBloc:
 		return warc.WBloc_next(self.me)
 
 
-# 	def getHttpCode(self):
-# 		return warc.WBloc_getHttpCode(self.me)
+ 	def getHttpCode(self):
+		return warc.WBloc_getHttpCode(self.me)
 
 
 
