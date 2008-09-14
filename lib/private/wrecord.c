@@ -185,7 +185,7 @@ switch (*action)
                        goto check_action;
                       }
 
-                  unless (strncmp ("HTTP ", (const char *) WString_getText (line), 5)) /* we chack if it is the HTTP code line */
+                  unless (strncmp ("HTTP/", (const char *) WString_getText (line), 5)) /* we chack if it is the HTTP code line */
                      {
                      /* if it is, we print the code */
                       *action = IGNORE_ALL;
