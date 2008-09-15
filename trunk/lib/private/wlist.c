@@ -113,6 +113,9 @@ WPUBLIC warc_bool_t WList_push (void * const _self, void * const o)
   CASSERT (self);
   assert (o);
 
+  /* can't add object identical to the container */
+  assert(self != o);
+
   /* create a new list node for the object "o" */
   n = MAKE_LNODE;
   unless (n)
@@ -234,6 +237,9 @@ WPUBLIC warc_bool_t WList_unshift (void * const _self, void * const o)
   /* preconditions */
   CASSERT (self);
   assert (o);
+
+  /* can't add object identical to the container */
+  assert(self != o);
 
   /* create a new list node for the object "o" */
   n = MAKE_LNODE;
@@ -442,6 +448,9 @@ WPUBLIC void * WList_setElement (void * const _self, const warc_u32_t index,
   CASSERT (self);
   assert (o);
 
+  /* can't add object identical to the container */
+  assert(self != o);
+
   /* position node on the target node */
   n = gotoIndex (self, index);
   unless (n)
@@ -542,7 +551,6 @@ WPRIVATE void * WList_destructor (void * _self)
   CASSERT (self);
 
   /* destory all objects in the list */
-
   n = DUMMY -> next;
 
   while (n != DUMMY)

@@ -180,8 +180,10 @@ WIPUBLIC warc_bool_t WHash_insert (const void * const _self,
   warc_u32_t                 hkey;
   warc_u32_t                 index;
 
-  /* test if the KEY already exists */
+  /* can't add object identical to the actual hash object */
+  assert(self != key);
 
+  /* test if the KEY already exists */
   if (WHash_get (self, key, len) )
     {
       w_fprintf (fprintf (stderr, "WHash error - key already exists\n" ) );
