@@ -152,9 +152,6 @@ void test3 (void)
   const void * v = NIL;
   warc_u32_t   k;
 
-
-
-
   h = bless (WHash, 101);
   CU_ASSERT_PTR_NOT_EQUAL(h,NIL);
 
@@ -167,7 +164,6 @@ void test3 (void)
   CU_ASSERT_PTR_NOT_EQUAL(s,NIL);
   k = 2;
   WHash_insert (h, makeI (k), s);
-
 
   k = 1;
   v = WHash_get (h, makeI (k) );
@@ -199,7 +195,6 @@ void test4 (void)
   void       * s = NIL;
   char       * k = NIL;
   const void * v = NIL;
-fprintf(stdout,"////////// test 4//////////\n");
 
   h = bless (WHash, 101);
   CU_ASSERT_PTR_NOT_EQUAL(h,NIL);
@@ -236,12 +231,9 @@ fprintf(stdout,"////////// test 4//////////\n");
 
 int main (void)
 {
- 
-
- 
-CU_pSuite pSuite = NULL;
-
-   /* initialize the CUnit test registry */
+  CU_pSuite pSuite = NULL;
+  
+  /* initialize the CUnit test registry */
    if (CUE_SUCCESS != CU_initialize_registry())
       return CU_get_error();
 

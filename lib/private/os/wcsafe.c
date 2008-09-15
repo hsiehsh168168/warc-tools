@@ -322,11 +322,11 @@ WPUBLIC warc_u32_t computeHash (const char * _str, warc_u32_t len)
 }
 
 /**
- * @param dstring: the string to chek
+ * @param dstring: the string to check
  *
  * @return True if succeedds, False otherwise
  *
- * Cheks if a string represents a Numerical value or not
+ * Checks if a string represents a Numerical value or not
  */
 
 WPUBLIC warc_bool_t w_check_digital_string (const warc_u8_t * dstring,
@@ -346,7 +346,7 @@ WPUBLIC warc_bool_t w_check_digital_string (const warc_u8_t * dstring,
 
 /*
   convert string to unsigned integern,
-  returns false if succeed and true if en error occure
+  returns false if succeed and true if en error occurs
 */
 
 WPUBLIC warc_bool_t w_atou (const warc_u8_t * s, warc_u32_t len,

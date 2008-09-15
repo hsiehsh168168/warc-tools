@@ -166,6 +166,9 @@ WPUBLIC warc_bool_t WString_concat (void * const _self, const void * const b)
   CASSERT (self);
   CASSERT (b);
 
+  /* can't concat object identical to the actual object string */
+  assert(self != b);
+
   return (WString_append (self, WString_getText (b), WString_getLength (b) ) );
 }
 
@@ -308,9 +311,9 @@ WPUBLIC warc_bool_t WString_setText (void * const _self,
 WPRIVATE void * WString_constructor (void * _self, va_list * app)
 {
 
-  struct WString      * const self = _self;
-  const warc_u8_t * text = va_arg (* app, const warc_u8_t *);
-  const warc_u32_t      len  = va_arg (* app, const warc_u32_t);
+  struct WString    * const self = _self;
+  const warc_u8_t   *       text = va_arg (* app, const warc_u8_t *);
+  const warc_u32_t          len  = va_arg (* app, const warc_u32_t);
 
   /* preconditions */
   assert (text);
