@@ -166,9 +166,6 @@ WPUBLIC warc_bool_t WString_concat (void * const _self, const void * const b)
   CASSERT (self);
   CASSERT (b);
 
-  /* can't concat object identical to the actual object string */
-  assert(self != b);
-
   return (WString_append (self, WString_getText (b), WString_getLength (b) ) );
 }
 

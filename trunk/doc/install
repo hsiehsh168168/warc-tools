@@ -517,9 +517,9 @@ o Start/Stop Lighttpd with:
 
   (3) http://host:port/WARC/0.18/list/offset/outpout_format/fname
 
-  where :
+  where:
 
-  - outpout_format : is the format of outpout with 4 possiblities:
+  - outpout_format: is the format of outpout with 4 possiblities:
 
     -> html
     -> xml
@@ -527,11 +527,11 @@ o Start/Stop Lighttpd with:
     -> text
        
 
-* Python wrapper :
+* Python wrapper:
 
 You need to following packages installed:
  - pyhton 2.4.x or later (http://www.python.org/)
- - swig 1.3.33 or later  (http://www.swig.org)
+ - swig 1.3.33 at least  (see above)
 
 o When done, simply type:
   
@@ -541,8 +541,12 @@ o Then, use the Python applications under "app/python":
   warcdump.py, arcdump.py, arc2warc.py ...
 
 
+* Man pages:
 
+All the C commands (ex. arc2warc, warcvalidator ...) inside the "app"
+directory are delivered with a UNIX man pages.
 
+Type:
 
-
+$ man app/man/arc2warc.man
 
