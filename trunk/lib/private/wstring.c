@@ -55,7 +55,7 @@ struct WString
     const void * class;
 
     /*@{*/
-    warc_u8_t * text; /**< text string */
+    warc_u8_t   * text; /**< text string */
     warc_u32_t    len;  /**< string length */
     warc_u32_t    max;  /**< max string length */
     /*@}*/
@@ -185,12 +185,16 @@ WPUBLIC warc_bool_t WString_append (void * const _self,
 {
 
   struct WString * const self = _self;
-  warc_u8_t  *       text = NIL;
+  warc_u8_t  *           text = NIL;
   warc_u32_t             ablen;
 
   /* preconditions */
   CASSERT (self);
   assert  (b);
+
+  /* avoid append from the same string */
+  assert(TEXT != b);
+  assert(b < TEXT || b > (TEXT + MAX));
 
   ablen = LEN + blen;
   text  = TEXT;
@@ -255,6 +259,10 @@ WPUBLIC warc_bool_t WString_setText (void * const _self,
   /* preconditions */
   CASSERT (self);
   assert (text);
+
+  /* avoid set text from the same string */
+  assert(TEXT != text);
+  assert(text < TEXT || text > (TEXT + MAX));
 
   /* re-allocate only if necessary */
 

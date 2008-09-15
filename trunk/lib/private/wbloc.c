@@ -44,7 +44,7 @@
 #include <wrecord.h>
 #include <wmktmp.h>
 
-#define SIGN 22
+#define SIGN 3
 
 /**
  * WARC Record Data Bloc Class

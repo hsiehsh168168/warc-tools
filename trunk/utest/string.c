@@ -67,7 +67,7 @@ void test11 (void)
 {
   void       * s = NIL;
    s = makeWString ("");
-
+   
    CU_ASSERT_PTR_NOT_EQUAL(s,NIL);
    destroy (s);
 }
