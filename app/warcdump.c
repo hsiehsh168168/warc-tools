@@ -120,9 +120,9 @@ int main (int argc, const char ** argv)
 
   while (WFile_hasMoreRecords (w) )
     {
-      warc_bool_t  m1  = WARC_FALSE;
+      warc_u32_t          tlen  = 0;
+      warc_bool_t         m1    = WARC_FALSE;
       const warc_u8_t  * string = NIL;
-      warc_u32_t   tlen = 0;
 
       unless ( (r = WFile_nextRecord (w) ) )
       {

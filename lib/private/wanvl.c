@@ -151,8 +151,8 @@ WPUBLIC warc_bool_t WAnvl_setKey (void * const _self,
 
   /* reject any key length = 0 */
   unless (len)
-  return (WARC_TRUE);
-
+    return (WARC_TRUE);
+  
   if (w_strcasestr (text, (warc_u8_t *) " ") )
     return (WARC_TRUE);
 

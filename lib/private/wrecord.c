@@ -1789,13 +1789,13 @@ return (WHeader_getAnvl (HDL));
  * @param _self WRecord object instance
  * @param key the key of an anvl field as a const char *
  *
- * @return A valid anvl field value correspnding to the key, NIL otherwise
+ * @return A valid anvl field value corresponding to the key, NIL otherwise
  *
  * Warc Record anvl field value corrsponding to a key
  */
 
 WIPUBLIC const warc_u8_t * WRecord_getAnvlValue (const void* const _self,
-                                                const warc_u8_t * key)
+                                                 const warc_u8_t * key)
 {
 
   const struct WRecord * const self = _self;
@@ -2543,8 +2543,10 @@ WIPUBLIC warc_bool_t WRecord_setContentFromArc (void * _self, void * arcontent)
  * Returns the anvl field corresponding to the rank in the WARC Record
  */
 
-WPUBLIC warc_bool_t WRecord_getAnvlField (const void * const _self, const warc_u32_t rank,
-                                          const warc_u8_t ** key, const warc_u8_t ** value)
+WPUBLIC warc_bool_t WRecord_getAnvlField (const void * const _self, 
+                                          const warc_u32_t rank,
+                                          const warc_u8_t ** key, 
+                                          const warc_u8_t ** value)
 {
     const struct WRecord * const self  = _self;
     const void           * inner_anvl  = NIL; /* for the manipulation of the inner anvl fields lit */
@@ -2553,7 +2555,6 @@ WPUBLIC warc_bool_t WRecord_getAnvlField (const void * const _self, const warc_u
 
   /* Preconditions */
   CASSERT (self);
-  
 
   inner_anvl = WHeader_getAnvl (HDL);
   unless (inner_anvl)
