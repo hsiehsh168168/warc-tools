@@ -359,7 +359,7 @@ WPRIVATE warc_bool_t WServer_parseRequest (const warc_u8_t * uri,
   WString_concat (other_item, item);
     
  /*  if (w_strcmp (WString_getText (other_item), (warc_u8_t *) WARC_GET_VERSION)) */
-  if( w_checkCompatibleVersions (other_item) )
+  if( w_checkCompatibleVersions (WString_getText(other_item)) )
     {
       destroy (other_item);
       destroy (item);

@@ -153,7 +153,7 @@ EXTERNAL_FUNCTION int hts_plug (httrackp *opt, const char* argv) {
 
 #define WARC_MODULE_NAME "libhtswarc.so"
 EXTERNAL_FUNCTION int hts_unplug(httrackp *opt) {
-  fprintf(stderr, "> \"" WARC_MODULE_NAME "\" mdule unplugged. OK\n");
+  fprintf(stderr, "> \"" WARC_MODULE_NAME "\" module unplugged. OK\n");
 
   return 1;  /* success */
 }
