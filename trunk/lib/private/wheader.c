@@ -1658,18 +1658,17 @@ WIPUBLIC const warc_u8_t * WHeader_getAnvlValue (const void* const _self,
   CASSERT (self);
 
   unless (OTHER_FIELDS)
-  return (NIL);
+    return (NIL);
 
   unless (key)
-  return (NIL);
+    return (NIL);
 
   lsize = WList_size (OTHER_FIELDS);
-
   while (i < lsize)
     {
       anvl = WList_getElement (OTHER_FIELDS, i);
       unless (w_strcmp (WAnvl_getKey (anvl), key) )
-      return (WAnvl_getValue (anvl) );
+        return (WAnvl_getValue (anvl) );
       else
         ++ i;
     }

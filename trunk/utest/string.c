@@ -120,20 +120,26 @@ void test23 (void)
 
 void test31 (void)
 {
-  void       * s = NIL;
-         s = makeWString ("AA");
-        CU_ASSERT_PTR_NOT_EQUAL(s,NIL);
-	CU_ASSERT_STRING_EQUAL("AA", WString_getText   (s)  ); 
-        CU_ASSERT_EQUAL(2, WString_getLength (s) );
-        WString_setText (s, makeS ("BBBBB") );
-	CU_ASSERT_STRING_NOT_EQUAL("AA", WString_getText   (s)  ); 
-        CU_ASSERT_EQUAL(5, WString_getLength (s) );
-        WString_setText (s, makeS ("AABBCCDDEEF") );
-	CU_ASSERT_STRING_EQUAL("AABBCCDDEEF", WString_getText   (s)  ); 
-        CU_ASSERT_EQUAL(11, WString_getLength (s) );
-				
+  void * s = NIL;
+
+  s = makeWString ("AA");
+  CU_ASSERT_PTR_NOT_EQUAL(s,NIL);
+  CU_ASSERT_STRING_EQUAL("AA", WString_getText   (s)  ); 
+  CU_ASSERT_EQUAL(2, WString_getLength (s) );
+  
+  WString_setText (s, makeS ("BBBBB") );
+  
+  CU_ASSERT_STRING_NOT_EQUAL("AA", WString_getText   (s)  ); 
+  CU_ASSERT_EQUAL(5, WString_getLength (s) );
+  WString_setText (s, makeS ("AABBCCDDEEF") );
+  
+  CU_ASSERT_STRING_EQUAL("AABBCCDDEEF", WString_getText   (s)  ); 
+  CU_ASSERT_EQUAL(11, WString_getLength (s) );
+  
   destroy (s);  
 }
+
+
 
 void test41 (void)
 {

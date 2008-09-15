@@ -2009,12 +2009,12 @@ WPUBLIC warc_bool_t WFile_storeRecord (void* _self, const void * wrec)
   warc_u32_t     datalength  = 0;
 
   /* Preconditions */
-
   CASSERT (self);
+
   unless (wrec)
-  {
     return (WARC_TRUE);
-  }
+
+  assert (self != wrec);
 
   /* reject any other mode except for writing */
   if (MODE != WARC_FILE_WRITER)

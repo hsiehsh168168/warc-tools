@@ -126,6 +126,7 @@ WPRIVATE void * WKV_constructor (void * _self, va_list * app)
 
   /* preconditions */
   assert (value);
+  assert (self != value);
 
   HKEY  = hkey;
   VALUE = value;
