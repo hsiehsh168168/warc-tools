@@ -37,6 +37,7 @@ DOC      = doc
 LIB      = lib
 MISC     = misc
 CONTRIB  = contrib
+MAN 	 = $(APP)/man
 CURL	 = $(CONTRIB)/curl
 FILE	 = $(CONTRIB)/file
 HTTRACK	 = $(CONTRIB)/httrack
@@ -536,6 +537,7 @@ source:	shared static python httrack $(a)
 		cp -f $(a) $(DESTDIR)/bin
 		cp -f $(APP)/*.sh $(DESTDIR)/bin
 		cp -f $(APPYTHON)/* $(DESTDIR)/bin
+		cp -rf $(MAN) $(DESTDIR)
 		find $(LIB) -name "*.h" -type "f" -exec cp -f '{}' $(DESTDIR)/include \;
 		find $(LIB) -name "*.x" -type "f" -exec cp -f '{}' $(DESTDIR)/include \;
 		cp -f $(EVENT_CONFIG) $(DESTDIR)/include
@@ -547,7 +549,7 @@ source:	shared static python httrack $(a)
 		mv $(LIBNAME).a $(DESTDIR)/lib
 		mv *$(LIBNAME)*$(LIBSUFFIX)* $(DESTDIR)/lib
 		cp -rf $(CONTRIB) $(DESTDIR)
-		(cd $(DESTDIR)/$(HTTRACK) && rm -f *.c *.h *.o && sed -e "s|file2warc=.*|file2warc=\"..\/..\/bin\/file2warc.py\"|" httrack2warc.sh > tmp && mv tmp httrack2warc.sh)
+		@(cd $(DESTDIR)/$(HTTRACK) && rm -f *.c *.h *.o && sed -e "s|file2warc=.*|file2warc=\"..\/..\/bin\/file2warc.py\"|" httrack2warc.sh > tmp && mv tmp httrack2warc.sh)
 
 
 tgz:	source
