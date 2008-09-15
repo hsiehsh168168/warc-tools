@@ -24,6 +24,10 @@
 /*     http://code.google.com/p/warc-tools/                            */
 /* ------------------------------------------------------------------- */
 
+2008-09-12 to 2008-09-14 by "voidptrptr":
+
+	* Add pages man for C commands ans update the security model
+
 2008-09-10 to 2008-09-12 by "voidptrptr":
 
 	* Full functional release of HTTrack WARC plugin, ready to use (contrib/httrack)

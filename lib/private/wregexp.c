@@ -43,7 +43,7 @@
 #include <wcsafe.h>  /* w_strncpy, ... */
 #include <regex.h>
 
-#define SIGN 20
+#define SIGN 7
 
 /**
  * WARC Regular expressions matcher internal structur
