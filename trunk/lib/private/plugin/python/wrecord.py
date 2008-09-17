@@ -154,13 +154,6 @@ class WRecord:
 		return warc.WRecord_getCompressedSize(self.me)
 
 
-	def getAnvlField(self,rank):
-		key = ""
-		value = ""
-		warc.WRecord_get(self.me,rank, key, value)
-		return key, value
-
-
 	def getBloc(self, with_http, wfile, code):
 		if (wfile.type() == classtype.WFile):
 			withh = warc.cvar.WARC_TRUE
@@ -236,11 +229,11 @@ class WRecord:
 
 
 	def setTruncated(self, cause, cause_len):
-		return warc.WRecord_set(self.me, cause, cause_len)
+		return warc.WRecord_setTruncated(self.me, cause, cause_len)
 
 
 	def setWarcInfoId(self, rid, id_len):
-		return warc.WRecord_set(self.me, rid, id_len)
+		return warc.WRecord_setWarcInfoId(self.me, rid, id_len)
 
 
 	def setProfile(self, profile, profile_len):
@@ -248,7 +241,7 @@ class WRecord:
 
 
 	def setPayloadType(self, ptype, type_len):
-		return warc.WRecord_set(self.me, ptype, type_len)
+		return warc.WRecord_setPayloadType(self.me, ptype, type_len)
 
 
 	def setSegmentOriginId(self, rid, id_len):
@@ -268,7 +261,7 @@ class WRecord:
 
 
 	def addAnvl(self, key, key_len, value, value_len):
-		return warc.WRecord_set(self.me, key, key_len, value, value_len)
+		return warc.WRecord_addAnvl(self.me, key, key_len, value, value_len)
 
 
 	def setContentFromFileName(self, name):
@@ -310,4 +303,3 @@ class WRecord:
 
 
 ##  end of wrapper ##
-
