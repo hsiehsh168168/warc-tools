@@ -44,7 +44,7 @@
 #include <wrecord.h>
 #include <wmktmp.h>
 
-#define SIGN 3
+#define SIGN 22
 
 /**
  * WARC Record Data Bloc Class
@@ -59,11 +59,12 @@ struct WBloc
     /*@{*/
     warc_u32_t    allocation_unit; /**< The amount of Byte to allocate */
     warc_u8_t   * buffer ; /**< The buffer whcich will contain the data */
-    warc_bool_t   eob; /** end of bloc */
-    void        * wfile; /** The Warc File wher the bloc will be got */
-    void        * wrecord; /** The WRecord class instance containg the bloc */
-    void        * wtfile; /** The WTempFile object that will contain the data bloc */
-    warc_u8_t     http_code[4]; /** Will contain the http response code */
+    warc_bool_t   eob; /**< end of bloc */
+    void        * wfile; /**< The Warc File wher the bloc will be got */
+    void        * wrecord; /**< The WRecord class instance containg the bloc */
+    void        * wtfile; /**< The WTempFile object that will contain the data bloc */
+    warc_u8_t     http_code[4]; /**< Will contain the http response code */
+    warc_u32_t    last_size ; /**< The size of the last read chunk */
     
     /*@}*/
   };
@@ -76,6 +77,7 @@ struct WBloc
 #define WTFILE       (self -> wtfile)
 #define CODE         (self -> http_code)
 #define EOB          (self -> eob)
+#define LASTSIZE    (self -> last_size)
 
 #define DEFAULT_UNIT  64 * 1024
 
@@ -105,6 +107,7 @@ WPUBLIC warc_u8_t * WBloc_next (void * _self)
     {
       EOB = WARC_FALSE;
       w_fseek_start (tfile);
+      LASTSIZE = 0;
       return (NIL);
     }
 
@@ -115,10 +118,31 @@ WPUBLIC warc_u8_t * WBloc_next (void * _self)
   if(size < ALLOC)
     {
       EOB = WARC_TRUE;
+      LASTSIZE = size;
       return (BUFF);
     }
-
+  
+  LASTSIZE = size;
   return (BUFF);
+}
+
+
+/**
+ * @param _self: A WBloc object instance
+ *
+ * @return the size of the last read chunk size
+ *
+ * Last Read chunk size recovering function
+ */
+
+WPUBLIC  warc_u32_t WBloc_getLastChunkSize (const void * const _self)
+{
+     const struct WBloc * const self = _self;
+
+  /* Precondtionx */
+  CASSERT(self);
+
+  return (LASTSIZE);
 }
 
 
@@ -178,7 +202,7 @@ WPRIVATE void * WBloc_constructor (void * _self, va_list * app)
     destroy(self);
     return (NIL);
   }
-  
+
   /* if alloc = 0, use allocated */
   if (alloc)
     allocated = alloc;
@@ -213,6 +237,7 @@ WPRIVATE void * WBloc_constructor (void * _self, va_list * app)
   }
 
   w_fseek_start (WTempFile_handle (WTFILE));
+  LASTSIZE = 0;
 
   return (self);
 }

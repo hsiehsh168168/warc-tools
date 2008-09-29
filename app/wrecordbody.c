@@ -42,11 +42,13 @@ int main (int argc, const char ** argv)
   warc_u8_t      * wdir    = uS(".");
   warc_u32_t       offset  = 0;
   warc_u8_t       * flags    = uS ("f:o:t:h");
-  warc_u8_t       * buffer [WARC_CHUNK_SIZE+1];
+  warc_u8_t       buffer [WARC_CHUNK_SIZE+1];
   warc_u8_t         http_code [4];
   warc_i32_t       c;
   wfile_comp_t     cmode   = WARC_FILE_DETECT_COMPRESSION;
   warc_bool_t      with_http = WARC_FALSE;
+  warc_u32_t       rsize    = 0;
+  warc_bool_t stop = WARC_FALSE;
 
   void           * r = NIL;
   void           * w = NIL;
@@ -202,15 +204,20 @@ destroy (p);
   tfile = WTempFile_handle (otfile);
   w_fseek_start (tfile);
 
-  while ((w_fread (buffer, 1, WARC_CHUNK_SIZE, tfile)) >= WARC_CHUNK_SIZE)
+
+  while (! stop)
        {
-        if (fwrite( buffer, 1, WARC_CHUNK_SIZE, stdout) != WARC_CHUNK_SIZE || ferror(stdout))
+        rsize = w_fread (buffer, 1, WARC_CHUNK_SIZE, tfile);
+        if (fwrite( buffer, 1, rsize, stdout) != rsize || ferror(stdout))
           {
            destroy (r);
            destroy (w);
            destroy (otfile);
            return (10);
           }
+
+        if (rsize < WARC_CHUNK_SIZE)
+           stop = WARC_TRUE;
        }
 
 destroy (w);
