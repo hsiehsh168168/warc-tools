@@ -35,6 +35,7 @@
 
     extern char * WBloc_next (void *);
     extern const char * WBloc_getHttpCode (const void * const);
+    extern unsigned int  WBloc_getLastChunkSize (const void * const );
 
 
 

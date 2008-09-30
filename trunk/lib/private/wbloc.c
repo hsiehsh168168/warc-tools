@@ -95,9 +95,8 @@ struct WBloc
 WPUBLIC warc_u8_t * WBloc_next (void * _self)
 {
   struct WBloc *  self = _self;
-
-  FILE       * tfile = NIL;
-  warc_u32_t  size = 0;
+  FILE         * tfile = NIL;
+  warc_u32_t     size  = 0;
 
   /* Preconditions  */
   CASSERT (self);
@@ -112,17 +111,16 @@ WPUBLIC warc_u8_t * WBloc_next (void * _self)
     }
 
   size = w_fread (BUFF, 1, ALLOC, tfile);
-  if(size)
-    BUFF [size] = '\0';
+
+  BUFF [size] = '\0';
+  LASTSIZE = size;
 
   if(size < ALLOC)
     {
       EOB = WARC_TRUE;
-      LASTSIZE = size;
       return (BUFF);
     }
   
-  LASTSIZE = size;
   return (BUFF);
 }
 

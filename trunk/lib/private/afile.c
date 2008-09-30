@@ -175,7 +175,6 @@ WPUBLIC void * AFile_nextRecord ( void * _self)
   warc_u64_t   usize    = 0; /* uncompressed data size */
   warc_u64_t   csize    = 0; /* compressed data size */
   warc_u32_t   ret      = 0;
-/*   void       * objrectfile = NIL; */
   FILE       * rectfile = NIL; /* to uncompress the ARecord */
   warc_u64_t   offset   = 0;
 
@@ -188,16 +187,6 @@ WPUBLIC void * AFile_nextRecord ( void * _self)
   if (COMP == ARC_FILE_COMPRESSED_GZIP)
     {
       WTempFile_reset (TEMP_FILE);
-
-/*       objrectfile = bless (WTempFile, WString_getText(WORKING_DIR),  */
-/*                            WString_getLength(WORKING_DIR)); */
-
-/*       unless (objrectfile) */
-/*       { */
-/*         WarcDebugMsg ("unable to create temporary space"); */
-/*         return (NIL); */
-/*       } */
-
       rectfile = WTempFile_handle (TEMP_FILE);
 
       gzobj = bless (WGzip);
@@ -208,7 +197,6 @@ WPUBLIC void * AFile_nextRecord ( void * _self)
       if (ret)
         {
           WarcDebugMsg ("unable to uncompress the gzipped record");
-/*           destroy (objrectfile); */
           destroy (gzobj);
           return (NIL);
         }
@@ -224,19 +212,19 @@ WPUBLIC void * AFile_nextRecord ( void * _self)
         {
 
           destroy (arcfsm);
-/*           destroy (objrectfile); */
           return (NIL);
         }
 
       arec = AFsmHDL_transform (arcfsm);
 
+      /* read the record data and strip out the \n\n */
+/*       SBLOC = ARecord_getDataLength (arec) - 2; */
       SBLOC = ARecord_getDataLength (arec);
 
       if (ARecord_setAfile (arec, self) )
         {
           destroy (arec);
           destroy (arcfsm);
-/*           destroy (objrectfile); */
           return (NIL);
         }
 
@@ -244,7 +232,6 @@ WPUBLIC void * AFile_nextRecord ( void * _self)
         {
           destroy (arec);
           destroy (arcfsm);
-/*           destroy (objrectfile); */
           return (NIL);
         }
 
@@ -252,7 +239,6 @@ WPUBLIC void * AFile_nextRecord ( void * _self)
         {
           destroy (arec);
           destroy (arcfsm);
-/*           destroy (objrectfile); */
           return (NIL);
         }
 
@@ -260,7 +246,6 @@ WPUBLIC void * AFile_nextRecord ( void * _self)
       if (ARecord_setContentFromFile (arec, TEMP_FILE) )
         {
           destroy (arec);
-/*           destroy (objrectfile); */
           return (NIL);
         }
 
@@ -425,7 +410,7 @@ WPUBLIC warc_bool_t AFile_register (void* _self, void * arec,
 
   /* check if "self" is the correct AFile object */
   unless (self == ARecord_fromWho (arec) )
-  return (WARC_TRUE);
+    return (WARC_TRUE);
 
   unless (callback)
   {
@@ -440,57 +425,48 @@ WPUBLIC warc_bool_t AFile_register (void* _self, void * arec,
     return (WARC_TRUE);
 
   offset = ARecord_getRecordOffset (arec);
-
   if (offset < 0)
     return (WARC_TRUE);
-
 
   if (COMP == ARC_FILE_COMPRESSED_GZIP)
     {
       w_fseek_from_start (ARecord_getDataFile (arec), offset);
     }
-
   else if (COMP == ARC_FILE_UNCOMPRESSED)
     {
       WTempFile_reset (TEMP_FILE);
-/*       objatfile = bless (WTempFile, WString_getText(WORKING_DIR), WString_getLength(WORKING_DIR)); */
-/*       unless (objatfile) */
-/*       { */
-/*         WarcDebugMsg ("unable to create temporary space"); */
-/*         return (WARC_TRUE); */
-/*       } */
-
+      
       atfile = WTempFile_handle (TEMP_FILE);
-
+      
       size = ARecord_getDataSize (arec);
-
+      
       acurrent = (warc_i64_t) w_ftell (FH);
       w_fseek_from_start (FH, offset);
-
+      
       if (AFile_fillTempFile (self, atfile, size) )
         {
-/*           destroy (objatfile); */
           w_fseek_from_start (FH, acurrent);
           return (WARC_TRUE);
         }
-
+      
       w_fseek_start (atfile);
 
       w_fseek_from_start (FH, acurrent);
-
-      if (ARecord_setContentFromFile (arec, TEMP_FILE) )
+      
+      if (ARecord_setContentFromFile (arec, TEMP_FILE))
         {
-/*           destroy (objatfile); */
           w_fseek_from_start (FH, acurrent);
           return (WARC_TRUE);
         }
     }
-
   else
     {
       WarcDebugMsg ("ARC file opened with an unknown mode");
       return (WARC_TRUE);
     }
+
+  
+
 
   return (WARC_FALSE);
 }

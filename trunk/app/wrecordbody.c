@@ -41,7 +41,7 @@ int main (int argc, const char ** argv)
   warc_u8_t      * field   = NIL;
   warc_u8_t      * wdir    = uS(".");
   warc_u32_t       offset  = 0;
-  warc_u8_t       * flags    = uS ("f:o:t:h");
+  warc_u8_t       * flags    = uS ("f:o:t:e");
   warc_u8_t       buffer [WARC_CHUNK_SIZE+1];
   warc_u8_t         http_code [4];
   warc_i32_t       c;
@@ -60,11 +60,11 @@ int main (int argc, const char ** argv)
   if (argc < 3 || argc > 7)
     {
       fprintf (stderr, "Extract WARC's content block only\n");
-      fprintf (stderr, "Usage: %s -f <file.warc> [-v] [-t <working_dir>]\n", argv [0]);
+      fprintf (stderr, "Usage: %s -f <file.warc> <-o offset> [-e] [-t <working_dir>]\n", argv [0]);
       fprintf (stderr, "\t-f   : valid WARC file name\n");
       fprintf (stderr, "\t-o   : the offset of the record\n");
       fprintf (stderr, "\t[-t] : temporary working directory (default \".\")\n");
-      fprintf (stderr, "\t[-h] : says if the Content is encapsulated with the HTTP response (default \"no\")\n");
+      fprintf (stderr, "\t[-e] : whether the payload content is after the HTTP response (default \"no\")\n");
       return (2);
     }
 
@@ -106,7 +106,7 @@ int main (int argc, const char ** argv)
                 wdir = uS(WGetOpt_argument (p));
           break;
 
-          case 'h' :
+          case 'e' :
               with_http = WARC_TRUE;
           break;
 
