@@ -96,12 +96,13 @@ def main () :
     while True:
         buff = b.getNext()
         if buff:
+            # the chunk size is returned by calling "b.getLastChunkSize()"
             sys.stdout.write(buff)
         else: # no more data to read. reach the end of record
             break
 
-    b.destroy()
-    r.destroy()
+    b.destroy ()
+    r.destroy ()
     w.destroy ()
 
 if __name__ == "__main__":

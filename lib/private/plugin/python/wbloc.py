@@ -58,11 +58,11 @@ class WBloc:
 	def getNext(self):
 		return warc.WBloc_next(self.me)
 
-
  	def getHttpCode(self):
 		return warc.WBloc_getHttpCode(self.me)
 
-
+	def getLastChunkSize (self):
+		return warc.WBloc_gelLastChunkSize(self.me)
 
 
 ## Ruby WBloc class particular methods
