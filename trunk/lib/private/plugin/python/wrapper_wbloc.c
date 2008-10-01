@@ -23,14 +23,34 @@
 /*     http://code.google.com/p/warc-tools/                            */
 /* ------------------------------------------------------------------- */
 
- %{
-   #include <wport.h>
-   #include <wpybless.h>
- %}
+/*
+ * Portability header file
+ */
+
+#include <wport.h>
+
+/*
+ * WARC default headers
+ */
+
+#include <wmisc.h>   /* unless, ... */
+#include <wbloc.h>   /* WBloc class */
+
+#include <wrapper_wbloc.h>
+
+WPUBLIC PyObject* WRAPPER_WBlock_next (void * _self)
+{
+  struct WBloc    * self = _self;
+  const warc_u8_t * dat  = NIL;
   
-
-    extern void * bless_WFile (const char  *, const unsigned int, unsigned int , const unsigned int, const char *);
-
-    extern void * bless_WRecord ();
-
-    extern void * bless_WBloc (void  *, void  *, warc_bool_t, const unsigned int);
+  assert (self);
+  
+  dat = WBloc_next (self);
+  if( dat )
+    {
+      warc_u32_t len = WBloc_getLastChunkSize (self);
+      return (Py_BuildValue("s#", dat , len));
+    }
+  
+  return (NIL);
+}

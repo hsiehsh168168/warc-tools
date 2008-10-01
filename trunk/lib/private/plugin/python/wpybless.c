@@ -1,12 +1,12 @@
 /* 
   Here, there is a specialized bless functin for warc-tools library classes
-  It is for Ruby wrapper use purpuse, only the class used in this warpper may have
-  a specialized blmess function here
  */
 
 
 #include <warc.h>
-#include <wbloc.h>       /* WBloc */
+#include <wbloc.h>   /* WBloc class */
+
+#include <wpybless.h>
 
 WPUBLIC void * bless_WFile (const char  * fname, const warc_u32_t  max_size, wfile_mode_t mode, const wfile_comp_t compressed, const char * dname )
 {

@@ -37,7 +37,7 @@
 
 #include <wclass.h>  /* bless, destroy, cassert, struct Class */
 #include <wsign.h>   /* CASSERT macro */
-#include <wstring.h> /* for class's prototypes */
+#include <wbloc.h>   /* for class's prototypes */
 #include <wmem.h>    /* wmalloc, wfree */
 #include <wmisc.h>   /* unless, ... */
 #include <wcsafe.h>  /* w_strncpy, ... */
@@ -77,7 +77,7 @@ struct WBloc
 #define WTFILE       (self -> wtfile)
 #define CODE         (self -> http_code)
 #define EOB          (self -> eob)
-#define LASTSIZE    (self -> last_size)
+#define LASTSIZE     (self -> last_size)
 
 #define DEFAULT_UNIT  64 * 1024
 
@@ -94,7 +94,7 @@ struct WBloc
 
 WPUBLIC warc_u8_t * WBloc_next (void * _self)
 {
-  struct WBloc *  self = _self;
+  struct WBloc * self  = _self;
   FILE         * tfile = NIL;
   warc_u32_t     size  = 0;
 
@@ -104,8 +104,8 @@ WPUBLIC warc_u8_t * WBloc_next (void * _self)
   tfile = WTempFile_handle (WTFILE);
   if(EOB || feof (tfile))
     {
-      EOB = WARC_FALSE;
       w_fseek_start (tfile);
+      EOB      = WARC_FALSE;
       LASTSIZE = 0;
       return (NIL);
     }
@@ -113,7 +113,7 @@ WPUBLIC warc_u8_t * WBloc_next (void * _self)
   size = w_fread (BUFF, 1, ALLOC, tfile);
 
   BUFF [size] = '\0';
-  LASTSIZE = size;
+  LASTSIZE    = size;
 
   if(size < ALLOC)
     {
@@ -262,6 +262,8 @@ WPRIVATE void * WBloc_destructor (void * _self)
 
   if (WTFILE)
       destroy (WTFILE), WTFILE = NIL;
+
+  LASTSIZE = 0;
 
   return (self);
 }

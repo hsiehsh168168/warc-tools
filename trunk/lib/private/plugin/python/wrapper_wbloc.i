@@ -23,14 +23,11 @@
 /*     http://code.google.com/p/warc-tools/                            */
 /* ------------------------------------------------------------------- */
 
+/* wrapper_wbloc.i */
+
  %{
-   #include <wport.h>
-   #include <wpybless.h>
+   #include <Python.h>
+   #include <wrapper_wbloc.h>
  %}
   
-
-    extern void * bless_WFile (const char  *, const unsigned int, unsigned int , const unsigned int, const char *);
-
-    extern void * bless_WRecord ();
-
-    extern void * bless_WBloc (void  *, void  *, warc_bool_t, const unsigned int);
+  extern PyObject* WRAPPER_WBlock_next (void *);

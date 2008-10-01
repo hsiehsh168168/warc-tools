@@ -23,14 +23,33 @@
 /*     http://code.google.com/p/warc-tools/                            */
 /* ------------------------------------------------------------------- */
 
- %{
-   #include <wport.h>
-   #include <wpybless.h>
- %}
-  
+#ifndef	__WARC_WRAPPER_WBLOC_H__
+#define	__WARC_WRAPPER_WBLOC_H__
 
-    extern void * bless_WFile (const char  *, const unsigned int, unsigned int , const unsigned int, const char *);
 
-    extern void * bless_WRecord ();
+/* to mix C and C++ */
+#ifdef __cplusplus
+extern "C"
+  {
+#endif
 
-    extern void * bless_WBloc (void  *, void  *, warc_bool_t, const unsigned int);
+
+    /**
+     * Portability header file
+     */
+
+#include <wport.h>
+
+#include <Python.h>
+
+    extern PyObject* WRAPPER_WBlock_next (void *);
+
+
+
+#ifdef __cplusplus
+  }
+
+#endif
+
+
+#endif /* __WARC_WRAPPER_WBLOC_H__ */

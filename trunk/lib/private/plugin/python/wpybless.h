@@ -25,8 +25,6 @@
 
 #ifndef __WPYBLESS_H__
 #define __WPYBLESS_H__
-#include <warc.h>
-
 
 /* to mix C and C++ */
 #ifdef __cplusplus
@@ -34,15 +32,12 @@ extern "C"
   {
 #endif
 
+#include <warc.h>
 
-    extern void * bless_WFile (const char  * , const warc_u32_t  , wfile_mode_t , const wfile_comp_t , const char * );
-
-
+    extern void * bless_WFile (const char  * , const warc_u32_t, 
+                               wfile_mode_t , const wfile_comp_t , const char * );
     extern void * bless_WRecord ();
-
-
     extern void * bless_WBloc (void  * , void  * , warc_bool_t, const warc_u32_t );
-
 
 #ifdef __cplusplus
   }
