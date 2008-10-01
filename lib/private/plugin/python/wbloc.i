@@ -27,15 +27,13 @@
  %{
    #include <wport.h>
    #include <wbloc.h>
- 
  %}
   
 
     extern const void * WBloc;
 
-    extern char * WBloc_next (void *);
-    extern const char * WBloc_getHttpCode (const void * const);
+    extern       char *  WBloc_next (void *);
+    extern const char *  WBloc_getHttpCode (const void * const);
     extern unsigned int  WBloc_getLastChunkSize (const void * const );
-
 
 

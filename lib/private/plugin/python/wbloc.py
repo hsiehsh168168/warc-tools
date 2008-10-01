@@ -48,8 +48,8 @@ class WBloc:
 		self.classtype = WTypes()
                 self.httpheaders = httpheaders
                 if (wfile.type != self.classtype.WFile or wrec.type != self.classtype.WRecord):
-									return 0
-		self.type = self.classtype.WBloc
+                        return 0
+                self.type = self.classtype.WBloc
 		self.me = warc.bless_WBloc(wfile.getInternal(self), wrec.getInternal(self), self.httpheaders, alloc)
 
 
@@ -58,6 +58,9 @@ class WBloc:
 	def getNext(self):
 		return warc.WBloc_next(self.me)
 
+# 	def getNext(self):
+# 		return warc.WRAPPER_WBloc_next(self.me)
+    
  	def getHttpCode(self):
 		return warc.WBloc_getHttpCode(self.me)
 
@@ -65,7 +68,7 @@ class WBloc:
 		return warc.WBloc_gelLastChunkSize(self.me)
 
 
-## Ruby WBloc class particular methods
+## Python WBloc class particular methods
 
 	def type(self):
 		return self.type

@@ -794,12 +794,14 @@ pylib   =  $(GZIP)/adler32.o     $(GZIP)/compress.o      $(GZIP)/crc32.o  \
 		   $(OSDEP)/wmktmp.o     $(PRIVATE)/whash.o      $(PRIVATE)/wkv.o \
 		   $(OSDEP)/wcsafe.o	 $(PRIVATE)/wuuid.o		 $(PRIVATE)/wrecord.o \
 		   $(PRIVATE)/wheader.o	 $(PRIVATE)/wanvl.o	     $(PRIVATE)/wfsmanvl.o \
-		   $(PRIVATE)/wversion.o $(PRIVATE)/wbloc.o   	 $(PRIVATE)/wfile.o 
+		   $(PRIVATE)/wversion.o $(PRIVATE)/wbloc.o   	 $(PRIVATE)/wfile.o
 
-wpylib   = $(PYTHON)/warc_wrap.o $(PYTHON)/wpybless.o $(PYTHON)/wfield.o
+wpylib   = $(PYTHON)/warc_wrap.o $(PYTHON)/wpybless.o $(PYTHON)/wfield.o \
+		   $(PYTHON)/wrapper_wbloc.o
 
 apylib   = $(PRIVATE)/arecord.o  $(PRIVATE)/afile.o 	 $(PRIVATE)/afsmhdl.o \
-		   $(PYTHON)/arc_wrap.o  $(PYTHON)/wpybless.o $(PYTHON)/apybless.o $(PYTHON)/wfield.o
+		   $(PYTHON)/arc_wrap.o  $(PYTHON)/wpybless.o    $(PYTHON)/apybless.o \
+		   $(PYTHON)/wfield.o
 
 pyshared_unix: python_clean pyshared
 		$(CC) -shared -Wl,-soname$(WPYSONAME) -o $(PYTHON)/$(WPYSHAREDNAME) \
@@ -814,7 +816,7 @@ pyshared_openbsd: python_clean pyshared
 pyshared_netbsd: pyshared_openbsd
 
 pyshared_solaris: python_clean pyshared
-		$(LD) $(SWIG_LDFLAGS) $(pylib) $(wpylib) -o $(PYTHON)/$(WPYSHAREDNAME)
+		$(CC) $(SWIG_LDFLAGS) $(pylib) $(wpylib) -o $(PYTHON)/$(WPYSHAREDNAME)
 		$(CC) $(SWIG_LDFLAGS) $(pylib) $(apylib) -o $(PYTHON)/$(APYSHAREDNAME)
 
 pyshared_osx: python_clean pyshared
@@ -851,13 +853,17 @@ $(PYTHON)/wfield.o : $(PYTHON)/wfield.c
 	$(CC) $(CFLAGS) $(INC_PYTHON) -c $< -o $@
 
 $(PYTHON)/warc_wrap.o : $(PYTHON)/warc_wrap.c
-	$(CC) $(INC_PYTHON) -c $(PYTHON)/warc_wrap.c -o $(PYTHON)/warc_wrap.o
+	$(CC) $(INC_PYTHON) -c $< -o $@
+
+$(PYTHON)/wrapper_wbloc.o : $(PYTHON)/wrapper_wbloc.c
+	$(CC) $(CFLAGS) $(INC_PYTHON) -c $< -o $@
 
 $(PYTHON)/arc.py $(PYTHON)/arc_wrap.c :
 	$(SWIG) -python -outdir $(PYTHON) $(PYTHON)/arc.i
 
 $(PYTHON)/arc_wrap.o : $(PYTHON)/arc_wrap.c
-	$(CC) $(INC_PYTHON) -c $(PYTHON)/arc_wrap.c -o $(PYTHON)/arc_wrap.o
+	$(CC) $(INC_PYTHON) -c $< -o $@
+
 
 
 ######################

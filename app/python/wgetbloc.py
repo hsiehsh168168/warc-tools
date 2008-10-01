@@ -69,10 +69,10 @@ def main () :
     if options.cnt == None:
         parser.error(" You must provide a record number")
 
-    w = WFile (options.filename ,600 * 1024 * 1024, warc.WARC_FILE_READER, warc.WARC_FILE_DETECT_COMPRESSION, options.tmpdir)
+    w = WFile (options.filename, 600 * 1024 * 1024, warc.WARC_FILE_READER, warc.WARC_FILE_DETECT_COMPRESSION, options.tmpdir)
 
     if (not (w)) :
-             print "WARC file  not found "
+        print "WARC file  not found "
 
     # go to the record number "cnt"
     cnt = options.cnt
@@ -97,6 +97,7 @@ def main () :
         buff = b.getNext()
         if buff:
             # the chunk size is returned by calling "b.getLastChunkSize()"
+            #sys.stderr.write("chunk size:" + b.getLastChunkSize())
             sys.stdout.write(buff)
         else: # no more data to read. reach the end of record
             break

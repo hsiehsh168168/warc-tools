@@ -25,8 +25,6 @@
 
 #ifndef __WFIELD_H__
 #define __WFIELD_H__
-#include <warc.h>
-
 
 /* to mix C and C++ */
 #ifdef __cplusplus
@@ -34,7 +32,7 @@ extern "C"
   {
 #endif
 
-
+#include <warc.h>
 
     extern const warc_u8_t * getFieldKey (void * r, warc_u32_t rank);
     extern const warc_u8_t * getFieldValue (void * r, warc_u32_t rank);
