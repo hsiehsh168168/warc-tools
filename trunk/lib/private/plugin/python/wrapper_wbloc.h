@@ -42,7 +42,7 @@ extern "C"
 
 #include <Python.h>
 
-    extern PyObject* WRAPPER_WBlock_next (void *);
+    extern PyObject* WRAPPER_WBloc_next (void *);
 
 
 

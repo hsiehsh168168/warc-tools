@@ -38,11 +38,11 @@ from   wbloc    import WBloc
 
 def main () :
     
-    usage =  "./app/python/wgetbloc.py -f <file.warc> -n <num> [-v] [-t <working_dir>]\n "\
+    usage =  "./app/python/wgetbloc.py <-f file.warc> <-o offset> [-e] [-v] [-t <working_dir>]\n "\
              "\t-f    : valid WARC file name\n"\
-             "\t-n    : record number\n"\
+             "\t-o    : record offset\n"\
+             "\t[-e]  : print HTTP response headers (default 'no')\n"\
              "\t[-t]  : temporary working directory (default './')\n"\
-             "\t[-v]  : dump ANVL (default false)\n\n"\
              "./app/python/wgetbloc.py -f foo.warc.gz -n 7"
  
     parser = OptionParser(usage)
@@ -50,11 +50,11 @@ def main () :
     parser.add_option("-f", "--file", dest="filename",
                       help="read data from FILENAME")
 
-    parser.add_option("-n", "--num", dest="cnt",
-                      help="record number", type="int")
+    parser.add_option("-o", "--offset", dest="offset",
+                      help="record offset", type="int")
 
-    parser.add_option("-v", "--verbose",
-                      action="store_true", dest="verbose")
+    parser.add_option("-e", "--headers",
+                    action="store_false", default=True, dest="headers")
     
     parser.add_option("-t", "--tempdir", dest="tmpdir",
                       help="Temporary working directory", default=".")
@@ -67,33 +67,25 @@ def main () :
     if (not (options.filename)) :
         parser.error(" You must give WARC file name")
 
-    if options.cnt == None:
-        parser.error(" You must provide a record number")
+    if options.offset == None:
+        parser.error(" You must provide a valid record offset")
 
     w = WFile (options.filename, 600 * 1024 * 1024, warc.WARC_FILE_READER, warc.WARC_FILE_DETECT_COMPRESSION, options.tmpdir)
 
     if (not (w)) :
         print "WARC file  not found "
 
-    # go to the record number "cnt"
-    cnt = options.cnt
-    nr  = 1
-    while nr:
-        nr = w . hasMoreRecords ()
+    # go to the specified offset
+    w.seek(options.offset);
+    if w . hasMoreRecords ():
         r  = w . nextRecord ()
-        if cnt == 0:
-            break
-
-        r . destroy()
-        cnt = cnt - 1
-
-    if cnt or nr == 0:
-        print "End of file reached, no record with number", options.cnt
+    else:
+        print "End of file reached, or no record at this offset", options.offset
         sys.exit(0);
 
     # choose your buffer size (ex. 64K = 64 * 1024) to read the payload
     # (with the HTTP headers or not, use the boolean flag) chunk by chunk 
-    b = WBloc (w, r, False, 64 * 1024)
+    b = WBloc (w, r, options.headers, 64 * 1024)
     while True:
         buff = b.getNext()
         if buff:
