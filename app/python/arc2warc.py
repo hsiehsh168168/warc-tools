@@ -48,16 +48,18 @@ from optparse import OptionParser
 # otherwise remove it if necessary 
 
 def guessname( fname , cmode ):
-    if '.arc' in fname:
-        fname = fname.replace( '.arc' , '.warc' )
-    else:
-        fname += '.warc' 
     if cmode:
         if not '.gz' in fname:
             fname += '.gz'
     else:
         if '.gz' in fname:
             fname = fname.replace( '.gz' , '' )
+            
+    if '.arc.gz' in fname:
+        fname = fname.replace( '.arc.gz' , '.warc.gz' )
+    else:
+        fname += '.warc'
+        
     return fname            
             
 
