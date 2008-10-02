@@ -38,7 +38,7 @@
 
 #include <wrapper_wbloc.h>
 
-WPUBLIC PyObject* WRAPPER_WBlock_next (void * _self)
+WPUBLIC PyObject* WRAPPER_WBloc_next (void * _self)
 {
   struct WBloc    * self = _self;
   const warc_u8_t * dat  = NIL;
@@ -47,10 +47,7 @@ WPUBLIC PyObject* WRAPPER_WBlock_next (void * _self)
   
   dat = WBloc_next (self);
   if( dat )
-    {
-      warc_u32_t len = WBloc_getLastChunkSize (self);
-      return (Py_BuildValue("s#", dat , len));
-    }
+    return (Py_BuildValue("s#", dat , WBloc_getLastChunkSize (self)));
   
-  return (NIL);
+  return (Py_BuildValue("s#", "" , 0));
 }

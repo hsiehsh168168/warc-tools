@@ -55,17 +55,17 @@ class WBloc:
 
 ## Bloc chunks recovering ##
 
-	def getNext(self):
+	def getNext0(self):
 		return warc.WBloc_next(self.me)
 
-# 	def getNext(self):
-# 		return warc.WRAPPER_WBloc_next(self.me)
+ 	def getNext(self):
+ 		return warc.WRAPPER_WBloc_next(self.me)
     
  	def getHttpCode(self):
 		return warc.WBloc_getHttpCode(self.me)
 
 	def getLastChunkSize (self):
-		return warc.WBloc_gelLastChunkSize(self.me)
+		return warc.WBloc_getLastChunkSize(self.me)
 
 
 ## Python WBloc class particular methods
