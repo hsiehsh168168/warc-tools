@@ -114,8 +114,8 @@ int main (int argc, const char ** argv)
              WARC_FILE_READER, cmode, wdir);
   assert (w);
 
-  fprintf (stderr, "%-20s %-20s %-10s %-20s %-45s %-44s %-86s \n",
-           "Offset", "CSize", "WarcId", "Content-Length",
+  fprintf (stderr, "%-10s %-20s %-20s %-20s %-2s %-20s %-86s \n",
+           "WarcId", "Offset", "CSize",  "Content-Length",
            "WARC-Type", "WARC-Date",  "WARC-Record-ID");
 
   while (WFile_hasMoreRecords (w) )
@@ -133,134 +133,128 @@ int main (int argc, const char ** argv)
       /* dump WRecord */
 
       /* mandatory fields */
+      fprintf (stdout, "%-10s ",   WRecord_getWarcId        (r));
+
       fprintf (stdout, "%-20llu ", (unsigned long long) WRecord_getOffset (r) );
 
       fprintf (stdout, "%-20llu ", (unsigned long long) WRecord_getCompressedSize (r) );
 
-      fprintf (stdout, "%-10s ",   WRecord_getWarcId        (r) );
+      fprintf (stdout, "%-20u ",   WRecord_getContentLength (r));
 
-      fprintf (stdout, "%-20u ",   WRecord_getContentLength (r) );
+      fprintf (stdout, "%-2u ",    WRecord_getRecordType    (r));
 
-      fprintf (stdout, "%-45u ",   WRecord_getRecordType    (r) );
+      fprintf (stdout, "%-20s ",   WRecord_getDate          (r));
 
-      fprintf (stdout, "%-44s ",   WRecord_getDate  (r) );
-
-      fprintf (stdout, "%-86s\n",   WRecord_getRecordId      (r) );
+      fprintf (stdout, "%-86s\n",  WRecord_getRecordId      (r));
 
       /* optionnal fields */
-
       m1 = WARC_FALSE;
-      fprintf (stdout, "More Fields:\n\n"   );
+
+      string =  WRecord_getTargetUri (r) ;
+      if (string)
+        {
+          fprintf (stdout, "%-15s: %-20s\n", "WARC-Target-URI",  string);
+          m1 = WARC_TRUE;
+        }
 
       string =  WRecord_getContentType (r) ;
       if (string)
         {
-        fprintf (stdout, "%-35s: %-20s\n", "Content-Type",  string);
-
-       m1 = WARC_TRUE;
+          fprintf (stdout, "%-15s: %-20s\n", "Content-Type",  string);
+          m1 = WARC_TRUE;
         }
-
 
       string =  WRecord_getConcurrentTo (r) ;
       if (string)
         {
-        fprintf (stdout, "%-35s: %-20s\n", "WARC-Concurrent-To",  string);
-        m1 = WARC_TRUE;
+          fprintf (stdout, "%-15s: %-20s\n", "WARC-Concurrent-To",  string);
+          m1 = WARC_TRUE;
         }
 
       string =  WRecord_getBlockDigest (r) ;
       if (string)
         {
-        fprintf (stdout, "%-35s: %-20s\n", "WARC-Block-Digest",  string);
-        m1 = WARC_TRUE;
+          fprintf (stdout, "%-15s: %-20s\n", "WARC-Block-Digest",  string);
+          m1 = WARC_TRUE;
         }
 
       string =  WRecord_getPayloadDigest (r) ;
       if (string)
         {
-        fprintf (stdout, "%-35s: %-20s\n", "WARC-Payload-Digest", string);
-        m1 = WARC_TRUE;
+          fprintf (stdout, "%-15s: %-20s\n", "WARC-Payload-Digest", string);
+          m1 = WARC_TRUE;
         }
 
       string =  WRecord_getIpAddress (r) ;
       if (string)
         {
-        fprintf (stdout, "%-35s: %-20s\n", "WARC-IP-Address", string);
-        m1 = WARC_TRUE;
+          fprintf (stdout, "%-15s: %-20s\n", "WARC-IP-Address", string);
+          m1 = WARC_TRUE;
         }
 
       string =  WRecord_getRefersTo (r) ;
       if (string)
         {
-        fprintf (stdout, "%-35s: %-20s\n", "WARC-Refers-To", string);
-        m1 = WARC_TRUE;
-        }
-
-      string =  WRecord_getTargetUri (r) ;
-      if (string)
-        {
-        fprintf (stdout, "%-35s: %-20s\n", "WARC-Target-URI",  string);
-        m1 = WARC_TRUE;
+          fprintf (stdout, "%-15s: %-20s\n", "WARC-Refers-To", string);
+          m1 = WARC_TRUE;
         }
 
       string =  WRecord_getTruncated (r) ;
       if (string)
         {
-        fprintf (stdout, "%-35s: %-20s\n", "WARC-Truncated",  string);
+        fprintf (stdout, "%-15s: %-20s\n", "WARC-Truncated",  string);
         m1 = WARC_TRUE;
         }
 
       string =  WRecord_getWarcInfoId (r) ;
       if (string)
         {
-        fprintf (stdout, "%-35s: %-20s\n", "WARC-Warcinfo-ID", string);
-        m1 = WARC_TRUE;
+          fprintf (stdout, "%-15s: %-20s\n", "WARC-Warcinfo-ID", string);
+          m1 = WARC_TRUE;
         }
 
       string =  WRecord_getFilename (r) ;
       if (string)
         {
-        fprintf (stdout, "%-35s: %-20s\n", "WARC-Filename", string);
+        fprintf (stdout, "%-15s: %-20s\n", "WARC-Filename", string);
         m1 = WARC_TRUE;
         }
 
       string =  WRecord_getProfile (r) ;
       if (string)
         {
-        fprintf (stdout, "%-35s: %-20s\n", "WARC-Profile",  string);
-        m1 = WARC_TRUE;
+          fprintf (stdout, "%-15s: %-20s\n", "WARC-Profile",  string);
+          m1 = WARC_TRUE;
         }
 
       string =  WRecord_getPayloadType (r) ;
       if (string)
         {
-        fprintf (stdout, "%-35s: %-20s\n", "WARC-Identified-Payload-type", string);
-        m1 = WARC_TRUE;
+          fprintf (stdout, "%-15s: %-20s\n", "WARC-Identified-Payload-type", string);
+          m1 = WARC_TRUE;
         }
 
       string =  WRecord_getSegmentOriginId (r) ;
       if (string)
         {
-        fprintf (stdout, "%-35s: %-20s\n", "WARC-Segment-Origin-ID",  string);
-
-        fprintf (stdout, "%-35s: %-20d\n", "WARC-Segment-Number", WRecord_getSegmentNumber (r));
-        m1 = WARC_TRUE;
+          fprintf (stdout, "%-15s: %-20s\n", "WARC-Segment-Origin-ID",  string);
+          
+          fprintf (stdout, "%-15s: %-20d\n", "WARC-Segment-Number", 
+                   WRecord_getSegmentNumber (r));
+          m1 = WARC_TRUE;
         }
 
       tlen = WRecord_getSegTotalLength (r) ;
       if (tlen)
         {
-        fprintf (stdout, "%-35s: %-20d\n", "WARC-Segment-Total-Length", tlen);
-        m1 = WARC_TRUE;
+          fprintf (stdout, "%-15s: %-20d\n", "WARC-Segment-Total-Length", tlen);
+          m1 = WARC_TRUE;
         }
 
-     unless (m1)
-        fprintf (stdout, "-- No One --\n");
-
-     fprintf (stdout, "\n");
-
+      unless (m1)
+        fprintf (stderr, "-- No One --\n");
+      
       /* dump ANVLs */
-
       if (amode == WARC_TRUE)
         {
           warc_u32_t  i = 0;
@@ -270,9 +264,9 @@ int main (int argc, const char ** argv)
 
           if (j)
             {
-             fprintf (stdout, "-- More Info--\n\n");
+              fprintf (stdout, "+ ANVLs\n");
 
-             while ( i < j )
+              while ( i < j )
                {
                 if (WRecord_getAnvlField (r, i, & key, & value)) /* ANVL record */
 
@@ -287,7 +281,8 @@ int main (int argc, const char ** argv)
             }
         }
 
-
+      fprintf (stdout, "\n");
+      
       destroy (r);
     }
 
