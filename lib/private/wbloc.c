@@ -38,6 +38,7 @@
 #include <wclass.h>  /* bless, destroy, cassert, struct Class */
 #include <wsign.h>   /* CASSERT macro */
 #include <wbloc.h>   /* for class's prototypes */
+#include <wbloc.x>   /* for private class's prototypes */
 #include <wmem.h>    /* wmalloc, wfree */
 #include <wmisc.h>   /* unless, ... */
 #include <wcsafe.h>  /* w_strncpy, ... */
@@ -122,6 +123,43 @@ WPUBLIC warc_u8_t * WBloc_next (void * _self)
     }
   
   return (BUFF);
+}
+
+
+/**
+ * @param _self: a WBloc object instance
+ * @param tmpfile: temporary FILE * handle
+ * @return WARC_FALSE if the copy succeeds. Otherwise WARC_TRUE
+ *
+ * Copy data from WBloc internal temporary file to an external
+ * FILE * handle (to use only with Ruby - SWIG interface).
+ */
+
+WPUBLIC warc_bool_t WBloc_copyPayloadToTemporary (void * _self, int tmpfile)
+{
+  struct WBloc    * self  = _self;
+
+  /* Preconditions  */
+  CASSERT (self);
+  assert (tmpfile);
+
+  while (WBloc_next (self))
+    {
+      write(tmpfile, BUFF, LASTSIZE);
+
+      if (WARC_TRUE == EOB)
+        break;
+    }
+
+  /* rewind the internal filehandle for future usage */
+  w_fseek_start (WTempFile_handle (WTFILE));
+
+  /* something wrong happens */
+  if (WARC_FALSE == EOB)
+    return (WARC_TRUE);
+
+  /* everything went fine */
+  return (EOB = WARC_FALSE);
 }
 
 
