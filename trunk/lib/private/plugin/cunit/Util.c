@@ -104,7 +104,7 @@ int CU_translate_special_characters(const char* szSrc, char* szDest, size_t maxl
 	size_t src = 0;
 	size_t dest = 0;
 	size_t length = strlen(szSrc);
-	int conv_index;
+	int conv_index = -1;
         size_t l;
 
   assert(NULL != szSrc);
