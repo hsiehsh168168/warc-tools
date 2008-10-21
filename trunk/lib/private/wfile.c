@@ -1150,8 +1150,8 @@ WPRIVATE void WFile_writeRecordType (FILE * wtfile, warc_rec_t type,
                                      warc_u32_t  * datalength)
 {
 
-  w_fwrite ("WARC-Type:", 10, 1, wtfile);
-  (*datalength) += 10;
+  w_fwrite ("WARC-Type: ", 11, 1, wtfile);
+  (*datalength) += 11;
 
   switch (type)
     {
@@ -1224,8 +1224,8 @@ WIPRIVATE void WFile_writeSubjectUri (FILE * wtfile,
                                       warc_u32_t * datalength)
 {
 
-  w_fwrite ("WARC-Target-URI:", 16, 1, wtfile);
-  (* datalength) += 16;
+  w_fwrite ("WARC-Target-URI: ", 17, 1, wtfile);
+  (* datalength) += 17;
 
   w_fwrite (suri, s, 1, wtfile);
   (* datalength) += s;
@@ -1250,8 +1250,8 @@ WIPRIVATE void WFile_writeCreationDate (FILE * wtfile,
                                         warc_u32_t s,
                                         warc_u32_t * datalength)
 {
-  w_fwrite ("WARC-Date:", 10, 1, wtfile);
-  (* datalength) += 10;
+  w_fwrite ("WARC-Date: ", 11, 1, wtfile);
+  (* datalength) += 11;
 
   w_fwrite (cdate, s , 1, wtfile);
   (* datalength) += s ;
@@ -1276,8 +1276,8 @@ WIPRIVATE void WFile_writeContentType (FILE * wtfile,
                                        warc_u32_t s,
                                        warc_u32_t * datalength)
 {
-  w_fwrite ("Content-Type:", 13, 1, wtfile);
-  (*datalength) += 13;
+  w_fwrite ("Content-Type: ", 14, 1, wtfile);
+  (*datalength) += 14;
 
   w_fwrite (ctype, s , 1, wtfile);
   (* datalength) += s ;
@@ -1302,8 +1302,8 @@ WIPRIVATE void WFile_writeRecordId (FILE * wtfile,
                                     warc_u32_t s,
                                     warc_u32_t * datalength)
 {
-  w_fwrite ("WARC-Record-ID:", 15, 1, wtfile);
-  (* datalength) += 15;
+  w_fwrite ("WARC-Record-ID: ", 16, 1, wtfile);
+  (* datalength) += 16;
 
   w_fwrite (rec_id, s , 1, wtfile);
   (* datalength) += s ;
@@ -1330,8 +1330,8 @@ WIPRIVATE void WFile_writeContentLength (FILE * wtfile,
 {
   warc_u8_t   strdat[20];
 
-  w_fwrite ("Content-Length:", 15, 1, wtfile);
-  (* datalength) += 15;
+  w_fwrite ("Content-Length: ", 16, 1, wtfile);
+  (* datalength) += 16;
 
   w_numToString (clen, strdat);
 
@@ -1358,8 +1358,8 @@ WIPRIVATE void WFile_writeConcurrentTo (FILE * wtfile,
                                       warc_u32_t s,
                                       warc_u32_t * datalength)
 {
-  w_fwrite ("WARC-Concurrent-To:", 19, 1, wtfile);
-  (* datalength) += 19;
+  w_fwrite ("WARC-Concurrent-To: ", 20, 1, wtfile);
+  (* datalength) += 20;
 
   w_fwrite (rec_id, s , 1, wtfile);
   (* datalength) += s ;
@@ -1383,8 +1383,8 @@ WIPRIVATE void WFile_writeBlockDigest (FILE * wtfile,
                                     warc_u32_t s,
                                     warc_u32_t * datalength)
 {
-  w_fwrite ("WARC-Block-Digest:", 18, 1, wtfile);
-  (* datalength) += 18;
+  w_fwrite ("WARC-Block-Digest: ", 19, 1, wtfile);
+  (* datalength) += 19;
 
   w_fwrite (dig, s , 1, wtfile);
   (* datalength) += s ;
@@ -1408,8 +1408,8 @@ WIPRIVATE void WFile_writePayloadDigest (FILE * wtfile,
                                     warc_u32_t s,
                                     warc_u32_t * datalength)
 {
-  w_fwrite ("WARC-Payload-Digest:", 20, 1, wtfile);
-  (* datalength) += 20;
+  w_fwrite ("WARC-Payload-Digest: ", 21, 1, wtfile);
+  (* datalength) += 21;
 
   w_fwrite (pdig, s , 1, wtfile);
   (* datalength) += s ;
@@ -1433,8 +1433,8 @@ WIPRIVATE void WFile_writeIpAddress (FILE * wtfile,
                                     warc_u32_t s,
                                     warc_u32_t * datalength)
 {
-  w_fwrite ("WARC-IP-Address:", 16, 1, wtfile);
-  (* datalength) += 16;
+  w_fwrite ("WARC-IP-Address: ", 17, 1, wtfile);
+  (* datalength) += 17;
 
   w_fwrite (ip, s , 1, wtfile);
   (* datalength) += s ;
@@ -1458,8 +1458,8 @@ WIPRIVATE void WFile_writeRefersTo (FILE * wtfile,
                                     warc_u32_t s,
                                     warc_u32_t * datalength)
 {
-  w_fwrite ("WARC-Refers-To:", 15, 1, wtfile);
-  (* datalength) += 15;
+  w_fwrite ("WARC-Refers-To:", 16, 1, wtfile);
+  (* datalength) += 16;
 
   w_fwrite (rec_id, s , 1, wtfile);
   (* datalength) += s ;
@@ -1484,8 +1484,8 @@ WIPRIVATE void WFile_writeTruncated (FILE * wtfile,
                                     warc_u32_t s,
                                     warc_u32_t * datalength)
 {
-  w_fwrite ("WARC-Truncated:", 15, 1, wtfile);
-  (* datalength) += 15;
+  w_fwrite ("WARC-Truncated: ", 16, 1, wtfile);
+  (* datalength) += 16;
 
   w_fwrite (trunc, s , 1, wtfile);
   (* datalength) += s ;
@@ -1510,8 +1510,8 @@ WIPRIVATE void WFile_writeWarcInfo (FILE * wtfile,
                                     warc_u32_t s,
                                     warc_u32_t * datalength)
 {
-  w_fwrite ("WARC-Warcinfo-ID:", 17, 1, wtfile);
-  (* datalength) += 17;
+  w_fwrite ("WARC-Warcinfo-ID: ", 18, 1, wtfile);
+  (* datalength) += 18;
 
   w_fwrite (rec_id, s , 1, wtfile);
   (* datalength) += s ;
@@ -1536,8 +1536,8 @@ WIPRIVATE void WFile_writeFilename (FILE * wtfile,
                                     warc_u32_t s,
                                     warc_u32_t * datalength)
 {
-  w_fwrite ("WARC-Filename:", 14, 1, wtfile);
-  (* datalength) += 14;
+  w_fwrite ("WARC-Filename: ", 15, 1, wtfile);
+  (* datalength) += 15;
 
   w_fwrite (fname, s , 1, wtfile);
   (* datalength) += s ;
@@ -1562,8 +1562,8 @@ WIPRIVATE void WFile_writeProfile (FILE * wtfile,
                                     warc_u32_t s,
                                     warc_u32_t * datalength)
 {
-  w_fwrite ("WARC-Profile:", 13, 1, wtfile);
-  (* datalength) += 13;
+  w_fwrite ("WARC-Profile: ", 14, 1, wtfile);
+  (* datalength) += 14;
 
   w_fwrite (rec_id, s , 1, wtfile);
   (* datalength) += s ;
@@ -1588,8 +1588,8 @@ WIPRIVATE void WFile_writePayloadType (FILE * wtfile,
                                     warc_u32_t s,
                                     warc_u32_t * datalength)
 {
-  w_fwrite ("WARC-Identified-Payload-Type:", 29, 1, wtfile);
-  (* datalength) += 29;
+  w_fwrite ("WARC-Identified-Payload-Type: ", 30, 1, wtfile);
+  (* datalength) += 30;
 
   w_fwrite (ptype, s , 1, wtfile);
   (* datalength) += s ;
@@ -1614,8 +1614,8 @@ WIPRIVATE void WFile_writeSegOriginId (FILE * wtfile,
                                     warc_u32_t s,
                                     warc_u32_t * datalength)
 {
-  w_fwrite ("WARC-Segment-Origin-ID:", 23, 1, wtfile);
-  (* datalength) += 23;
+  w_fwrite ("WARC-Segment-Origin-ID: ", 24, 1, wtfile);
+  (* datalength) += 24;
 
   w_fwrite (rec_id, s , 1, wtfile);
   (* datalength) += s ;
@@ -1643,8 +1643,8 @@ WIPRIVATE void WFile_writeSegNumber (FILE * wtfile,
 
   strdat [0] = '\0';
 
-  w_fwrite ("WARC-Segment-Number:", 20, 1, wtfile);
-  (* datalength) += 20;
+  w_fwrite ("WARC-Segment-Number: ", 21, 1, wtfile);
+  (* datalength) += 21;
 
   w_numToString (snum, strdat);
 
@@ -1673,8 +1673,8 @@ WIPRIVATE void WFile_writeSegTotalLength (FILE * wtfile,
 {
   warc_u8_t   strdat[20];
 
-  w_fwrite ("WARC-Segment-Total-Length:", 26, 1, wtfile);
-  (* datalength) += 26;
+  w_fwrite ("WARC-Segment-Total-Length: ", 27, 1, wtfile);
+  (* datalength) += 27;
 
   w_numToString (tlen, strdat);
 
