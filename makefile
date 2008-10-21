@@ -404,7 +404,7 @@ c	= $(b) \
 
 c	+= $(APP)/arc2warc.c     $(APP)/warcdump.c    $(APP)/warcfilter.c \
 	   $(APP)/warcvalidator.c $(APP)/warcserver.c  $(APP)/warcclient.c \
-	   $(APP)/wrecordbody.c
+	   $(APP)/wrecordbody.c  $(APP)/arcopen.c
 
 h	= $(PUBLIC)/wclass.h     $(PUBLIC)/warc.h      $(PRIVATE)/wstring.h \
 	  $(PUBLIC)/wrtype.h     $(PUBLIC)/wfile.h     $(PRIVATE)/wlist.h \
@@ -449,7 +449,7 @@ u  += $(EV_UTEST_BIN)
 t  += $(u)
 
 a  = $(APP)/arc2warc         $(APP)/warcdump      $(APP)/warcfilter \
-	 $(APP)/warcvalidator	 $(APP)/wrecordbody 
+	 $(APP)/warcvalidator	 $(APP)/wrecordbody   $(APP)/arcopen
 
 a  += $(EV_APP_BIN)
 
@@ -919,6 +919,14 @@ arc2warc = $(PRIVATE)/wclass.o      $(PRIVATE)/wstring.o $(PRIVATE)/wlist.o \
 		   $(PRIVATE)/wgetopt.o     $(APP)/arc2warc.o    $(gzlib) \
 		   $(PRIVATE)/wversion.o
 
+arcopen =  $(PRIVATE)/wclass.o      $(PRIVATE)/wstring.o $(PRIVATE)/wlist.o \
+	       $(PRIVATE)/wanvl.o       $(PRIVATE)/wrecord.o $(PRIVATE)/wheader.o \
+	       $(PRIVATE)/wfile.o       $(PRIVATE)/afile.o   $(PRIVATE)/afsmhdl.o \
+           $(PRIVATE)/wfsmanvl.o    ${CSAFE}.o           $(PRIVATE)/arecord.o \
+           ${MKTEMP}.o              $(TIGER)/tiger.o     $(PRIVATE)/wuuid.o \
+		   $(PRIVATE)/wgetopt.o     $(APP)/arcopen.o     $(gzlib) \
+		   $(PRIVATE)/wversion.o
+
 warcfilter  = $(PRIVATE)/wclass.o   $(PRIVATE)/wstring.o  $(PRIVATE)/wlist.o \
 		   $(PRIVATE)/wanvl.o       $(PRIVATE)/wrecord.o  $(PRIVATE)/wheader.o \
 		   $(PRIVATE)/wfile.o       $(PRIVATE)/wgetopt.o  ${MKTEMP}.o \
@@ -961,6 +969,7 @@ wrecordbody = $(PRIVATE)/wclass.o   $(PRIVATE)/wstring.o  $(PRIVATE)/wlist.o \
 
 $(APP)/warcdump:      $(warcdump);       $(CC) $(CFLAGS) -o $@ $(warcdump)
 $(APP)/arc2warc:      $(arc2warc);       $(CC) $(CFLAGS) -o $@ $(arc2warc)
+$(APP)/arcopen:       $(arcopen);       $(CC) $(CFLAGS) -o $@ $(arcopen)
 $(APP)/warcfilter:    $(warcfilter);     $(CC) $(CFLAGS) -o $@ $(warcfilter)
 $(APP)/warcvalidator: $(warcvalidator);  $(CC) $(CFLAGS) -o $@ $(warcvalidator)
 $(APP)/warcserver: 	  $(warcserver);  	 $(CC) $(RFLAGS) -o $@ $(warcserver) \
