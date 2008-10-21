@@ -123,6 +123,13 @@
     extern int    WRecord_setFilename (void *, const char *,
           const unsigned int );
 
+    extern int WRecord_setContentFromString (void *, const char *,
+                                                     const unsigned int);
+    
+    extern int  WRecord_setContentFromStringConcat (void *,
+                                                            const char *,
+                                                            const unsigned int);
+
 
     extern int   WRecord_addAnvl         (void *, const char *,
           const unsigned int, const char *,
