@@ -51,15 +51,18 @@ GZIP     = $(PLUGIN)/gzip
 TIGER    = $(PLUGIN)/tiger
 EVENT    = $(PLUGIN)/event
 APPYTHON = $(APP)/python
+APRUBY   = $(APP)/ruby
 EVENT_COMPACT = $(EVENT)/compat
 REGEX    = $(PLUGIN)/regex
 OSDEP    = $(PRIVATE)/os
 MINGW_DEP= $(OSDEP)/mingw
 OUT      = $(TST)/outputs
 PYTHON   = $(PLUGIN)/python
+RUBY     = $(PLUGIN)/ruby
 HEADERS  = -I. -I$(PRIVATE) -I$(PUBLIC) -I$(GZIP) \
 		   -I$(CUNIT) -I$(TIGER) -I$(EVENT) \
-		   -I$(EVENT_COMPACT) -I$(REGEX) -I$(PYTHON)
+		   -I$(EVENT_COMPACT) -I$(REGEX) -I$(PYTHON) \
+		   -I$(RUBY)
 
 MAJOR     = 0
 MINOR     = 18
@@ -119,6 +122,20 @@ APYNAME   	  = _arc
 APYSONAME	  =,$(APYNAME).$(LIBSUFFIX).$(MAJOR)
 APYSHAREDNAME = $(APYNAME).$(LIBSUFFIX)
 
+###################
+# ruby wrapper
+###################
+
+INC_RUBY	    = -I. -I$(shell ruby -rrbconfig -e 'print Config::CONFIG.fetch(%q(archdir))')
+LIB_RUBY_PATH	= $(shell ruby -rrbconfig -e 'print Config::CONFIG.fetch(%q(libdir))') 
+LIB_RUBY        = -L. -L$(LIB_RUBY_PATH)
+VERS_RUBY	    = $(shell ruby -rrbconfig -e 'print Config::CONFIG.fetch(%q(MAJOR))').$(shell ruby -rrbconfig -e 'print Config::CONFIG.fetch(%q(MINOR))') 
+CFLAGS_RUBY	    = $(shell ruby -rrbconfig -e 'print Config::CONFIG.fetch(%q(CFLAGS))')
+RUBYLDSHARED	= $(shell ruby -rrbconfig -e 'print Config::CONFIG.fetch(%q(LDSHARED))')
+WRBNAME  	    = warctools
+WRBSONAME	    =,$(WRBNAME).$(LIBSUFFIX).$(MAJOR)
+WRBSHAREDNAME   = $(WRBNAME).$(LIBSUFFIX)
+
 
 #################
 # httrack plugin
@@ -143,6 +160,7 @@ GCC       = gcc
 CC	  	  = $(GCC) $(HEADERS)
 
 DFLAG     = -g
+#DFLAG     = -g3
 
 CFLAGS    = -Wall -W -Wunused -ansi -pedantic -Werror -Wno-long-long \
 			-Wunused-function -std=gnu89 $(OPT)
@@ -200,7 +218,7 @@ EV_SRC       = $(EVENT)/event.c		$(EVENT)/buffer.c    $(EVENT)/log.c \
 SHARED_OS    = shared_unix
 PYSHARED_OS	 = pyshared_unix
 HTSHARED_OS	 = htshared_unix
-
+RBSHARED_OS	 = rbshared_unix
 
 # compile WARC as a shared library
 ifeq ($(W_SHARED),on)
@@ -210,6 +228,11 @@ endif
 # compile the Python wrapper as a shared library
 ifeq ($(W_PYSHARED),on)
 	S_CFLAGS = -fPIC -DPIC
+endif
+
+# compile the Ruby wrapper as a shared library
+ifeq ($(W_RBSHARED),on)
+	S_RB_CFLAGS = $(CFLAGS_RUBY)
 endif
 
 # compile the HTTrack plugin as a shared library
@@ -227,6 +250,7 @@ ifeq ($(UNAME_S),Linux)
 	EVENT_CONFIG = $(EV_OS)/config.h $(EV_OS)/event-config.h
 	EV_LIB		 = -lrt 
 #-lnsl -lresolv
+	LIB_RUBY    += -rdynamic -Wl,-export-dynamic -Wl,-R -Wl,$(LIB_RUBY_PATH) -L$(LIB_RUBY_PATH) -L/usr/lib -L/usr/local/lib -lruby$(VERS_RUBY)  -lpthread -ldl -lcrypt -lm -lc
 endif
 ifeq ($(UNAME_S),FreeBSD)
 	MAKE         = gmake
@@ -247,6 +271,7 @@ ifeq ($(UNAME_S),OpenBSD)
 	GCC_EXTRA    = 
 	S_CFLAGS     = -fpic
 	PYSHARED_OS	 = pyshared_openbsd
+	RBSHARED_OS	 = rbshared_openbsd
 	HTSHARED_OS	 = htshared_openbsd
 endif
 ifeq ($(UNAME_S),NetBSD)
@@ -258,6 +283,7 @@ ifeq ($(UNAME_S),NetBSD)
 	EV_LIB		 = 
 	S_CFLAGS     = -fpic
 	PYSHARED_OS	 = pyshared_netbsd
+	RBSHARED_OS	 = rbshared_netbsd
 	HTSHARED_OS	 = htshared_netbsd
 endif
 ifeq ($(UNAME_S),Darwin)
@@ -284,6 +310,10 @@ ifeq ($(UNAME_S),Darwin)
 	HTSHAREDNAME  = $(HTNAME).$(MAJOR).$(MINOR).$(RELEASE).$(LIBSUFFIX)
 	SWIG_CFLAGS   = -bundle -undefined suppress -flat_namespace
 	HTTIME        = $(HTTRACK)/warctime-osx
+	LIB_RUBY     += -lruby  -lpthread -ldl -lm
+	RBLIBSUFFIX   = bundle
+	WRBSHAREDNAME = $(WRBNAME).$(RBLIBSUFFIX)
+	RBSHARED_OS	  = rbshared_osx
 endif
 ifeq ($(UNAME_S),SunOS)
 	CC	    += -R/usr/local/lib
@@ -297,6 +327,7 @@ ifeq ($(UNAME_S),SunOS)
 #-lnsl -lresolv -lsocket
 	SONAME	     = 
 	HTSONAME     = 
+	RBSHARED_OS  = rbshared_solaris
 endif
 ifneq ($(findstring MINGW,$(UNAME_S)),)
 	MKTEMP       = $(MINGW_DEP)/wmktmp
@@ -322,6 +353,7 @@ ifneq ($(findstring MINGW,$(UNAME_S)),)
 	EV_APP_BIN   = 
 	EV_APP_SRC   = 
 	LIGHTY_SRC   =
+	RBSHARED_OS  = rbshared_mingw
 endif
 ifneq ($(findstring CYGWIN,$(UNAME_S)),)
 	EV_OS        = $(EVENT)/os/cygwin -I$(CUNIT)/os/cygwin
@@ -342,6 +374,7 @@ ifneq ($(findstring CYGWIN,$(UNAME_S)),)
 	APYSONAME	 =,$(APYNAME).$(LIBSUFFIX).$(MAJOR)
 	APYSHAREDNAME= $(APYNAME).$(LIBSUFFIX)
 	S_CFLAGS     = 
+	RBSHARED_OS  = rbshared_cygwin
 endif
 
 
@@ -362,7 +395,9 @@ ifeq ($(W_HTSHARED),on)
 	CFLAGS += $(S_CFLAGS)
 endif
 
-
+ifeq ($(W_RBSHARED),on)
+	CFLAGS += $(S_RB_CFLAGS)
+endif
 
 
 RFLAGS = $(CFLAGS)
@@ -527,7 +562,7 @@ shared:
 release:
 		@$(MAKE) W_RELEASE=on
 
-source:	shared static python httrack $(a)
+source:	shared static python ruby httrack $(a)
 		rm -rf $(PROJECT)
 		mkdir -p $(DESTDIR)/bin
 		mkdir -p $(DESTDIR)/include/compat/sys
@@ -546,6 +581,7 @@ source:	shared static python httrack $(a)
 		cp -rf $(APACHE) $(DESTDIR)
 		cp -rf $(LIGHTTPD) $(DESTDIR)
 		cp -rf $(PYTHON) $(DESTDIR) && rm -f $(DESTDIR)/python/*.o
+		cp -rf $(RUBY) $(DESTDIR) && rm -f $(DESTDIR)/ruby/*.o
 		mv $(LIBNAME).a $(DESTDIR)/lib
 		mv *$(LIBNAME)*$(LIBSUFFIX)* $(DESTDIR)/lib
 		cp -rf $(CONTRIB) $(DESTDIR)
@@ -865,6 +901,52 @@ $(PYTHON)/arc_wrap.o : $(PYTHON)/arc_wrap.c
 	$(CC) $(INC_PYTHON) -c $< -o $@
 
 
+######################
+# Ruby SWIG wrapper
+######################
+
+rblib   =  $(GZIP)/adler32.o     $(GZIP)/compress.o     $(GZIP)/crc32.o  \
+		   $(GZIP)/deflate.o     $(GZIP)/infback.o      $(GZIP)/inffast.o \
+		   $(GZIP)/inflate.o     $(GZIP)/inftrees.o     $(GZIP)/trees.o \
+		   $(GZIP)/uncompr.o     $(PRIVATE)/wendian.o   $(GZIP)/wgzipbit.o \
+	   	   $(GZIP)/zutil.o		 $(PRIVATE)/wgzip.o     $(TIGER)/tiger.o \
+		   $(PRIVATE)/wstring.o  $(PRIVATE)/wlist.o		$(PRIVATE)/wclass.o \
+		   $(OSDEP)/wmktmp.o     $(PRIVATE)/whash.o     $(PRIVATE)/wkv.o \
+		   $(OSDEP)/wcsafe.o	 $(PRIVATE)/wuuid.o		$(PRIVATE)/wrecord.o \
+		   $(PRIVATE)/wheader.o	 $(PRIVATE)/wanvl.o	    $(PRIVATE)/wfsmanvl.o \
+		   $(PRIVATE)/wfile.o    $(PRIVATE)/wregexp.o   $(PRIVATE)/wbloc.o \
+		   $(PRIVATE)/wversion.o
+
+wrblib   = $(RUBY)/wruby.o    $(RUBY)/warctools_wrap.o  $(RUBY)/wrbbless.o \
+		   $(RUBY)/payload.o
+
+rbshared_unix: ruby_clean rbshared
+		$(RUBYLDSHARED) -o $(RUBY)/$(WRBSHAREDNAME) $(wrblib) $(rblib) \
+					   $(LIB_RUBY) 
+
+rbshared_osx: rbshared_unix
+
+ruby:
+		@$(MAKE) W_RBSHARED=on $(RBSHARED_OS)
+
+rbshared : $(rblib) $(wrblib)
+
+$(RUBY)/payload.o : $(RUBY)/payload.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(RUBY)/wruby.o : $(RUBY)/wruby.c
+	$(CC) $(CFLAGS) $(INC_RUBY) -c $< -o $@
+
+$(RUBY)/wrbbless.o : $(RUBY)/wrbbless.c
+	$(CC) $(CFLAGS) $(INC_RUBY) -c $< -o $@
+
+$(RUBY)/warctools_wrap.c : 
+	$(SWIG) -ruby -outdir $(RUBY) $(RUBY)/warctools.i 
+
+$(RUBY)/warctools_wrap.o : $(RUBY)/warctools_wrap.c
+	$(CC) $(CFLAGS_RUBY) $(INC_RUBY) -c $< -o $@
+
+
 
 ######################
 # HTTrack WARC plugin
@@ -998,11 +1080,16 @@ python_clean: 	   ; @rm -f $(PYTHON)/*.o $(PYTHON)/*~ $(PYTHON)/*.pyc
 					 $(PYTHON)/arc.py $(APPYTHON)/*.pyc  $(APPYTHON)/*~ \
 					 $(PYTHON)/*$(LIBSUFFIX)* $(PYTHON)/_* 
 
+ruby_clean: 	   ; @rm -f $(RUBY)/*.o
+					 @rm -f $(RUBY)/*wrap.c $(RUBY)/*.bundle $(RUBY)/*.so \
+					 $(RUBY)/*.o $(RUBY)/*~ $(APRUBY)/*~ $(APRUBY)/*.bundle \
+					 $(APRUBY)/*.dylib
+
 httrack_clean: 	   ; @rm -f $(HTTRACK)/*.o $(HTTRACK)/*~ $(HTTRACK)/*.so* \
 					$(HTTRACK)/*.dylib*    $(HTTRACK)/*.dll* $(htlib)    
 
 
-clean:		tclean	mod_apache_clean mod_lighty_clean python_clean httrack_clean
+clean:		tclean	mod_apache_clean mod_lighty_clean python_clean ruby_clean httrack_clean
 			@rm -f $t             $(obj)            *.o \
 			       *~             *.a               *.so* \
 			       *.log          *.gz              $(PUBLIC)/*~ \
@@ -1021,4 +1108,4 @@ clean:		tclean	mod_apache_clean mod_lighty_clean python_clean httrack_clean
 			@rm -rf $(DOC)/html   warc-tools*
 
 
-.PHONY: all static clean tclean doc source tgz rpm deb mod_apache_clean mod_lighty_clean python_clean httrack_clean
+.PHONY: all static clean tclean doc source tgz rpm deb mod_apache_clean mod_lighty_clean python python_clean ruby ruby_clean httrack httrack_clean

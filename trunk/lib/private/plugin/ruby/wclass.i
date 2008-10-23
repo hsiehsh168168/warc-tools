@@ -1,4 +1,3 @@
-
 /* ------------------------------------------------------------------- */
 /* Copyright (c) 2007-2008 Hanzo Archives Limited.                     */
 /*                                                                     */
@@ -24,41 +23,29 @@
 /*     http://code.google.com/p/warc-tools/                            */
 /* ------------------------------------------------------------------- */
 
-2008-09-14 to 2008-10-22 by "voidptrptr":
+/* wclass.i */
+ %{
+   #include <wport.h>
+    /*
+     * C default headers
+     */
 
-	* Fix minor bugs
-        * Add Ruby SWIG wrapper (plugin/ruby and app/ruby)
+#include <stdarg.h>    /* variable function argument */
+    /*
+     * WARC default headers
+     */
 
-2008-09-12 to 2008-09-14 by "voidptrptr":
+#include <wclass.x>  /* WARC base class structure */
+#include <wclass.h>
+     
+ %}
+/*   %varargs(const char * str = NULL, unsigned int lenstr=0, wfile_mode_t mod=0,wfile_comp_t comp =6,  const char * chr = NULL) bless;
+   %varargs(void * str = NULL, void * = NULL , char * = NULL) bless;*/
 
-	* Add pages man for C commands ans update the security model
+   extern void * bless   (const void *, ...);
+   extern void   destroy (void *);
+   extern void   cassert (void * const, const unsigned int);
 
-2008-09-10 to 2008-09-12 by "voidptrptr":
 
-	* Full functional release of HTTrack WARC plugin, ready to use (contrib/httrack)
 
-2008-09-08 to 2008-09-10 by "voidptrptr":
-
-	* WARC storage backend for HTTrack (contrib/httrack)
-
-2008-05-29 to 2008-09-08 by "voidptrptr":
-
-	* Complete rewrite of the Python wrapper
-	* Curl integration with pyCurl (contrib/curl)
-	* HTTrack collections migration tool (contrib/httrack)
-
-2008-04-06 to 2008-05-29 by "voidptrptr":
-
-	* Full Python wrapper implementation
-
-2008-02-15 to 2008-04-06 by "voidptrptr":
-
-	* Second stable release. Compliant with WARC/0.17 specification
-
-2008-02-08 to 2008-02-15 by "voidptrptr":
-
-	* Stable release. Compliant with WARC/0.9 specification
-
-2007-11-20 to 2008-02-08 by "voidptrptr":
-
-	* First candidate release.
+    
