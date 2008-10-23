@@ -135,7 +135,7 @@ environment variable if necessary):
 - chmod
 - perl (for contrib/httrack)
 - python with development headers and libs (for Python-SWIG wrapper)
-
+- ruby with development headers and libs (for Ruby-SWIG wrapper)
 
 * To start unit tests, type:
 
@@ -531,7 +531,7 @@ o Start/Stop Lighttpd with:
 
 You need to following packages installed:
  - pyhton 2.4.x or later (http://www.python.org/)
- - swig 1.3.33 at least  (see above)
+ - swig 1.3.36 at least (see above)
 
 o When done, simply type:
   
@@ -539,6 +539,22 @@ o When done, simply type:
 
 o Then, use the Python applications under "app/python":
   warcdump.py, arcdump.py, arc2warc.py ...
+
+* Ruby wrapper:
+
+You need to following packages installed:
+ - ruby 1.8.x or later (http://www.ruby-lang.org/)
+ - swig 1.3.36 at least (see above)
+
+For Fedora guys, simply install:
+yum install ruby ruby-devel rubygem
+
+o When done, simply type:
+  
+  make ruby 
+
+o Then, use the Python applications under "app/ruby":
+  warcdump.rb
 
 
 * Man pages:
