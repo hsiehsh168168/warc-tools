@@ -34,7 +34,7 @@ extern "C"
 #endif
 
 
-    extern void * bless_WFile (const char  * , const warc_u32_t  , wfile_mode_t , const wfile_comp_t , const char * );
+    extern void * bless_WFile (const char  * , const warc_u64_t, wfile_mode_t , const wfile_comp_t , const char * );
 
 
     extern void * bless_WRecord ();
