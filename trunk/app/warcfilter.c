@@ -230,7 +230,7 @@ int main (int argc, const char ** argv)
 
       fprintf (stdout, "%-10s ",   WRecord_getWarcId        (r) );
 
-      fprintf (stdout, "%-20u ",   WRecord_getContentLength (r) );
+      fprintf (stdout, "%-20llu ", (long long unsigned int)   WRecord_getContentLength (r) );
 
       fprintf (stdout, "%-45u ",   WRecord_getRecordType    (r) );
 

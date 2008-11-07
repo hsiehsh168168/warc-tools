@@ -141,7 +141,7 @@ int main (int argc, const char ** argv)
 
       fprintf (stdout, "%-20llu ", (unsigned long long) WRecord_getCompressedSize (r) );
 
-      fprintf (stdout, "%-20u ",   WRecord_getContentLength (r));
+      fprintf (stdout, "%-20llu ",   (long long unsigned int) WRecord_getContentLength (r));
 
       fprintf (stdout, "%-2u ",    WRecord_getRecordType    (r));
 
