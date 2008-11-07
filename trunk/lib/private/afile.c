@@ -260,7 +260,7 @@ WPUBLIC void * AFile_nextRecord ( void * _self)
 
       if (AFsmHDL_run (arcfsm) )
         {
-          w_fprintf (fprintf (stderr , "error in FSM state address %p, at offset %ld in the arc file\n", AFsmHDL_state (arcfsm), w_ftell (FH) ) );
+          w_fprintf (fprintf (stderr , "error in FSM state address %p, at offset %llu in the arc file\n", AFsmHDL_state (arcfsm), (long long unsigned int) w_ftell (FH) ) );
           destroy (arcfsm);
           return (NIL);
         }

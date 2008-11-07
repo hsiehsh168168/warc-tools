@@ -138,7 +138,7 @@ extern "C"
      */
 
 #ifndef w_fseek
-#define w_fseek fseek
+#define w_fseek fseeko
 #endif
 
     /**
@@ -146,7 +146,7 @@ extern "C"
      */
 
 #ifndef w_ftell
-#define w_ftell(file) ftell(file)
+#define w_ftell(file) ftello(file)
 #endif
 
 

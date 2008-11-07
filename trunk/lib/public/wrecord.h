@@ -73,7 +73,7 @@ extern "C"
 
 
     extern const void * WRecord_getAnvl             (const void * const);
-    extern warc_i64_t   WRecord_getOffset           (const void * const);
+    extern warc_u64_t   WRecord_getOffset           (const void * const);
     extern warc_u64_t   WRecord_getUncompressedSize (const void * const);
     extern warc_u64_t   WRecord_getCompressedSize   (const void * const);
    
