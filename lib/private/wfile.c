@@ -2346,10 +2346,8 @@ WPRIVATE void * WFile_constructor (void * _self, va_list * app)
       return (NIL);
     }
 
-
   COMP    = compressed;
   MODE    = mode;
-
 
   MAXSIZE = max_size;
   unless (MAXSIZE)

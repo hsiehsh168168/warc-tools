@@ -56,7 +56,7 @@ extern "C"
     extern warc_bool_t        WRecord_getContent     (const void * const);
     extern const warc_u8_t *  WRecord_getAnvlValue   (const void * const,
                                                       const warc_u8_t *);
-    extern  warc_u32_t        WRecord_getContentLength   (const void * const);
+    extern        warc_u64_t  WRecord_getContentLength   (const void * const);
     extern const  warc_u8_t * WRecord_getConcurrentTo    (const void * const);
     extern const  warc_u8_t * WRecord_getBlockDigest     (const void * const);
     extern const  warc_u8_t * WRecord_getPayloadDigest   (const void * const);

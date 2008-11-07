@@ -1758,26 +1758,29 @@ WPRIVATE warc_rec_t WHeader_getRecordTypeNumber (const warc_u8_t * rectype)
  * 
  * @return the new string if succeeds, NIL otherwise
  *
- * Gives a string containg the characters of an other string
+ * Gives a string containing the characters of an other string
  * without the spaces in its beginbing
  */
 
-WPRIVATE warc_u8_t * WHeader_jumpFirstSpaces (const warc_u8_t * initial_s, warc_u32_t initsize, warc_u8_t * new_s)
+WPRIVATE warc_u8_t * WHeader_jumpFirstSpaces (const warc_u8_t * initial_s, 
+                                              warc_u32_t initsize, 
+                                              warc_u8_t * new_s)
 {
     warc_u32_t    i     = 0 ;
     warc_u32_t    j     = 0;
 
-  while (((initial_s [i] == ' ') || (initial_s[i] == '\t')) && (i < initsize))
-      i++;
-
-  while (i < initsize)
+    while (((initial_s [i] == ' ') || (initial_s[i] == '\t')) && (i < initsize))
+      ++ i;
+    
+    while (i < initsize)
       {
-      new_s [j] = initial_s[i];
-      i++, j++;
+        new_s [j] = initial_s[i];
+        i++, j++;
       }
-  new_s [j] = '\0';
-
-  return (new_s);
+    
+    new_s [j] = '\0';
+    
+    return (new_s);
 }
 
 
@@ -2044,6 +2047,9 @@ WPUBLIC warc_bool_t WHeader_extractFromWarcFile (void * _self, FILE * infile)
   charbuf [digital] = '\0';
 
 /*   if (w_strcmp (charbuf, WString_getText (WARC_ID))) */
+
+  /* fprintf(stderr, "\n\n>>>>>> WARC VERSION ID is =====> >%s<\n", charbuf); */
+
   if ( w_checkCompatibleVersions (charbuf) )
      {
      WarcDebugMsg ("Incompatible Warc Version");
@@ -2485,7 +2491,8 @@ WPUBLIC warc_bool_t WHeader_extractFromWarcFile (void * _self, FILE * infile)
                  return (WARC_TRUE);
                 }
 
-              WHeader_jumpFirstSpaces (WAnvl_getValue (anvl), WAnvl_getValueLen (anvl), charbuf);
+              WHeader_jumpFirstSpaces (WAnvl_getValue (anvl),
+                                       WAnvl_getValueLen (anvl), charbuf);
 
               unless (WHeader_checkFilename (charbuf))
                  {
@@ -2506,7 +2513,9 @@ WPUBLIC warc_bool_t WHeader_extractFromWarcFile (void * _self, FILE * infile)
                   }
 
               wfree (charbuf);
-              datalen = datalen + WAnvl_getKeyLen (anvl) + WAnvl_getValueLen (anvl) +  3;
+              datalen = datalen + WAnvl_getKeyLen (anvl) + 
+                WAnvl_getValueLen (anvl) +  3;
+
               destroy (anvl);
              }
         else unless (w_strcmp (WAnvl_getKey(anvl), makeU("WARC-Profile")))
@@ -2520,9 +2529,10 @@ WPUBLIC warc_bool_t WHeader_extractFromWarcFile (void * _self, FILE * infile)
                  return (WARC_TRUE);
                 }
 
-              WHeader_jumpFirstSpaces (WAnvl_getValue (anvl), WAnvl_getValueLen (anvl), charbuf);
+              WHeader_jumpFirstSpaces (WAnvl_getValue (anvl), 
+                                       WAnvl_getValueLen (anvl), charbuf);
 
-              if (WHeader_setProfile (self, WAnvl_getValue (anvl), WAnvl_getValueLen (anvl)))
+              if (WHeader_setProfile (self, makeS (charbuf)))
                  {
                   WarcDebugMsg ("Bad Profile string");
                   destroy (anvl);

@@ -608,7 +608,7 @@ WIPUBLIC const warc_u8_t * WRecord_getRecordId (const void * const _self)
  * Returns the content length of the WARC-record
  */
 
-WIPUBLIC  warc_u32_t  WRecord_getContentLength (const void * const _self)
+WIPUBLIC  warc_u64_t  WRecord_getContentLength (const void * const _self)
 {
 
   const struct WRecord * const self = _self;

@@ -97,7 +97,7 @@ struct WFsmANVL
 
 
 /* prototypes of all events in the FSM (defined below) */
-warc_bool_t WFsmANVL_isSpace   (void *), WFsmANVL_isText    (void *),
+warc_bool_t WFsmANVL_isFirstSpace   (void *), WFsmANVL_isSpace   (void *), WFsmANVL_isText    (void *),
 WFsmANVL_isVdots (void *), WFsmANVL_isCR      (void *),
 WFsmANVL_isLF      (void *), WFsmANVL_isUnknown (void *),
 WFsmANVL_isSharp (void *), WFsmANVL_isCtlChar (void *),
@@ -193,6 +193,7 @@ State WANT_ANVL_VALUE =
 {
   /* TEST_EVENT             ACTION                   NEXT_STATE */
 
+/*   {WFsmANVL_isFirstSpace,   NIL,                     WANT_ANVL_VALUE}, */
   {WFsmANVL_isText,         WFsmANVL_setValue,       WANT_ANVL_VALUE},
   {WFsmANVL_isCR,           WFsmANVL_setValue,       WANT_ANVL_LF   },
   {WFsmANVL_isSpace,        WFsmANVL_setValue,       WANT_ANVL_VALUE},
@@ -360,6 +361,15 @@ State WANT_ANVL_COMMENTLF =
 
  */
 
+
+warc_bool_t WFsmANVL_isFirstSpace (void * _as)
+{
+  const ANVLState * const as = _as;
+
+  assert (as);
+
+  return ( (as -> c == ' ')  || (as -> c == '\t') );
+}
 
 warc_bool_t WFsmANVL_isSpace (void * _as)
 {
