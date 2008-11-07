@@ -43,6 +43,7 @@
 
 #define makeS(s) (warc_u8_t *) (s), w_strlen ((warc_u8_t *) (s))
 
+#define WARC_MAX_SIZE 629145600LLU
 
 int test1 (void)
 {
@@ -53,7 +54,7 @@ int test1 (void)
  /*  warc_u8_t   string [20];*/
 
 
-  w = bless (WFile, "app/wdata/testwfile/onerec.warc", 600 * 1024 * 1024,  WARC_FILE_READER, WARC_FILE_DETECT_COMPRESSION, ".");
+  w = bless (WFile, "app/wdata/testwfile/onerec.warc", WARC_MAX_SIZE,  WARC_FILE_READER, WARC_FILE_DETECT_COMPRESSION, ".");
   assert (w);
 
   if (WFile_hasMoreRecords (w))

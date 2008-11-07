@@ -41,7 +41,8 @@
 #include <wversion.h>
 
 
-#define WARC_MAX_SIZE 629145600
+#define WARC_MAX_SIZE 629145600LLU
+
 #define makeS(s) ((warc_u8_t *) s), w_strlen((warc_u8_t *) (s))
 int init_suite1(void) { return 0; }
 int clean_suite1(void) { return 0; }
@@ -135,7 +136,7 @@ void test2 (void)
   void * w =  NIL; /* warc file object */
   void * r = NIL;  /* to recover records */
   warc_u32_t  i      = 1;
-  w = bless (WFile, "file.warc", 660, WARC_FILE_READER, WARC_FILE_UNCOMPRESSED, ".");
+  w = bless (WFile, "file.warc", WARC_MAX_SIZE, WARC_FILE_READER, WARC_FILE_UNCOMPRESSED, ".");
   
   CU_ASSERT_PTR_NOT_EQUAL(w,NIL);
   assert(w);
@@ -150,7 +151,7 @@ void test2 (void)
 
 /*
      fprintf (stdout, "WarcId: %-20s\n",         WRecord_getWarcId      (r) );
-      fprintf (stdout, "Content Length: %-20d\n", WRecord_getContentLength  () );
+      fprintf (stdout, "Content Length: %-20d\n", WRecord_getContentLength  (r) );
       fprintf (stdout, "RecordType: %-20d\n",     WRecord_getRecordType  (r) );
       fprintf (stdout, "TargetUri: %-20s\n",     WRecord_getTargetUri  (r) );
       fprintf (stdout, "CreationDate: %-20s\n",   WRecord_getDate (r) );
@@ -160,8 +161,9 @@ void test2 (void)
 
 	if(i==1)
 	{
+     
 	CU_ASSERT_STRING_EQUAL(WRecord_getWarcId      (r), WARC_VERSION); 
-	CU_ASSERT( WRecord_getContentLength  (r) == 22567);
+	CU_ASSERT( WRecord_getContentLength  (r) == 22566);
 	CU_ASSERT(WRecord_getRecordType  (r)==8); 
 	CU_ASSERT_STRING_EQUAL(WRecord_getTargetUri  (r) , "filedesc://BnF-elec2007-20070524113301-00040-heritrix1.arc"); 
 	CU_ASSERT_STRING_EQUAL(WRecord_getDate (r) , "2007-05-24T11:33:01Z"); 
@@ -172,7 +174,7 @@ void test2 (void)
 	if(i==2)
 	{
 	CU_ASSERT_STRING_EQUAL(WRecord_getWarcId      (r), WARC_VERSION); 
-	CU_ASSERT( WRecord_getContentLength  (r) == 22567);
+	CU_ASSERT( WRecord_getContentLength  (r) == 22566);
 	CU_ASSERT(WRecord_getRecordType  (r)==8); 
 	CU_ASSERT_STRING_EQUAL(WRecord_getTargetUri  (r) , "filedesc://BnF-elec2007-20070524113301-00040-heritrix1.arc"); 
 	CU_ASSERT_STRING_EQUAL(WRecord_getDate (r) , "2007-05-24T11:33:01Z"); 
@@ -183,7 +185,7 @@ void test2 (void)
 	if(i==3)
 	{
 	CU_ASSERT_STRING_EQUAL(WRecord_getWarcId      (r), WARC_VERSION); 
-	CU_ASSERT( WRecord_getContentLength  (r) == 22567);
+	CU_ASSERT( WRecord_getContentLength  (r) == 22566);
 	CU_ASSERT(WRecord_getRecordType  (r)==8); 
 	CU_ASSERT_STRING_EQUAL(WRecord_getTargetUri  (r) , "filedesc://BnF-elec2007-20070524113301-00040-heritrix1.arc"); 
 	CU_ASSERT_STRING_EQUAL(WRecord_getDate (r) , "2007-05-24T11:33:01Z"); 
@@ -295,7 +297,7 @@ void test4 (void)
       if(i==1)
 	{
 	CU_ASSERT_STRING_EQUAL(WRecord_getWarcId      (r), WARC_VERSION); 
-	CU_ASSERT( WRecord_getContentLength  (r) == 22567);
+	CU_ASSERT( WRecord_getContentLength  (r) == 22566);
 	CU_ASSERT(WRecord_getRecordType  (r)==8); 
 	CU_ASSERT_STRING_EQUAL(WRecord_getTargetUri  (r) , "filedesc://BnF-elec2007-20070524113301-00040-heritrix1.arc"); 
 	CU_ASSERT_STRING_EQUAL(WRecord_getDate (r) , "2007-05-24T11:33:01Z"); 
@@ -306,7 +308,7 @@ void test4 (void)
 	if(i==2)
 	{
 	CU_ASSERT_STRING_EQUAL(WRecord_getWarcId      (r), WARC_VERSION); 
-	CU_ASSERT( WRecord_getContentLength  (r) == 22567);
+	CU_ASSERT( WRecord_getContentLength  (r) == 22566);
 	CU_ASSERT(WRecord_getRecordType  (r)==8); 
 	CU_ASSERT_STRING_EQUAL(WRecord_getTargetUri  (r) , "filedesc://BnF-elec2007-20070524113301-00040-heritrix1.arc"); 
 	CU_ASSERT_STRING_EQUAL(WRecord_getDate (r) , "2007-05-24T11:33:01Z"); 
@@ -317,7 +319,7 @@ void test4 (void)
 	if(i==3)
 	{
 	CU_ASSERT_STRING_EQUAL(WRecord_getWarcId      (r), WARC_VERSION); 
-	CU_ASSERT( WRecord_getContentLength  (r) == 22567);
+	CU_ASSERT( WRecord_getContentLength  (r) == 22566);
 	CU_ASSERT(WRecord_getRecordType  (r)==8); 
 	CU_ASSERT_STRING_EQUAL(WRecord_getTargetUri  (r) , "filedesc://BnF-elec2007-20070524113301-00040-heritrix1.arc"); 
 	CU_ASSERT_STRING_EQUAL(WRecord_getDate (r) , "2007-05-24T11:33:01Z"); 
@@ -328,7 +330,7 @@ void test4 (void)
       if(i==4)
 	{
 	CU_ASSERT_STRING_EQUAL(WRecord_getWarcId      (r), WARC_VERSION); 
-	CU_ASSERT( WRecord_getContentLength  (r) == 22567);
+	CU_ASSERT( WRecord_getContentLength  (r) == 22566);
 	CU_ASSERT(WRecord_getRecordType  (r)==8); 
 	CU_ASSERT_STRING_EQUAL(WRecord_getTargetUri  (r) , "filedesc://BnF-elec2007-20070524113301-00040-heritrix1.arc"); 
 	CU_ASSERT_STRING_EQUAL(WRecord_getDate (r) , "2007-05-24T11:33:01Z"); 
@@ -339,7 +341,7 @@ void test4 (void)
 	if(i==5)
 	{
 	CU_ASSERT_STRING_EQUAL(WRecord_getWarcId      (r), WARC_VERSION); 
-	CU_ASSERT( WRecord_getContentLength  (r) == 22567);
+	CU_ASSERT( WRecord_getContentLength  (r) == 22566);
 	CU_ASSERT(WRecord_getRecordType  (r)==8); 
 	CU_ASSERT_STRING_EQUAL(WRecord_getTargetUri  (r) , "filedesc://BnF-elec2007-20070524113301-00040-heritrix1.arc"); 
 	CU_ASSERT_STRING_EQUAL(WRecord_getDate (r) , "2007-05-24T11:33:01Z"); 
@@ -350,7 +352,7 @@ void test4 (void)
 	if(i==6)
 	{
 	CU_ASSERT_STRING_EQUAL(WRecord_getWarcId      (r), WARC_VERSION); 
-	CU_ASSERT( WRecord_getContentLength  (r) == 22567);
+	CU_ASSERT( WRecord_getContentLength  (r) == 22566);
 	CU_ASSERT(WRecord_getRecordType  (r)==8); 
 	CU_ASSERT_STRING_EQUAL(WRecord_getTargetUri  (r) , "filedesc://BnF-elec2007-20070524113301-00040-heritrix1.arc"); 
 	CU_ASSERT_STRING_EQUAL(WRecord_getDate (r) , "2007-05-24T11:33:01Z"); 
@@ -478,8 +480,9 @@ CU_ASSERT_PTR_NOT_EQUAL(w,NIL);
       fprintf (stdout, "Ip Address: %-20s\n",    WRecord_getIpAddress (r));*/
 	if(i==1)
 	{
+ 
 	CU_ASSERT_STRING_EQUAL(WRecord_getWarcId      (r), WARC_VERSION); 
-	CU_ASSERT( WRecord_getContentLength  (r) == 1364);
+	CU_ASSERT( WRecord_getContentLength  (r) == 1363);
 	CU_ASSERT(WRecord_getRecordType  (r)==8); 
 	CU_ASSERT_STRING_EQUAL(WRecord_getTargetUri  (r) , "filedesc://BnF-elec2007-20061119183301-00236-atlas1.arc"); 
 	CU_ASSERT_STRING_EQUAL(WRecord_getDate (r) , "2006-11-19T18:33:01Z"); 
@@ -490,7 +493,7 @@ CU_ASSERT_PTR_NOT_EQUAL(w,NIL);
 	if(i==2)
 	{
 	CU_ASSERT_STRING_EQUAL(WRecord_getWarcId      (r), WARC_VERSION); 
-	CU_ASSERT( WRecord_getContentLength  (r) == 1364);
+	CU_ASSERT( WRecord_getContentLength  (r) == 1363);
 	CU_ASSERT(WRecord_getRecordType  (r)==8); 
 	CU_ASSERT_STRING_EQUAL(WRecord_getTargetUri  (r) , "iledesc://BnF-elec2007-20061119183301-00236-atlas1.arc"); 
 	CU_ASSERT_STRING_EQUAL(WRecord_getDate (r) , "2006-11-19T18:33:01Z"); 
@@ -501,7 +504,7 @@ CU_ASSERT_PTR_NOT_EQUAL(w,NIL);
 	if(i==3)
 	{
 	CU_ASSERT_STRING_EQUAL(WRecord_getWarcId      (r), WARC_VERSION); 
-	CU_ASSERT( WRecord_getContentLength  (r) == 1364);
+	CU_ASSERT( WRecord_getContentLength  (r) == 1363);
 	CU_ASSERT(WRecord_getRecordType  (r)==8); 
 	CU_ASSERT_STRING_EQUAL(WRecord_getTargetUri  (r) , "iledesc://BnF-elec2007-20061119183301-00236-atlas1.arc"); 
 	CU_ASSERT_STRING_EQUAL(WRecord_getDate (r) , "2006-11-19T18:33:01Z"); 
@@ -512,7 +515,7 @@ CU_ASSERT_PTR_NOT_EQUAL(w,NIL);
 	if(i==4)
 	{
 	CU_ASSERT_STRING_EQUAL(WRecord_getWarcId      (r), WARC_VERSION); 
-	CU_ASSERT( WRecord_getContentLength  (r) == 1364);
+	CU_ASSERT( WRecord_getContentLength  (r) == 1363);
 	CU_ASSERT(WRecord_getRecordType  (r)==8); 
 	CU_ASSERT_STRING_EQUAL(WRecord_getTargetUri  (r) , "filedesc://BnF-elec2007-20061119183301-00236-atlas1.arc"); 
 	CU_ASSERT_STRING_EQUAL(WRecord_getDate (r) , "2006-11-19T18:33:01Z"); 
@@ -523,7 +526,7 @@ CU_ASSERT_PTR_NOT_EQUAL(w,NIL);
 	if(i==5)
 	{
 	CU_ASSERT_STRING_EQUAL(WRecord_getWarcId      (r), WARC_VERSION); 
-	CU_ASSERT( WRecord_getContentLength  (r) == 1364);
+	CU_ASSERT( WRecord_getContentLength  (r) == 1363);
 	CU_ASSERT(WRecord_getRecordType  (r)==8); 
 	CU_ASSERT_STRING_EQUAL(WRecord_getTargetUri  (r) , "iledesc://BnF-elec2007-20061119183301-00236-atlas1.arc"); 
 	CU_ASSERT_STRING_EQUAL(WRecord_getDate (r) , "2006-11-19T18:33:01Z"); 
@@ -534,7 +537,7 @@ CU_ASSERT_PTR_NOT_EQUAL(w,NIL);
 	if(i==6)
 	{
 	CU_ASSERT_STRING_EQUAL(WRecord_getWarcId      (r), WARC_VERSION); 
-	CU_ASSERT( WRecord_getContentLength  (r) == 1364);
+	CU_ASSERT( WRecord_getContentLength  (r) == 1363);
 	CU_ASSERT(WRecord_getRecordType  (r)==8); 
 	CU_ASSERT_STRING_EQUAL(WRecord_getTargetUri  (r) , "iledesc://BnF-elec2007-20061119183301-00236-atlas1.arc"); 
 	CU_ASSERT_STRING_EQUAL(WRecord_getDate (r) , "2006-11-19T18:33:01Z"); 
@@ -545,7 +548,7 @@ CU_ASSERT_PTR_NOT_EQUAL(w,NIL);
 	if(i==7)
 	{
 	CU_ASSERT_STRING_EQUAL(WRecord_getWarcId      (r), WARC_VERSION); 
-	CU_ASSERT( WRecord_getContentLength  (r) == 1364);
+	CU_ASSERT( WRecord_getContentLength  (r) == 1363);
 	CU_ASSERT(WRecord_getRecordType  (r)==8); 
 	CU_ASSERT_STRING_EQUAL(WRecord_getTargetUri  (r) , "filedesc://BnF-elec2007-20061119183301-00236-atlas1.arc"); 
 	CU_ASSERT_STRING_EQUAL(WRecord_getDate (r) , "2006-11-19T18:33:01Z"); 
@@ -556,7 +559,7 @@ CU_ASSERT_PTR_NOT_EQUAL(w,NIL);
 	if(i==8)
 	{
 	CU_ASSERT_STRING_EQUAL(WRecord_getWarcId      (r), WARC_VERSION); 
-	CU_ASSERT( WRecord_getContentLength  (r) == 1364);
+	CU_ASSERT( WRecord_getContentLength  (r) == 1363);
 	CU_ASSERT(WRecord_getRecordType  (r)==8); 
 	CU_ASSERT_STRING_EQUAL(WRecord_getTargetUri  (r) , "iledesc://BnF-elec2007-20061119183301-00236-atlas1.arc"); 
 	CU_ASSERT_STRING_EQUAL(WRecord_getDate (r) , "2006-11-19T18:33:01Z"); 
@@ -567,7 +570,7 @@ CU_ASSERT_PTR_NOT_EQUAL(w,NIL);
 	if(i==9)
 	{
 	CU_ASSERT_STRING_EQUAL(WRecord_getWarcId      (r), WARC_VERSION); 
-	CU_ASSERT( WRecord_getContentLength  (r) == 1364);
+	CU_ASSERT( WRecord_getContentLength  (r) == 1363);
 	CU_ASSERT(WRecord_getRecordType  (r)==8); 
 	CU_ASSERT_STRING_EQUAL(WRecord_getTargetUri  (r) , "iledesc://BnF-elec2007-20061119183301-00236-atlas1.arc"); 
 	CU_ASSERT_STRING_EQUAL(WRecord_getDate (r) , "2006-11-19T18:33:01Z"); 
@@ -831,7 +834,7 @@ void test10 (void)
   void * r = NIL;  /* to recover records */
 
 
-  w = bless (WFile, "test2.warc", 660, WARC_FILE_READER, WARC_FILE_UNCOMPRESSED, ".");
+  w = bless (WFile, "test2.warc", WARC_MAX_SIZE, WARC_FILE_READER, WARC_FILE_UNCOMPRESSED, ".");
 
 CU_ASSERT_PTR_NOT_EQUAL(w,NIL);
    assert(w);
@@ -944,7 +947,7 @@ void test12 (void)
   void * r = NIL;  /* to recover records */
 warc_u32_t  i      = 1;
 
-  w = bless (WFile, "file.warc.gz", 660, WARC_FILE_READER, WARC_FILE_COMPRESSED_GZIP, ".");
+  w = bless (WFile, "file.warc.gz", WARC_MAX_SIZE, WARC_FILE_READER, WARC_FILE_COMPRESSED_GZIP, ".");
 
 CU_ASSERT_PTR_NOT_EQUAL(w,NIL);
  assert(w);
@@ -969,8 +972,9 @@ CU_ASSERT_PTR_NOT_EQUAL(w,NIL);
       fprintf (stdout, "RecordId: %-20s\n",       WRecord_getRecordId    (r) );*/
 	if(i==1)
 	{
+
 	CU_ASSERT_STRING_EQUAL(WRecord_getWarcId      (r), WARC_VERSION); 
-	CU_ASSERT( WRecord_getContentLength  (r) == 22567);
+	CU_ASSERT( WRecord_getContentLength  (r) == 22566);
 	CU_ASSERT(WRecord_getRecordType  (r)==8); 
 	CU_ASSERT_STRING_EQUAL(WRecord_getTargetUri  (r) , "filedesc://BnF-elec2007-20070524113301-00040-heritrix1.arc"); 
 	CU_ASSERT_STRING_EQUAL(WRecord_getDate (r) , "2007-05-24T11:33:01Z"); 
@@ -1071,7 +1075,7 @@ void test14 (void)
   void * r = NIL;  /* to recover records */
 warc_u32_t  i      = 1;
 
-  w = bless (WFile, "sfile.warc.gz", 660, WARC_FILE_READER, WARC_FILE_COMPRESSED_GZIP, ".");
+  w = bless (WFile, "sfile.warc.gz", WARC_MAX_SIZE, WARC_FILE_READER, WARC_FILE_COMPRESSED_GZIP, ".");
 
 CU_ASSERT_PTR_NOT_EQUAL(w,NIL);
  assert(w);
@@ -1096,8 +1100,9 @@ CU_ASSERT_PTR_NOT_EQUAL(w,NIL);
       fprintf (stdout, "RecordId: %-20s\n",       WRecord_getRecordId    (r) );*/
 if(i==1)
 	{
+
 	CU_ASSERT_STRING_EQUAL(WRecord_getWarcId      (r), WARC_VERSION); 
-	CU_ASSERT( WRecord_getContentLength  (r) == 22567);
+	CU_ASSERT( WRecord_getContentLength  (r) == 22566);
 	CU_ASSERT(WRecord_getRecordType  (r)==8); 
 	CU_ASSERT_STRING_EQUAL(WRecord_getTargetUri  (r) , "filedesc://BnF-elec2007-20070524113301-00040-heritrix1.arc"); 
 	CU_ASSERT_STRING_EQUAL(WRecord_getDate (r) , "2007-05-24T11:33:01Z"); 
@@ -1199,7 +1204,7 @@ void test16 (void)
   void * w =  NIL; /* warc file object */
   void * r = NIL;  /* to recover records */
 warc_u32_t  i      = 1;
-  w = bless (WFile, "mfile.warc.gz", 660, WARC_FILE_READER, WARC_FILE_COMPRESSED_GZIP, ".");
+  w = bless (WFile, "mfile.warc.gz", WARC_MAX_SIZE, WARC_FILE_READER, WARC_FILE_COMPRESSED_GZIP, ".");
 
 CU_ASSERT_PTR_NOT_EQUAL(w,NIL);
  assert(w);
@@ -1225,7 +1230,7 @@ CU_ASSERT_PTR_NOT_EQUAL(w,NIL);
 	if(i==1)
 	{
 	CU_ASSERT_STRING_EQUAL(WRecord_getWarcId      (r), WARC_VERSION); 
-	CU_ASSERT( WRecord_getContentLength  (r) == 22567);
+	CU_ASSERT( WRecord_getContentLength  (r) == 22566);
 	CU_ASSERT(WRecord_getRecordType  (r)==8); 
 	CU_ASSERT_STRING_EQUAL(WRecord_getTargetUri  (r) , "filedesc://BnF-elec2007-20070524113301-00040-heritrix1.arc"); 
 	CU_ASSERT_STRING_EQUAL(WRecord_getDate (r) , "2007-05-24T11:33:01Z"); 

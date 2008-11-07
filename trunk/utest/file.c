@@ -38,6 +38,11 @@
 
 #include <warc.h>
 
+#ifndef WARC_MAX_SIZE
+/* 16 Go by default */
+#define WARC_MAX_SIZE 17179869184ULL
+#endif
+
 #define makeS(s) ((warc_u8_t *) s), w_strlen((warc_u8_t *) (s))
 #define makeU(s) (const warc_u8_t *) (s), (warc_u64_t) w_strlen((warc_u8_t *) (s))
 int init_suite1(void) {return 0; }
@@ -77,15 +82,18 @@ UNUSED (buff);
 
 void test1 (void)
 {
-  
-
-  const char * file1 = "./app/wdata/testwfile/unidesc.html";
+ const char * file1 = "./app/wdata/testwfile/unidesc.html";
 
   void * r = bless (WRecord);
-  void * w = bless (WFile, "./awanvl.warc", 600 * 1024 * 1024,  WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED, ".");
+  void * w = bless (WFile, "./awanvl.warc", WARC_MAX_SIZE, 
+                    WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED, ".");
   void * u = NIL;
 
-  
+  unless (w)
+  {
+    fprintf(stderr, "\n+++++++++++++ 1 ptr: %p\n", w);
+    exit (15);
+  }
 
 
   if  (WRecord_setRecordType (r, WARC_INFO_RECORD) )
@@ -216,7 +224,7 @@ void test2 (void)
   const char * file1 = "./app/wdata/testwfile/unidesc.html";
 
   void * r = bless (WRecord);
-  void * w = bless (WFile, "./awarcavl.warc", 600 * 1024 * 1024, WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED, ".");
+  void * w = bless (WFile, "./awarcavl.warc", WARC_MAX_SIZE, WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED, ".");
   void * u = NIL;
 fprintf(stdout,"////////////////////////////test 2 /////////////////////////////////\n");
 
@@ -366,7 +374,7 @@ void test3 (void)
   const char * file2 = "./app/wdata/testwfile/anvlcom";
 
   void * r = bless (WRecord);
-  void * w = bless (WFile, "./awarcmlp.warc", 600 * 1024 * 1024,  WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED, ".");
+  void * w = bless (WFile, "./awarcmlp.warc", WARC_MAX_SIZE,  WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED, ".");
   void * u = NIL;
 
  
@@ -636,7 +644,7 @@ void test4 (void)
   const char * file1 = "./app/wdata/testwfile/unidesc.html";
 
   void * r = bless (WRecord);
-  void * w = bless (WFile, "./awarfdt.warc", 600 * 1024 * 1024, WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED, ".");
+  void * w = bless (WFile, "./awarfdt.warc", WARC_MAX_SIZE, WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED, ".");
   void * u = NIL;
 
  
@@ -1035,7 +1043,7 @@ void test5 (void)
   const char * file1 = "./app/wdata/testwfile/unidesc.html";
 
   void * r = bless (WRecord);
-  void * w = bless (WFile, "./awarcfdt.warc", 600 * 1024 * 1024, WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED, ".");
+  void * w = bless (WFile, "./awarcfdt.warc", WARC_MAX_SIZE, WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED, ".");
   void * u = NIL;
 
   if (WRecord_setTargetUri (r, makeS ("test://anunknownplace") ) )
@@ -1432,7 +1440,7 @@ void test6 (void)
   const char * file1 = "./app/wdata/testwfile/unidesc.html";
 
   void * r = bless (WRecord);
-  void * w = bless (WFile, "./awarfldt.warc", 600 * 1024 * 1024, WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED, ".");
+  void * w = bless (WFile, "./awarfldt.warc", WARC_MAX_SIZE, WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED, ".");
   void * u = NIL;
 
 
@@ -1638,7 +1646,7 @@ void test7 (void)
   const char * file1 = "./app/wdata/testwfile/unidesc.html";
 
   void * r = bless (WRecord);
-  void * w = bless (WFile, "./awarfldt.warc", 600 * 1024 * 1024, WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED, ".");
+  void * w = bless (WFile, "./awarfldt.warc", WARC_MAX_SIZE, WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED, ".");
   void * u = NIL;
 
 
@@ -1843,7 +1851,7 @@ void test8 (void)
   const char * file1 = "./app/wdata/testwfile/unidesc.html";
 
   void * r = bless (WRecord);
-  void * w = bless (WFile, "./awarfldt.warc", 600 * 1024 * 1024, WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED, ".");
+  void * w = bless (WFile, "./awarfldt.warc", WARC_MAX_SIZE, WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED, ".");
   void * u = NIL;
 fprintf(stdout,"////////////////////////////test 8 /////////////////////////////////\n");
  
@@ -2048,7 +2056,7 @@ void test9 (void)
   const char * file1 = "./app/wdata/testwfile/unidesc.html";
 
   void * r = bless (WRecord);
-  void * w = bless (WFile, "./awarfldt.warc", 600 * 1024 * 1024, WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED, ".");
+  void * w = bless (WFile, "./awarfldt.warc", WARC_MAX_SIZE, WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED, ".");
   void * u = NIL;
 
  
@@ -2254,7 +2262,7 @@ void test10 (void)
   const char * file1 = "./app/wdata/testwfile/unidesc.html";
 
   void * r = bless (WRecord);
-  void * w = bless (WFile, "./awarfldt.warc", 600 * 1024 * 1024, WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED, ".");
+  void * w = bless (WFile, "./awarfldt.warc", WARC_MAX_SIZE, WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED, ".");
   void * u = NIL;
 
  
@@ -2460,7 +2468,7 @@ void test11 (void)
   const char * file1 = "./app/wdata/testwfile/unidesc.html";
 
   void * r = bless (WRecord);
-  void * w = bless (WFile, "./awarfldt.warc", 600 * 1024 * 1024, WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED, ".");
+  void * w = bless (WFile, "./awarfldt.warc", WARC_MAX_SIZE, WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED, ".");
   void * u = NIL;
 
  
@@ -2666,7 +2674,7 @@ void test12 (void)
   const char * file1 = "./app/wdata/testwfile/unidesc.html";
 
   void * r = bless (WRecord);
-  void * w = bless (WFile, "./awarfldt.warc", 600 * 1024 * 1024, WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED, ".");
+  void * w = bless (WFile, "./awarfldt.warc", WARC_MAX_SIZE, WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED, ".");
   void * u = NIL;
 
   
@@ -2872,7 +2880,7 @@ void test13 (void)
   const char * file1 = "./app/wdata/testwfile/unidesc.html";
 
   void * r = bless (WRecord);
-  void * w = bless (WFile, "./awarfldt.warc", 600 * 1024 * 1024, WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED, ".");
+  void * w = bless (WFile, "./awarfldt.warc", WARC_MAX_SIZE, WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED, ".");
   void * u = NIL;
 
   
@@ -3085,7 +3093,7 @@ void test14 (void)
   
 
   r = bless (WRecord);
-  w = bless (WFile, "./cwarc.warc.gz", 600 * 1024 * 1024, WARC_FILE_WRITER, WARC_FILE_COMPRESSED_GZIP_BEST_SPEED, ".");
+  w = bless (WFile, "./cwarc.warc.gz", WARC_MAX_SIZE, WARC_FILE_WRITER, WARC_FILE_COMPRESSED_GZIP_BEST_SPEED, ".");
 
 
   if  (WRecord_setRecordType (r, WARC_INFO_RECORD) )
@@ -3227,7 +3235,7 @@ void test15 (void)
 
 
   r = bless (WRecord);
-  w = bless (WFile, "./2cwarc.warc.gz", 600 * 1024 * 1024, WARC_FILE_WRITER, WARC_FILE_COMPRESSED_GZIP_BEST_SPEED, ".");
+  w = bless (WFile, "./2cwarc.warc.gz", WARC_MAX_SIZE, WARC_FILE_WRITER, WARC_FILE_COMPRESSED_GZIP_BEST_SPEED, ".");
 
 
 
@@ -3484,9 +3492,9 @@ void test16 (void)
   void * r = NIL;  /*to recover records */
   char  env[20];
 
-  
 
-  w = bless (WFile, "./awanvl.warc", 600 * 1024 * 1024,
+
+  w = bless (WFile, "./awanvl.warc", WARC_MAX_SIZE,
              WARC_FILE_READER, WARC_FILE_UNCOMPRESSED, ".");
   unless (w)
   return;
@@ -3524,9 +3532,10 @@ void test16 (void)
 
 
       fprintf(stdout, "--------------------------------------------------------------------------\n");
+*/
 
-      fprintf(stdout, "\n\n");*/
-      CU_ASSERT(WRecord_getContentLength (r)==9740);
+
+      CU_ASSERT(WRecord_getContentLength (r)==9739);
      /* CU_ASSERT_STRING_EQUAL("(null)",WRecord_getTargetUri (r));*/
 CU_ASSERT_STRING_EQUAL("Text/random",WRecord_getContentType (r));
 /*CU_ASSERT_STRING_EQUAL("(null)",WRecord_getConcurrentTo (r));*/
@@ -3537,6 +3546,7 @@ CU_ASSERT_STRING_EQUAL("sha2:0121-KJ45-1111-A001L", WRecord_getPayloadDigest (r)
 /*CU_ASSERT_STRING_EQUAL("(null)",WRecord_getRefersTo (r));*/
 CU_ASSERT_STRING_EQUAL("time", WRecord_getTruncated (r));
 /*CU_ASSERT_STRING_EQUAL("(null)",WRecord_getWarcInfoId (r));*/
+
 CU_ASSERT_STRING_EQUAL("Compressed:gzip:best speed",WRecord_getProfile (r));
 CU_ASSERT_STRING_EQUAL("/home/user/warcfile.warc",WRecord_getFilename (r));
 CU_ASSERT_STRING_EQUAL("text/html; charset=unicode-utf8",WRecord_getPayloadType (r));
@@ -3565,9 +3575,7 @@ void test17 (void)
   void * r = NIL;  /*to recover records */
  warc_u32_t  i      = 1;
 
- 
-
-  w = bless (WFile, "./awarcmlp.warc", 600 * 1024 * 1024,
+  w = bless (WFile, "./awarcmlp.warc", WARC_MAX_SIZE,
              WARC_FILE_READER, WARC_FILE_UNCOMPRESSED, ".");
   unless (w)
   return;
@@ -3610,7 +3618,9 @@ void test17 (void)
 
    if (i==1)
        {
-CU_ASSERT(WRecord_getContentLength (r)==9740);
+
+
+CU_ASSERT(WRecord_getContentLength (r)==9739);
      /* CU_ASSERT_STRING_EQUAL("(null)",WRecord_getTargetUri (r));*/
 CU_ASSERT_STRING_EQUAL("Text/random",WRecord_getContentType (r));
 /*CU_ASSERT_STRING_EQUAL("(null)",WRecord_getConcurrentTo (r));*/
@@ -3632,7 +3642,9 @@ CU_ASSERT(WRecord_getSegTotalLength (r)==0);
         }
 if (i==2)
        {
-CU_ASSERT(WRecord_getContentLength (r)==8330);
+
+
+CU_ASSERT(WRecord_getContentLength (r)==8329);
      /* CU_ASSERT_STRING_EQUAL("(null)",WRecord_getTargetUri (r));*/
 CU_ASSERT_STRING_EQUAL("Text/random",WRecord_getContentType (r));
 /*CU_ASSERT_STRING_EQUAL("(null)",WRecord_getConcurrentTo (r));*/
@@ -3654,7 +3666,8 @@ CU_ASSERT(WRecord_getSegTotalLength (r)==0);
         }
 if (i==3)
        {
-CU_ASSERT(WRecord_getContentLength (r)==9740);
+
+CU_ASSERT(WRecord_getContentLength (r)==9739);
      /* CU_ASSERT_STRING_EQUAL("(null)",WRecord_getTargetUri (r));*/
 CU_ASSERT_STRING_EQUAL("Text/random",WRecord_getContentType (r));
 /*CU_ASSERT_STRING_EQUAL("(null)",WRecord_getConcurrentTo (r));*/
@@ -3676,7 +3689,9 @@ CU_ASSERT(WRecord_getSegTotalLength (r)==0);
         }
 if (i==4)
        {
-CU_ASSERT(WRecord_getContentLength (r)==8330);
+
+
+CU_ASSERT(WRecord_getContentLength (r)==8329);
      /* CU_ASSERT_STRING_EQUAL("(null)",WRecord_getTargetUri (r));*/
 CU_ASSERT_STRING_EQUAL("Text/random",WRecord_getContentType (r));
 /*CU_ASSERT_STRING_EQUAL("(null)",WRecord_getConcurrentTo (r));*/
@@ -3698,7 +3713,9 @@ CU_ASSERT(WRecord_getSegTotalLength (r)==0);
         }
 if (i==5)
        {
-CU_ASSERT(WRecord_getContentLength (r)==9740);
+
+
+CU_ASSERT(WRecord_getContentLength (r)==9739);
      /* CU_ASSERT_STRING_EQUAL("(null)",WRecord_getTargetUri (r));*/
 CU_ASSERT_STRING_EQUAL("Text/random",WRecord_getContentType (r));
 /*CU_ASSERT_STRING_EQUAL("(null)",WRecord_getConcurrentTo (r));*/
@@ -3720,7 +3737,7 @@ CU_ASSERT(WRecord_getSegTotalLength (r)==0);
         }
 if (i==6)
        {
-CU_ASSERT(WRecord_getContentLength (r)==8330);
+CU_ASSERT(WRecord_getContentLength (r)==8329);
      /* CU_ASSERT_STRING_EQUAL("(null)",WRecord_getTargetUri (r));*/
 CU_ASSERT_STRING_EQUAL("Text/random",WRecord_getContentType (r));
 /*CU_ASSERT_STRING_EQUAL("(null)",WRecord_getConcurrentTo (r));*/
@@ -3759,7 +3776,7 @@ void test18 (void)
 warc_u32_t  i      = 1;
 
 
-  w = bless (WFile, "./2cwarc.warc.gz", 600 * 1024 * 1024,
+  w = bless (WFile, "./2cwarc.warc.gz", WARC_MAX_SIZE,
              WARC_FILE_READER, WARC_FILE_COMPRESSED_GZIP, ".");
   unless (w)
   return;
@@ -3802,7 +3819,8 @@ warc_u32_t  i      = 1;
 
  if (i==1)
        {
-CU_ASSERT(WRecord_getContentLength (r)==9740);
+
+CU_ASSERT(WRecord_getContentLength (r)==9739);
      /* CU_ASSERT_STRING_EQUAL("(null)",WRecord_getTargetUri (r));*/
 CU_ASSERT_STRING_EQUAL("Text/random",WRecord_getContentType (r));
 /*CU_ASSERT_STRING_EQUAL("(null)",WRecord_getConcurrentTo (r));*/
@@ -3824,7 +3842,8 @@ CU_ASSERT(WRecord_getSegTotalLength (r)==0);
         }
 if (i==2)
        {
-CU_ASSERT(WRecord_getContentLength (r)==8330);
+
+CU_ASSERT(WRecord_getContentLength (r)==8329);
      /* CU_ASSERT_STRING_EQUAL("(null)",WRecord_getTargetUri (r));*/
 CU_ASSERT_STRING_EQUAL("Text/random",WRecord_getContentType (r));
 /*CU_ASSERT_STRING_EQUAL("(null)",WRecord_getConcurrentTo (r));*/
@@ -3846,7 +3865,8 @@ CU_ASSERT(WRecord_getSegTotalLength (r)==0);
         }
 if (i==3)
        {
-CU_ASSERT(WRecord_getContentLength (r)==9740);
+
+CU_ASSERT(WRecord_getContentLength (r)==9739);
      /* CU_ASSERT_STRING_EQUAL("(null)",WRecord_getTargetUri (r));*/
 CU_ASSERT_STRING_EQUAL("Text/random",WRecord_getContentType (r));
 /*CU_ASSERT_STRING_EQUAL("(null)",WRecord_getConcurrentTo (r));*/
@@ -3868,7 +3888,7 @@ CU_ASSERT(WRecord_getSegTotalLength (r)==0);
         }
 if (i==4)
        {
-CU_ASSERT(WRecord_getContentLength (r)==8330);
+CU_ASSERT(WRecord_getContentLength (r)==8329);
      /* CU_ASSERT_STRING_EQUAL("(null)",WRecord_getTargetUri (r));*/
 CU_ASSERT_STRING_EQUAL("Text/random",WRecord_getContentType (r));
 /*CU_ASSERT_STRING_EQUAL("(null)",WRecord_getConcurrentTo (r));*/
@@ -3890,7 +3910,8 @@ CU_ASSERT(WRecord_getSegTotalLength (r)==0);
         }
 if (i==5)
        {
-CU_ASSERT(WRecord_getContentLength (r)==9740);
+
+CU_ASSERT(WRecord_getContentLength (r)==9739);
      /* CU_ASSERT_STRING_EQUAL("(null)",WRecord_getTargetUri (r));*/
 CU_ASSERT_STRING_EQUAL("Text/random",WRecord_getContentType (r));
 /*CU_ASSERT_STRING_EQUAL("(null)",WRecord_getConcurrentTo (r));*/
@@ -3912,7 +3933,7 @@ CU_ASSERT(WRecord_getSegTotalLength (r)==0);
         }
 if (i==6)
        {
-CU_ASSERT(WRecord_getContentLength (r)==8330);
+CU_ASSERT(WRecord_getContentLength (r)==8329);
      /* CU_ASSERT_STRING_EQUAL("(null)",WRecord_getTargetUri (r));*/
 CU_ASSERT_STRING_EQUAL("Text/random",WRecord_getContentType (r));
 /*CU_ASSERT_STRING_EQUAL("(null)",WRecord_getConcurrentTo (r));*/
@@ -3957,7 +3978,7 @@ void test19 (void)
 
   
 
-  w = bless (WFile, "../app/wdata/testwfile/ero1.warc", 600 * 1024 * 1024,
+  w = bless (WFile, "../app/wdata/testwfile/ero1.warc", WARC_MAX_SIZE,
              WARC_FILE_READER, WARC_FILE_UNCOMPRESSED, ".");
   unless (w)
   return;
@@ -4013,7 +4034,7 @@ void test20 (void)
 
   
 
-  w = bless (WFile, "../app/wdata/testwfile/ero2.warc", 600 * 1024 * 1024,
+  w = bless (WFile, "../app/wdata/testwfile/ero2.warc", WARC_MAX_SIZE,
              WARC_FILE_READER, WARC_FILE_UNCOMPRESSED, ".");
   unless (w)
   return;
@@ -4067,7 +4088,7 @@ void test21 (void)
 
  
 
-  w = bless (WFile, "../app/wdata/testwfile/ero3.warc", 600 * 1024 * 1024,
+  w = bless (WFile, "../app/wdata/testwfile/ero3.warc", WARC_MAX_SIZE,
              WARC_FILE_READER, WARC_FILE_UNCOMPRESSED, ".");
   unless (w)
   return;
@@ -4122,7 +4143,7 @@ void test22 (void)
 
   char  env[20];
 
-  w = bless (WFile, "./awanvl.warc", 660 * 1024 * 1024,
+  w = bless (WFile, "./awanvl.warc", WARC_MAX_SIZE,
              WARC_FILE_READER, WARC_FILE_UNCOMPRESSED, ".");
 
   unless (w)
@@ -4138,7 +4159,7 @@ void test22 (void)
       }
 
 
-CU_ASSERT(WRecord_getContentLength (r)==9740);
+CU_ASSERT(WRecord_getContentLength (r)==9739);
      /* CU_ASSERT_STRING_EQUAL("(null)",WRecord_getTargetUri (r));*/
 CU_ASSERT_STRING_EQUAL("Text/random",WRecord_getContentType (r));
 /*CU_ASSERT_STRING_EQUAL("(null)",WRecord_getConcurrentTo (r));*/
@@ -4189,7 +4210,7 @@ void test23 (void)
   char  env[20];
 
 
-  w = bless (WFile, "./awanvl.warc", 660 * 1024 * 1024,
+  w = bless (WFile, "./awanvl.warc", WARC_MAX_SIZE,
              WARC_FILE_READER, WARC_FILE_UNCOMPRESSED, ".");
 
   unless (w)
@@ -4202,7 +4223,7 @@ void test23 (void)
         destroy (w);
         return;
       }
-/*CU_ASSERT(WRecord_getContentLength (r)==9740);*/
+/*CU_ASSERT(WRecord_getContentLength (r)==9739);*/
 /*CU_ASSERT_STRING_EQUAL("Text/random",WRecord_getContentType (r));*/
 /*CU_ASSERT_STRING_EQUAL("sha1:0451-9645-AM35P-12LL",WRecord_getBlockDigest (r));
 CU_ASSERT_STRING_EQUAL("sha2:0121-KJ45-1111-A001L", WRecord_getPayloadDigest (r));
@@ -4214,7 +4235,7 @@ CU_ASSERT_STRING_EQUAL("text/html; charset=unicode-utf8",WRecord_getPayloadType 
 CU_ASSERT(WRecord_getSegTotalLength (r)==0);*/
 
 
-      w2 = bless (WFile, "./app/wdata/testwfile/warcfile.warc", 660 * 1024 * 1024,
+      w2 = bless (WFile, "./app/wdata/testwfile/warcfile.warc", WARC_MAX_SIZE,
                   WARC_FILE_READER, WARC_FILE_UNCOMPRESSED);
 
       if (WFile_register (w2, r, callback, (void *) env) )
@@ -4249,7 +4270,7 @@ void test24 (void)
   /*const char * file1 = "./app/wdata/testwfile/unidesc.html";*/
 
   void * r = bless (WRecord);
-  void * w = bless (WFile, "./strings.warc", 600 * 1024 * 1024,  WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED, ".");
+  void * w = bless (WFile, "./strings.warc", WARC_MAX_SIZE,  WARC_FILE_WRITER, WARC_FILE_UNCOMPRESSED, ".");
   void * u = NIL;
 
   
@@ -4421,42 +4442,39 @@ void test24 (void)
 int main (void)
 {
    CU_pSuite pSuite = NULL;   
+
    /* initialize the CUnit test registry */
    if (CUE_SUCCESS != CU_initialize_registry())
-      return CU_get_error();
-
+     return CU_get_error();
+   
    /* add a suite to the registry */
    pSuite = CU_add_suite("Suite1", init_suite1, clean_suite1);
-   if (NULL == pSuite) {
-      CU_cleanup_registry();
-      return CU_get_error();
-                        }
-  
-
+   if (NULL == pSuite) 
+     {
+       CU_cleanup_registry();
+       return CU_get_error();
+     }
+   
+   
    /* add the tests to the suite */
-
    if ((NULL == CU_add_test(pSuite, "TEST 1:creating Warc File './awanvl.warc' with one record an no anvl field", test1)) ||
        (NULL == CU_add_test(pSuite, "TEST 2:creating a Warc File './awarcavl.warc' with one record containing one anvl field this recond will not be created (presence of ip-adress or refers-to in warc info record)", test2))||
        (NULL == CU_add_test(pSuite, "TEST 3:Creating a Warc File '/awarcmlp.warc' with two Records ", test3))||
        (NULL == CU_add_test(pSuite, "TEST 4:Trying to create a Warc File with a Warc record having a corrupted Creation Date field Corrupted date", test4)))
-      
-   {
-      CU_cleanup_registry();
-      return CU_get_error();
-   } 
-
-  
-
-
+     {
+       CU_cleanup_registry();
+       return CU_get_error();
+     } 
+   
    /* add a suite to the registry */
    pSuite = CU_add_suite("Suite2", init_suite2, clean_suite2);
-   if (NULL == pSuite) {
-      CU_cleanup_registry();
-      return CU_get_error();
-                        }
-
+   if (NULL == pSuite) 
+     {
+       CU_cleanup_registry();
+       return CU_get_error();
+     }
+   
    /* add the tests to the suite */
-
    if ((NULL == CU_add_test(pSuite, "TEST 5:Trying to create a Warc File with a Warc record having a corrupted Record Type field Corrupted Record type  ", test5)) ||
        (NULL == CU_add_test(pSuite, "TEST 6:Trying to create a Warc File with a Warc record having a corrupted anvl field Corrupted anvl", test6))||
        (NULL == CU_add_test(pSuite, "TEST 7:Trying to create a Warc File with a Warc record having a corrupted truncated field Corrupted Truncated  ", test7))||

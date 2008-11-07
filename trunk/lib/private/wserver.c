@@ -69,6 +69,9 @@
 
 #define WARC_GET_VERSION ((const char *) WARC_VERSION)
 
+/* 100LLU isn't the real WARC size, just to be able to read */
+#define WARC_MAX_SIZE 100LLU
+
 /**
  * Argument for the events callback functions
  */
@@ -777,7 +780,7 @@ WPRIVATE warc_bool_t WSend_fullResponse (void * fname, void * tmp, warc_i32_t of
    evhttp_add_header (req -> output_headers, 
                       "Content-Length", (const char *) char_size);
 
-   wfile = bless (WFile, WString_getText (fname), 100, 
+   wfile = bless (WFile, WString_getText (fname), WARC_MAX_SIZE, 
                   WARC_FILE_READER, WARC_FILE_DETECT_COMPRESSION , WString_getText (tmp), WString_getLength(tmp));
    unless (wfile)
      {
@@ -884,8 +887,7 @@ WPRIVATE warc_bool_t WSend_record (void * fname, void * tmp, warc_i32_t offset, 
    warc_u8_t         content_type[25];
       
 
-   /* 100 isn't used inside the bless below because of reading */
-   wfile = bless (WFile, WString_getText (fname), 100, 
+   wfile = bless (WFile, WString_getText (fname), WARC_MAX_SIZE, 
                   WARC_FILE_READER, WARC_FILE_DETECT_COMPRESSION, WString_getText (tmp), WString_getLength(tmp));
    unless (wfile)
      {
@@ -1091,7 +1093,7 @@ WPRIVATE warc_bool_t WBuildXmlOutput (void * fname, const void * server_name, vo
       xml_recode (makeS (WRecord_getWarcId (wrecord)), xmlstr);
       evbuffer_add_printf (buf, "warc-id=\"%s\" ", (const char *) xmlstr);
 
-      evbuffer_add_printf (buf, "content-length=\"%u\" ", WRecord_getContentLength  (wrecord) );
+      evbuffer_add_printf (buf, "content-length=\"%llu\" ", WRecord_getContentLength  (wrecord) );
 
       evbuffer_add_printf (buf, "warc-type=\"%u\" ", WRecord_getRecordType  (wrecord) );
 
@@ -1321,7 +1323,7 @@ WPRIVATE warc_bool_t WBuildHtmlOutput (void * fname, const void * server_name, v
       evbuffer_add_printf (buf, "<tr><td><font color=darkgreen size = 3> Warc ID </font></td><td>%s</td></tr> ",
                               (const char *) WRecord_getWarcId      (wrecord) );
 
-      evbuffer_add_printf (buf, "<tr><td><font color=darkgreen size = 3> Content-Length </font></td><td>%u</td></tr>",
+      evbuffer_add_printf (buf, "<tr><td><font color=darkgreen size = 3> Content-Length </font></td><td>%llu</td></tr>",
                               WRecord_getContentLength  (wrecord) );
 
       evbuffer_add_printf (buf, "<tr><td><font color=darkgreen size = 3> WARC-Type </font></td><td>%u</td></tr>",
@@ -1564,7 +1566,7 @@ WPRIVATE warc_bool_t WBuildTextOutput (void * fname, const void * server_name, v
       evbuffer_add_printf (buf, "\t* Warc ID: %s\r\n",
                               (const char *) WRecord_getWarcId      (wrecord) );
 
-      evbuffer_add_printf (buf, "\t* Content-Length: %u\r\n",
+      evbuffer_add_printf (buf, "\t* Content-Length: %llu\r\n",
                               WRecord_getContentLength  (wrecord) );
 
       evbuffer_add_printf (buf, "\t* WARC-Type: %u\r\n",
@@ -1806,7 +1808,7 @@ WPRIVATE warc_bool_t WBuildJsonOutput (void * fname, const void * server_name, v
       evbuffer_add_printf (buf, ",{\"fields\":[{\"Warc ID\":\"%s\"}",
                               (const char *) WRecord_getWarcId      (wrecord) );
 
-      evbuffer_add_printf (buf, ",{\"Content-Length\":%u}",
+      evbuffer_add_printf (buf, ",{\"Content-Length\":%llu}",
                               WRecord_getContentLength  (wrecord) );
 
       evbuffer_add_printf (buf, ",{\"WARC-Type\":%u}",
@@ -2073,7 +2075,7 @@ WPRIVATE warc_bool_t WSend_distantDumpResponse (void * fname, void * tmp, warc_i
 
 
    /* 100 isn't used inside the bless below because of reading */
-   wfile = bless (WFile, WString_getText (fname), 100, 
+   wfile = bless (WFile, WString_getText (fname), WARC_MAX_SIZE, 
                   WARC_FILE_READER, WARC_FILE_DETECT_COMPRESSION, WString_getText (tmp), WString_getLength (tmp));
    unless (wfile)
      {
@@ -2235,7 +2237,7 @@ WPRIVATE warc_bool_t WSend_distantFilterResponse (void * fname, void * tmp, warc
    
 
    /* 100 isn't used inside the bless below because of reading */
-   wfile = bless (WFile, WString_getText (fname), 100, 
+   wfile = bless (WFile, WString_getText (fname), WARC_MAX_SIZE, 
                   WARC_FILE_READER, WARC_FILE_DETECT_COMPRESSION, WString_getText (tmp), WString_getLength(tmp));
    unless (wfile)
      {
