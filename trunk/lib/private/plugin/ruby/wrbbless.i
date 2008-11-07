@@ -31,7 +31,7 @@
  %}
   
 
-    extern void * bless_WFile (const char  * , const unsigned int  , unsigned int , const unsigned int , const char * );
+    extern void * bless_WFile (const char  * , const warc_u64_t, unsigned int, const unsigned int , const char * );
 
     extern void * bless_WRecord ();
 

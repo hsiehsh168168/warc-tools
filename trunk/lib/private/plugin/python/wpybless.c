@@ -8,9 +8,9 @@
 
 #include <wpybless.h>
 
-WPUBLIC void * bless_WFile (const char  * fname, const warc_u32_t  max_size, wfile_mode_t mode, const wfile_comp_t compressed, const char * dname )
+WPUBLIC void * bless_WFile (const char  * fname, const warc_u64_t  max_size, wfile_mode_t mode, const wfile_comp_t compressed, const char * dname )
 {
-  return (bless (WFile, fname, max_size, mode, compressed, dname));
+  return (bless (WFile, fname, (warc_u64_t) max_size, mode, compressed, dname));
 }
 
 WPUBLIC void * bless_WRecord ()
