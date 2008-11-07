@@ -1053,7 +1053,7 @@ WPRIVATE warc_bool_t WBuildXmlOutput (void * fname, const void * server_name, vo
 
    evbuffer_add_printf (buf, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n");
    evbuffer_add_printf (buf, "<warcfile name=\"%s\" size=\"%llu\">\r\n", (const char *) WString_getText (fname), 
-                                                                 (unsigned long long)WFile_getFileSize (wfile)); 
+                                                                 (long long unsigned int) WFile_getFileSize (wfile)); 
 
   while (WFile_hasMoreRecords (wfile) )
     {
@@ -1083,17 +1083,17 @@ WPRIVATE warc_bool_t WBuildXmlOutput (void * fname, const void * server_name, vo
       /* dump WRecord */
       evbuffer_add_printf (buf, "<warc-record rank=\"%d\" ", cpt );
 
-      evbuffer_add_printf (buf, "offset=\"%llu\" ", (unsigned long long) WRecord_getOffset (wrecord) );
+      evbuffer_add_printf (buf, "offset=\"%llu\" ", (long long unsigned int) WRecord_getOffset (wrecord) );
 
-      evbuffer_add_printf (buf, "compressed-size=\"%llu\" ", (unsigned long long) WRecord_getCompressedSize (wrecord) );
+      evbuffer_add_printf (buf, "compressed-size=\"%llu\" ", (long long unsigned int) WRecord_getCompressedSize (wrecord) );
 
-      evbuffer_add_printf (buf, "uncompressed-size=\"%llu\" ", (unsigned long long) WRecord_getUncompressedSize (wrecord) );
+      evbuffer_add_printf (buf, "uncompressed-size=\"%llu\" ", (long long unsigned int) WRecord_getUncompressedSize (wrecord) );
 
       /* Preprocessing for xml viewing */
       xml_recode (makeS (WRecord_getWarcId (wrecord)), xmlstr);
       evbuffer_add_printf (buf, "warc-id=\"%s\" ", (const char *) xmlstr);
 
-      evbuffer_add_printf (buf, "content-length=\"%llu\" ", WRecord_getContentLength  (wrecord) );
+      evbuffer_add_printf (buf, "content-length=\"%llu\" ", (long long unsigned int) WRecord_getContentLength  (wrecord) );
 
       evbuffer_add_printf (buf, "warc-type=\"%u\" ", WRecord_getRecordType  (wrecord) );
 
@@ -1324,7 +1324,7 @@ WPRIVATE warc_bool_t WBuildHtmlOutput (void * fname, const void * server_name, v
                               (const char *) WRecord_getWarcId      (wrecord) );
 
       evbuffer_add_printf (buf, "<tr><td><font color=darkgreen size = 3> Content-Length </font></td><td>%llu</td></tr>",
-                              WRecord_getContentLength  (wrecord) );
+                              (long long unsigned int) WRecord_getContentLength  (wrecord) );
 
       evbuffer_add_printf (buf, "<tr><td><font color=darkgreen size = 3> WARC-Type </font></td><td>%u</td></tr>",
                               WRecord_getRecordType  (wrecord) );
@@ -1567,7 +1567,7 @@ WPRIVATE warc_bool_t WBuildTextOutput (void * fname, const void * server_name, v
                               (const char *) WRecord_getWarcId      (wrecord) );
 
       evbuffer_add_printf (buf, "\t* Content-Length: %llu\r\n",
-                              WRecord_getContentLength  (wrecord) );
+                              (long long unsigned int) WRecord_getContentLength  (wrecord) );
 
       evbuffer_add_printf (buf, "\t* WARC-Type: %u\r\n",
                               WRecord_getRecordType  (wrecord) );
@@ -1809,7 +1809,7 @@ WPRIVATE warc_bool_t WBuildJsonOutput (void * fname, const void * server_name, v
                               (const char *) WRecord_getWarcId      (wrecord) );
 
       evbuffer_add_printf (buf, ",{\"Content-Length\":%llu}",
-                              WRecord_getContentLength  (wrecord) );
+                              (long long unsigned int) WRecord_getContentLength  (wrecord) );
 
       evbuffer_add_printf (buf, ",{\"WARC-Type\":%u}",
                               WRecord_getRecordType  (wrecord) );
