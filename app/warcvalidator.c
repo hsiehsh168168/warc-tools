@@ -33,7 +33,8 @@
 
 
 #ifndef WARC_MAX_SIZE
-#define WARC_MAX_SIZE 1629145600
+/* 16 Go by default */
+#define WARC_MAX_SIZE 17179869184ULL
 #endif
 
 #define uS(s)  ((warc_u8_t *) (s))

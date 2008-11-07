@@ -24,6 +24,11 @@
 /*     http://code.google.com/p/warc-tools/                            */
 /* ------------------------------------------------------------------- */
 
+2008-10-22 to 2008-11-07 by "voidptrptr":
+
+        * Fix doc typo
+	* Unlock WARC file size limit to use warc_u64_t (handle Exa bytes WARC file). 
+
 2008-09-14 to 2008-10-22 by "voidptrptr":
 
 	* Fix minor bugs

@@ -1147,7 +1147,7 @@ WIPRIVATE void WFile_writeWarcId (FILE * wtfile)
  */
 
 WPRIVATE void WFile_writeRecordType (FILE * wtfile, warc_rec_t type,
-                                     warc_u32_t  * datalength)
+                                     warc_u64_t  * datalength)
 {
 
   w_fwrite ("WARC-Type: ", 11, 1, wtfile);
@@ -1221,7 +1221,7 @@ WPRIVATE void WFile_writeRecordType (FILE * wtfile, warc_rec_t type,
 WIPRIVATE void WFile_writeSubjectUri (FILE * wtfile,
                                       const warc_u8_t * suri,
                                       warc_u32_t s,
-                                      warc_u32_t * datalength)
+                                      warc_u64_t * datalength)
 {
 
   w_fwrite ("WARC-Target-URI: ", 17, 1, wtfile);
@@ -1248,7 +1248,7 @@ WIPRIVATE void WFile_writeSubjectUri (FILE * wtfile,
 WIPRIVATE void WFile_writeCreationDate (FILE * wtfile,
                                         const warc_u8_t * cdate,
                                         warc_u32_t s,
-                                        warc_u32_t * datalength)
+                                        warc_u64_t * datalength)
 {
   w_fwrite ("WARC-Date: ", 11, 1, wtfile);
   (* datalength) += 11;
@@ -1274,7 +1274,7 @@ WIPRIVATE void WFile_writeCreationDate (FILE * wtfile,
 WIPRIVATE void WFile_writeContentType (FILE * wtfile,
                                        const warc_u8_t * ctype,
                                        warc_u32_t s,
-                                       warc_u32_t * datalength)
+                                       warc_u64_t * datalength)
 {
   w_fwrite ("Content-Type: ", 14, 1, wtfile);
   (*datalength) += 14;
@@ -1300,7 +1300,7 @@ WIPRIVATE void WFile_writeContentType (FILE * wtfile,
 WIPRIVATE void WFile_writeRecordId (FILE * wtfile,
                                     const warc_u8_t * rec_id,
                                     warc_u32_t s,
-                                    warc_u32_t * datalength)
+                                    warc_u64_t * datalength)
 {
   w_fwrite ("WARC-Record-ID: ", 16, 1, wtfile);
   (* datalength) += 16;
@@ -1326,7 +1326,7 @@ WIPRIVATE void WFile_writeRecordId (FILE * wtfile,
 
 WIPRIVATE void WFile_writeContentLength (FILE * wtfile,
                                     warc_u32_t clen,
-                                    warc_u32_t * datalength)
+                                    warc_u64_t * datalength)
 {
   warc_u8_t   strdat[20];
 
@@ -1356,7 +1356,7 @@ WIPRIVATE void WFile_writeContentLength (FILE * wtfile,
 WIPRIVATE void WFile_writeConcurrentTo (FILE * wtfile,
                                       const warc_u8_t * rec_id,
                                       warc_u32_t s,
-                                      warc_u32_t * datalength)
+                                      warc_u64_t * datalength)
 {
   w_fwrite ("WARC-Concurrent-To: ", 20, 1, wtfile);
   (* datalength) += 20;
@@ -1381,7 +1381,7 @@ WIPRIVATE void WFile_writeConcurrentTo (FILE * wtfile,
 WIPRIVATE void WFile_writeBlockDigest (FILE * wtfile,
                                     const warc_u8_t * dig,
                                     warc_u32_t s,
-                                    warc_u32_t * datalength)
+                                    warc_u64_t * datalength)
 {
   w_fwrite ("WARC-Block-Digest: ", 19, 1, wtfile);
   (* datalength) += 19;
@@ -1406,7 +1406,7 @@ WIPRIVATE void WFile_writeBlockDigest (FILE * wtfile,
 WIPRIVATE void WFile_writePayloadDigest (FILE * wtfile,
                                     const warc_u8_t * pdig,
                                     warc_u32_t s,
-                                    warc_u32_t * datalength)
+                                    warc_u64_t * datalength)
 {
   w_fwrite ("WARC-Payload-Digest: ", 21, 1, wtfile);
   (* datalength) += 21;
@@ -1431,7 +1431,7 @@ WIPRIVATE void WFile_writePayloadDigest (FILE * wtfile,
 WIPRIVATE void WFile_writeIpAddress (FILE * wtfile,
                                     const warc_u8_t * ip,
                                     warc_u32_t s,
-                                    warc_u32_t * datalength)
+                                    warc_u64_t * datalength)
 {
   w_fwrite ("WARC-IP-Address: ", 17, 1, wtfile);
   (* datalength) += 17;
@@ -1456,7 +1456,7 @@ WIPRIVATE void WFile_writeIpAddress (FILE * wtfile,
 WIPRIVATE void WFile_writeRefersTo (FILE * wtfile,
                                     const warc_u8_t * rec_id,
                                     warc_u32_t s,
-                                    warc_u32_t * datalength)
+                                    warc_u64_t * datalength)
 {
   w_fwrite ("WARC-Refers-To:", 16, 1, wtfile);
   (* datalength) += 16;
@@ -1482,7 +1482,7 @@ WIPRIVATE void WFile_writeRefersTo (FILE * wtfile,
 WIPRIVATE void WFile_writeTruncated (FILE * wtfile,
                                     const warc_u8_t * trunc,
                                     warc_u32_t s,
-                                    warc_u32_t * datalength)
+                                    warc_u64_t * datalength)
 {
   w_fwrite ("WARC-Truncated: ", 16, 1, wtfile);
   (* datalength) += 16;
@@ -1508,7 +1508,7 @@ WIPRIVATE void WFile_writeTruncated (FILE * wtfile,
 WIPRIVATE void WFile_writeWarcInfo (FILE * wtfile,
                                     const warc_u8_t * rec_id,
                                     warc_u32_t s,
-                                    warc_u32_t * datalength)
+                                    warc_u64_t * datalength)
 {
   w_fwrite ("WARC-Warcinfo-ID: ", 18, 1, wtfile);
   (* datalength) += 18;
@@ -1534,7 +1534,7 @@ WIPRIVATE void WFile_writeWarcInfo (FILE * wtfile,
 WIPRIVATE void WFile_writeFilename (FILE * wtfile,
                                     const warc_u8_t * fname,
                                     warc_u32_t s,
-                                    warc_u32_t * datalength)
+                                    warc_u64_t * datalength)
 {
   w_fwrite ("WARC-Filename: ", 15, 1, wtfile);
   (* datalength) += 15;
@@ -1560,7 +1560,7 @@ WIPRIVATE void WFile_writeFilename (FILE * wtfile,
 WIPRIVATE void WFile_writeProfile (FILE * wtfile,
                                     const warc_u8_t * rec_id,
                                     warc_u32_t s,
-                                    warc_u32_t * datalength)
+                                    warc_u64_t * datalength)
 {
   w_fwrite ("WARC-Profile: ", 14, 1, wtfile);
   (* datalength) += 14;
@@ -1586,7 +1586,7 @@ WIPRIVATE void WFile_writeProfile (FILE * wtfile,
 WIPRIVATE void WFile_writePayloadType (FILE * wtfile,
                                     const warc_u8_t * ptype,
                                     warc_u32_t s,
-                                    warc_u32_t * datalength)
+                                    warc_u64_t * datalength)
 {
   w_fwrite ("WARC-Identified-Payload-Type: ", 30, 1, wtfile);
   (* datalength) += 30;
@@ -1612,7 +1612,7 @@ WIPRIVATE void WFile_writePayloadType (FILE * wtfile,
 WIPRIVATE void WFile_writeSegOriginId (FILE * wtfile,
                                     const warc_u8_t * rec_id,
                                     warc_u32_t s,
-                                    warc_u32_t * datalength)
+                                    warc_u64_t * datalength)
 {
   w_fwrite ("WARC-Segment-Origin-ID: ", 24, 1, wtfile);
   (* datalength) += 24;
@@ -1637,7 +1637,7 @@ WIPRIVATE void WFile_writeSegOriginId (FILE * wtfile,
 
 WIPRIVATE void WFile_writeSegNumber (FILE * wtfile,
                                     warc_u32_t snum,
-                                    warc_u32_t * datalength)
+                                    warc_u64_t * datalength)
 {
   warc_u8_t   strdat[20];
 
@@ -1669,7 +1669,7 @@ WIPRIVATE void WFile_writeSegNumber (FILE * wtfile,
 
 WIPRIVATE void WFile_writeSegTotalLength (FILE * wtfile,
                                     warc_u32_t tlen,
-                                    warc_u32_t * datalength)
+                                    warc_u64_t * datalength)
 {
   warc_u8_t   strdat[20];
 
@@ -1697,7 +1697,7 @@ WIPRIVATE void WFile_writeSegTotalLength (FILE * wtfile,
 */
 
 WPRIVATE void WFile_writeAnvls (FILE * wtfile, const void * lanvl,
-                                warc_u32_t * datalength)
+                                warc_u64_t * datalength)
 {
   const void * anvl; /* recover anvl fields from Warc Record */
   warc_u32_t size, i, s;
@@ -1857,7 +1857,7 @@ WPRIVATE warc_bool_t WFile_flushTemporary (FILE * warcf, FILE * wtfile)
 WPRIVATE warc_bool_t
 WFile_storeRecordGzipCompressed (void * _self,
                                  const void * wrec, 
-                                 warc_u32_t datalength,
+                                 warc_u64_t datalength,
                                  FILE * bloc, FILE * wtfile
                                 )
 {
@@ -1953,7 +1953,7 @@ WFile_storeRecordGzipCompressed (void * _self,
 
 WPRIVATE warc_bool_t
 WFile_storeRecordUncompressed (void* _self, const void * wrec,
-                               warc_u32_t datalength, FILE * bloc,
+                               warc_u64_t datalength, FILE * bloc,
                                FILE * wtfile
                                )
 {
@@ -2006,7 +2006,7 @@ WPUBLIC warc_bool_t WFile_storeRecord (void* _self, const void * wrec)
   const void   * lanvl;  /* recover the anvl list from the Warc Record Header */
   FILE         * wtfile      = NIL; /* for creation of the temporary file */
   const warc_u8_t * field    = NIL; /*wil; hold the different fields value*/
-  warc_u32_t     datalength  = 0;
+  warc_u64_t     datalength  = 0;
 
   /* Preconditions */
   CASSERT (self);
@@ -2317,7 +2317,7 @@ WPRIVATE void * WFile_constructor (void * _self, va_list * app)
 {
   struct WFile            * const self = _self;
   const char              * fname      = va_arg (* app, const char *);
-  const warc_u32_t          max_size   = va_arg (* app, const warc_u32_t);
+  const warc_u64_t          max_size   = va_arg (* app, const warc_u64_t);
   wfile_mode_t              mode       = va_arg (* app, wfile_mode_t);
   const wfile_comp_t        compressed = va_arg (* app, const warc_bool_t);
   const char              * dname      = va_arg (* app, const char *);

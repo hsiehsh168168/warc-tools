@@ -67,7 +67,7 @@ struct WHeader
     /*@{*/
     /* Old warc format header line fileds */
     void       * warc_id; /**< The WARC version (Mandatory) */
-    warc_u32_t   data_length; /**< The WARC record data length */
+    warc_u64_t   data_length; /**< The WARC record data length */
     warc_rec_t   record_type; /**< The WARC record type (Mandatory) */
     void       * subject_uri; /**< The WARC record subject uri */
     void       * creation_date; /**< The WARC record date of creation (Mandatory) */
@@ -75,7 +75,7 @@ struct WHeader
     void       * record_id; /**< The WARC record id  (Mandatory) */
 
     /* New warc format header fileds */
-    warc_u32_t   content_length; /**< The length of the data bloc (Mandatory) */
+    warc_u64_t   content_length; /**< The length of the data bloc (Mandatory) */
     void       * concurrent_to; /**< The id of the record related to this one */
     void       * block_digest; /**< The algorithme and value of the disgest applied on the block this record */
     void       * payload_digst; /**< The algorithme and value of the digest applied on the payload of this record */
@@ -87,8 +87,8 @@ struct WHeader
     void       * profile; /**< In "revisit record" case, it indicates the kind of analysis and handling applied to */
     void       * payload_type; /**< The content type of the payload of the record */
     void       * segm_origin_id; /**< In "segment record" case, it gives the id of the first record */
-    warc_u32_t   segm_number; /**< In "segmented record" case, it gives the row of the segment */
-    warc_u32_t   segm_total_length; /**< In "segmented record" case, it gives the length of the whole segmented data */
+    warc_u64_t   segm_number; /**< In "segmented record" case, it gives the row of the segment */
+    warc_u64_t   segm_total_length; /**< In "segmented record" case, it gives the length of the whole segmented data */
     
     void       * other_fields; /**< The list of other non predefined named fields */
     /*@}*/
@@ -164,12 +164,12 @@ WIPUBLIC warc_u32_t WHeader_getWarcIdLen (const void * const _self)
 /**
  * @param _self WHeader object
  *
- * @return Warc Record length as a 32 bits unsigned integer
+ * @return Warc Record length as a 64 bits unsigned integer
  *
  * Returns the length of the WARC-record
  */
 
-WIPUBLIC warc_u32_t WHeader_getDataLength (const void * const _self)
+WIPUBLIC warc_u64_t WHeader_getDataLength (const void * const _self)
 {
 
   const struct WHeader * const self = _self;
@@ -190,7 +190,7 @@ WIPUBLIC warc_u32_t WHeader_getDataLength (const void * const _self)
  * Sets the size of the WARC-record
  */
 
-WIPUBLIC warc_bool_t WHeader_setDataLength (void * const _self, const warc_u32_t len)
+WIPUBLIC warc_bool_t WHeader_setDataLength (void * const _self, const warc_u64_t len)
 {
 
   struct WHeader * const self = _self;
@@ -216,7 +216,7 @@ WIPUBLIC warc_bool_t WHeader_setDataLength (void * const _self, const warc_u32_t
  * Returns the content length of the WARC-record
  */
 
-WIPUBLIC warc_u32_t WHeader_getContentLength (const void * const _self)
+WIPUBLIC warc_u64_t WHeader_getContentLength (const void * const _self)
 {
 
   const struct WHeader * const self = _self;
@@ -236,7 +236,8 @@ WIPUBLIC warc_u32_t WHeader_getContentLength (const void * const _self)
  * Sets the content length of the WARC-record
  */
 
-WIPUBLIC warc_bool_t WHeader_setContentLength (void * const _self, const warc_i32_t len)
+WIPUBLIC warc_bool_t WHeader_setContentLength (void * const _self, 
+                                               const warc_u64_t len)
 {
 
   struct WHeader * const self = _self;
@@ -1554,7 +1555,7 @@ WIPUBLIC warc_u32_t WHeader_getSegmentNumber (const void * const _self)
  * Sets the Segment number of a segment Warc Record
  */
 
-WIPUBLIC warc_bool_t WHeader_setSegmentNumber (void * const _self, const warc_i32_t snumber)
+WIPUBLIC warc_bool_t WHeader_setSegmentNumber (void * const _self, const warc_u64_t snumber)
 {
 
   struct WHeader * const self = _self;
@@ -1562,8 +1563,8 @@ WIPUBLIC warc_bool_t WHeader_setSegmentNumber (void * const _self, const warc_i3
   /* preconditions */
   CASSERT (self);
  
-  if (snumber < 0)
-     return (WARC_TRUE);
+/*   if (snumber < 0) */
+/*      return (WARC_TRUE); */
 
   S_NUMBER = snumber;
   return (WARC_FALSE);
@@ -1599,7 +1600,7 @@ WIPUBLIC warc_u32_t WHeader_getSegTotalLength (const void * const _self)
  * Sets the Total size of segmented WARC-record (only in the last segment)
  */
 
-WIPUBLIC warc_bool_t WHeader_setSegTotalLength (void * const _self, const warc_i32_t stlength)
+WIPUBLIC warc_bool_t WHeader_setSegTotalLength (void * const _self, const warc_u64_t stlength)
 {
 
   struct WHeader * const self = _self;
@@ -2025,7 +2026,7 @@ WPUBLIC warc_bool_t WHeader_extractFromWarcFile (void * _self, FILE * infile)
     void          *   anvl = NIL       ;
     warc_bool_t       more = WARC_TRUE ;
     warc_u32_t        digital = 0      ;
-    warc_u32_t        datalen = 0      ;
+    warc_u64_t        datalen = 0      ;
     warc_rec_t        rtype = WARC_UNKNOWN_RECORD;
     warc_u8_t     *   charbuf = NIL;
 
@@ -2672,8 +2673,8 @@ WPUBLIC warc_bool_t WHeader_extractFromWarcFile (void * _self, FILE * infile)
       else
         {
           /* error when parsing the WARC header line */
-          w_fprintf (fprintf (stderr , __FILE__ " (line %d) error in FSM state address %p, at offset %ld in the Warc file \n",
-                              __LINE__, WFsmANVL_state (afsm), w_ftell (infile) ) );
+          w_fprintf (fprintf (stderr , __FILE__ " (line %d) error in FSM state address %p, at offset %llu in the Warc file \n",
+                              __LINE__, WFsmANVL_state (afsm), (long long unsigned int) w_ftell (infile) ) );
 
           destroy (afsm);
           return  (WARC_TRUE);

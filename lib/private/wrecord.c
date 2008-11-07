@@ -416,7 +416,7 @@ WIPUBLIC warc_bool_t WRecord_setUncompressedSize (void * _self, warc_u64_t usize
  * Returns the WRecord offset in the Warc File
  */
 
-WIPUBLIC warc_i64_t WRecord_getOffset (const void * const _self)
+WIPUBLIC warc_u64_t WRecord_getOffset (const void * const _self)
 {
 
   const struct WRecord * const self = _self;
@@ -437,7 +437,7 @@ WIPUBLIC warc_i64_t WRecord_getOffset (const void * const _self)
  * Warc Record in Warc File offset updating function
  */
 
-WIPUBLIC warc_bool_t WRecord_setWFileOffset (void * _self, warc_i64_t inwoffset)
+WIPUBLIC warc_bool_t WRecord_setWFileOffset (void * _self, warc_u64_t inwoffset)
 {
 
   struct WRecord * self = _self;
@@ -445,8 +445,8 @@ WIPUBLIC warc_bool_t WRecord_setWFileOffset (void * _self, warc_i64_t inwoffset)
   /* Preconditions */
   CASSERT (self);
 
-  if (inwoffset < 0)
-    return (WARC_TRUE);
+  /* if (inwoffset < 0) */
+/*     return (WARC_TRUE); */
 
   IOFFSET = inwoffset;
 
@@ -482,7 +482,7 @@ WIPUBLIC const warc_u8_t * WRecord_getWarcId (const void * const _self)
  * Returns the data length of the WARC-record
  */
 
-WIPUBLIC warc_u32_t WRecord_getDataLength (const void * const _self)
+WIPUBLIC warc_u64_t WRecord_getDataLength (const void * const _self)
 {
 
   const struct WRecord * const self = _self; 
@@ -2137,7 +2137,7 @@ WPUBLIC FILE * WRecord_getDataFileExtern (const void * const _self)
  * Warc Record Data Bloc file Size returning function
  */
 
-WIPUBLIC warc_i64_t WRecord_getDataSize (const void * const _self)
+WIPUBLIC warc_u64_t WRecord_getDataSize (const void * const _self)
 {
 
   const struct WRecord * const self = _self;
