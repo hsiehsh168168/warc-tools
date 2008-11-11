@@ -160,6 +160,7 @@ RANLIB	  = ranlib
 GCC       = gcc
 CC	  	  = $(GCC) $(HEADERS)
 
+# comment the below line to not include debugging symbols
 DFLAG     = -g
 #DFLAG     = -g3
 
@@ -184,7 +185,11 @@ endif
 CFLAGS += $(DFLAG)
 
 # uncomment the line below to compile with optimization enabled
-#CFLAGS += -O3 -march=i686 -pipe
+CFLAGS_SPEED = -O3 -pipe
+# on 32bits machines, uncomment this too
+CFLAGS_SPEED_ARCH = -march=i686
+# for 64bits machines uncomment this too
+#CFLAGS_SPEED_ARCH = -march=x86-64
 
 # uncomment the line below to disable all assertions and traces
 #CFLAGS += -DNDEBUG
@@ -397,10 +402,11 @@ ifeq ($(W_HTSHARED),on)
 endif
 
 ifeq ($(W_RBSHARED),on)
+	CFLAGS_SPEED_ARCH =
 	CFLAGS += $(S_RB_CFLAGS)
 endif
 
-
+CFLAGS += $(CFLAGS_SPEED) $(CFLAGS_SPEED_ARCH)
 RFLAGS = $(CFLAGS)
 CFLAGS += $(DEFS)
 ###############

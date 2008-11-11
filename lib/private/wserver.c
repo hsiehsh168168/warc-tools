@@ -2507,8 +2507,8 @@ WPRIVATE void WAccess_callback (struct evhttp_request * req, void * _arg)
   struct evbuffer  * buf         = NIL;
   warc_i32_t         offset      = -1;
   warc_request_t     req_kind;
-  warc_filters_t     what;
-  warc_list_output   out = WARC_XML;
+  warc_filters_t     what        = WARC_URI;
+  warc_list_output   out         = WARC_XML;
 
 
   server_name = arg -> server_name;
