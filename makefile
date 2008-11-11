@@ -185,9 +185,9 @@ endif
 CFLAGS += $(DFLAG)
 
 # uncomment the line below to compile with optimization enabled
-CFLAGS_SPEED = -O3 -pipe
+#CFLAGS_SPEED = -O3 -pipe
 # on 32bits machines, uncomment this too
-CFLAGS_SPEED_ARCH = -march=i686
+#CFLAGS_SPEED_ARCH = -march=i686
 # for 64bits machines uncomment this too
 #CFLAGS_SPEED_ARCH = -march=x86-64
 
