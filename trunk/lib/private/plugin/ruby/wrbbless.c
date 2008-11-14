@@ -8,25 +8,23 @@
 #include <warc.h>
 #include <wbloc.h>
 
+#include <wrbbless.h>
 
-WPUBLIC void * bless_WFile (const char  * fname, const warc_u64_t  max_size, wfile_mode_t mode, const wfile_comp_t compressed, const char * dname )
+
+WPUBLIC void * bless_WFile (const char  * fname, warc_u64_t  max_size,
+                            wfile_mode_t mode, wfile_comp_t compressed,
+                            const char * dname )
 {
   return (bless (WFile, fname, (warc_u64_t) max_size, mode, compressed, dname));
 }
 
-WPUBLIC void * bless_WRecord ()
+WPUBLIC void * bless_WRecord (void)
 {
-return (bless (WRecord));
+  return (bless (WRecord));
 }
 
-WPUBLIC void * bless_WBloc (void  * wfile, void  * wrecord, warc_bool_t httphead, const warc_u32_t alloc)
+WPUBLIC void * bless_WBloc (void  * wfile, void  * wrecord, 
+                            warc_bool_t httphead, const warc_u32_t alloc)
 {
-void * x;
-
-x = bless (WBloc, wfile, wrecord, httphead, alloc);
-
-/* if (x == NIL)  */
-/*    fprintf (stdout, "-----------\n"); */
-
-return (x);
+  return (bless (WBloc, wfile, wrecord, httphead, alloc));
 }

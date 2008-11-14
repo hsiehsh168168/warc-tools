@@ -32,6 +32,9 @@
  %}
  
 
+%apply unsigned int { warc_u32_t }
+%apply unsigned long long { warc_u64_t }
+
     typedef enum
     {
       WARC_UNKNOWN_RECORD = 0,
@@ -56,7 +59,7 @@
     extern int   WRecord_getContent     (const void * const);
     extern const char *   WRecord_getAnvlValue   (const void * const,
           const char *);
-    extern  unsigned int  WRecord_getContentLength        (const void * const );
+    extern warc_u64_t  WRecord_getContentLength        (const void * const );
     extern const   char * WRecord_getConcurrentTo  (const void * const );
     extern const   char * WRecord_getBlockDigest (const void * const   );
     extern const   char * WRecord_getPayloadDigest (const void * const );
@@ -130,9 +133,9 @@
 
     extern int   WRecord_setContentFromFileName (void *, const char *);
 
-    extern int    WRecord_getOffset           (const void * const );
-    extern unsigned int    WRecord_getUncompressedSize (const void * const );
-    extern unsigned int    WRecord_getCompressedSize   (const void * const);
+    extern warc_u64_t    WRecord_getOffset           (const void * const );
+    extern warc_u64_t    WRecord_getUncompressedSize (const void * const );
+    extern warc_u64_t    WRecord_getCompressedSize   (const void * const);
 
     extern int WRecord_setDateFromArc   (void *  ,
                                                 const char * ,

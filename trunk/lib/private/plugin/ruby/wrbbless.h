@@ -33,15 +33,12 @@ extern "C"
   {
 #endif
 
+    extern void * bless_WFile (const char  *, warc_u64_t maxsize, 
+                               wfile_mode_t, wfile_comp_t, const char *);
 
-    extern void * bless_WFile (const char  * , const warc_u64_t, wfile_mode_t , const wfile_comp_t , const char * );
-
-
-    extern void * bless_WRecord ();
-
-
-    extern void * bless_WBloc (void  * , void  * , warc_bool_t, const warc_u32_t );
-
+    extern void * bless_WRecord (void);
+ 
+    extern void * bless_WBloc (void  *, void  *, warc_bool_t, warc_u32_t);
 
 #ifdef __cplusplus
   }
