@@ -927,7 +927,7 @@ rblib   =  $(GZIP)/adler32.o     $(GZIP)/compress.o     $(GZIP)/crc32.o  \
 		   $(PRIVATE)/wfile.o    $(PRIVATE)/wregexp.o   $(PRIVATE)/wbloc.o \
 		   $(PRIVATE)/wversion.o
 
-wrblib   = $(RUBY)/wruby.o    $(RUBY)/warctools_wrap.o  $(RUBY)/wrbbless.o \
+wrblib   = $(RUBY)/warctools_wrap.o  $(RUBY)/wrbbless.o \
 		   $(RUBY)/payload.o
 
 rbshared_unix: ruby_clean rbshared
@@ -944,8 +944,8 @@ rbshared : $(rblib) $(wrblib)
 $(RUBY)/payload.o : $(RUBY)/payload.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
-$(RUBY)/wruby.o : $(RUBY)/wruby.c
-	$(CC) $(CFLAGS) $(INC_RUBY) -c $< -o $@
+# $(RUBY)/wruby.o : $(RUBY)/wruby.c
+# 	$(CC) $(CFLAGS) $(INC_RUBY) -c $< -o $@
 
 $(RUBY)/wrbbless.o : $(RUBY)/wrbbless.c
 	$(CC) $(CFLAGS) $(INC_RUBY) -c $< -o $@
