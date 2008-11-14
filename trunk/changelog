@@ -24,6 +24,12 @@
 /*     http://code.google.com/p/warc-tools/                            */
 /* ------------------------------------------------------------------- */
 
+2008-11-07 to 2008-11-14 by "voidptrptr":
+
+        * Fix mahjor bug on SWIG when moving to 64 bits WARC file size support
+	* WARC browser bsed proxy (see contrib/browser/readme)
+
+
 2008-10-22 to 2008-11-07 by "voidptrptr":
 
         * Fix doc typo
