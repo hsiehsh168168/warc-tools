@@ -136,6 +136,7 @@ environment variable if necessary):
 - perl (for contrib/httrack)
 - python with development headers and libs (for Python-SWIG wrapper)
 - ruby with development headers and libs (for Ruby-SWIG wrapper)
+- java JDK (for Java wrapper)
 
 * To start unit tests, type:
 
@@ -556,6 +557,10 @@ o When done, simply type:
 o Then, use the Python applications under "app/ruby":
   warcdump.rb
 
+
+* Java wrapper:
+
+Please, have a look to contrib/java/install.
 
 * Man pages:
 

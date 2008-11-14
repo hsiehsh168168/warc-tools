@@ -84,7 +84,7 @@ extern "C"
 #ifndef WARC_MSG_DEBUG
 #define WARC_MSG_DEBUG
 #define WarcDebugMsg(m) \
-  (fprintf(stderr, "> debug: " __FILE__ " :%d:" #m "\n", __LINE__))
+    (fprintf(stderr, "> debug point: caller<" __FILE__ ":%s"  ":%d>" #m "\n", __FUNCTION__, __LINE__))
 #else
 #define WarcDebugMsg(m) (m)
 #endif
@@ -93,7 +93,7 @@ extern "C"
 #ifndef WARC_MSG_DEBUG_ACTION
 #define WARC_MSG_DEBUG_ACTION
 #define WarcDebugMsgAction(m) \
-  (fprintf(stderr, "> debug action: " __FILE__ " :%d:" #m "\n", __LINE__), (m))
+  (fprintf(stderr, "> debug action: caller<" __FILE__ ":%s:%d> callee<" #m ">\n",  __FUNCTION__, __LINE__), (m))
 #else
 #define WarcDebugMsgAction(m) (m)
 #endif

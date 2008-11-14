@@ -32,15 +32,16 @@
     
     extern const void * WList;
 
-    extern warc_bool_t      WList_push    (void * const, void * const);
-    extern void *       WList_pop     (void * const);
-    extern void *       WList_shift   (void * const);
-    extern warc_bool_t      WList_unshift (void * const, void * const);
-    extern unsigned int   WList_size    (const void * const);
-    extern const void * WList_getElement     (const void * const, const unsigned int);
-    extern void       * WList_remove  (void * const, const unsigned int);
-    extern void       * WList_setElement     (void * const, const unsigned int,
-                                         void * const);
+    extern warc_bool_t  WList_push        (void * const, void * const);
+    extern void *       WList_pop         (void * const);
+    extern void *       WList_shift       (void * const);
+    extern warc_bool_t  WList_unshift     (void * const, void * const);
+    extern warc_u32_t   WList_size        (const void * const);
+    extern const void * WList_getElement  (const void * const, 
+                                           const warc_u32_t);
+    extern void       * WList_remove      (void * const, const warc_u32_t);
+    extern void       * WList_setElement  (void * const, const warc_u32_t,
+                                           void * const);
 
  
 

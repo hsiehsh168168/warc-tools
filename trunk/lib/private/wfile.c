@@ -52,6 +52,9 @@
 #include <wversion.h> /* WARC_VERSION */
 #include <wcsafe.h>   /* w_fprintf ... */
 
+
+#include <limits.h>
+
 #define makeS(s) (s), w_strlen ((s))
 #define makeU(s) ((warc_u8_t *) (s))
 
@@ -255,6 +258,7 @@ WIPUBLIC warc_bool_t WFile_hasMoreRecords (const void * const _self)
 {
 
   const struct WFile * const self = _self;
+  warc_u64_t off;
 
   /* preconditions */
   CASSERT (self);
@@ -265,7 +269,8 @@ WIPUBLIC warc_bool_t WFile_hasMoreRecords (const void * const _self)
     return (WARC_TRUE);
 
   /* if it reach the end of WARC, its start over again */
-  if (w_ftell (FH) == (warc_i64_t) FSIZE)
+  w_ftell (FH, off);
+  if (off == FSIZE)
     {
       w_fseek_start (FH); /* restet from start */
       return (WARC_FALSE);
@@ -305,7 +310,7 @@ WIPUBLIC warc_u64_t WFile_getFileSize (const void * const _self)
  * Return is the WARC file is full or not
  */
 
-WIPUBLIC warc_u64_t WFile_isFull (const void * const _self)
+WIPUBLIC warc_bool_t WFile_isFull (const void * const _self)
 {
   const struct WFile * self = _self;
   
@@ -427,22 +432,24 @@ WFile_nextRecordGzipCompressedFast (void * _self,
                                     /*     void * objrectfile, */
 /*                                     FILE * rectfile, */
                                     void * gzobj,
-                                    warc_i64_t offset,
+                                    warc_u64_t offset,
                                     warc_u64_t usize,
                                     warc_u64_t csize)
 {
   struct WFile  * self     = _self;
 
   void 		    * wobject  = NIL; /* to recover the WRecord Object */
-  warc_u32_t      wdatal   = 0;   /* to recover the Record dataLength */
-  warc_u32_t      datasize = 0;
-  warc_i64_t      blbegin  = -1;
+  warc_u64_t      wdatal   = 0;   /* to recover the Record dataLength */
+  warc_u64_t      datasize = 0;
+  warc_u64_t      blbegin  = -1;
   void          * head     = NIL; /* to recover the record Header */
   void          * oldhd    = NIL; /* for destruction of old value*/
   FILE          * rectfile = NIL;
   warc_u64_t      husize   = 0;   /* uncompressed data size */
   warc_u64_t      hcsize   = 0;   /* compressed data size stored in header */
   warc_u32_t      ret      = 0;
+
+  warc_u64_t      off;
 
   struct CallbackEnv cbenv;
 
@@ -483,14 +490,16 @@ WFile_nextRecordGzipCompressedFast (void * _self,
 
   /* setting the offset of the data bloc in the WRecord */
 
-  if (WRecord_setWoffset (wobject, w_ftell (FH) ) )
+  w_ftell (FH, off);
+  if (WRecord_setWoffset (wobject, off) )
     {
 /*       destroy (objrectfile); */
       destroy (wobject);
       return (NIL);
     }
 
-  ret = WGzip_uncompress (gzobj, FH, w_ftell (FH), & husize, & hcsize,
+  w_ftell (FH, off);
+  ret = WGzip_uncompress (gzobj, FH, off, & husize, & hcsize,
                           getHeader, (void *) & cbenv);
   if (ret)
     {
@@ -522,7 +531,7 @@ WFile_nextRecordGzipCompressedFast (void * _self,
      return (NIL);
     }
 
-  blbegin = w_ftell (rectfile);
+  w_ftell (rectfile, blbegin);
 
   wdatal = WHeader_getDataLength (head);
 
@@ -572,27 +581,29 @@ WPRIVATE void * WFile_nextRecordGzipCompressed (void * _self)
   struct WFile  * self = _self;
 
   void 		    * wobject  = NIL; /* to recover the WRecord Object */
-  warc_u32_t      wdatal   = 0;   /* to recover the Record dataLength */
-  warc_u32_t      datasize = 0;
-  warc_i64_t      blbegin = -1, recend = -1;
+  warc_u64_t      wdatal   = 0;   /* to recover the Record dataLength */
+  warc_u64_t      datasize = 0;
+  warc_u64_t      blbegin = -1, recend = -1;
   void          * head    = NIL; /* To recover Header */
   void          * oldhd    = NIL; /* for destruction of old value*/
   void          * gzobj    = NIL; /* for decompression */
   warc_u64_t      usize    = 0;   /* uncompressed data size */
   warc_u64_t      csize    = 0;   /* compressed data size */
-  warc_i64_t      offset   = 0;
+  warc_u64_t      offset   = 0;
   warc_u32_t      ret      = 0;
   FILE          * rectfile = NIL; /* to uncompress the WRecord */
 
+  warc_u64_t      off;
 
   WTempFile_reset (TEMP_FILE);
 
   gzobj = bless (WGzip);
-  offset = w_ftell (FH);
+  w_ftell (FH, offset);
 
 
   /* test if the we have the warc extra gzip header */
-  ret = WGzip_analyzeHeader (gzobj, FH, w_ftell (FH), & usize, & csize);
+  w_ftell (FH, off);
+  ret = WGzip_analyzeHeader (gzobj, FH, off, & usize, & csize);
 
   w_fseek_from_start (FH, offset);
 
@@ -621,7 +632,9 @@ WPRIVATE void * WFile_nextRecordGzipCompressed (void * _self)
 
   rectfile = WTempFile_handle (WRecord_getDataFile (wobject));
 
-  ret = WGzip_uncompress (gzobj, FH, w_ftell (FH), & usize, & csize,
+  
+  w_ftell (FH, off);
+  ret = WGzip_uncompress (gzobj, FH, off, & usize, & csize,
                           wrecover, (void *) rectfile);
   if (ret)
     {
@@ -668,14 +681,15 @@ WPRIVATE void * WFile_nextRecordGzipCompressed (void * _self)
       return (NIL);
     }
 
-  blbegin = w_ftell (rectfile);
+
+  w_ftell (rectfile, blbegin);
   wdatal  = WHeader_getDataLength (head);
 
   w_fseek_start (rectfile);
 
-  w_fseek_from_here (rectfile, (warc_i64_t) wdatal);
+  w_fseek_from_here (rectfile, wdatal);
 
-  recend = (warc_i64_t) w_ftell (rectfile);
+  w_ftell (rectfile, recend);
 
   /* checking the presence of the two end CRLF */
   unless (WFile_checkEndCRLF (rectfile) )
@@ -735,9 +749,9 @@ WPRIVATE void * WFile_nextRecordUncompressed (void * _self)
   struct WFile  * self = _self;
 
   void 		    * wobject  = NIL; /* to recover the WRecord Object */
-  warc_u32_t      wdatal   = 0;   /* to recover the Record dataLength */
-  warc_u32_t      datasize = 0;
-  warc_i64_t      recbegin = -1, blbegin = -1, recend = -1;
+  warc_u64_t      wdatal   = 0;   /* to recover the Record dataLength */
+  warc_u64_t      datasize = 0;
+  warc_u64_t      recbegin = -1, blbegin = -1, recend = -1;
   void          * head     = NIL; /* To recover Header */
   void          * oldhd    = NIL; /* for destruction of old value*/
 
@@ -751,7 +765,7 @@ WPRIVATE void * WFile_nextRecordUncompressed (void * _self)
     return (NIL);
 
 
-  recbegin = (warc_i64_t) w_ftell (FH);
+  w_ftell (FH, recbegin);
 
   wobject = bless (WRecord);
 
@@ -778,7 +792,8 @@ WPRIVATE void * WFile_nextRecordUncompressed (void * _self)
       return (NIL);
      }
 
-  blbegin = w_ftell (FH);
+  
+  w_ftell (FH, blbegin);
 
 
   wdatal = WHeader_getDataLength (head);
@@ -801,9 +816,9 @@ WPRIVATE void * WFile_nextRecordUncompressed (void * _self)
   /* checking the presence of the two end CRLF */
   w_fseek_from_start (FH, recbegin);
 
-  w_fseek_from_here (FH, (warc_i64_t) wdatal);
+  w_fseek_from_here (FH, (warc_u64_t) wdatal);
 
-  recend = (warc_i64_t) w_ftell (FH);
+  w_ftell (FH, recend);
 
   unless (WFile_checkEndCRLF (FH) )
   {
@@ -907,11 +922,11 @@ WPUBLIC warc_bool_t WFile_register (void* _self, void * wrec,
 
   struct WFile * self      = _self;
 
-  warc_i64_t     wcurrent  = -1;   /* to return to the
+  warc_u64_t     wcurrent  = -1;   /* to return to the
                                       current postion of the WFile */
-  warc_i64_t     offset    = -1;   /* to recover the bloc offset
+  warc_u64_t     offset    = 0;   /* to recover the bloc offset
                                       in the Warc file */
-  warc_u32_t     size      = 0;    /* to recover the bloc size from
+  warc_u64_t     size      = 0;    /* to recover the bloc size from
                                       the record */
 
   warc_u32_t     ret       = 0;
@@ -949,7 +964,7 @@ WPUBLIC warc_bool_t WFile_register (void* _self, void * wrec,
 
   offset = WRecord_getWoffset (wrec);
 
-  if (offset < 0)
+  if (offset == WARC_U64_MAX)
     return (WARC_TRUE);
 
   switch (COMP)
@@ -963,7 +978,9 @@ WPUBLIC warc_bool_t WFile_register (void* _self, void * wrec,
 
         else
           {
-            wcurrent = w_ftell (FH);
+            warc_u64_t off;
+
+            w_ftell (FH, wcurrent);
             w_fseek_from_start (FH, offset);
 
             gzobj = bless (WGzip);
@@ -985,8 +1002,9 @@ WPUBLIC warc_bool_t WFile_register (void* _self, void * wrec,
                }
 
             wtfile = WTempFile_handle (objwtfile);
-
-            ret = WGzip_uncompress (gzobj, FH, w_ftell (FH), & usize,
+            
+            w_ftell (FH, off);
+            ret = WGzip_uncompress (gzobj, FH, off, & usize,
                                     & csize, wrecover, (void *) wtfile);
 
             if (ret)
@@ -1001,7 +1019,7 @@ WPUBLIC warc_bool_t WFile_register (void* _self, void * wrec,
             destroy (gzobj);
             w_fseek_from_end (wtfile, -4);
 
-            offset = w_ftell (wtfile);
+            w_ftell (wtfile, offset);
 
             unless (WFile_checkEndCRLF (wtfile) )
             {
@@ -1040,7 +1058,7 @@ WPUBLIC warc_bool_t WFile_register (void* _self, void * wrec,
 
         size = WRecord_getDataSize (wrec);
 
-        wcurrent = (warc_i64_t) w_ftell (FH);
+        w_ftell (FH, wcurrent);
         w_fseek_from_start (FH, offset);
 
         if (WFile_fillTempFile (self, wtfile, size) )
@@ -1325,7 +1343,7 @@ WIPRIVATE void WFile_writeRecordId (FILE * wtfile,
  */
 
 WIPRIVATE void WFile_writeContentLength (FILE * wtfile,
-                                    warc_u32_t clen,
+                                    warc_u64_t clen,
                                     warc_u64_t * datalength)
 {
   warc_u8_t   strdat[20];
@@ -1636,7 +1654,7 @@ WIPRIVATE void WFile_writeSegOriginId (FILE * wtfile,
  */
 
 WIPRIVATE void WFile_writeSegNumber (FILE * wtfile,
-                                    warc_u32_t snum,
+                                    warc_u64_t snum,
                                     warc_u64_t * datalength)
 {
   warc_u8_t   strdat[20];
@@ -1668,7 +1686,7 @@ WIPRIVATE void WFile_writeSegNumber (FILE * wtfile,
  */
 
 WIPRIVATE void WFile_writeSegTotalLength (FILE * wtfile,
-                                    warc_u32_t tlen,
+                                    warc_u64_t tlen,
                                     warc_u64_t * datalength)
 {
   warc_u8_t   strdat[20];
@@ -1868,6 +1886,8 @@ WFile_storeRecordGzipCompressed (void * _self,
   warc_u64_t     where   = 0;
   warc_gzlevel_t level;
 
+  warc_u64_t     off;
+
   UNUSED (datalength);
 
   /* map the correct compression level */
@@ -1903,7 +1923,7 @@ WFile_storeRecordGzipCompressed (void * _self,
   /* Compressing the  record */
   w_fseek_start (wtfile);
   gzobj = bless (WGzip);
-  where = w_ftell (FH);
+  w_ftell (FH, where);
 
   if (WGzip_compress (gzobj, wtfile, FH, level, & csize) )
     {
@@ -1919,7 +1939,8 @@ WFile_storeRecordGzipCompressed (void * _self,
   destroy (gzobj), gzobj = NIL;
 
   /* testing if the record will not overload the WARC File */
-  if (MAXSIZE <= (warc_u64_t) w_ftell (FH) )
+  w_ftell (FH, off);
+  if (MAXSIZE <= off)
     {
       /* set WARC file to FULL, no more records could be added */
       ISFULL = WARC_TRUE;
@@ -1934,7 +1955,8 @@ WFile_storeRecordGzipCompressed (void * _self,
       return (WARC_TRUE);
     }
 
-  FSIZE = w_ftell (FH);
+  w_ftell (FH, off);
+  FSIZE = off;
 
   return (WARC_FALSE);
 }
@@ -1960,10 +1982,13 @@ WFile_storeRecordUncompressed (void* _self, const void * wrec,
 
   struct WFile * self = _self;
 
+  warc_u64_t off;
+
+  w_ftell (FH, off);
 
   /* testing if the record writing will not overload the Warc File */
   if ( (datalength + 4) > (datalength) && /* avoid integer overflow */
-       (MAXSIZE - w_ftell (FH) ) < (datalength + 4) )
+       (MAXSIZE - off ) < (datalength + 4) )
     {
       /* set WARC file to FULL, no more records could be added */
       ISFULL = WARC_TRUE;
@@ -1981,7 +2006,8 @@ WFile_storeRecordUncompressed (void* _self, const void * wrec,
   /* writing final double CRLF */
   w_fwrite ("\r\n\r\n", 4, 1, FH);
 
-  FSIZE = w_ftell(FH);
+  w_ftell(FH, off);
+  FSIZE = off;
 
   return (WARC_FALSE);
 }
@@ -2007,6 +2033,8 @@ WPUBLIC warc_bool_t WFile_storeRecord (void* _self, const void * wrec)
   FILE         * wtfile      = NIL; /* for creation of the temporary file */
   const warc_u8_t * field    = NIL; /*wil; hold the different fields value*/
   warc_u64_t     datalength  = 0;
+
+  warc_u64_t     off;
 
   /* Preconditions */
   CASSERT (self);
@@ -2036,7 +2064,9 @@ WPUBLIC warc_bool_t WFile_storeRecord (void* _self, const void * wrec)
   }
 
   w_fseek_end (bloc);
-  if (WRecord_getDataSize (wrec) != w_ftell (bloc) )
+
+  w_ftell (bloc, off);
+  if (WRecord_getDataSize (wrec) != off )
     return (WARC_TRUE);
   w_fseek_start (bloc);
 
@@ -2282,7 +2312,7 @@ WIPUBLIC warc_i32_t WFile_fileno (void *_self)
  */
 
 WIPUBLIC warc_bool_t WFile_fillBuffer (void * _self, char * buffer,
-                                       warc_i32_t size, warc_i32_t * ret)
+                                       warc_i64_t size, warc_i64_t * ret)
 {
 
   struct WFile * self = _self;
@@ -2355,7 +2385,7 @@ WPRIVATE void * WFile_constructor (void * _self, va_list * app)
     destroy (self);
     return (NIL);
   }
-
+  
 
   if (MODE == WARC_FILE_READER) /* reading from a WARC file */
     {
@@ -2401,7 +2431,7 @@ WPRIVATE void * WFile_constructor (void * _self, va_list * app)
             return (NIL);
           }
 
-          where = (warc_u64_t) w_ftell (FH);
+          w_ftell (FH, where);
 
           if (WGzip_check (g, FH, 0) )
             {
@@ -2427,6 +2457,8 @@ WPRIVATE void * WFile_constructor (void * _self, va_list * app)
 
   else if (MODE == WARC_FILE_WRITER) /* writing to a WARC file */
     {
+      warc_u64_t off;
+
 /*       FH = w_fopen_wb (fname); */
       w_open_cwb (fname, FH);
       unless (FH)
@@ -2436,7 +2468,9 @@ WPRIVATE void * WFile_constructor (void * _self, va_list * app)
       }
 
       w_fseek_end (FH);
-      FSIZE = (warc_u64_t) w_ftell (FH);
+
+      w_ftell (FH, off);
+      FSIZE = off;
 
       if (FSIZE >= MAXSIZE)
         {

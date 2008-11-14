@@ -171,7 +171,7 @@ WPUBLIC warc_bool_t WBloc_copyPayloadToTemporary (void * _self, int tmpfile)
  * Last Read chunk size recovering function
  */
 
-WPUBLIC  warc_u32_t WBloc_getLastChunkSize (const void * const _self)
+WPUBLIC warc_u32_t WBloc_getLastChunkSize (const void * const _self)
 {
      const struct WBloc * const self = _self;
 

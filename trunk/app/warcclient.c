@@ -52,8 +52,8 @@ int main (int argc, const char ** argv)
   warc_u8_t        what [12];
   warc_bool_t      request = WARC_FALSE;
   warc_bool_t      filter  = WARC_FALSE;
-  warc_u32_t       port    = 0;
-  warc_u32_t       offset  = 0;
+  warc_u64_t       port    = 0;
+  warc_u64_t       offset  = 0;
   warc_i32_t       c       = 0;
 
   if (argc <= 6)
@@ -206,7 +206,7 @@ int main (int argc, const char ** argv)
   s = bless (WClient, makeS(ip), port, makeS (server));
   unless (s)
     {
-     fprintf (stderr, "Unable to create the WARC client using the IP address %s on the port %d.\n", ip, port);
+     fprintf (stderr, "Unable to create the WARC client using the IP address %s on the port %llu.\n", ip, (unsigned long long) port);
      free_obj(p, 7);
     }
   

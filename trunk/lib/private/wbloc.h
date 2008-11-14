@@ -44,9 +44,9 @@ extern "C"
 
     extern const void * WBloc;
 
-    extern warc_u8_t * WBloc_next (void *);
-    extern const warc_u8_t * WBloc_getHttpCode (const void * const);
-    extern warc_u32_t WBloc_getLastChunkSize (const void * const );
+    extern warc_u8_t *       WBloc_next             (void *);
+    extern const warc_u8_t * WBloc_getHttpCode      (const void * const);
+    extern warc_u32_t        WBloc_getLastChunkSize (const void * const );
 
 
 #ifdef __cplusplus

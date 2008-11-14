@@ -57,12 +57,12 @@
 /* The buffer maxumim size */
 #ifndef WSERVER_MAX_BUFFER_SIZE
 #define WSERVER_MAX_BUFFER_SIZE  512 
-#endif /* WSERVER_MAX_BUFFER_SIZE */ 
+#endif
 
 /* The chunk maximum size (equals header a TCP tram) */
 #ifndef WSERVER_MAX_CHUNK_SIZE
 #define WSERVER_MAX_CHUNK_SIZE   512
-#endif /* WSERVER_MAX_CHUNK_SIZE */
+#endif
 
 
 #define makeS(s) (s), w_strlen ((s))
@@ -331,7 +331,7 @@ WPRIVATE void * WServer_getUriFileName (const warc_u8_t * uri,
 
 WPRIVATE warc_bool_t WServer_parseRequest (const warc_u8_t * uri, 
                                            void            * fname, 
-                                           warc_i32_t      * offset, 
+                                           warc_u64_t      * offset, 
                                            warc_filters_t  * what,
                                            void            * value,
                                            warc_list_output  * out,
@@ -403,7 +403,7 @@ WPRIVATE warc_bool_t WServer_parseRequest (const warc_u8_t * uri,
       }
   
      w_atou (WString_getText(item), WString_getLength (item), 
-             (warc_u32_t *) offset);
+             offset);
      pos = pos + WString_getLength (item) + 1;
      destroy (item);
   
@@ -451,7 +451,7 @@ WPRIVATE warc_bool_t WServer_parseRequest (const warc_u8_t * uri,
       }
   
      w_atou (WString_getText(item), WString_getLength (item), 
-             (warc_u32_t *) offset);
+             offset);
      pos = pos + WString_getLength (item) + 1;
      destroy (item);
 
@@ -541,7 +541,7 @@ WPRIVATE warc_bool_t WServer_parseRequest (const warc_u8_t * uri,
       return (WARC_TRUE);
       }
 
-    w_atou(WString_getText(item), WString_getLength(item), (warc_u32_t *) offset);
+    w_atou(WString_getText(item), WString_getLength(item), offset);
     pos = pos + WString_getLength (item)+1;
     destroy (item);
 
@@ -590,7 +590,7 @@ WPRIVATE warc_bool_t WServer_parseRequest (const warc_u8_t * uri,
       return (WARC_TRUE);
       }
 
-    w_atou(WString_getText(item), WString_getLength(item), (warc_u32_t *) offset);
+    w_atou(WString_getText(item), WString_getLength(item), offset);
     pos = pos + WString_getLength (item)+1;
     destroy (item);
 
@@ -701,12 +701,14 @@ WPRIVATE warc_bool_t WSend_fullResponse (void * fname, void * tmp, warc_i32_t of
    char         *   buffer         = NIL ;
    FILE         *   full_file      = NIL ;
    wfile_comp_t     comp_mode      = WARC_FILE_UNCOMPRESSED;
-   warc_u32_t       size           = 0   ;
-   warc_u32_t       rsize          = 0   ;
+   warc_u64_t       size           = 0   ;
+   warc_u64_t       rsize          = 0   ;
    warc_u8_t        char_size[26]        ;
    warc_u8_t        content_type[25]     ;
    void         *   wfile          = NIL;
    
+   warc_u64_t       off;
+
 
    full_file = w_fopen_rb ((const char *) WString_getText(fname));
 
@@ -748,7 +750,8 @@ WPRIVATE warc_bool_t WSend_fullResponse (void * fname, void * tmp, warc_i32_t of
    w_file_size (full_file, size);
    w_fseek_from_start (full_file, offset);
 
-   size = size - (warc_u32_t) w_ftell (full_file);
+   w_ftell (full_file, off);
+   size = size - off;
 
       
    buffer = wmalloc (WSERVER_MAX_CHUNK_SIZE + 1);
@@ -881,8 +884,8 @@ WPRIVATE warc_bool_t WSend_record (void * fname, void * tmp, warc_i32_t offset, 
    void         *    wfile     = NIL  ;
    void         *    wrecord   = NIL  ;
    wfile_comp_t      comp_mode = WARC_FILE_UNCOMPRESSED;
-   warc_u32_t        size      = 0    ;
-   warc_u32_t        rsize     = 0    ;
+   warc_i64_t        size      = 0    ;
+   warc_i64_t        rsize     = 0    ;
    warc_u8_t         char_size[26]   ;
    warc_u8_t         content_type[25];
       
@@ -994,7 +997,7 @@ WPRIVATE warc_bool_t WSend_record (void * fname, void * tmp, warc_i32_t offset, 
    /* sending the data chunk per chunk */
    while (size)
       {
-       warc_i32_t ret = -1;
+       warc_i64_t ret = 0;
          
        /* getting a chunk from the input file */
        if (size > WSERVER_MAX_CHUNK_SIZE)
@@ -2224,8 +2227,8 @@ WPRIVATE warc_bool_t WSend_distantFilterResponse (void * fname, void * tmp, warc
    void         *    wfile     = NIL  ;
    void         *    wrecord   = NIL  ;
    wfile_comp_t      comp_mode = WARC_FILE_UNCOMPRESSED;
-   warc_u32_t        size      = 0    ;
-   warc_u32_t        rsize     = 0    ;
+   warc_i64_t        size      = 0    ;
+   warc_i64_t        rsize     = 0    ;
    warc_u8_t         content_type[25];
    warc_bool_t       found     = WARC_TRUE ;
    const warc_u8_t   * string  = NIL ;
@@ -2433,7 +2436,7 @@ WPRIVATE warc_bool_t WSend_distantFilterResponse (void * fname, void * tmp, warc
          /* sending the data chunk per chunk */
          while (size)
             {
-             warc_i32_t ret = -1;
+             warc_i64_t ret = -1;
          
              /* getting a chunk from the input file */
              if (size > WSERVER_MAX_CHUNK_SIZE)
@@ -2505,7 +2508,7 @@ WPRIVATE void WAccess_callback (struct evhttp_request * req, void * _arg)
   void             * cvalue      = NIL;
   const  warc_u8_t * uri         = NIL;
   struct evbuffer  * buf         = NIL;
-  warc_i32_t         offset      = -1;
+  warc_u64_t         offset      = 0;
   warc_request_t     req_kind;
   warc_filters_t     what        = WARC_URI;
   warc_list_output   out         = WARC_XML;

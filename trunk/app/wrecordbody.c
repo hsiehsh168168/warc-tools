@@ -68,15 +68,15 @@ int main (int argc, const char ** argv)
   warc_u8_t      * fname   = NIL;
   warc_u8_t      * field   = NIL;
   warc_u8_t      * wdir    = uS(".");
-  warc_u32_t       offset  = 0;
-  warc_u8_t       * flags    = uS ("f:o:t:e");
-  warc_u8_t       buffer [WARC_CHUNK_SIZE+1];
-  warc_u8_t         http_code [4];
+  warc_u64_t       offset  = 0;
+  warc_u8_t      * flags   = uS ("f:o:t:e");
+  warc_u8_t        buffer [WARC_CHUNK_SIZE+1];
+  warc_u8_t        http_code [4];
   warc_i32_t       c;
   wfile_comp_t     cmode   = WARC_FILE_DETECT_COMPRESSION;
   warc_bool_t      with_http = WARC_FALSE;
   warc_u32_t       rsize    = 0;
-  warc_bool_t stop = WARC_FALSE;
+  warc_bool_t      stop = WARC_FALSE;
 
   void           * r = NIL;
   void           * w = NIL;
@@ -165,7 +165,7 @@ destroy (p);
 
   if (WFile_seek (w, offset))
      {
-      fprintf (stderr, "Could not reach the offset %d\n", offset);
+       fprintf (stderr, "Could not reach the offset %llu\n", (unsigned long long) offset);
       destroy (w);
       return (9);
      }

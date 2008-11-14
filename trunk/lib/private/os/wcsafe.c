@@ -36,7 +36,7 @@
 
 #include <stddef.h>
 #include <ctype.h>
-
+#include <limits.h>
 
 #include <wmisc.h>
 #include <wcsafe.h>
@@ -349,13 +349,21 @@ WPUBLIC warc_bool_t w_check_digital_string (const warc_u8_t * dstring,
   returns false if succeed and true if en error occurs
 */
 
-WPUBLIC warc_bool_t w_atou (const warc_u8_t * s, warc_u32_t len,
-                            warc_u32_t * val)
+/* C/C++ 64 bits: http://home.att.net/~jackklein/c/inttypes.html#long_long */
+
+WPUBLIC warc_bool_t w_atou (const warc_u8_t * s, warc_u64_t len,
+                            warc_u64_t * val)
 {
   unless (w_check_digital_string (s, len) )
   return (WARC_TRUE);
   else
-    * val = atoi ( (const char *) s);
+    {
+      /* unsigned long long int _val = 0; */
+
+      /*  *val = (warc_u64_t) atoll ( (const char *) s); */
+      /*sscanf((const char *) s, "%llu", (long long unsigned int) val);*/
+      *val = strtoull((const char *) s, NIL, 10);
+    }
 
   return (WARC_FALSE);
 }
@@ -365,11 +373,11 @@ WPUBLIC warc_bool_t w_atou (const warc_u8_t * s, warc_u32_t len,
  * Convert a digit its string representation
  */
 
-WPUBLIC warc_u8_t * w_numToString (warc_i64_t numericvalue,
+WPUBLIC warc_u8_t * w_numToString (warc_u64_t numericvalue,
                                    warc_u8_t * strvalue)
 {
   warc_u32_t i;
-  warc_u32_t quaut = 1;
+  warc_u64_t quaut = 1;
 
   while ( (numericvalue / quaut) != 0)
     quaut *= 10;

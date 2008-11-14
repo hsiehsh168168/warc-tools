@@ -27,17 +27,21 @@
 #include <Python.h>
 #include <wport.h>
 
-/* struct used to hold a reference to a python callable object, and a python obj containing user data */
+/* struct used to hold a reference to a python 
+   callable object, and a python obj containing 
+   user data 
+*/
 typedef struct {
-    PyObject* callback;
-    PyObject* arg;
-    } callbackStruct;
+  PyObject* callback;
+  PyObject* arg;
+} callbackStruct;
 
 
-PyObject* pyAFile_register(void *, void * , PyObject* pyfunc, PyObject* arg);
-extern warc_bool_t     AFile_register       (void *, void *,
-          int (*)
-          (void *, const char *,
-           const unsigned int),
-          void *);
-    
+extern   PyObject*  pyAFile_register (void *, void *, PyObject *, PyObject *);
+
+extern   warc_bool_t AFile_register   (void *, void *,
+                                       int (*)
+                                       (void *, const char *,
+                                        const unsigned int),
+                                       void *);
+

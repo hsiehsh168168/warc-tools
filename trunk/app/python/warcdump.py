@@ -55,25 +55,26 @@ def main () :
     (options, args) = parser.parse_args()
 
     if len (args) != 0 :
-       parser.error(" Incorrect arguments")
+       parser.error("Incorrect arguments")
 
     if (not (options.filename)) :
-        parser.error(" You must give WARC file name")
+        parser.error("You must provide a WARC file name")
 
-    w = WFile (options.filename ,600 * 1024 * 1024, warc.WARC_FILE_READER, warc.WARC_FILE_DETECT_COMPRESSION, options.tmpdir)
+    w = WFile (options.filename, 600 * 1024 * 1024, warc.WARC_FILE_READER, warc.WARC_FILE_DETECT_COMPRESSION, options.tmpdir)
+    
+    if w == None:
+        print "Couldn't create a WARC File object"
+        return
 
-    if (not (w)) :
-             print "WARC file  not found "
-             return
     #print "%-20s %-20s %-10s %-20s %-45s %-44s %-86s " % ("Offset", "CSize", "WarcId", "Content-Length", "WARC-Type", "WARC-Date",  "WARC-Record-ID")
 
     while ( w.hasMoreRecords() ) :
 
           r = w.nextRecord()
-
-          if (not (r)) :
+          if r == None:
              w.destroy ()
-             return             
+             print "Couldn't get the WARC record object"
+             return   
 
           sys.stdout.write ("%-20u " %  r . getOffset () )
 

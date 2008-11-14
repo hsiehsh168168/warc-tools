@@ -115,11 +115,13 @@ WIPUBLIC warc_bool_t AFile_hasMoreRecords (const void * const _self)
 {
 
   const struct AFile * const self = _self;
+  warc_u64_t   off;
 
   /* preconditions */
   CASSERT (self);
 
-  if (w_ftell (FH) == (warc_i64_t)  FSIZE)
+  w_ftell (FH, off);
+  if ( off == FSIZE)
     {
       w_fseek_start (FH);
       return (WARC_FALSE);
@@ -178,7 +180,7 @@ WPUBLIC void * AFile_nextRecord ( void * _self)
   FILE       * rectfile = NIL; /* to uncompress the ARecord */
   warc_u64_t   offset   = 0;
 
-
+  warc_u64_t   off;
 
 
   /* Preconditions */
@@ -190,8 +192,9 @@ WPUBLIC void * AFile_nextRecord ( void * _self)
       rectfile = WTempFile_handle (TEMP_FILE);
 
       gzobj = bless (WGzip);
-      offset = w_ftell (FH);
-      ret = WGzip_uncompress (gzobj, FH, w_ftell (FH), & usize, & csize,
+
+      w_ftell (FH, offset);
+      ret = WGzip_uncompress (gzobj, FH, offset, & usize, & csize,
                               arecover, (void *) rectfile);
 
       if (ret)
@@ -228,7 +231,8 @@ WPUBLIC void * AFile_nextRecord ( void * _self)
           return (NIL);
         }
 
-      if (ARecord_setRecordOffset (arec, w_ftell (rectfile) ) )
+      w_ftell (rectfile, off);
+      if (ARecord_setRecordOffset (arec, off ) )
         {
           destroy (arec);
           destroy (arcfsm);
@@ -256,11 +260,14 @@ WPUBLIC void * AFile_nextRecord ( void * _self)
 
   else if (COMP == ARC_FILE_UNCOMPRESSED)
     {
+      warc_u64_t off;
+
       arcfsm = bless (AFsmHDL, FH, WORKING_DIR);
 
       if (AFsmHDL_run (arcfsm) )
         {
-          w_fprintf (fprintf (stderr , "error in FSM state address %p, at offset %llu in the arc file\n", AFsmHDL_state (arcfsm), (long long unsigned int) w_ftell (FH) ) );
+          w_ftell (FH, off);
+          w_fprintf (fprintf (stderr , "error in FSM state address %p, at offset %llu in the arc file\n", AFsmHDL_state (arcfsm), (long long unsigned int) off ) );
           destroy (arcfsm);
           return (NIL);
         }
@@ -277,7 +284,8 @@ WPUBLIC void * AFile_nextRecord ( void * _self)
           return (NIL);
         }
 
-      if (ARecord_setRecordOffset (arec, w_ftell (FH) ) )
+      w_ftell (FH, off);
+      if (ARecord_setRecordOffset (arec, off ) )
         {
           destroy (arec);
           destroy (arcfsm);
@@ -440,7 +448,7 @@ WPUBLIC warc_bool_t AFile_register (void* _self, void * arec,
       
       size = ARecord_getDataSize (arec);
       
-      acurrent = (warc_i64_t) w_ftell (FH);
+      w_ftell (FH, acurrent);
       w_fseek_from_start (FH, offset);
       
       if (AFile_fillTempFile (self, atfile, size) )
@@ -545,7 +553,7 @@ WPRIVATE void * AFile_constructor (void * _self, va_list * app)
         return (NIL);
       }
 
-      where = (warc_u64_t) w_ftell (FH);
+      w_ftell (FH, where);
 
       if (WGzip_check (g, FH, 0) )
         {

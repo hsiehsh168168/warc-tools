@@ -137,16 +137,19 @@ WPUBLIC warc_i32_t WGzip_compress (const void * const _self,
   warc_u64_t offset;
   warc_u64_t ucsize = 0;
 
+  warc_u64_t off;
+
   /* preconditions */
   CASSERT (self);
   assert  (source);
   assert  (dest);
 
   /* get actual offset from "dest" */
-  offset = (warc_u64_t) w_ftell (dest);
+  w_ftell (dest, offset);
 
   /* compute "source" file size */
-  w_file_size_from_offset (source, ucsize, w_ftell (source));
+  w_ftell (source, off);
+  w_file_size_from_offset (source, ucsize, off);
 
   /* create extra space in GZIP header */
   while (space)

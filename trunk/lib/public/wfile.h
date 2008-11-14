@@ -59,7 +59,7 @@ extern "C"
 
     extern warc_bool_t     WFile_hasMoreRecords (const void * const);
     extern void *          WFile_nextRecord     (void *);
-    extern warc_u64_t      WFile_isFull          (const void * const);
+    extern warc_bool_t     WFile_isFull          (const void * const);
     extern warc_bool_t     WFile_setMaxSize     (void *, const warc_u64_t);
     extern warc_bool_t     WFile_storeRecord    (void *, const void *);
     extern warc_bool_t     WFile_seek           (void *, const warc_u64_t);

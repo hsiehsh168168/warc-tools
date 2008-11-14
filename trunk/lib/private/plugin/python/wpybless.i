@@ -28,9 +28,18 @@
    #include <wpybless.h>
  %}
   
+ #include <wport.h>
 
-    extern void * bless_WFile (const char  *, const warc_u64_t, unsigned int , const unsigned int, const char *);
+%apply unsigned int { warc_u32_t }
+%apply unsigned long long { warc_u64_t }
 
-    extern void * bless_WRecord ();
+/* %typemap(in) warc_u64_t maxsize{ */
+/*     $1 = (unsigned long long) PyLong_AsUnsignedLongLong($input); */
+/* } */
 
-    extern void * bless_WBloc (void  *, void  *, warc_bool_t, const unsigned int);
+    void * bless_WFile (const char  *, warc_u64_t maxsize, 
+                        wfile_mode_t , warc_bool_t, const char *);
+
+    void * bless_WRecord (void);
+
+    void * bless_WBloc (void  *, void  *, warc_bool_t, warc_u32_t);

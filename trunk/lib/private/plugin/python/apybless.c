@@ -9,13 +9,10 @@
 
 
 
-WPUBLIC void * bless_AFile (const char * fname, const afile_comp_t compressed, const char * dname)
+WPUBLIC void * bless_AFile (const char * fname, const afile_comp_t compressed,
+                            const char * dname)
 {
-void * x;
-
-x = bless (AFile, fname, compressed, dname);
-
-return (x);
+  return (bless (AFile, fname, compressed, dname));
 }
 
 

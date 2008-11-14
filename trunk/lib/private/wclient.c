@@ -96,8 +96,8 @@ WPRIVATE void WResponse_callback (struct evhttp_request * req, void * _arg)
 {
 
   struct Callbacks_arg * arg      = NIL;
-  warc_u32_t             size     = 0;
-  warc_u32_t             sentsize = 0;
+  warc_u64_t             size     = 0;
+  warc_u64_t             sentsize = 0;
   warc_u8_t            * strsize  = NIL;
 
   arg = _arg;
@@ -285,7 +285,7 @@ WPRIVATE warc_bool_t WClient_end (void * _self)
  */
 
 WPUBLIC warc_bool_t WClient_getWRecord (void * const _self,
-                                        warc_i64_t offset,
+                                        warc_u64_t offset,
                                         const warc_u8_t * path,
                                         warc_u32_t pathlen,
                                         const warc_u8_t * outf)
@@ -396,7 +396,7 @@ WPUBLIC warc_bool_t WClient_getWRecord (void * const _self,
  */
 
 WPUBLIC warc_bool_t WClient_getWFile (void * const _self, 
-                                      warc_i64_t offset,
+                                      warc_u64_t offset,
                                       const warc_u8_t * path,
                                       warc_u32_t pathlen,
                                       const warc_u8_t * outf)
@@ -509,7 +509,7 @@ WPUBLIC warc_bool_t WClient_getWFile (void * const _self,
  */
 
 WPUBLIC warc_bool_t WClient_getFiltredWFile (void * const _self,
-                                            warc_i64_t offset,
+                                            warc_u64_t offset,
                                             const warc_u8_t * what,
                                             warc_u32_t whatlen,
                                             const warc_u8_t * value,
@@ -634,7 +634,7 @@ WPUBLIC warc_bool_t WClient_getFiltredWFile (void * const _self,
  */
 
 WPUBLIC warc_bool_t WClient_getList (void * const _self, 
-                                      warc_i64_t offset,
+                                      warc_u64_t offset,
                                       const warc_u8_t * format,
                                       warc_u32_t        formatlen,
                                       const warc_u8_t * path,

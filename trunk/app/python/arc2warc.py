@@ -65,7 +65,7 @@ def guessname( fname , cmode ):
 
 
 def convert( fname , outfname , tmpdir , cmode  ):
-    a = AFile ( fname , arc.ARC_FILE_DETECT_COMPRESSION, tmpdir)
+    a = AFile (fname , arc.ARC_FILE_DETECT_COMPRESSION, tmpdir)
 
     if (not (a)) :
        print "ARC file not found "
@@ -76,22 +76,20 @@ def convert( fname , outfname , tmpdir , cmode  ):
     else :
         cmode = warc.WARC_FILE_UNCOMPRESSED
 
-    w = WFile(  outfname , 600 * 1024 * 1024,
-              warc.WARC_FILE_WRITER, cmode, tmpdir);
+    w = WFile (outfname, 16 * 1024 * 1024 * 1024,
+               warc.WARC_FILE_WRITER, cmode, tmpdir);
   
 
-    if (not (w)) :
+    if w == None:
        print "given temporary directory does not exist "
        a . destroy ()
        return
-
-
   
     while (a . hasMoreRecords () ) :
 
           ar = a. nextRecord ()
 
-          if (not (ar)) :
+          if ar == None:
              print "bad ARC file"
              a . destroy ()
              w . destroy ()
@@ -99,7 +97,7 @@ def convert( fname , outfname , tmpdir , cmode  ):
 
           wr = WRecord ()
 
-          if (not (wr)) :
+          if wr == None:
              print "can not create WARC record object"
              a . destroy ()
              w . destroy ()
