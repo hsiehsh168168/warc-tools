@@ -94,9 +94,12 @@ PyObject* pyWFile_register(void  * a, void * b,
      
  %}
 
-%typemap(in) warc_u64_t max_size {
-    $1 = (warc_u64_t) PyLong_AsUnsignedLongLong($input);
-}
+%apply unsigned int { warc_u32_t }
+%apply unsigned long long { warc_u64_t }
+
+/* %typemap(in) warc_u64_t max_size { */
+/*     $1 = (warc_u64_t) PyLong_AsUnsignedLongLong($input); */
+/* } */
 
 typedef enum {WARC_FILE_UNCOMPRESSED = 0,
               WARC_FILE_COMPRESSED_GZIP,

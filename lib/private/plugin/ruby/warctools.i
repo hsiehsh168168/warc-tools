@@ -10,5 +10,5 @@
 %include "typemaps.i"
 
 %apply float *INOUT { float *modify_me };
-FILE * SimpleFunc(float *modify_me);
+
 

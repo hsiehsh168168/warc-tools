@@ -32,8 +32,8 @@
   
 
 
-    extern const char * getFieldKey (void * r, unsigned int rank);
-    extern const char * getFieldValue (void * r, unsigned rank);
+    extern const char * getFieldKey (void * r, warc_u32_t rank);
+    extern const char * getFieldValue (void * r, warc_u32_t rank);
 
 
 

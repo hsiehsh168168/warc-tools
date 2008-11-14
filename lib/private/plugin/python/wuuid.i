@@ -30,6 +30,9 @@
  
  %}
 
+%apply unsigned int { warc_u32_t }
+%apply unsigned long long { warc_u64_t }
+
     extern const void * WUUID;
 
     extern void         WUUID_reinit (const void * const);
