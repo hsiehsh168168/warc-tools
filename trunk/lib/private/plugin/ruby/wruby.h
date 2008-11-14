@@ -32,9 +32,6 @@ extern "C"
   {
 #endif
 
-
-FILE * SimpleFunc(float *);
-
 int callback (void * userdata, const char * inner_data, int size);
 
 #ifdef __cplusplus
