@@ -60,7 +60,7 @@ struct ARecord
 
     /*@{*/
     warc_u64_t   asize;  /**< The size of data bloc */
-    warc_i64_t   aoffset;  /**< The offset of the data bloc in the Arc file */
+    warc_u64_t   aoffset;  /**< The offset of the data bloc in the Arc file */
     void       * url;          /**< The ARC url */
     void       * ip_adress; /**< The ARC record ip adress */
     void       * creation_date; /**< The ARC record date of creation */
@@ -71,7 +71,7 @@ struct ARecord
     /**< The pointer to the user call back function */
     void       * datafile; /**< The data File descriptor */
     FILE       * who; /**< The Arc file wich containt the record */
-    warc_u32_t   data_length; /**< The ARC record data_length */
+    warc_u64_t   data_length; /**< The ARC record data_length */
 
     /*@}*/
   };
@@ -142,7 +142,7 @@ WIPUBLIC warc_bool_t ARecord_setUrl (void * const _self,
  * Returns the data length of the ARC-record
  */
 
-WIPUBLIC warc_u32_t ARecord_getDataLength (const void * const _self)
+WIPUBLIC warc_u64_t ARecord_getDataLength (const void * const _self)
 {
 
   const struct ARecord * const self = _self;
@@ -161,7 +161,7 @@ WIPUBLIC warc_u32_t ARecord_getDataLength (const void * const _self)
  */
 
 WIPUBLIC warc_bool_t ARecord_setDataLength (void * const _self,
-    const warc_u32_t len)
+                                            const warc_u64_t len)
 {
 
   struct ARecord * const self = _self;
@@ -382,7 +382,7 @@ WIPUBLIC warc_u64_t ARecord_getDataSize (const void * const _self)
  * Arc Record Data Bloc file set size
  */
 
-WPUBLIC warc_bool_t ARecord_setContentSize (void * _self, warc_i64_t sz)
+WPUBLIC warc_bool_t ARecord_setContentSize (void * _self, warc_u64_t sz)
 {
 
   struct ARecord *  self = _self;
@@ -446,7 +446,7 @@ WIPUBLIC warc_bool_t ARecord_getContent (const void* const _self)
  * ARecord data bloc offset provider
  */
 
-WIPUBLIC warc_i64_t ARecord_getRecordOffset (const void * const _self)
+WIPUBLIC warc_u64_t ARecord_getRecordOffset (const void * const _self)
 {
 
   const struct ARecord * const self = _self;
@@ -454,10 +454,7 @@ WIPUBLIC warc_i64_t ARecord_getRecordOffset (const void * const _self)
   /* Preconditions */
   CASSERT (self);
 
-  if (OFFSET >= 0)
-    return (OFFSET);
-
-  return (-1);
+  return (OFFSET);
 }
 
 /**
@@ -468,7 +465,7 @@ WIPUBLIC warc_i64_t ARecord_getRecordOffset (const void * const _self)
  */
 
 WIPUBLIC warc_bool_t ARecord_setRecordOffset (void * _self,
-    const warc_i64_t offset)
+    const warc_u64_t offset)
 {
 
   struct ARecord * self = _self;
@@ -476,7 +473,7 @@ WIPUBLIC warc_bool_t ARecord_setRecordOffset (void * _self,
   /* Preconditions */
   CASSERT (self);
 
-  if (offset >= 0)
+  if (offset != WARC_U64_MAX)
     {
       OFFSET = offset;
       return (WARC_FALSE);
@@ -591,9 +588,13 @@ warc_bool_t temp_writer (void * _envstr, const char * buff, warc_u32_t size)
   warc_u32_t             wrtsize  = envstr -> _wrtsize;
   warc_u32_t             realsize = size;
 
-  if (w_ftell (fout) + size > wrtsize)
-    realsize = wrtsize - w_ftell (fout);
+  warc_u64_t             off;
 
+  w_ftell (fout, off);
+  if (off + size > wrtsize)
+    {
+      realsize = wrtsize - off;
+    }
   w_fwrite (buff, realsize, 1, fout);
 
   return (WARC_TRUE);

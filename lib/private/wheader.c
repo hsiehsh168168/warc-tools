@@ -245,7 +245,7 @@ WIPUBLIC warc_bool_t WHeader_setContentLength (void * const _self,
   /* preconditions */
   CASSERT (self);
 
-  if (len <=0 )
+  if (len == WARC_U64_MAX )
      return (WARC_TRUE);
 
   CONT_LENGTH = len;
@@ -2028,7 +2028,7 @@ WPUBLIC warc_bool_t WHeader_extractFromWarcFile (void * _self, FILE * infile)
     void          *   afsm = NIL       ;
     void          *   anvl = NIL       ;
     warc_bool_t       more = WARC_TRUE ;
-    warc_u32_t        digital = 0      ;
+    warc_u64_t        digital = 0      ;
     warc_u64_t        datalen = 0      ;
     warc_rec_t        rtype = WARC_UNKNOWN_RECORD;
     warc_u8_t     *   charbuf = NIL;
@@ -2202,6 +2202,7 @@ WPUBLIC warc_bool_t WHeader_extractFromWarcFile (void * _self, FILE * infile)
                 }
               digital = 0;
               w_atou (makeS (charbuf), & digital);
+
               wfree (charbuf);
               if (WHeader_setContentLength (self, digital))
                  {
@@ -2621,7 +2622,8 @@ WPUBLIC warc_bool_t WHeader_extractFromWarcFile (void * _self, FILE * infile)
               wfree (charbuf);
 
               digital = 0;
-              w_atou (WAnvl_getValue (anvl), WAnvl_getValueLen (anvl), & digital);
+              w_atou (WAnvl_getValue (anvl), WAnvl_getValueLen (anvl), 
+                      & digital);
 
               if (WHeader_setSegmentNumber (self, digital))
                  {
@@ -2658,7 +2660,8 @@ WPUBLIC warc_bool_t WHeader_extractFromWarcFile (void * _self, FILE * infile)
               wfree (charbuf);
 
               digital = 0;
-              w_atou (WAnvl_getValue (anvl), WAnvl_getValueLen (anvl), & digital);
+              w_atou (WAnvl_getValue (anvl), WAnvl_getValueLen (anvl), 
+                      & digital);
 
               if (WHeader_setSegTotalLength (self, digital))
                  {
@@ -2682,9 +2685,11 @@ WPUBLIC warc_bool_t WHeader_extractFromWarcFile (void * _self, FILE * infile)
       }
       else
         {
+          warc_u64_t off;
+          w_ftell (infile, off);
           /* error when parsing the WARC header line */
           w_fprintf (fprintf (stderr , __FILE__ " (line %d) error in FSM state address %p, at offset %llu in the Warc file \n",
-                              __LINE__, WFsmANVL_state (afsm), (long long unsigned int) w_ftell (infile) ) );
+                              __LINE__, WFsmANVL_state (afsm), (long long unsigned int) off ) );
 
           destroy (afsm);
           return  (WARC_TRUE);

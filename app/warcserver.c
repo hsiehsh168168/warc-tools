@@ -45,7 +45,7 @@ int main (int argc, const char ** argv)
   warc_u8_t      * prefix  = NIL;
   char           * wdir    = ".";
   warc_u8_t      * sn      = uS ("iipc");
-  warc_u32_t       port    = 0;
+  warc_u64_t       port    = 0;
   warc_i32_t       c       = 0;
 
   if (argc < 7 || argc > 11)
@@ -134,7 +134,7 @@ int main (int argc, const char ** argv)
 
   unless (s)
   {
-    fprintf (stderr, "Unable to start the server with IP address %s on the port %d.\n", ip, port);
+    fprintf (stderr, "Unable to start the server with IP address %s on the port %llu.\n", ip, (unsigned long long) port);
 
     free_obj (p, 5);
   }

@@ -26,11 +26,11 @@
 /* anvl.i */
  %{
    #include <wport.h>
-   #include "apybless.h"
+   #include <apybless.h>
  
  %}
   
 
-    extern void * bless_AFile (const char *, const unsigned int, const char *);
+  extern void * bless_AFile (const char *, const afile_comp_t, const char *);
 
 

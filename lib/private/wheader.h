@@ -84,13 +84,15 @@ extern "C"
 
     extern warc_u32_t WHeader_getWarcIdLen (const void * const );
 
-    extern warc_u32_t WHeader_getContentLength (const void * const );
+    extern warc_u64_t WHeader_getContentLength (const void * const );
  
-    extern warc_bool_t WHeader_setContentLength (void * const , const warc_u32_t );
+    extern warc_bool_t WHeader_setContentLength (void * const , 
+                                                 const warc_u64_t );
 
-    extern warc_u32_t WHeader_getDataLength (const void * const );
+    extern warc_u64_t WHeader_getDataLength (const void * const );
 
-    extern warc_bool_t WHeader_setDataLength (void * const _self, const warc_u32_t );
+    extern warc_bool_t WHeader_setDataLength (void * const _self, 
+                                              const warc_u64_t );
 
     extern warc_rec_t WHeader_getRecordType (const void * const );
 

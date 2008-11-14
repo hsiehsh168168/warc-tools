@@ -23,27 +23,6 @@
 /*     http://code.google.com/p/warc-tools/                            */
 /* ------------------------------------------------------------------- */
 
-/* wclass.i */
- %{
-   #include <wport.h>
-    /*
-     * C default headers
-     */
-
-#include <stdarg.h>    /* variable function argument */
-    /*
-     * WARC default headers
-     */
-
-#include <wclass.x>  /* WARC base class structure */
-#include <wclass.h>
-     
- %}
-
-   extern void * bless   (const void *, ...);
-   extern void   destroy (void *);
-   extern void   cassert (void * const, const unsigned int);
-
-
-
-    
+JHOVE (JSTOR/Harvard Object Validation Environment) validation module
+for WARC format:
+http://hul.harvard.edu/jhove/

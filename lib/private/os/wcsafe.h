@@ -145,9 +145,25 @@ extern "C"
      * Macro to get current offset of o file
      */
 
+/* #ifndef w_ftell */
+/* #define w_ftell(file) ftello(file) */
+/* #endif */
+
 #ifndef w_ftell
-#define w_ftell(file) ftello(file)
+#define w_ftell(file,off) \
+  do { \
+    off_t _off = ftello(file);  \
+    if(_off == -1) \
+      { \
+        off = WARC_U64_MAX;  \
+        assert (0);          \
+      } \
+    else \
+      off = _off; \
+    } while (0)
 #endif
+
+
 
 
     /**
@@ -157,7 +173,7 @@ extern "C"
 #ifndef w_fseek_start
 #define w_fseek_start(file) \
   do { \
-      int ret = w_fseek (file, 0, SEEK_SET); \
+    int ret = w_fseek (file, (off_t) 0, SEEK_SET);    \
       assert (! ret); \
       UNUSED (ret); \
     } while (0)
@@ -170,7 +186,7 @@ extern "C"
 #ifndef w_fseek_from_start
 #define w_fseek_from_start(file, offset) \
   do { \
-      int ret = w_fseek (file, offset, SEEK_SET); \
+    int ret = w_fseek (file, offset, SEEK_SET);   \
       assert (! ret); \
       UNUSED (ret); \
     } while (0)
@@ -223,7 +239,7 @@ extern "C"
 #define w_file_size(file,size) \
   do { \
       w_fseek_end((file)); \
-      (size) = (warc_u64_t) w_ftell((file)); \
+      w_ftell((file),(size)); \
       w_fseek_start((file)); \
     } while (0)
 #endif
@@ -237,7 +253,8 @@ extern "C"
   do { \
       warc_u64_t o = (offset); \
       w_fseek_end((file)); \
-      (size) = (warc_u64_t) w_ftell((file)) - o; \
+      w_ftell((file), (offset)); \
+      (size) =  offset - o; \
       w_fseek_from_start((file), (o)); \
     } while (0)
 #endif
@@ -372,22 +389,23 @@ extern "C"
 #define w_strstr(s1,s2) strstr ((const char *)s1,(const char *)s2)
 #endif
 
-    extern ptrdiff_t  w_strncpy         (warc_u8_t *, const warc_u8_t *,
-                                           size_t);
+    extern ptrdiff_t   w_strncpy        (warc_u8_t *, const warc_u8_t *,
+                                         size_t);
     extern warc_u8_t * w_strcasestr     (const warc_u8_t *,
-                                           const warc_u8_t *);
+                                         const warc_u8_t *);
     extern const warc_u8_t * w_index    (const warc_u8_t *, int);
-    extern warc_i32_t  w_strcmp         (const warc_u8_t *, const warc_u8_t *);
+    extern warc_i32_t  w_strcmp         (const warc_u8_t *, 
+                                         const warc_u8_t *);
     extern warc_u32_t  w_strlen         (const warc_u8_t *);
     extern warc_u32_t  roundToPowerOfTwoUInt (warc_u32_t);
     extern warc_bool_t isPowerOfTwoUInt (warc_u32_t);
     extern warc_u32_t  computeHash      (const char *, warc_u32_t);
     extern warc_bool_t w_check_digital_string (const warc_u8_t *,
-          warc_u32_t);
-    extern warc_bool_t w_atou           (const warc_u8_t *, warc_u32_t,
-                                           warc_u32_t *);
-    extern warc_u8_t * w_numToString    (warc_i64_t, warc_u8_t *);
-
+                                               warc_u32_t);
+    extern warc_bool_t w_atou           (const warc_u8_t *, warc_u64_t,
+                                         warc_u64_t *);
+    extern warc_u8_t * w_numToString    (warc_u64_t, warc_u8_t *);
+    
 #ifdef __cplusplus
   }
 

@@ -2158,7 +2158,7 @@ WIPUBLIC warc_u64_t WRecord_getDataSize (const void * const _self)
  * Warc Record Data Bloc file set size
  */
 
-WPUBLIC warc_bool_t WRecord_setContentSize (void * _self, warc_i64_t sz)
+WPUBLIC warc_bool_t WRecord_setContentSize (void * _self, warc_u64_t sz)
 {
 
   struct WRecord *  self = _self;
@@ -2210,7 +2210,7 @@ WIPUBLIC warc_bool_t WRecord_getContent (const void* const _self)
   handle = WTempFile_handle (DATAF);
 
   /* save where we're */
-  where = w_ftell (handle);
+  w_ftell (handle, where);
 
   while (WARC_TRUE)
     {

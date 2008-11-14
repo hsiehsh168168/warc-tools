@@ -28,59 +28,67 @@
 /* afile.i */
  %{
    #include <wport.h>
-    #include "pyback.h"
-    /*
-     * C default headers
-     */
-
-
-#include <afile.h>  /* WARC base class structure */
+   #include "pyback.h"
+   
+   /*
+    * C default headers
+    */
+   #include <afile.h>  /* WARC base class structure */
 
 /* statically defined C to Python callback adapter */
-static warc_bool_t PythonCallback(void* user_data, const char * buff, unsigned int size) {
-    
+static warc_bool_t PythonCallback(void* user_data, const char * buff, 
+                                  unsigned int size) 
+{
   PyObject *func, *arglist, *result, *arg;
   callbackStruct* cbStruct = (callbackStruct*)user_data;
-  /*    PyEval_AcquireThread(thread_state); */
+
+  /* PyEval_AcquireThread(thread_state); */
   func = cbStruct->callback;
-  arg = cbStruct->arg;
+  arg  = cbStruct->arg;
     
-  /*arglist = Py_BuildValue("(O)", arg);*/
+  /* arglist = Py_BuildValue("(O)", arg);*/
   arglist = Py_BuildValue("(Osi)", arg, buff, size);
-  result = PyEval_CallObject(func, arglist);
+  result  = PyEval_CallObject(func, arglist);
+
   Py_DECREF(arglist);
   Py_XDECREF(result);
-  /*    PyEval_ReleaseThread(thread_state); */
+
+  /* PyEval_ReleaseThread(thread_state); */
   return;
 }
 
 
 /* Function to register a request for a callback */
-
-PyObject* pyAFile_register(void  *a, void * b, PyObject* pyfunc, PyObject* arg) {
-
-  int ret;
-  PyObject *tuple, *ptr;
-  char* tmpstr;
-  callbackStruct* cbStruct;
+PyObject* pyAFile_register (void  * a, void * b, PyObject * pyfunc,
+                            PyObject * arg)
+{
+  int              ret;
+  PyObject       * tuple, * ptr;
+  char           * tmpstr;
+  callbackStruct * cbStruct;
 	
   if (!(tuple=PyTuple_New(2)))
     {
       PyErr_SetString(PyExc_RuntimeError, "pyAFile_register: PyTuple_New()");
       return NULL;
     }
+
   cbStruct = (callbackStruct*)malloc(sizeof(callbackStruct));
+
   Py_XINCREF(pyfunc);
   Py_XINCREF(arg);
-  cbStruct->callback = pyfunc;
-  cbStruct->arg = arg;
+
+  cbStruct -> callback = pyfunc;
+  cbStruct -> arg      = arg;
    
   ret = AFile_register(a, b, PythonCallback, (void*)cbStruct);
 
   ptr = SWIG_NewPointerObj((void*)cbStruct, 
-			   SWIGTYPE_p_callbackStruct, 0);
+                           SWIGTYPE_p_callbackStruct, 0);
+
   PyTuple_SET_ITEM(tuple, 0, Py_BuildValue("i", 0));
   PyTuple_SET_ITEM(tuple, 1, ptr);
+
   return tuple;
 }
   
@@ -88,23 +96,19 @@ PyObject* pyAFile_register(void  *a, void * b, PyObject* pyfunc, PyObject* arg) 
  %}
    extern const void * AFile;
 
-    typedef enum {ARC_FILE_UNCOMPRESSED = 0,
-                  ARC_FILE_COMPRESSED_GZIP,
-                  ARC_FILE_DETECT_COMPRESSION
-                 } afile_comp_t;
+   typedef enum {ARC_FILE_UNCOMPRESSED = 0,
+                 ARC_FILE_COMPRESSED_GZIP,
+                 ARC_FILE_DETECT_COMPRESSION
+   } afile_comp_t;
 
-    typedef enum {WARC_FALSE = 0,
-                  WARC_TRUE  = 1
-               } warc_bool_t;
+   typedef enum {WARC_FALSE = 0,
+                 WARC_TRUE  = 1
+   } warc_bool_t;
 
     extern void *          AFile_nextRecord     (void *);
-/*    extern unsigned int      AFile_getContentSize (const void * const); */
     extern warc_bool_t     AFile_hasMoreRecords (const void * const);
-/*    extern warc_bool_t     AFile_seek           (void *, const unsigned int); */
 
 %init %{
     PyEval_InitThreads();
 %}
 %include "apyback.h"
-
-    

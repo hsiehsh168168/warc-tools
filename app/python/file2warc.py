@@ -37,19 +37,28 @@ from   wrecord import WRecord
 
 
 def addToWarc (fname, wfile, uri, mime, date, ip, cmode, maxsize, tmpdir):
-	
-##  creating a new record  ##
-##  don't forget to check return values of each functions  ##
+    ##  creating a new record  ##
+    ##  don't forget to check return values of each functions  ##
 
-	w = WFile(wfile, maxsize, warc.WARC_FILE_WRITER, cmode, tmpdir)
+        w = WFile(wfile, maxsize, warc.WARC_FILE_WRITER, cmode, tmpdir)
+        if w == None:
+                print "Couldn't create a WARC File object"
+                return
+    
 	r = WRecord()
+        if r == None:
+                w.destroy ()
+                print "Couldn't create an empty WARC record object"
+                return   
+
 	r . setRecordType(warc.WARC_RESOURCE_RECORD)
        	r . setTargetUri(uri, len(uri))	
        	r . setDate(date, len(date))
        	r . setContentType(mime, len(mime))
 
         # use your "unique identifier" function here
-        s = time.strftime ("%Y-%m-%dT%H:%M:%SZ", time.localtime())
+        #s = time.strftime ("%Y-%m-%dT%H:%M:%SZ", time.localtime())
+        s = "%Y-%m-%dT%H:%M:%SZ"
 	sh = sha.new(uri + s)
 	rid = sh.hexdigest()
 	rid = "uuid:" + rid
@@ -88,8 +97,8 @@ def main () :
                       help="Server IP address fom where the file was retrieved")
     parser.add_option("-c", "--compressed", dest="cmode",
                       action="store_true", help="WARC file will be GZIP compressed (default no)")
-    parser.add_option("-x", "--maxsize", dest="maxsize",
-                      help="WARC file maximum size in bytes (default 600Mb)", default=600 * 1024 * 1024)
+    parser.add_option("-x", "--maxsize", type="int", dest="maxsize",
+                      help="WARC file maximum size in bytes (default 600Mb)", default=16 * 1024 * 1024 * 1024)
     parser.add_option("-t", "--tempdir", dest="tmpdir",
                       help="Temporary working directory (default \".\")", default=".")
     (options, args) = parser.parse_args()
@@ -97,7 +106,6 @@ def main () :
     compmode = warc.WARC_FILE_UNCOMPRESSED
     if (options.cmode):
         compmode = warc.WARC_FILE_COMPRESSED_GZIP
-
 
     addToWarc(options.filename, options.wfilename, options.url, options.mime, options.date, options.ip, compmode, options.maxsize, options.tmpdir)
     

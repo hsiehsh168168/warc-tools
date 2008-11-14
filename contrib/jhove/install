@@ -1,0 +1,9 @@
+Settings
+=========
+
+Build the "warc-tools" shared library with from the main directory:
+$ make shared
+
+Set your environment variable to:
+$ export LD_LIBRARY_PATH=../../..:$LD_LIBRARY_PATH
+

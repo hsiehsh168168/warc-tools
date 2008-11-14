@@ -365,11 +365,11 @@ WPUBLIC warc_bool_t w_atou (const warc_u8_t * s, warc_u32_t len,
  * Convert a digit its string representation
  */
 
-WPUBLIC warc_u8_t * w_numToString (warc_i64_t numericvalue,
+WPUBLIC warc_u8_t * w_numToString (warc_u64_t numericvalue,
                                    warc_u8_t * strvalue)
 {
   warc_u32_t i;
-  warc_u32_t quaut = 1;
+  warc_u64_t quaut = 1;
 
   while ( (numericvalue / quaut) != 0)
     quaut *= 10;

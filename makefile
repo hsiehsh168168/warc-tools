@@ -42,6 +42,7 @@ CURL	 = $(CONTRIB)/curl
 FILE	 = $(CONTRIB)/file
 HTTRACK	 = $(CONTRIB)/httrack
 JHOVE	 = $(CONTRIB)/jhove
+JAVA	 = $(CONTRIB)/java
 YOUTUBE	 = $(CONTRIB)/youtube
 BROWSER	 = $(CONTRIB)/browser
 PUBLIC   = $(LIB)/public
@@ -175,7 +176,8 @@ DEFS      =  -DSTDC_HEADERS=1 -DHAVE_STRING_H=1 -DHAVE_ALLOCA_H=1 -DEBUG=1
 #CFLAGS  += -Wconversion -Wtraditional -Wmissing-prototypes -Wshadow
 
 # comment the line below to compile without large file support (i.e. 64 bits offsets)
-CFLAGS  += -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGE_FILES
+LARGE_FILES = -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGE_FILES
+CFLAGS  += $(LARGE_FILES)
 
 # compile in release mode (no debug info will be included and assertions are disabled). Use with care.
 ifeq ($(W_RELEASE),on)
@@ -420,7 +422,8 @@ b	= $(PRIVATE)/wstring.c   $(PRIVATE)/wclass.c  $(PRIVATE)/wlist.c \
       $(PRIVATE)/afile.c     ${MKTEMP}.c          $(PRIVATE)/wendian.c \
       $(PRIVATE)/wuuid.c     $(PRIVATE)/wserver.c $(PRIVATE)/whash.c \
       $(PRIVATE)/wkv.c	     $(PRIVATE)/wgzip.c   $(PRIVATE)/wclient.c \
-      $(PRIVATE)/wregexp.c	 $(PRIVATE)/wbloc.c   $(PRIVATE)/wversion.c
+      $(PRIVATE)/wregexp.c	 $(PRIVATE)/wbloc.c   $(PRIVATE)/wversion.c \
+	  $(PRIVATE)/jwrap.c
 
 b	+= $(GZIP)/adler32.c     $(GZIP)/crc32.c      $(GZIP)/deflate.c \
 	  $(GZIP)/infback.c      $(GZIP)/inffast.c    $(GZIP)/inflate.c \
@@ -896,7 +899,7 @@ $(PYTHON)/wfield.o : $(PYTHON)/wfield.c
 	$(CC) $(CFLAGS) $(INC_PYTHON) -c $< -o $@
 
 $(PYTHON)/warc_wrap.o : $(PYTHON)/warc_wrap.c
-	$(CC) $(INC_PYTHON) -c $< -o $@
+	$(CC) $(LARGE_FILES) $(INC_PYTHON) -c $< -o $@
 
 $(PYTHON)/wrapper_wbloc.o : $(PYTHON)/wrapper_wbloc.c
 	$(CC) $(CFLAGS) $(INC_PYTHON) -c $< -o $@
@@ -905,7 +908,7 @@ $(PYTHON)/arc.py $(PYTHON)/arc_wrap.c :
 	$(SWIG) -python -outdir $(PYTHON) $(PYTHON)/arc.i
 
 $(PYTHON)/arc_wrap.o : $(PYTHON)/arc_wrap.c
-	$(CC) $(INC_PYTHON) -c $< -o $@
+	$(CC) $(LARGE_FILES) $(INC_PYTHON) -c $< -o $@
 
 
 ######################
@@ -951,7 +954,7 @@ $(RUBY)/warctools_wrap.c :
 	$(SWIG) -ruby -outdir $(RUBY) $(RUBY)/warctools.i 
 
 $(RUBY)/warctools_wrap.o : $(RUBY)/warctools_wrap.c
-	$(CC) $(CFLAGS_RUBY) $(INC_RUBY) -c $< -o $@
+	$(CC) $(LARGE_FILES) $(CFLAGS_RUBY) $(INC_RUBY) -c $< -o $@
 
 
 
@@ -987,7 +990,7 @@ $(HTTRACK)/warcplug.o : $(HTTRACK)/warcplug.c
 	$(CC) $(CFLAGS) -I$(HTTRACK) -c $< -o $@
 
 $(HTTRACK)/httrack_warc_plugin.o : $(HTTRACK)/httrack_warc_plugin.c
-	$(GCC) $(S_CFLAGS) $(HEADERS) -I$(HTTRACK) $(INC_HTTRACK) -c $< -o $@
+	$(GCC) $(LARGE_FILES) $(S_CFLAGS) $(HEADERS) -I$(HTTRACK) $(INC_HTTRACK) -c $< -o $@
 
 
 ####################
@@ -1106,13 +1109,14 @@ clean:		tclean	mod_apache_clean mod_lighty_clean python_clean ruby_clean httrack
 			       $(MISC)/*~     $(MISC)/DEBIAN/*~ $(PRIVATE)/*~ \
 				   semantic.cache depend            *.dylib* *.dll* \
 				   *.bak		  *.stackdump*		*core*	\
-				   $(EVENT)/*~	  $(EVENT)/*.o      $(MENU)/*~	\
-                   $(OUT)/*.xml   $(OUT)/*~		    $(CUNIT)/*~ \
-                   $(CUNIT)/*.o   $(REGEX)/*~       $(REGEX)/*.o \
-				   ${OSDEP}/*.o   ${OSDEP}/*~       ${MINGW_DEP}/*.o
-			@rm -rf $(JHOVE)/*~   $(HTTRACK)/*~   	$(FILE)/*~ $(CURL)/*~ \
-					$(YOUTUBE)/*~ $(BROWSER)/*~     $(BROWSER)/*.pyc \
-					$(BROWSER)/index/*.pyc
+				   $(EVENT)/*~	     $(EVENT)/*.o      $(MENU)/*~	\
+                   $(OUT)/*.xml      $(OUT)/*~		    $(CUNIT)/*~ \
+                   $(CUNIT)/*.o      $(REGEX)/*~       $(REGEX)/*.o \
+				   ${OSDEP}/*.o      ${OSDEP}/*~       ${MINGW_DEP}/*.o
+			@rm -rf $(JHOVE)/*~      $(HTTRACK)/*~   	$(FILE)/*~ $(CURL)/*~ \
+					$(YOUTUBE)/*~    $(BROWSER)/*~     $(JAVA)/*~ \
+					$(JHOVE)/conf/*~ \
+					$(BROWSER)/*.pyc $(BROWSER)/index/*.pyc
 
 			@rm -rf $(DOC)/html   warc-tools*
 

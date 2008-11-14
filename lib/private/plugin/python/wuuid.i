@@ -34,7 +34,7 @@
 
     extern void         WUUID_reinit (const void * const);
     extern void         WUUID_hash   (const void * const, const char *,
-                                        const unsigned long);
+                                     const warc_u64_t);
     extern const char * WUUID_text   (const void * const);
 
 
