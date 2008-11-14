@@ -26,15 +26,16 @@
 /* wrbbless.i */
  %{
    #include <wport.h>
-   #include "wrbbless.h"
- 
- %}
+   #include <wrbbless.h>
+  %}
   
+%apply unsigned int { warc_u32_t }
+%apply unsigned long long { warc_u64_t }
 
-    extern void * bless_WFile (const char  * , const warc_u64_t, unsigned int, const unsigned int , const char * );
+    extern void * bless_WFile (const char  *, warc_u64_t maxsize, 
+                               wfile_mode_t, wfile_comp_t, const char *);
 
-    extern void * bless_WRecord ();
-
-    extern void * bless_WBloc (void  * , void  * , unsigned int, const unsigned int );
-
+    extern void * bless_WRecord (void);
+ 
+    extern void * bless_WBloc (void  *, void  *, warc_bool_t, warc_u32_t);
 

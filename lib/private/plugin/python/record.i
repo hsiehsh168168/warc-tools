@@ -30,10 +30,13 @@
    #include <wrectype.h>
    #include <wrecord.h>
  %}
- 
-%typemap(out) warc_u64_t {
-    $result = (unsigned long long) PyLong_FromUnsignedLongLong((warc_u64_t) $1);
-}
+
+%apply unsigned int { warc_u32_t }
+%apply unsigned long long { warc_u64_t }
+
+/* %typemap(out) warc_u64_t { */
+/*     $result = (unsigned long long) PyLong_FromUnsignedLongLong((warc_u64_t) $1); */
+/* } */
 
     typedef enum
     {
@@ -50,15 +53,15 @@
 
     extern const void * WRecord;
 
-    extern const char *  WRecord_getWarcId       (const void * const);
-    extern warc_rec_t    WRecord_getRecordType   (const void * const);
-    extern const char *  WRecord_getTargetUri    (const void * const);
-    extern const char *  WRecord_getDate         (const void * const);
-    extern const char *  WRecord_getContentType  (const void * const);
-    extern const char *  WRecord_getRecordId     (const void * const);
-    extern       int     WRecord_getContent      (const void * const);
-    extern const char *   WRecord_getAnvlValue   (const void * const,
-                                                  const char *);
+    extern const char *  WRecord_getWarcId           (const void * const);
+    extern warc_rec_t    WRecord_getRecordType       (const void * const);
+    extern const char *  WRecord_getTargetUri        (const void * const);
+    extern const char *  WRecord_getDate             (const void * const);
+    extern const char *  WRecord_getContentType      (const void * const);
+    extern const char *  WRecord_getRecordId         (const void * const);
+    extern       int     WRecord_getContent          (const void * const);
+    extern const char *   WRecord_getAnvlValue       (const void * const,
+                                                     const char *);
     extern  warc_u64_t  WRecord_getContentLength     (const void * const );
     extern const   char * WRecord_getConcurrentTo    (const void * const );
     extern const   char * WRecord_getBlockDigest     (const void * const   );
@@ -72,7 +75,7 @@
     extern const   char * WRecord_getSegmentOriginId (const void * const);
     extern  unsigned int  WRecord_getSegmentNumber   (const void * const );
     extern  unsigned int  WRecord_getSegTotalLength  (const void * const );
-    extern const char * WRecord_getFilename        (const void * const );
+    extern const char *   WRecord_getFilename        (const void * const );
 
 
     extern const void * WRecord_getAnvl         (const void * const);
