@@ -141,7 +141,7 @@ int main (int argc, const char ** argv)
 
       fprintf (stdout, "%-20llu ", (unsigned long long) WRecord_getCompressedSize (r) );
 
-      fprintf (stdout, "%-20llu ",   (unsigned long long) WRecord_getContentLength (r));
+      fprintf (stdout, "%-20llu ", (unsigned long long) WRecord_getContentLength (r));
 
       fprintf (stdout, "%-2u ",    WRecord_getRecordType    (r));
 
@@ -254,7 +254,7 @@ int main (int argc, const char ** argv)
         }
 
       unless (m1)
-        fprintf (stderr, "-- No One --\n");
+        fprintf (stderr, "-- No one --\n");
       
       /* dump ANVLs */
       if (amode == WARC_TRUE)

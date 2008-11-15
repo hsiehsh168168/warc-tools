@@ -66,7 +66,7 @@ def main () :
         print "Couldn't create a WARC File object"
         return
 
-    #print "%-20s %-20s %-10s %-20s %-45s %-44s %-86s " % ("Offset", "CSize", "WarcId", "Content-Length", "WARC-Type", "WARC-Date",  "WARC-Record-ID")
+    print "%-20s %-20s %-10s %-20s %-45s %-44s %-86s " % ("Offset", "CSize", "WarcId", "Content-Length", "WARC-Type", "WARC-Date",  "WARC-Record-ID")
 
     while ( w.hasMoreRecords() ) :
 

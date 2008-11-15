@@ -43,12 +43,17 @@ def dumpWarc(filename)
                 Warctools::WARC_FILE_DETECT_COMPRESSION, ".")
 
 
-  puts "%-16s %-12s %-22s %-50s" % ["Time Stamp", "Offset", "Content Type", "Url"]
+  puts "%-20s %-25s %-25s %-22s %-50s" % ["TimeStamp", 
+                                          "Offset", "Content-Length",
+                                          "Content-Type", "Url"]
   while (w.hasMoreRecords()) do
     r =  w.nextRecord()
 
-    puts "%-16s %-12s %-22s% -50s" % [r.getDate, "#{r.getOffset}", r.getContentType, r.getTargetUri]
-
+    puts "%-20s %-25s %-25s %-22s% -50s" % [r.getDate, 
+                                            "#{r.getOffset}", 
+                                            "#{r.getContentLength}",
+                                            r.getContentType, r.getTargetUri]
+    
     r.destroy()
   end
 end
