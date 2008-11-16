@@ -1,0 +1,62 @@
+<project>
+
+    <target name="clean">
+        <delete dir="classes"/>
+        <delete dir="jar"/>
+    </target>
+
+    <target name="compile">
+        <mkdir dir="classes"/>
+        <javac srcdir="src" destdir="classes"/>
+    </target>
+
+    <target name="jar-main">
+    <!-- generates the jar file with main, jna isn't included -->
+        <mkdir dir="jar"/>
+        <jar destfile="jar/warctools-with-main.jar">
+            <fileset dir="classes"/>
+            <manifest>              
+                <attribute name="Main-Class" value="warctools.Main"/>
+            </manifest>
+        </jar>
+    </target>
+    
+    
+    <target name="jar-main-jna">
+    <!-- generates the jar file with main and jna included -->
+        <mkdir dir="jar"/>
+        <jar destfile="jar/warctools-with-main-jna.jar">
+            <fileset dir="classes"/>
+            <fileset dir="opt"/>
+            <manifest>              
+                <attribute name="Main-Class" value="warctools.Main"/>
+            </manifest>
+        </jar>
+    </target>    
+
+        <target name="jar-jna">
+        <!-- generates the jar file with jna included without main -->
+        <mkdir dir="jar"/>
+        <jar destfile="jar/warctools-with-jna.jar">
+            <fileset dir="classes" excludes="**/Main.class"/>
+            <fileset dir="opt"/>
+        </jar>
+    </target> 
+    
+        <target name="jar">
+        <!-- generates the jar file without jna nor main -->
+        <mkdir dir="jar"/>
+        <jar destfile="jar/warctools.jar">
+            <fileset dir="classes" excludes="**/Main.class"/>
+        </jar>
+    </target>     
+
+    <target name="run">
+        <java jar="jar/warctools-with-main.jar" fork="true"/>
+    </target>
+    
+    <target name="run-main-jna">
+        <java jar="jar/warctools-with-main-jna.jar" fork="true"/>
+    </target>    
+
+</project>
