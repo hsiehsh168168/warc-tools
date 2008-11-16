@@ -541,6 +541,9 @@ o When done, simply type:
 o Then, use the Python applications under "app/python":
   warcdump.py, arcdump.py, arc2warc.py ...
 
+
+
+
 * Ruby wrapper:
 
 You need to following packages installed:
@@ -558,9 +561,19 @@ o Then, use the Python applications under "app/ruby":
   warcdump.rb
 
 
+
+
 * Java wrapper:
 
-Please, have a look to contrib/java/install.
+Please, have a look to "contrib/java/install" file.
+
+
+
+* JHOVE integration:
+
+Please, have a look to "contrib/jhove/install" file.
+
+
 
 * Man pages:
 

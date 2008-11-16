@@ -139,6 +139,14 @@ WRBSONAME	    =,$(WRBNAME).$(LIBSUFFIX).$(MAJOR)
 WRBSHAREDNAME   = $(WRBNAME).$(LIBSUFFIX)
 
 
+###################
+# Java wrapper
+###################
+
+DYNLIB=LIBRARY_PATH
+
+
+
 #################
 # httrack plugin
 #################
@@ -258,6 +266,7 @@ ifeq ($(UNAME_S),Linux)
 	EVENT_CONFIG = $(EV_OS)/config.h $(EV_OS)/event-config.h
 	EV_LIB		 = -lrt 
 #-lnsl -lresolv
+	VERS_RUBY    = 	
 	LIB_RUBY    += -rdynamic -Wl,-export-dynamic -Wl,-R -Wl,$(LIB_RUBY_PATH) -L$(LIB_RUBY_PATH) -L/usr/lib -L/usr/local/lib -lruby$(VERS_RUBY)  -lpthread -ldl -lcrypt -lm -lc
 endif
 ifeq ($(UNAME_S),FreeBSD)
@@ -322,6 +331,7 @@ ifeq ($(UNAME_S),Darwin)
 	RBLIBSUFFIX   = bundle
 	WRBSHAREDNAME = $(WRBNAME).$(RBLIBSUFFIX)
 	RBSHARED_OS	  = rbshared_osx
+	DYNLIB        = DYLD_LIBRARY_PATH
 endif
 ifeq ($(UNAME_S),SunOS)
 	CC	    += -R/usr/local/lib
@@ -959,6 +969,17 @@ $(RUBY)/warctools_wrap.o : $(RUBY)/warctools_wrap.c
 
 
 ######################
+# Java wrapper
+######################
+
+java: shared
+	@(cd $(JAVA); ant clean compile jar jar-jna jar-main jar-main-jna)
+
+java-test: java
+	(cd $(JAVA); export $(DYNLIB)=../..	; ant run-main-jna)
+
+
+######################
 # HTTrack WARC plugin
 ######################
 
@@ -1099,7 +1120,9 @@ httrack_clean: 	   ; @rm -f $(HTTRACK)/*.o $(HTTRACK)/*~ $(HTTRACK)/*.so* \
 					$(HTTRACK)/*.dylib*    $(HTTRACK)/*.dll* $(htlib)    
 
 
-clean:		tclean	mod_apache_clean mod_lighty_clean python_clean ruby_clean httrack_clean
+java_clean: 	   ; @(cd $(JAVA); ant clean &>/dev/null)
+
+clean:		tclean	mod_apache_clean mod_lighty_clean python_clean ruby_clean httrack_clean java_clean
 			@rm -f $t             $(obj)            *.o \
 			       *~             *.a               *.so* \
 			       *.log          *.gz              $(PUBLIC)/*~ \
@@ -1121,4 +1144,4 @@ clean:		tclean	mod_apache_clean mod_lighty_clean python_clean ruby_clean httrack
 			@rm -rf $(DOC)/html   warc-tools*
 
 
-.PHONY: all static clean tclean doc source tgz rpm deb mod_apache_clean mod_lighty_clean python python_clean ruby ruby_clean httrack httrack_clean
+.PHONY: all static clean tclean doc source tgz rpm deb mod_apache_clean mod_lighty_clean python python_clean ruby ruby_clean httrack httrack_cleanb java_clean

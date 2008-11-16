@@ -21,53 +21,7 @@
 /* You may find more information about the WARC Tools project at       */
 /*                                                                     */
 /*     http://code.google.com/p/warc-tools/                            */
-/* ------------------------------------------------------------------- *
+/* ------------------------------------------------------------------- */
 
-Prequesits
-===========
-
-Firs of all, install the Java interface for 
-warc-tools (see contrib/java/install)
-
-
-
-Settings
-=========
-
-See section "2.3 Installation" for JHOVE installation process:
-http://hul.harvard.edu/jhove/using.html
-
-$ cd contrib/jhove
-$ wget http://hul.harvard.edu/jhove/jhove-1_1.tar.gz
-$ tar xf jhove-1_1.tar.gz
-$ export JHOVE_HOME=`pwd`/jhove
-
-The following variables in $JHOVE_HOME/conf/jhove.conf need to be set:
-
-<jhoveHome>jhove-home-directory</jhoveHome>
-<tempDirectory>temporary-directory</tempDirectory>
-
-Also, change the following variables in the file "jhove.tmpl" like this:
-
-#JHOVE_HOME=[your directory path]/jhove
-#JAVA_HOME=/usr/java
-JAVA=$JAVA_HOME/bin/java
-
-
-
-Building
-=========
-
-$ cd contrib/jhove
-$ tar xf jhove-warc-patch.tar.gz -C $JHOVE_HOME
-$ cd $JHOVE_HOME
-$ ant
-
-
-
-
-Testing
-========
-
-$ ./jhove.tmpl -c conf/jhove.conf ../awanvl.warc
-
+Java wrapper interface for "warc-tools" using JNA:
+https://jna.dev.java.net/
