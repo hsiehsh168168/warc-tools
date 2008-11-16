@@ -130,6 +130,7 @@ environment variable if necessary):
 - curl
 - basename
 - dirname
+- unzip
 - strip
 - subversion client
 - chmod

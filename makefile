@@ -979,6 +979,7 @@ java-test: java
 	(cd $(JAVA); export $(DYNLIB)=../..	; ant run-main-jna)
 
 
+
 ######################
 # HTTrack WARC plugin
 ######################
@@ -1122,7 +1123,9 @@ httrack_clean: 	   ; @rm -f $(HTTRACK)/*.o $(HTTRACK)/*~ $(HTTRACK)/*.so* \
 
 java_clean: 	   ; @(cd $(JAVA); ant clean &>/dev/null)
 
-clean:		tclean	mod_apache_clean mod_lighty_clean python_clean ruby_clean httrack_clean java_clean
+jhove_clean:       ; @(cd $(JHOVE); rm -rf jhove jhove-1_1.tar.gz)
+
+clean:		tclean	mod_apache_clean mod_lighty_clean python_clean ruby_clean httrack_clean java_clean jhove_clean
 			@rm -f $t             $(obj)            *.o \
 			       *~             *.a               *.so* \
 			       *.log          *.gz              $(PUBLIC)/*~ \
@@ -1144,4 +1147,4 @@ clean:		tclean	mod_apache_clean mod_lighty_clean python_clean ruby_clean httrack
 			@rm -rf $(DOC)/html   warc-tools*
 
 
-.PHONY: all static clean tclean doc source tgz rpm deb mod_apache_clean mod_lighty_clean python python_clean ruby ruby_clean httrack httrack_cleanb java_clean
+.PHONY: all static clean tclean doc source tgz rpm deb mod_apache_clean mod_lighty_clean python python_clean ruby ruby_clean httrack httrack_cleanb java_clean jhove_clean
