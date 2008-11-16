@@ -58,9 +58,17 @@ JAVA=$JAVA_HOME/bin/java
 Building
 =========
 
+$ cd warc-tools-read-only
+$ make java
 $ cd contrib/jhove
-$ tar xf jhove-warc-patch.tar.gz -C $JHOVE_HOME
+$ tar xf patch.tar.gz -C $JHOVE_HOME
 $ cd $JHOVE_HOME
+$ export LD_LIBRARY_PATH=../../..:$LD_LIBRARY_PATH
+
+or on Mac OS X:
+$ export DYLD_LIBRARY_PATH=../../..:$DYLD_LIBRARY_PATH
+
+Then:
 $ ant
 
 
@@ -69,5 +77,6 @@ $ ant
 Testing
 ========
 
-$ ./jhove.tmpl -c conf/jhove.conf ../awanvl.warc
+Validate the warc file "../awanvl.warc" in "contrib/java" with JHOVE:
+$ ./jhove.tmpl -c conf/jhove.conf ../../java/awanvl.warc 
 
