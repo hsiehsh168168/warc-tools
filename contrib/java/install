@@ -80,7 +80,9 @@ Testing
 
 Test the example file "contrib/java/awanvl.warc" with:
 $ cd $WARC_TOOLS_HOME/contrib/java
-$ ant run-main-jna
+$ export CLASSPATH=$ANT_HOME/lib/jna.jar:jar/warctools-with-main.jar 
+$ java -cp "$CLASSPATH" warctools.Main
+
 
 
 
