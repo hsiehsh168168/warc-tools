@@ -972,7 +972,7 @@ $(RUBY)/warctools_wrap.o : $(RUBY)/warctools_wrap.c
 ######################
 
 java: shared
-	@(cd $(JAVA); ant clean compile jar jar-jna jar-main jar-main-jna)
+	@(cd $(JAVA); ant)
 
 
 
