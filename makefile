@@ -976,7 +976,7 @@ java: shared
 	@(cd $(JAVA); ant clean compile jar jar-jna jar-main jar-main-jna)
 
 java-test: java
-	(cd $(JAVA); export $(DYNLIB)=../..	; ant run-main-jna)
+	(cd $(JAVA); export $(DYNLIB)=../..	; ant run)
 
 
 
