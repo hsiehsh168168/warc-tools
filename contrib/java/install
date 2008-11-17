@@ -56,28 +56,29 @@ in the "lib" directory from:
 https://jna.dev.java.net/servlets/ProjectDocumentList
 
 Put the JNA jar file under ANT libs directory:
-# mv jna.jar /usr/lib/ant/lib/
+# cp /somewhere/jna.jar /usr/lib/ant/lib/
 # exit
-
-Set your environment variable LD_LIBRARY_PATH to:
-$ cd warc-tools-read-only
-$ export LD_LIBRARY_PATH=.:$LD_LIBRARY_PATH
-
-For Mac OS X users, use instead (https://jna.dev.java.net/):
-$ cd warc-tools-read-only
-$ export DYLD_LIBRARY_PATH=.:$DYLD_LIBRARY_PATH
 
 
 Compile from source
 ====================
 
-Build the "warc-tools" shared library from the main directory:
+$ export WARC_TOOLS_HOME=/somewhere/warc-tools-read-only
 
-$ cd contrib/java
+Uncompress the JNA jar:
+$ cd $WARC_TOOLS_HOME/contrib/java/opt
+$ unzip -a /somewhere/jna.jar
+$ rm -rf META-INF 
+
+Build the "warc-tools" shared library from the main directory:
+$ cd $WARC_TOOLS_HOME
 $ make shared
+$ export LD_LIBRARY_PATH=$WARC_TOOLS_HOME:$LD_LIBRARY_PATH
+
+Or for Mac OS X users, use DYLD_LIBRARY_PATH instead:
+$ export DYLD_LIBRARY_PATH=$WARC_TOOLS_HOME:$DYLD_LIBRARY_PATH
 
 Make the Java wrapper with:
-
 $ make java
 
 
@@ -94,9 +95,9 @@ Wrapper usage
 
 The JAR files you'll use in your programs are:
 
-1) "contrib/java//jar/warctools.jar"
+1) "contrib/java/jar/warctools.jar"
 
-2) Or "contrib/java//jar/warctools-with-jna.jar"
+2) Or "contrib/java/jar/warctools-with-jna.jar"
 which already includes JNA (i.e jna.jar).
 
 
