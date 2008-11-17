@@ -35,7 +35,7 @@ public class wrecord implements wrecordi
      public String  WRecord_getAnvlValue   (Pointer x, String val){
      return wrecordi.INSTANCE.WRecord_getAnvlValue   ( x,  val);
      }
-      public int   WRecord_getContentLength   (Pointer x){
+      public long   WRecord_getContentLength   (Pointer x){
       return wrecordi.INSTANCE.WRecord_getContentLength   (x);
      }
       public String WRecord_getConcurrentTo    (Pointer x){
