@@ -37,38 +37,29 @@ Settings
 See section "2.3 Installation" for JHOVE installation process:
 http://hul.harvard.edu/jhove/using.html
 
-$ cd contrib/jhove
+$ cd /tmp
 $ wget http://hul.harvard.edu/jhove/jhove-1_1.tar.gz
 $ tar xf jhove-1_1.tar.gz
 $ export JHOVE_HOME=`pwd`/jhove
+$ export WARC_TOOLS_HOME=/somewhere/warc-tools-read-only
+$ patch -p0 < $WARC_TOOLS_HOME/contrib/jhove/jhove-warc.patch
+$ tar xf $WARC_TOOLS_HOME/contrib/jhove/jhove-warc-src.tgz -C $JHOVE_HOME
 
-The following variables in $JHOVE_HOME/conf/jhove.conf need to be set:
-
-<jhoveHome>jhove-home-directory</jhoveHome>
-<tempDirectory>temporary-directory</tempDirectory>
-
-Also, change the following variables in the file "jhove.tmpl" like this:
-
-#JHOVE_HOME=[your directory path]/jhove
-#JAVA_HOME=/usr/java
-JAVA=$JAVA_HOME/bin/java
 
 
 
 Building
 =========
 
-$ cd warc-tools-read-only
+$ cd $WARC_TOOLS_HOME
 $ make java
-$ cd contrib/jhove
-$ tar xf patch.tar.gz -C $JHOVE_HOME
 $ cd $JHOVE_HOME
-$ export LD_LIBRARY_PATH=../../..:$LD_LIBRARY_PATH
+$ export LD_LIBRARY_PATH=$WARC_TOOLS_HOME:$LD_LIBRARY_PATH
 
 or on Mac OS X:
-$ export DYLD_LIBRARY_PATH=../../..:$DYLD_LIBRARY_PATH
+$ export DYLD_LIBRARY_PATH=$WARC_TOOLS_HOME:$DYLD_LIBRARY_PATH
 
-Then:
+Then, build everything:
 $ ant
 
 
