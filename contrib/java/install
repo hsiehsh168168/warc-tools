@@ -63,14 +63,9 @@ Put the JNA jar file under ANT libs directory:
 Compile from source
 ====================
 
-$ export WARC_TOOLS_HOME=/somewhere/warc-tools-read-only
-
-Uncompress the JNA jar:
-$ cd $WARC_TOOLS_HOME/contrib/java/opt
-$ unzip -a /usr/lib/ant/lib/jna.jar
-$ rm -rf META-INF 
-
 Build the "warc-tools" shared library from the main directory:
+
+$ export WARC_TOOLS_HOME=/somewhere/warc-tools-read-only
 $ cd $WARC_TOOLS_HOME
 $ make java
 $ export LD_LIBRARY_PATH=$WARC_TOOLS_HOME:$LD_LIBRARY_PATH
@@ -84,8 +79,9 @@ Testing
 ========
 
 Test the example file "contrib/java/awanvl.warc" with:
+$ cd $WARC_TOOLS_HOME/contrib/java
+$ ant run-main-jna
 
-$ make java-test
 
 
 Wrapper usage

@@ -331,7 +331,6 @@ ifeq ($(UNAME_S),Darwin)
 	RBLIBSUFFIX   = bundle
 	WRBSHAREDNAME = $(WRBNAME).$(RBLIBSUFFIX)
 	RBSHARED_OS	  = rbshared_osx
-	DYNLIB        = DYLD_LIBRARY_PATH
 endif
 ifeq ($(UNAME_S),SunOS)
 	CC	    += -R/usr/local/lib
@@ -975,8 +974,6 @@ $(RUBY)/warctools_wrap.o : $(RUBY)/warctools_wrap.c
 java: shared
 	@(cd $(JAVA); ant clean compile jar jar-jna jar-main jar-main-jna)
 
-java-test: java
-	(cd $(JAVA); export $(DYNLIB)=../..	; ant run)
 
 
 
