@@ -33,27 +33,6 @@
   </target>
   
   
-  <target name="jar-main-jna">
-    <!-- generates the jar file with main and jna included -->
-    <mkdir dir="jar"/>
-    <jar destfile="jar/warctools-with-main-jna.jar">
-      <fileset dir="classes"/>
-      <fileset dir="${lib.dir}"/>
-      <manifest>              
-        <attribute name="Main-Class" value="warctools.Main"/>
-      </manifest>
-    </jar>
-  </target>    
-  
-  <target name="jar-jna">
-    <!-- generates the jar file with jna included without main -->
-    <mkdir dir="jar"/>
-    <jar destfile="jar/warctools-with-jna.jar">
-      <fileset dir="classes" excludes="**/Main.class"/>
-      <fileset dir="${lib.dir}"/>
-    </jar>
-  </target> 
-  
   <target name="jar" depends="compile">
     <!-- generates the jar file without jna nor main -->
     <mkdir dir="jar"/>
@@ -66,20 +45,5 @@
     <java jar="jar/warctools-with-main.jar" fork="true"/>
   </target>
   
-  <target name="run-main-jna" depends="jar-main-jna">
-    <fileset dir="${lib.dir}"/>
-    <java jar="jar/warctools-with-main-jna.jar" fork="true">
-      <classpath refid="classpath"/>
-    </java>
-  
-<!--     <java fork="true" classname="${main-class}"> -->
-<!--       <classpath> -->
-<!--         <path refid="classpath"/> -->
-<!--         <path location="${jar.dir}/${ant.project.name}.jar"/> -->
-<!--       </classpath> -->
-<!--     </java> -->
-
-  </target>    
-  
-  <target name="main" depends="clean,compile,jar,jar-jna,jar-main,jar-main-jna"/>
+  <target name="main" depends="clean,compile,jar,jar-main"/>
 </project>
