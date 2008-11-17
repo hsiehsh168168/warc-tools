@@ -68,7 +68,7 @@ HEADERS  = -I. -I$(PRIVATE) -I$(PUBLIC) -I$(GZIP) \
 
 MAJOR     = 0
 MINOR     = 18
-RELEASE   = 98
+RELEASE   = 99
 
 LIBSUFFIX = so
 LIBNAME   = libwarc
