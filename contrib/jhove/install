@@ -53,13 +53,13 @@ Building
 
 $ cd $WARC_TOOLS_HOME
 $ make java
-$ cd $JHOVE_HOME
 $ export LD_LIBRARY_PATH=$WARC_TOOLS_HOME:$LD_LIBRARY_PATH
 
 or on Mac OS X:
 $ export DYLD_LIBRARY_PATH=$WARC_TOOLS_HOME:$DYLD_LIBRARY_PATH
 
 Then, build everything:
+$ cd $JHOVE_HOME
 $ ant
 
 
@@ -69,5 +69,5 @@ Testing
 ========
 
 Validate the warc file "../awanvl.warc" in "contrib/java" with JHOVE:
-$ ./jhove.tmpl -c conf/jhove.conf ../../java/awanvl.warc 
+$ ./jhove.tmpl -c conf/jhove.conf $WARC_TOOLS_HOME/contrib/java/awanvl.warc 
 

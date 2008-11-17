@@ -67,19 +67,17 @@ $ export WARC_TOOLS_HOME=/somewhere/warc-tools-read-only
 
 Uncompress the JNA jar:
 $ cd $WARC_TOOLS_HOME/contrib/java/opt
-$ unzip -a /somewhere/jna.jar
+$ unzip -a /usr/lib/ant/lib/jna.jar
 $ rm -rf META-INF 
 
 Build the "warc-tools" shared library from the main directory:
 $ cd $WARC_TOOLS_HOME
-$ make shared
+$ make java
 $ export LD_LIBRARY_PATH=$WARC_TOOLS_HOME:$LD_LIBRARY_PATH
 
 Or for Mac OS X users, use DYLD_LIBRARY_PATH instead:
 $ export DYLD_LIBRARY_PATH=$WARC_TOOLS_HOME:$DYLD_LIBRARY_PATH
 
-Make the Java wrapper with:
-$ make java
 
 
 Testing
