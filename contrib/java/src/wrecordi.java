@@ -7,39 +7,42 @@ import com.sun.jna.Pointer;
 
 public interface wrecordi extends Library
 {
-    wrecordi INSTANCE = (wrecordi) Native.loadLibrary("warc", wrecordi.class);
+        wrecordi INSTANCE = (wrecordi)
+            Native.loadLibrary("warc",
+                               wrecordi.class);
         	
-    //Getters 
-    String  WRecord_getWarcId          (Pointer x);
-    int     WRecord_getRecordType      (Pointer x);
-    String  WRecord_getTargetUri       (Pointer x);
-    String  WRecord_getDate            (Pointer x);
-    String  WRecord_getContentType     (Pointer x);
-    String  WRecord_getRecordId        (Pointer x);
-    int     WRecord_getContent         (Pointer x);
-    String  WRecord_getAnvlValue       (Pointer x, String val);
-    int     WRecord_getContentLength   (Pointer x);
-    String  WRecord_getConcurrentTo    (Pointer x);
-    String  WRecord_getBlockDigest     (Pointer x);
-    String  WRecord_getPayloadDigest   (Pointer x);
-    String  WRecord_getIpAddress       (Pointer x);
-    String  WRecord_getRefersTo        (Pointer x);
-    String  WRecord_getTruncated       (Pointer x);
-    String  WRecord_getWarcInfoId      (Pointer x);
-    String  WRecord_getProfile         (Pointer x);
-    String  WRecord_getPayloadType     (Pointer x);
-    String  WRecord_getSegmentOriginId (Pointer x);
-    int     WRecord_getSegmentNumber   (Pointer x);
-    int     WRecord_getSegTotalLength  (Pointer x);
-    String  WRecord_getFilename        (Pointer x);
+   //Getters 
+     String  WRecord_getWarcId      (Pointer x);
+     int         WRecord_getRecordType  (Pointer x);
+     String  WRecord_getTargetUri   (Pointer x);
+     String  WRecord_getDate        (Pointer x);
+     String  WRecord_getContentType (Pointer x);
+     String  WRecord_getRecordId    (Pointer x);
+     int        WRecord_getContent     (Pointer x);
+     String  WRecord_getAnvlValue   (Pointer x, String val);
+      long        WRecord_getContentLength   (Pointer x);
+      String WRecord_getConcurrentTo    (Pointer x);
+      String WRecord_getBlockDigest     (Pointer x);
+      String WRecord_getPayloadDigest   (Pointer x);
+      String WRecord_getIpAddress       (Pointer x);
+      String WRecord_getRefersTo        (Pointer x);
+      String WRecord_getTruncated       (Pointer x);
+      String WRecord_getWarcInfoId      (Pointer x);
+      String WRecord_getProfile         (Pointer x);
+      String WRecord_getPayloadType     (Pointer x);
+      String WRecord_getSegmentOriginId (Pointer x);
+      int  WRecord_getSegmentNumber         (Pointer x);
+      int WRecord_getSegTotalLength         (Pointer x);
+     String WRecord_getFilename         (Pointer x);
      
-    Pointer WRecord_getAnvl            (Pointer x);
-    long    WRecord_getOffset          (Pointer x);
-    long    WRecord_getUncompressedSize(Pointer x);
-    long    WRecord_getCompressedSize  (Pointer x);
+     Pointer WRecord_getAnvl             (Pointer x);
+     long   WRecord_getOffset           (Pointer x);
+     long   WRecord_getUncompressedSize (Pointer x);
+     long   WRecord_getCompressedSize   (Pointer x);
+   
+     //int  WRecord_getAnvlField        (Pointer x, int , String , String );
     
-    //int  WRecord_getAnvlField        (Pointer x, int , String , String );
-    int WRecord_getAnvlFieldsNumber (Pointer x );
+     int WRecord_getAnvlFieldsNumber (Pointer x );
     
      Pointer WRecord_getBloc (Pointer x, Pointer y,  int with, String code);
 	
@@ -90,7 +93,7 @@ public interface wrecordi extends Library
 	 
 	 int WRecord_setContentFromStringConcat (Pointer x, String ctc, int ctc_len);
 	
-	 void    destroy       (Pointer x);
+	 void     destroy           (Pointer x);
 	 
 	 Pointer bless_Wrecord ();
 

@@ -60,6 +60,7 @@ $ export DYLD_LIBRARY_PATH=$WARC_TOOLS_HOME:$DYLD_LIBRARY_PATH
 
 Then, build everything:
 $ cd $JHOVE_HOME
+$ ant cleandist
 $ ant
 
 

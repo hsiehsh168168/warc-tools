@@ -13,17 +13,17 @@ warc_bool_t callback (void * env, const char* buff, const warc_u32_t size)
   return (WARC_TRUE);
 }
 
-void * bless_Wfile (char * path, warc_u64_t dim, int mode, int compressed, 
-                    char * dname)
+void * bless_Wfile (char * path, warc_u64_t dim, 
+                    int mode, int compressed, char * dname)
 {	
-  return bless (WFile, path, dim, mode, compressed, dname);
+	return bless (WFile, path, dim, mode, compressed, dname);
 }
 
-int isValid (void * const w)
+int isValid ( void * const w)
 {
   void           * r       = NIL;  /* to recover records */
   warc_u32_t       ret     = 0;
-  
+
   while (WFile_hasMoreRecords (w) )
     {
       r = WFile_nextRecord (w);
@@ -32,14 +32,15 @@ int isValid (void * const w)
         ret = 1;
         break;
       }
-      
+
       WFile_register (w, r, callback, (void *) 0);
       WRecord_getContent (r);
       
       destroy (r);
     }
-  
+
   destroy (w);
+
   return (ret);
 }
 
