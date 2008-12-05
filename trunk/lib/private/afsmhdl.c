@@ -24,14 +24,6 @@
 /*     http://code.google.com/p/warc-tools/                            */
 /* ------------------------------------------------------------------- */
 
-/*
- * This file is used to get a more tolerant version of ARC 2 WARC when
- * ARC files have timestamp not conforming to 14 digits.
- * The missing digits are filled with zeros (000...)
- * Overwrite the file with the same name "lib/private/afsmhdl.c" with this one
- * and rebuild evrything if you want this feature.
- */
-
 /**
  * Portability header file
  */
@@ -116,8 +108,7 @@ AFsmHDL_isInteger (void *),  AFsmHDL_isCR      (void *),
 AFsmHDL_isLF      (void *),  AFsmHDL_isUnknown (void *);
 
 /* prototypes of all actions in the FSM (defined below) */
-void AFsmHDL_setDataLength  (void *), 
-AFsmHDL_setDataLengthRelaxed (void *), AFsmHDL_setIpAdress       (void *),
+void AFsmHDL_setDataLength  (void *), AFsmHDL_setIpAdress       (void *),
 AFsmHDL_setUrl         (void *), AFsmHDL_setCreationDate   (void *),
 AFsmHDL_setMimeType    (void *), AFsmHDL_pushBack          (void *),
 AFsmHDL_checkRecordType (void *), AFsmHDL_raiseError        (void *),
@@ -241,8 +232,6 @@ State WANT_ARCHDL_MIME_TYPE =
 {
   /* TEST_EVENT             ACTION                 NEXT_STATE */
 
-  {AFsmHDL_isCR,            AFsmHDL_setDataLengthRelaxed, WANT_ARCHDL_LF},
-  {AFsmHDL_isLF,            AFsmHDL_setDataLengthRelaxed, WANT_ARCHDL_LF},
   {AFsmHDL_isText,          AFsmHDL_setMimeType,   WANT_ARCHDL_MIME_TYPE},
   {AFsmHDL_isSpace,         NIL,                   WANT_ARCHDL_MIME_SP},
   {AFsmHDL_isUnknown,       AFsmHDL_raiseError,    NIL}
@@ -251,9 +240,6 @@ State WANT_ARCHDL_MIME_SP =
 {
   /* TEST_EVENT             ACTION                       NEXT_STATE */
 
-  /*ZZZ*/
-  {AFsmHDL_isCR,            AFsmHDL_setDataLengthRelaxed, WANT_ARCHDL_LF},
-  {AFsmHDL_isLF,            AFsmHDL_setDataLengthRelaxed, WANT_ARCHDL_LF},
   {AFsmHDL_isSpace,         NIL,                         WANT_ARCHDL_MIME_SP},
   {AFsmHDL_isInteger,       AFsmHDL_setDataLength,       WANT_ARCHDL_DATA_LENGTH},
   {AFsmHDL_isUnknown,       AFsmHDL_raiseErrorDlength,   NIL}
@@ -410,35 +396,7 @@ void AFsmHDL_setDataLength (void * _hs)
   WString_append (hs -> data_length, & (hs -> c), 1);
 }
 
-void AFsmHDL_setDataLengthRelaxed (void * _hs)
-{
-  const HDLState * const hs = _hs;
 
-  assert (hs);
-
-
-  printf ("+++++++ RELAXED\n");
-
-  /* push back the char */
-  AFsmHDL_pushBack(_hs);
-
-  /* Maybe the MIME TYPE is missing. So we got DataLength instead */
-  if (strspn ((char *) WString_getText(hs -> mime_type), "0123456789") != WString_getLength (hs -> mime_type) )
-    {
-      AFsmHDL_raiseErrorDlength(_hs);
-      return;
-    }
-
- /* We're almost sure that MIME TYPE is missing due to 
-    a malformed header. Set DataLength to MIME TYPE value and set
-   the MIME TYPE to "unknown_mime" */
-  WString_setText (hs -> data_length, 
-                   WString_getText   (hs -> mime_type),
-                   WString_getLength (hs -> mime_type));
-
-#define UNKNOWN_MIME "unknown_mime"
-  WString_setText (hs -> mime_type, (warc_u8_t *) UNKNOWN_MIME, strlen(UNKNOWN_MIME));
-}
 
 
 
@@ -489,9 +447,6 @@ void AFsmHDL_checkCreationDate (void * _hs)
   HDLState            * const hs  = _hs;
   const warc_u8_t     *       strtompon;
   warc_u32_t                  len;
-  warc_u32_t            diff = 0;
-  warc_u8_t             zero[2];
-  warc_u32_t             i = 0;
 
   assert (hs);
 
@@ -502,42 +457,37 @@ void AFsmHDL_checkCreationDate (void * _hs)
 
   if (len != 14)
     {
-
-     diff = 14 - len;
-     zero [0] = '0';
-     zero [1] = '\0';
-
-     for (i = 0; i < diff; i++)
-       WString_append(hs -> creation_date, zero, 1);
-
-/*      w_fprintf (fprintf (stderr, "error> found creation date: %s\n", (char *) strtompon) );*/
+      w_fprintf (fprintf (stderr, "error> found creation date: %s\n", (char *) strtompon) );
 
       /* raise the flag error */
-/*      WarcDebugMsg ("expecting a valid creation date with 14 digits");*/
-/*      hs -> err = WARC_TRUE;  */
+      WarcDebugMsg ("expecting a valid creation date with 14 digits");
+      hs -> err = WARC_TRUE;
 
       /* rewind the stream */
-/*      AFsmHDL_rewind (hs, WString_getLength (hs -> creation_date) + 1);*/
+      AFsmHDL_rewind (hs, WString_getLength (hs -> creation_date) + 1);
     }
 
+  else
+    {
 
-    while (len)
-      {
-        len --;
+      while (len)
+        {
+          len --;
 
-        if (! isdigit (strtompon[len]) )
-          {
-            w_fprintf (fprintf (stderr, "error> found creation date: %s\n", (char *) strtompon) );
+          if (! isdigit (strtompon[len]) )
+            {
+              w_fprintf (fprintf (stderr, "error> found creation date: %s\n", (char *) strtompon) );
 
-            /* raise the flag error */
-            WarcDebugMsg ("expecting a valid creation date: not digit character");
-            hs -> err = WARC_TRUE;
+              /* raise the flag error */
+              WarcDebugMsg ("expecting a valid creation date: not digit character");
+              hs -> err = WARC_TRUE;
 
-            /* rewind the stream */
-            AFsmHDL_rewind (hs, WString_getLength (hs -> creation_date) + 1);
-            break;
-          }
-      }
+              /* rewind the stream */
+              AFsmHDL_rewind (hs, WString_getLength (hs -> creation_date) + 1);
+              break;
+            }
+        }
+    }
 }
 
 
@@ -772,7 +722,7 @@ void AFsmHDL_raiseErrorDlength (void * _hs)
   fread (buf, sizeof(char), buf_size-1, hs -> fin);
   buf [buf_size-1] = '\0';
   printf (">>> invalid data length: %s\n", buf);
-  
+
   WarcDebugMsg ("expecting a valid data length");
   /* raise "on" the error flag */
   hs -> err = WARC_TRUE;
