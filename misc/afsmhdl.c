@@ -116,7 +116,8 @@ AFsmHDL_isInteger (void *),  AFsmHDL_isCR      (void *),
 AFsmHDL_isLF      (void *),  AFsmHDL_isUnknown (void *);
 
 /* prototypes of all actions in the FSM (defined below) */
-void AFsmHDL_setDataLength  (void *), AFsmHDL_setIpAdress       (void *),
+void AFsmHDL_setDataLength  (void *), 
+AFsmHDL_setDataLengthRelaxed (void *), AFsmHDL_setIpAdress       (void *),
 AFsmHDL_setUrl         (void *), AFsmHDL_setCreationDate   (void *),
 AFsmHDL_setMimeType    (void *), AFsmHDL_pushBack          (void *),
 AFsmHDL_checkRecordType (void *), AFsmHDL_raiseError        (void *),
@@ -240,6 +241,8 @@ State WANT_ARCHDL_MIME_TYPE =
 {
   /* TEST_EVENT             ACTION                 NEXT_STATE */
 
+  {AFsmHDL_isCR,            AFsmHDL_setDataLengthRelaxed, WANT_ARCHDL_LF},
+  {AFsmHDL_isLF,            AFsmHDL_setDataLengthRelaxed, WANT_ARCHDL_LF},
   {AFsmHDL_isText,          AFsmHDL_setMimeType,   WANT_ARCHDL_MIME_TYPE},
   {AFsmHDL_isSpace,         NIL,                   WANT_ARCHDL_MIME_SP},
   {AFsmHDL_isUnknown,       AFsmHDL_raiseError,    NIL}
@@ -248,6 +251,9 @@ State WANT_ARCHDL_MIME_SP =
 {
   /* TEST_EVENT             ACTION                       NEXT_STATE */
 
+  /*ZZZ*/
+  {AFsmHDL_isCR,            AFsmHDL_setDataLengthRelaxed, WANT_ARCHDL_LF},
+  {AFsmHDL_isLF,            AFsmHDL_setDataLengthRelaxed, WANT_ARCHDL_LF},
   {AFsmHDL_isSpace,         NIL,                         WANT_ARCHDL_MIME_SP},
   {AFsmHDL_isInteger,       AFsmHDL_setDataLength,       WANT_ARCHDL_DATA_LENGTH},
   {AFsmHDL_isUnknown,       AFsmHDL_raiseErrorDlength,   NIL}
@@ -404,7 +410,35 @@ void AFsmHDL_setDataLength (void * _hs)
   WString_append (hs -> data_length, & (hs -> c), 1);
 }
 
+void AFsmHDL_setDataLengthRelaxed (void * _hs)
+{
+  const HDLState * const hs = _hs;
 
+  assert (hs);
+
+
+  printf ("+++++++ RELAXED\n");
+
+  /* push back the char */
+  AFsmHDL_pushBack(_hs);
+
+  /* Maybe the MIME TYPE is missing. So we got DataLength instead */
+  if (strspn ((char *) WString_getText(hs -> mime_type), "0123456789") != WString_getLength (hs -> mime_type) )
+    {
+      AFsmHDL_raiseErrorDlength(_hs);
+      return;
+    }
+
+ /* We're almost sure that MIME TYPE is missing due to 
+    a malformed header. Set DataLength to MIME TYPE value and set
+   the MIME TYPE to "unknown_mime" */
+  WString_setText (hs -> data_length, 
+                   WString_getText   (hs -> mime_type),
+                   WString_getLength (hs -> mime_type));
+
+#define UNKNOWN_MIME "unknown_mime"
+  WString_setText (hs -> mime_type, (warc_u8_t *) UNKNOWN_MIME, strlen(UNKNOWN_MIME));
+}
 
 
 
@@ -738,7 +772,7 @@ void AFsmHDL_raiseErrorDlength (void * _hs)
   fread (buf, sizeof(char), buf_size-1, hs -> fin);
   buf [buf_size-1] = '\0';
   printf (">>> invalid data length: %s\n", buf);
-
+  
   WarcDebugMsg ("expecting a valid data length");
   /* raise "on" the error flag */
   hs -> err = WARC_TRUE;
