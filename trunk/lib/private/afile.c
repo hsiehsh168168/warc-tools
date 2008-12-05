@@ -194,6 +194,9 @@ WPUBLIC void * AFile_nextRecord ( void * _self)
       gzobj = bless (WGzip);
 
       w_ftell (FH, offset);
+
+      fprintf(stderr, "arc record offset: %llu\n", (unsigned long long) offset);
+
       ret = WGzip_uncompress (gzobj, FH, offset, & usize, & csize,
                               arecover, (void *) rectfile);
 
