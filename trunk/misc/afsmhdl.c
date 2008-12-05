@@ -416,9 +416,6 @@ void AFsmHDL_setDataLengthRelaxed (void * _hs)
 
   assert (hs);
 
-
-  printf ("+++++++ RELAXED\n");
-
   /* push back the char */
   AFsmHDL_pushBack(_hs);
 
