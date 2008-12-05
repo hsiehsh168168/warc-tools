@@ -25,90 +25,63 @@
 #     http://code.google.com/p/warc-tools/                             #
 # -------------------------------------------------------------------  #
 
+
+set -u
+
 usage () {
     echo >&2
     echo "Convert all ARC files in a directory to WARC files" >&2
-    echo "Usage: $0 <-d dirname> [-b] [-c] [-t <working_dir>] [-v] [-h]"  >&2
+    echo "Usage: $0 <-d dirname> [-c] [-h]"  >&2
     echo "       -d     : directory name containing ARC files"  >&2
     echo "       -c     : WARC files will be GZIP compressed (default no)"  >&2
-    echo "       -t     : temporary working directory (default \".\")"  >&2
     echo "       -h     : print this help message"  >&2
-    echo "       -v     : output version information and exit"  >&2
     exit 1
 }
 
-# default settings
-version="0.18"
-
-while getopts hvcd:t: o
+dn=""
+ccomp=""
+while getopts hcd: o
 do
   case "$o" in
     d)   dn=$OPTARG ;;
-    t)   wdir=$OPTARG ;;
     c)   ccomp="-c" ;;
-    h)   usage ;;
-    v)   echo "$0 v$version"; exit 0 ;;
     *)   usage ;;
   esac
 done
 
-if [ -z "$dn" ]; then
-    echo ">> you must supply \"-d\" option" >&2
-    usage
-fi
-
 if [ ! -d "$dn" ]; then
-    echo ">> directory \"$dn\" doesn't exist" >&2
+    echo "must specify a valid ARC directory: $dn" >&2
     usage
 fi
 
-if [ `touch $dn/$$ 2>/dev/null; echo "$?"` -eq 0 ]; then
-    rm -f $dn/$$
-else
-    echo ">> directory \"$dn\" isn't writable" >&2
-    usage
-fi 
+TMP=`mktemp -t arc2warc.sh.XXXXXX`
+trap "rm -f $TMP 2>/dev/null" INT TERM EXIT
+of=$TMP
 
-if [ -z "$wdir" ]; then
-    wdir="."
-fi
+find $dn -name "*.arc.gz" -type "f" > $of
+lines=`wc -l $of | awk '{print $1}'`
+cnt=1
 
-orig_dir=$(pwd)
-cd ${0%/*}/..
-a2w="`pwd`/app/arc2warc"
-
-if ! type $a2w &>/dev/null; then
-    echo ">> \"$a2w\" doesn't exist" >&2
-    usage
-fi
-
-dn=`echo $dn | sed -e "s|/*$||"`
-for i in `find $dn/ -name "*.arc*" -type "f"`;
+while read i;
 do
-  dn=`dirname $i`
-  bn=`basename $i`
-  
-if [ "$ccomp" = "-c" ]; then
-  wf=`echo "$bn" | sed -e "s|\(.*\)\.arc.*$|\1.warc\.gz|"`
-
-else
-  wf=`echo "$bn" | sed -e "s|\(.*\)\.arc.*$|\1.warc|"`
-fi
-
-  wf="$dn/$wf"
-
-  echo "converting $i -> $wf"
-
-  if [ -f "$wf" ]; then
-      echo ">> \"$wf\" already exist, skip it" >&2
+   if [ ! -f $i ];
+   then
       continue
-  fi
+   fi
+ 
+   echo -n "[$cnt/$lines] $i ... "
 
-  $a2w -a $i -f $wf $ccomp -t $wdir &>/dev/null
-  if [ $? -ne 0 ]; then
-      echo ">> error when converting \"$i\"" >&2
-      #exit 2
-  fi
-done 
+   (./arc2warc.py $ccomp $i &>$i.err)
+   err=`cat $i.err`
+   if [ -z "$err" ]; 
+   then
+      rm -f $i.err
+      echo "OK"
+   else
+      echo "ERROR"
+   fi
+
+   let "cnt=cnt+1"
+done < $of
 
 exit 0
