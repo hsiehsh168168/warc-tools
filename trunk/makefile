@@ -266,7 +266,7 @@ ifeq ($(UNAME_S),Linux)
 	EVENT_CONFIG = $(EV_OS)/config.h $(EV_OS)/event-config.h
 	EV_LIB		 = -lrt 
 #-lnsl -lresolv
-	VERS_RUBY    = 	
+#	VERS_RUBY    = 	
 	LIB_RUBY    += -rdynamic -Wl,-export-dynamic -Wl,-R -Wl,$(LIB_RUBY_PATH) -L$(LIB_RUBY_PATH) -L/usr/lib -L/usr/local/lib -lruby$(VERS_RUBY)  -lpthread -ldl -lcrypt -lm -lc
 endif
 ifeq ($(UNAME_S),FreeBSD)
