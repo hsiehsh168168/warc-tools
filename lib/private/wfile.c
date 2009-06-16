@@ -1029,6 +1029,7 @@ WPUBLIC warc_bool_t WFile_register (void* _self, void * wrec,
             }
 
             w_ftruncate (w_fileno (wtfile), offset);
+            w_fflush (wtfile);
 
             w_fseek_from_here (wtfile, (-1 * WRecord_getDataSize (wrec) -4));
 
