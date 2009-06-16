@@ -701,6 +701,7 @@ WPRIVATE void * WFile_nextRecordGzipCompressed (void * _self)
   }
 
   w_ftruncate (w_fileno (rectfile), recend);
+  w_fflush(rectfile);
 
   w_fseek_start (rectfile);
 

@@ -24,6 +24,12 @@
 /*     http://code.google.com/p/warc-tools/                            */
 /* ------------------------------------------------------------------- */
 
+2008-11-17 to 2009-06-16 by "voidptrptr":
+
+	* Fix bug on Linux machine only wich appears after truncating a temporary record file
+	  when using compressed record without extra field (ex. Heritrix WARC files).
+	  This bug was reported by Noah from Internet Archive. Thanks dude !
+
 2008-11-14 to 2008-11-17 by "voidptrptr":
 
 	* Java wrapper for warc tools (see contrib/java/install)
