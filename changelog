@@ -24,6 +24,13 @@
 /*     http://code.google.com/p/warc-tools/                            */
 /* ------------------------------------------------------------------- */
 
+2009-06-23 by mark williamson
+
+   * Fixed bug where temporary filename was constructed without a '/' after the 
+      /tmp part meaning it could only be run as root because it tried to make temp files
+      in / on the filesystem. 
+
+
 2008-11-17 to 2009-06-16 by "voidptrptr":
 
 	* Fix bug on Linux machine only wich appears after truncating a temporary record file
