@@ -127,20 +127,18 @@ WPRIVATE void * WTempFile_constructor (void * _self, va_list * app)
   warc_i32_t         tempsize;
   warc_i32_t         wfd;
   mode_t             old_mode;
-
-
+   
   tempsize = w_strlen((const warc_u8_t *) TEMPLATE_NAME);
-  template = wmalloc (sizeof (char) * (dirlen + tempsize + 1));
+  template = wmalloc (sizeof (char) * (dirlen + tempsize + 2));
   unless (template)
     {
       destroy (self);
       return (NIL);
     }
-
   w_strncpy(template, dir, dirlen);
-  w_strncpy(template + dirlen, (const warc_u8_t *) TEMPLATE_NAME, tempsize);
-  template [dirlen + tempsize] = '\0';
-
+  w_strncpy(template + dirlen, (const warc_u8_t *) "/" , (warc_i32_t) 1 );
+  w_strncpy(template + dirlen + 1 , (const warc_u8_t *) TEMPLATE_NAME, tempsize);
+  template [dirlen + 1 + tempsize] = '\0';
   /* create file with restrictive permissions */
   old_mode = umask (077);
 
@@ -150,7 +148,6 @@ WPRIVATE void * WTempFile_constructor (void * _self, va_list * app)
       destroy (self);
       return  (NIL);
     }
-
   umask (old_mode);
 
   if ( (HANDLE = w_fdopen_wb (wfd) ) == NIL || unlink ((char *) template) < 0)
@@ -160,7 +157,6 @@ WPRIVATE void * WTempFile_constructor (void * _self, va_list * app)
       destroy (self);
       return  (NIL);
     }
-
   wfree (template);
   return (self);
 }
